@@ -1,0 +1,22 @@
+# Prepend framework kernel
+php_value auto_prepend_file ../app/kernel.php
+
+# Routes definition
+RewriteEngine On
+RewriteCond %{THE_REQUEST} !(stylesheets|javascripts|assets)
+RewriteRule ^/?(.+)/?$ index.php [NC,L,QSA]
+
+# Deny all access to .php files
+RewriteCond %{THE_REQUEST} ^.+?\ [^?]+\.php[?\ ]
+RewriteRule ^/?.*\.php$ - [R=404]
+
+# Activate compression for the following mime-types
+AddOutputFilterByType DEFLATE text/plain
+AddOutputFilterByType DEFLATE text/html
+AddOutputFilterByType DEFLATE text/xml
+AddOutputFilterByType DEFLATE text/css
+AddOutputFilterByType DEFLATE application/xml
+AddOutputFilterByType DEFLATE application/xhtml+xml
+AddOutputFilterByType DEFLATE application/rss+xml
+AddOutputFilterByType DEFLATE application/javascript
+AddOutputFilterByType DEFLATE application/x-javascript
