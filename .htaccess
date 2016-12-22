@@ -1,0 +1,64 @@
+Options +FollowSymLinks
+Options -Indexes
+
+# ----------------------------- ERROR HANDLING ------------------------------ #
+php_flag display_startup_errors on
+php_flag display_errors on
+php_flag html_errors on
+php_flag log_errors on
+php_flag ignore_repeated_errors on
+php_flag ignore_repeated_source on
+php_flag report_memleaks on
+php_flag track_errors on
+php_value docref_root 0
+php_value docref_ext 0
+php_value error_log /var/www/zephyrus/logs/errors.log
+php_value error_reporting -1
+php_value log_errors_max_len 0
+
+# --------------------------- LANGUAGE & CHARSET ---------------------------- #
+php_value date.timezone "America/New_York"
+AddDefaultCharset UTF-8
+DefaultLanguage fr-CA
+
+# --------------------------- SECURITY SETTINGS ----------------------------- #
+
+# Maximum allowed upload size
+php_value post_max_size 20M
+php_value upload_max_filesize 20M
+
+# Limit HTTP request body according to the maximum allowed upload
+# size (20M in bytes).
+LimitRequestBody 20480000
+
+# Disable directory browsing and server exposition
+Options All -Indexes
+ServerSignature Off
+
+# Transmit session id only with cookie and prevent theft from client
+# scripts (XSS).
+php_flag session.use_cookies On
+php_flag session.use_only_cookies On
+php_flag session.cookie_httponly On
+php_flag session.use_trans_sid Off
+
+# Reinforce session ID entropy
+php_value session.entropy_file "/dev/urandom"
+php_value session.entropy_length 512
+
+# Prevent RFI attacks (remote file inclusion)
+php_flag allow_url_fopen Off
+php_flag allow_url_include Off
+
+# Protect error logs, htaccess file and configurations
+<Files .htaccess,errors.log,config.ini>
+    order allow,deny
+    deny from all
+    satisfy all
+</Files>
+
+# Time limit (in seconds) to parse input data (GET, POST, ...)
+php_value max_input_time 180
+
+# Time limit (in seconds) for script execution
+php_value max_execution_time 15
