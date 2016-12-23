@@ -1,8 +1,6 @@
 <?php namespace Zephyrus\Security;
 
-use Zephyrus\Application\SessionHandler;
-
-class EncryptedSessionHandler extends SessionHandler
+class EncryptedSessionHandler extends \SessionHandler
 {
     /**
      * @var string Encryption algorithm (mcrypt compatible)
@@ -32,8 +30,7 @@ class EncryptedSessionHandler extends SessionHandler
     private $cookieKeyName;
 
     /**
-     * Assigns session callback functions and make sure the mcrypt extension is
-     * correctly installed.
+     * Makes sure the mcrypt extension is correctly installed.
      *
      * @throws \Exception
      */
@@ -42,14 +39,6 @@ class EncryptedSessionHandler extends SessionHandler
         if (!extension_loaded('mcrypt')) {
             throw new \Exception(__CLASS__ . " needs the mcrypt PHP extension");
         }
-        session_set_save_handler(
-            [$this, "open"],
-            [$this, "close"],
-            [$this, "read"],
-            [$this, "write"],
-            [$this, "destroy"],
-            [$this, "gc"]
-        );
     }
 
     /**
@@ -69,61 +58,27 @@ class EncryptedSessionHandler extends SessionHandler
         if (empty($_COOKIE[$this->cookieKeyName]) || strpos($_COOKIE[$this->cookieKeyName], ':') === false) {
             $this->createEncryptionCookie();
         } else {
-            list ($this->cryptKey, $this->cryptAuth) = explode(':', $_COOKIE[$this->cookieKeyName]);
+            list($this->cryptKey, $this->cryptAuth) = explode(':', $_COOKIE[$this->cookieKeyName]);
             $this->cryptKey = base64_decode($this->cryptKey);
             $this->cryptAuth = base64_decode($this->cryptAuth);
         }
         return true;
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function createEncryptionCookie()
-    {
-        $keyLength = mcrypt_get_key_size($this->encryptionAlgorithm, MCRYPT_MODE_CBC);
-        $this->cryptKey = Cryptography::randomBytes($keyLength);
-        $this->cryptAuth = Cryptography::randomBytes(32);
-
-        $cookieSettings = session_get_cookie_params();
-        setcookie(
-            $this->cookieKeyName,
-            base64_encode($this->cryptKey) . ':' . base64_encode($this->cryptAuth),
-            ($cookieSettings['lifetime'] > 0)
-                ? time() + $cookieSettings['lifetime']
-                : 0,
-            $cookieSettings['path'],
-            $cookieSettings['domain'],
-            $cookieSettings['secure'],
-            $cookieSettings['httponly']
-        );
-    }
-
-    /**
-     * Decrypt data before storing it in the $_SESSION global.
-     *
-     * @param string $id
-     * @return bool|string
-     */
     public function read($id)
     {
         $data = parent::read($id);
-        if ($data !== false) {
+        if (!$data) {
+            return "";
+        } else {
             return $this->decrypt($data);
         }
-        return false;
     }
 
-    /**
-     * Encrypt data before writing it on disk.
-     *
-     * @param string $id
-     * @param string $data
-     * @return bool
-     */
     public function write($id, $data)
     {
-        return parent::write($id, $this->crypt($data));
+        $data = $this->encrypt($data);
+        return parent::write($id, $data);
     }
 
     /**
@@ -146,18 +101,6 @@ class EncryptedSessionHandler extends SessionHandler
     }
 
     /**
-     * Configure the PHP garbage collector deletion policy. Default is to
-     * remove the session file when lifetime expires (about 24 minutes).
-     *
-     * @param int $lifetime
-     * @return bool
-     */
-    public function gc($lifetime)
-    {
-        return parent::gc($lifetime);
-    }
-
-    /**
      * Applies an algorithm used to encrypt session data on disk. Specified
      * algorithm must be compatible with the Mcrypt extension.
      *
@@ -172,20 +115,43 @@ class EncryptedSessionHandler extends SessionHandler
     }
 
     /**
+     * @throws \Exception
+     */
+    private function createEncryptionCookie()
+    {
+        $keyLength = mcrypt_get_key_size($this->encryptionAlgorithm, MCRYPT_MODE_CBC);
+        $this->cryptKey = Cryptography::randomBytes($keyLength);
+        $this->cryptAuth = Cryptography::randomBytes(32);
+
+        $cookieSettings = session_get_cookie_params();
+        setcookie(
+            $this->cookieKeyName,
+            base64_encode($this->cryptKey) . ':' . base64_encode($this->cryptAuth),
+            ($cookieSettings['lifetime'] > 0)
+                ? time() + $cookieSettings['lifetime']
+                : 0,
+            $cookieSettings['path'],
+            $cookieSettings['domain'],
+            $cookieSettings['secure'],
+            $cookieSettings['httponly']
+        );
+    }
+
+    /**
      * Encrypt the specified data using the defined algorithm in CBC mode. Also
      * create an Hmac authentication hash.
      *
      * @param $data
      * @return string
      */
-    private function crypt($data)
+    private function encrypt($data)
     {
         $iv = mcrypt_create_iv($this->cryptIvSize, MCRYPT_DEV_URANDOM);
         $cipher = mcrypt_encrypt($this->encryptionAlgorithm,
-                                 $this->cryptKey,
-                                 $data,
-                                 MCRYPT_MODE_CBC,
-                                 $iv
+            $this->cryptKey,
+            $data,
+            MCRYPT_MODE_CBC,
+            $iv
         );
         $hmac = hash_hmac('sha256', $iv . $this->encryptionAlgorithm . $cipher, $this->cryptAuth);
         return $hmac . ':' . base64_encode($iv) . ':' . base64_encode($cipher);
@@ -209,10 +175,10 @@ class EncryptedSessionHandler extends SessionHandler
             return false;
         }
         $decrypt = mcrypt_decrypt($this->encryptionAlgorithm,
-                                  $this->cryptKey,
-                                  $cipher,
-                                  MCRYPT_MODE_CBC,
-                                  $iv);
+            $this->cryptKey,
+            $cipher,
+            MCRYPT_MODE_CBC,
+            $iv);
         return rtrim($decrypt, "\0");
     }
 }

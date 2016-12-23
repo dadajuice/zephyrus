@@ -725,9 +725,7 @@ class Session
         session_name($this->name);
         if ($this->encryptionEnabled) {
             $this->sessionHandler = new EncryptedSessionHandler();
-            if (!empty($this->encryptionAlgorithm)) {
-                $this->sessionHandler->setEncryptionAlgorithm($this->encryptionAlgorithm);
-            }
+            session_set_save_handler($this->sessionHandler);
         }
     }
 
