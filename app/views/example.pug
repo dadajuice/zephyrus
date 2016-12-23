@@ -5,8 +5,8 @@ html
     meta(charset="utf-8")
   body
     #container
-      if message.success
-        div.success=message.success
+      if flash.success
+        div.success=flash.success
       h2 Example
       ul
       each item in items

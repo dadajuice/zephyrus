@@ -8,10 +8,8 @@ abstract class Controller
 {
     protected function render($view, $args = [])
     {
-        $pug = new Pug([
-            'cache' => '/var/cache/pug',
-            'basedir' => ROOT_DIR . '/app/views'
-        ]);
+        $pug = $this->buildPug();
+        $args = array_merge($args, Flash::readAll());
         $this->html($pug->render(ROOT_DIR . '/app/views/' . $view . $pug->getExtension(), $args));
     }
 
@@ -46,5 +44,17 @@ abstract class Controller
             exit;
         }
         throw new \RuntimeException("Cannot parse specified data as XML");
+    }
+
+    private function buildPug()
+    {
+        $options = [
+            'cache' => Configuration::getConfiguration('pug', 'cache'),
+            'basedir' => ROOT_DIR . '/app/views'
+        ];
+        if (Configuration::getApplicationConfiguration('env') == "prod") {
+            $options['upToDateCheck'] = false;
+        }
+        return new Pug($options);
     }
 }

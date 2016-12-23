@@ -1,0 +1,14 @@
+doctype html
+html
+  head
+    title Example
+    meta(charset="utf-8")
+  body
+    #container
+      h2 Add new item
+      form(action="/insert", method="post")
+        input(type="text", placeholder="Name", name="name")
+        br
+        input(type="text", placeholder="Price", name="price")
+        br
+        button(type="submit") Send
