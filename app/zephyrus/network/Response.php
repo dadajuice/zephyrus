@@ -50,7 +50,7 @@ class Response
      */
     public static function sendContentType($contentType = ContentType::HTML, $charset = 'UTF-8')
     {
-        if (self::$responseCodeSent) {
+        if (self::$responseContentTypeSent) {
             throw new \RuntimeException("HTTP Content-Type header already sent");
         }
         header('Content-Type: ' . $contentType . ';charset=' . $charset);
