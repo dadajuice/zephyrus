@@ -10,7 +10,7 @@ use Zephyrus\Security\IntrusionDetection;
 use Zephyrus\Security\SystemLog;
 
 define('PAGE_MAX_ENTITIES', 50);
-include('functions.php');
+include('zephyrus/functions.php');
 
 //include('error_handlers_dev.php');
 
