@@ -1,6 +1,6 @@
 <?php
 
-use Zephyrus\Network\BasicRouter as Router;
+use Zephyrus\Network\Router as Router;
 
 $router = new Router();
 foreach (recursiveGlob('../app/Routes/*.php') as $file) {
