@@ -1,7 +1,8 @@
 {
   "require": {
     "monolog/monolog": "^1.22",
-    "pug-php/pug": "^2.5"
+    "pug-php/pug": "^2.5",
+    "enygma/expose": "^2.4"
   },
   "autoload": {
     "psr-4": {
