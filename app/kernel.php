@@ -12,7 +12,7 @@ use Zephyrus\Security\SystemLog;
 define('PAGE_MAX_ENTITIES', 50);
 include('zephyrus/functions.php');
 
-//include('error_handlers_dev.php');
+include('handlers.php');
 
 //$session = Session::getInstance(Configuration::getSessionConfiguration());
 //$session->start();
