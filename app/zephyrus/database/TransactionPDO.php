@@ -1,4 +1,4 @@
-<?php namespace Chahira\Database;
+<?php namespace Zephyrus\Database;
 
 class TransactionPDO extends \PDO
 {
