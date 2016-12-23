@@ -2,6 +2,25 @@
 
 class Response
 {
+    private static $responseCodeSent = false;
+    private static $responseContentTypeSent = false;
+
+    /**
+     * @return boolean
+     */
+    public static function isResponseCodeSent()
+    {
+        return (bool) self::$responseCodeSent;
+    }
+
+    /**
+     * @return boolean
+     */
+    public static function isResponseContentTypeSent()
+    {
+        return (bool) self::$responseContentTypeSent;
+    }
+
     /**
      * Send the HTTP response code.
      *
@@ -9,7 +28,11 @@ class Response
      */
     public static function sendResponseCode($responseCode = 200)
     {
+        if (self::$responseCodeSent) {
+            throw new \RuntimeException("HTTP response status code already sent");
+        }
         http_response_code($responseCode);
+        self::$responseCodeSent = true;
     }
 
     /**
@@ -27,7 +50,11 @@ class Response
      */
     public static function sendContentType($contentType = ContentType::HTML, $charset = 'UTF-8')
     {
+        if (self::$responseCodeSent) {
+            throw new \RuntimeException("HTTP Content-Type header already sent");
+        }
         header('Content-Type: ' . $contentType . ';charset=' . $charset);
+        self::$responseContentTypeSent = true;
     }
 
     public static function abort($httpStatusCode)
