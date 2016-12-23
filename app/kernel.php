@@ -7,7 +7,7 @@ use Zephyrus\Application\Configuration;
 use Zephyrus\Security\Session;
 use Zephyrus\Network\Request;
 use Zephyrus\Security\IntrusionDetection;
-use Zephyrus\Security\Log;
+use Zephyrus\Security\SystemLog;
 
 define('PAGE_MAX_ENTITIES', 50);
 include('functions.php');
