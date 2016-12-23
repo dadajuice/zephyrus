@@ -34,22 +34,6 @@ abstract class Broker
     }
 
     /**
-     * @return string
-     */
-    protected function getLastInsertedId()
-    {
-        return $this->database->getLastInsertedId();
-    }
-
-    /**
-     * @param $limit
-     */
-    protected function setPagerLimit($limit)
-    {
-        $this->pagerLimit = $limit;
-    }
-
-    /**
      * @return Database
      */
     protected function getDatabase()
