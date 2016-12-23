@@ -46,7 +46,7 @@ class Configuration
      * @return mixed
      * @throws \Exception
      */
-    protected static function getConfiguration($section, $config = null)
+    public static function getConfiguration($section, $config = null)
     {
         if (is_null(self::$config)) {
             self::initializeConfigurations();
