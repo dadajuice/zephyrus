@@ -1,5 +1,17 @@
-div.container
-    h2 Example
-    ul.navlist
-        each item in items
-            li: a(href='#{item.href}') #{item.name}
+doctype html
+html
+  head
+    title Example
+    meta(charset="utf-8")
+  body
+    #container
+      if message.success
+        div.success=message.success
+      h2 Example
+      ul
+      each item in items
+        li
+          a(href='/examples/#{item.id}') #{item.name}
+          | &nbsp;(#{item.price} $)
+      br
+      a(href='/insert') Ajouter
