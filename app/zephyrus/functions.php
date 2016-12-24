@@ -118,7 +118,7 @@ function _val($fieldId, $defaultValue = "")
  * @param string $fieldId
  * @param string $value
  */
-function memorize($fieldId, $value)
+function _mem($fieldId, $value)
 {
     if (!isset($_SESSION['_FIELDS'])) {
         $_SESSION['_FIELDS'] = [];

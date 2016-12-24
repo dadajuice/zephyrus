@@ -13,8 +13,8 @@ html
 
       h2 Add new item
       form(action="/insert", method="post")
-        input(type="text", placeholder="Name", name="name")
+        input(type="text", placeholder="Name", name="name", value=$_val('name'))
         br
-        input(type="text", placeholder="Price", name="price")
+        input(type="text", placeholder="Price", name="price", value=$_val('price'))
         br
         button(type="submit") Send

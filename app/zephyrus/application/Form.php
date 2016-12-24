@@ -144,6 +144,8 @@ class Form
             }
             if (!$this->executeRule($field, $validation['callback'])) {
                 $this->errors[$field][] = $validation['message'];
+            } else {
+                _mem($field, $this->fields[$field]);
             }
         }
     }

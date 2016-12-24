@@ -10,7 +10,12 @@ abstract class Controller
     {
         $pug = $this->buildPug();
         $args = array_merge($args, Flash::readAll());
-        $this->html($pug->render(ROOT_DIR . '/app/views/' . $view . $pug->getExtension(), $args));
+        $args['_val'] = function($fieldId, $defaultValue = "") {
+            return _val($fieldId, $defaultValue);
+        };
+        $output = $pug->render(ROOT_DIR . '/app/views/' . $view . $pug->getExtension(), $args);
+        clearFieldMemory();
+        echo $output;
     }
 
     protected function html($data)
