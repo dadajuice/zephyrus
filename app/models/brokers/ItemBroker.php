@@ -22,7 +22,6 @@ class ItemBroker extends Broker
 
     public function insert(Item &$item)
     {
-        // Very simple SQL call, use $this->transaction for multiple operations
         $this->query(self::$SQL_INSERT, [$item->getName(), $item->getPrice()]);
         $item->setId($this->getDatabase()->getLastInsertedId());
     }

@@ -2,6 +2,21 @@
 
 class Validator
 {
+    const PASSWORD_COMPLIANT = ['Zephyrus\Utilities\Validator', 'isNotEmpty'];
+    const NOT_EMPTY = ['Zephyrus\Utilities\Validator', 'isNotEmpty'];
+    const DECIMAL = ['Zephyrus\Utilities\Validator', 'isDecimal'];
+    const DECIMAL_SIGNED = ['Zephyrus\Utilities\Validator', 'isSignedDecimal'];
+    const INTEGER = ['Zephyrus\Utilities\Validator', 'isInteger'];
+    const INTEGER_SIGNED = ['Zephyrus\Utilities\Validator', 'isSignedInteger'];
+    const EMAIL = ['Zephyrus\Utilities\Validator', 'isEmail'];
+    const DATE_ISO = ['Zephyrus\Utilities\Validator', 'isDate'];
+    const ALPHANUMERIC = ['Zephyrus\Utilities\Validator', 'isAlphanumeric'];
+    const URL = ['Zephyrus\Utilities\Validator', 'isUrl'];
+    const URL_STRICT = ['Zephyrus\Utilities\Validator', 'isStrictUrl'];
+    const URL_YOUTUBE = ['Zephyrus\Utilities\Validator', 'isYoutubeUrl'];
+    const PHONE = ['Zephyrus\Utilities\Validator', 'isPhone'];
+    const UPLOAD = ['Zephyrus\Utilities\Validator', 'isValidUpload'];
+
     /**
      * @param array $data
      * @return bool
@@ -13,18 +28,38 @@ class Validator
 
     /**
      * @param string $data
-     * @param string $characters
-     * @return int
+     * @return boolean
      */
-    public static function isAlphanumeric($data, $characters = 'a-zA-Z0-9')
+    public static function isNotEmpty($data)
     {
-        return preg_match('/^[' . $characters . ']+$/', $data);
+        return !empty(trim($data));
     }
 
-    /**
-     * @param string $data
-     * @return bool
-     */
+    public static function isDecimal($data)
+    {
+        return self::isRegexValid($data, "[0-9]+(\.[0-9]+)?");
+    }
+
+    public static function isInteger($data)
+    {
+        return self::isRegexValid($data, "[0-9]+");
+    }
+
+    public static function isSignedDecimal($data)
+    {
+        return self::isRegexValid($data, "-?[0-9]+(\.[0-9]+)?");
+    }
+
+    public static function isSignedInteger($data)
+    {
+        return self::isRegexValid($data, "-?[0-9]+");
+    }
+
+    public static function isAlphanumeric($data)
+    {
+        return preg_match('/^[a-zA-Z0-9]+$/', $data);
+    }
+
     public static function isPasswordCompliant($data)
     {
         $uppercase = preg_match('@[A-Z]@', $data);
@@ -33,31 +68,17 @@ class Validator
         return strlen($data) >= 8 && $uppercase && $lowercase && $number;
     }
 
-    /**
-     * @param string $data
-     * @param string $format
-     * @return bool
-     */
-    public static function isDate($data, $format = 'Y-m-d')
+    public static function isDate($data)
     {
-        $d = \DateTime::createFromFormat($format, $data);
-        return $d && $d->format($format) == $data;
+        $d = \DateTime::createFromFormat('Y-m-d', $data);
+        return $d && $d->format('Y-m-d') == $data;
     }
 
-    /**
-     * @param string $data
-     * @return mixed
-     */
     public static function isEmail($data)
     {
         return filter_var($data, FILTER_VALIDATE_EMAIL);
     }
 
-    /**
-     * @param string $data
-     * @param string $regex
-     * @return int
-     */
     public static function isRegexValid($data, $regex)
     {
         return preg_match('/^' . $regex . '$/', $data);
@@ -73,10 +94,6 @@ class Validator
         return self::isRegexValid($data, "([\(\+])?([0-9]{1,3}([\s])?)?([\+|\(|\-|\)|\s])?([0-9]{2,4})([\-|\)|\.|\s]([\s])?)?([0-9]{2,4})?([\.|\-|\s])?([0-9]{4,8})");
     }
 
-    /**
-     * @param string $data
-     * @return int
-     */
     public static function isUrl($data)
     {
         return self::isRegexValid($data, "(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\\\".,<>?«»“”‘’]))");

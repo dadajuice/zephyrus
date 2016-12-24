@@ -4,9 +4,11 @@ use Models\Brokers\ItemBroker;
 use Models\Item;
 use Zephyrus\Application\Controller;
 use Zephyrus\Application\Flash;
+use Zephyrus\Application\Form;
 use Zephyrus\Application\Routable;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Router;
+use Zephyrus\Utilities\Validator;
 
 class ExampleController extends Controller implements Routable
 {
@@ -28,19 +30,31 @@ class ExampleController extends Controller implements Routable
     {
         $broker = new ItemBroker();
         $items = $broker->findAll();
-        $m = ["success" => (isset($_SESSION["SUCCESS"])) ? $_SESSION["SUCCESS"] : ""];
-        unset($_SESSION["SUCCESS"]);
-        $this->render('example', ["items" => $items, "message" => $m]);
+        $this->render('example', ["items" => $items]);
     }
 
     public function insert()
     {
+        $form = new Form();
+        $form->addRule("name", Validator::NOT_EMPTY, "Le nom ne doit pas être vide");
+        $form->addRule("price", Validator::NOT_EMPTY, "Le prix ne doit pas être vide");
+        $form->addRule("price", Validator::DECIMAL, "Le prix doit être un nombre positif", Form::TRIGGER_FIELD_NO_ERROR);
+        $form->addRule("price", function($value) {
+            return $value >= 0.01 && $value <= 1000;
+        }, "Le prix doit être entre 0.01$ et 1000$", Form::TRIGGER_FIELD_NO_ERROR);
+
+        if (!$form->verify()) {
+            $messages = $form->getErrorMessages();
+            Flash::error($messages);
+            redirect("/insert");
+        }
+
         $item = new Item();
-        $item->setName(Request::getParameter("name"));
-        $item->setPrice(Request::getParameter("price"));
+        $item->setName($form->getValue("name"));
+        $item->setPrice($form->getValue("price"));
         $broker = new ItemBroker();
         $broker->insert($item);
-        Flash::success("You successfully added item #" . $item->getId());
+        Flash::success("Ajout de l'article #" . $item->getId() . " avec succès");
         redirect("/");
     }
 
