@@ -142,9 +142,9 @@ class ErrorHandler
      * to die the script. Should not be called manually. Used as a registered
      * PHP handler.
      *
-     * @param \Exception $e
+     * @param \Throwable $e
      */
-    public function exceptionHandler(\Exception $e)
+    public function exceptionHandler(\Throwable $e)
     {
         $reflection = new \ReflectionClass($e);
         $triggeredExceptionClass = $reflection->getShortName();
