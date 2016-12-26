@@ -1,21 +1,14 @@
 <?php namespace Zephyrus\Application;
 
-use Pug\Pug;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Response;
 
 abstract class Controller
 {
-    protected function render($view, $args = [])
+    protected function render($page, $args = [])
     {
-        $pug = $this->buildPug();
-        $args = array_merge($args, Flash::readAll());
-        $args['_val'] = function($fieldId, $defaultValue = "") {
-            return _val($fieldId, $defaultValue);
-        };
-        $output = $pug->render(ROOT_DIR . '/app/views/' . $view . $pug->getExtension(), $args);
-        clearFieldMemory();
-        echo $output;
+        $view = new View($page);
+        echo $view->render($args);
     }
 
     protected function html($data)
@@ -49,17 +42,5 @@ abstract class Controller
             exit;
         }
         throw new \RuntimeException("Cannot parse specified data as XML");
-    }
-
-    private function buildPug()
-    {
-        $options = [
-            'cache' => Configuration::getConfiguration('pug', 'cache'),
-            'basedir' => ROOT_DIR . '/app/views'
-        ];
-        if (Configuration::getApplicationConfiguration('env') == "prod") {
-            $options['upToDateCheck'] = false;
-        }
-        return new Pug($options);
     }
 }
