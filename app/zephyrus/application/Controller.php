@@ -5,9 +5,10 @@ use Zephyrus\Network\Response;
 
 abstract class Controller
 {
-    protected function render($page, $args = [])
+    protected function render($page, $args = [], $pager = null)
     {
         $view = new View($page);
+        $view->setPager($pager);
         echo $view->render($args);
     }
 

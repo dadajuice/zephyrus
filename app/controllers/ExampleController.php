@@ -29,8 +29,9 @@ class ExampleController extends Controller implements Routable
     public function index()
     {
         $broker = new ItemBroker();
+        $pager = $broker->buildPager($broker->countAll(), 2);
         $items = $broker->findAll();
-        $this->render('example', ["items" => $items]);
+        $this->render('example', ["items" => $items], $pager);
     }
 
     public function insert()

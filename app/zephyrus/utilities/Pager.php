@@ -118,9 +118,9 @@ class Pager
             }
 
             // Afficher le nombre total de pages
-            echo '<div class="pager-wrapper">';
-            print("<b>Page " . $this->currentPage . " de " . $this->maxPage . "</b>");
-            print("<div>");
+            echo '<div class="pager">';
+            //print("<b>Page " . $this->currentPage . " de " . $this->maxPage . "</b>");
+
 
             // Afficher les liens précédent et premier
             if ($this->currentPage != 1) {
@@ -150,7 +150,7 @@ class Pager
             }
 
             // Terminer l'affichage
-            print("</div></div>");
+            print("</div>");
         }
         return ob_get_clean();
     }
