@@ -14,6 +14,11 @@ abstract class Broker
     private $database;
 
     /**
+     * @var Pager
+     */
+    private $pager = null;
+
+    /**
      * Broker constructor called by children. Simply get the database reference
      * for further use.
      */
@@ -30,7 +35,16 @@ abstract class Broker
      */
     public function buildPager($count, $limit = Pager::PAGE_MAX_ENTITIES, $urlParameter = Pager::URL_PARAMETER)
     {
-        return new Pager($count, $limit, $urlParameter);
+        $this->pager = new Pager($count, $limit, $urlParameter);
+        return $this->pager;
+    }
+
+    /**
+     * @return Pager
+     */
+    public function getPager()
+    {
+        return $this->pager;
     }
 
     /**
@@ -102,6 +116,9 @@ abstract class Broker
      */
     protected function selectAll($query, $parameters = [], $allowedTags = "")
     {
+        if (!is_null($this->pager)) {
+            $query .= $this->pager->getSqlLimit();
+        }
         $statement = $this->query($query, $parameters);
         if (!empty($this->allowedHtmlTags)) {
             $statement->setAllowedHtmlTags($this->allowedHtmlTags);
