@@ -2,10 +2,11 @@
 
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Response;
+use Zephyrus\Utilities\Pager;
 
 abstract class Controller
 {
-    protected function render($page, $args = [], $pager = null)
+    protected function render($page, $args = [], Pager $pager = null)
     {
         $view = new View($page);
         $view->setPager($pager);

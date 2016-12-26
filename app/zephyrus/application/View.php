@@ -40,6 +40,12 @@ class View
      */
     public function render($args = [])
     {
+        if (isset($args['pager'])) {
+            throw new \RuntimeException("pager argument already set ! pager variable is reserved.");
+        }
+        if (!is_null($this->pager)) {
+            $args['pager'] = $this->pager;
+        }
         $output = $this->pug->render(ROOT_DIR . '/app/views/' . $this->pageToRender . $this->pug->getExtension(), $args);
         clearFieldMemory();
         return $output;
@@ -72,15 +78,13 @@ class View
     {
         $this->pug->addKeyword('pager', function ($arguments, $block, $keyword) {
             if (is_null($this->pager)) {
-                $begin = '<div><strong style="color: red;">PAGER NOT DEFINED !</strong></div>';
+                $begin = 'echo "<div><strong style=\"color: red;\">PAGER NOT DEFINED !</strong></div>"';
             } else {
-
-                $begin = $this->pager->__toString();    
+                $begin = 'echo $pager';
             }
-
             return array(
-                'begin' => $begin,
-                'end' => '',
+                'beginPhp' => $begin,
+                'endPhp' => ';',
             );
         });
     }
