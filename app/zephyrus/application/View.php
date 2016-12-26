@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Application;
 
 use Pug\Pug;
+use Zephyrus\Utilities\Pager;
 
 class View
 {
@@ -14,12 +15,29 @@ class View
      */
     private $pageToRender;
 
+    /**
+     * @var Pager
+     */
+    private $pager = null;
+
+    /**
+     * @param string $pageToRender
+     */
     public function __construct($pageToRender)
     {
         $this->pageToRender = $pageToRender;
         $this->buildPug();
     }
 
+    public function setPager(Pager $pager)
+    {
+        $this->pager = $pager;
+    }
+
+    /**
+     * @param array $args
+     * @return string
+     */
     public function render($args = [])
     {
         $output = $this->pug->render(ROOT_DIR . '/app/views/' . $this->pageToRender . $this->pug->getExtension(), $args);
@@ -38,7 +56,7 @@ class View
         }
         $this->pug = new Pug($options);
         $this->assignPugSharedArguments();
-        //$this->addPagerKeyword();
+        $this->addPagerKeyword();
     }
 
     private function assignPugSharedArguments()
@@ -52,26 +70,18 @@ class View
 
     private function addPagerKeyword()
     {
-        $this->pug->addKeyword('pager', new class() {
-            public function __invoke($arguments, $block, $keyWord)
-            {
-                $badges = array();
-                foreach ($block->nodes as $index => $tag) {
-                    if ($tag->name === 'badge') {
-                        $href = $tag->getAttribute('color');
-                        $badges[] = $href['value'];
-                        unset($block->nodes[$index]);
-                    }
-                }
+        $this->pug->addKeyword('pager', function ($arguments, $block, $keyword) {
+            if (is_null($this->pager)) {
+                $begin = '<div><strong style="color: red;">PAGER NOT DEFINED !</strong></div>';
+            } else {
 
-                $begin = '<div class="pager">';
-
-
-                return array(
-                    'begin' => $begin,
-                    'end' => '</div>',
-                );
+                $begin = $this->pager->__toString();    
             }
+
+            return array(
+                'begin' => $begin,
+                'end' => '',
+            );
         });
     }
 }
