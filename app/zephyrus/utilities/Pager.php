@@ -46,6 +46,14 @@ class Pager
         $this->maxPage = ceil($recordCount / $maxEntities);
         $this->pageUrl = Request::getPath();
         $this->pageQuery = $this->getQueryString();
+        $this->validate();
+    }
+
+    private function validate()
+    {
+        if ($this->currentPage < 1 || $this->currentPage > $this->maxPage) {
+            redirect($this->pageUrl);
+        }
     }
 
     public function getSqlLimit()
@@ -69,90 +77,110 @@ class Pager
 
     public function __toString()
     {
+        if (!is_numeric($this->currentPage) || $this->maxPage < 1) {
+            return "";
+        }
+        ob_start();
+        $this->displayPager();
+        return ob_get_clean();
+    }
+
+    /**
+     * Generates anchors to be displayed when max page is over 9
+     *
+     * @return array
+     */
+    private function createFullPages()
+    {
         $pageStart = 1;
         $pageEnd = $this->maxPage;
-        ob_start();
+        $tmp = $this->currentPage;
+        $pager = [];
+        while(($pageEnd - $tmp) < 4) $tmp--;
 
-        // Afficher seulement si le nombre de page est plus grand que 1
-        if (is_numeric($this->currentPage) && $this->maxPage > 1) {
-            // S'il y a plus de 9 pages (maximum affichable)
-            if ($this->maxPage > 9) {
-                // Calcul temporaire pour la finale de la pagination
-                $tmp = $this->currentPage;
-                while(($pageEnd - $tmp) < 4) $tmp--;
-
-                // Attribuer la page de départ
-                if ($tmp != $this->currentPage) {
-                    $pageStart = 1 + ($tmp - 5);
-                }
-
-                if ($this->currentPage > 5 && $this->currentPage == $tmp) {
-                    $pageStart = 1 + ($this->currentPage - 5);
-                }
-
-                // Assigner les valeurs du tableaux à afficher
-                $page = 0;
-                for ($i = $pageStart; $i < $tmp; $i++) {
-                    $pager[$page] = '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
-                    $page++;
-                }
-
-                for ($i = $tmp; $i <= $pageEnd && $page < 9; $i++) {
-                    if ($i == $this->currentPage) {
-                        $pager[$page] = "<span>$i</span>";
-                    } else {
-                        $pager[$page] = '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
-                    }
-                    $page++;
-                }
-            } else {
-                // S'il y a moins de 10 pages
-                // Assigner les valeurs du tableaux à afficher
-                for ($i = 1; $i <= $this->maxPage; $i++) {
-                    if ($i == $this->currentPage) {
-                        $pager[$i - 1] = "<span>$i</span>";
-                    } else {
-                        $pager[$i - 1] = '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
-                    }
-                }
-            }
-
-            // Afficher le nombre total de pages
-            echo '<div class="pager">';
-            //print("<b>Page " . $this->currentPage . " de " . $this->maxPage . "</b>");
-
-
-            // Afficher les liens précédent et premier
-            if ($this->currentPage != 1) {
-                // Afficher le lien 'premier'
-                if ($this->currentPage - 4 > 1) {
-                    echo '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=1' . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '" style="font-weight: 400; font-size: 1.2rem; padding-top: 8px; line-height: 0">«</a>';
-                }
-
-                // Afficher le lien 'précédent'
-                echo '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . ($this->currentPage - 1) . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '" class="icon" style="font-size: 1rem; padding-top: 2px;">&lt;</a>';
-            }
-
-            // Afficher les pages
-            for ($i = 0; $i < count($pager); $i++) {
-                print($pager[$i]);
-            }
-
-            // Afficher les liens suivant et dernier
-            if ($this->currentPage != $this->maxPage) {
-                // Afficher le lien 'suivant'
-                echo '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . ($this->currentPage + 1) . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '" class="icon" style="font-size: 1rem; padding-top: 2px;">&gt;</a>';
-
-                // Afficher le lien 'dernier'
-                if ($this->currentPage + 4 < $this->maxPage) {
-                    echo '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $this->maxPage . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '" style="font-weight: 400; font-size: 1.2rem; padding-top: 8px; line-height: 0">»</a>';
-                }
-            }
-
-            // Terminer l'affichage
-            print("</div>");
+        if ($tmp != $this->currentPage) {
+            $pageStart = 1 + ($tmp - 5);
         }
-        return ob_get_clean();
+
+        if ($this->currentPage > 5 && $this->currentPage == $tmp) {
+            $pageStart = 1 + ($this->currentPage - 5);
+        }
+
+        $page = 0;
+        for ($i = $pageStart; $i < $tmp; $i++) {
+            $pager[$page] = '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
+            $page++;
+        }
+
+        for ($i = $tmp; $i <= $pageEnd && $page < 9; $i++) {
+            if ($i == $this->currentPage) {
+                $pager[$page] = "<span>$i</span>";
+            } else {
+                $pager[$page] = '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
+            }
+            $page++;
+        }
+
+        return $pager;
+    }
+
+    /**
+     * Generates anchors to be displayed when max page is under 10.
+     *
+     * @return array
+     */
+    private function createSimplePages()
+    {
+        $pager = [];
+        for ($i = 1; $i <= $this->maxPage; $i++) {
+            if ($i == $this->currentPage) {
+                $pager[$i - 1] = "<span>$i</span>";
+            } else {
+                $pager[$i - 1] = '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
+            }
+        }
+        return $pager;
+    }
+
+    /**
+     * Display the complete pager architecture.
+     */
+    private function displayPager()
+    {
+        $pager = ($this->maxPage > 9) ? $this->createFullPages() : $this->createSimplePages();
+        echo '<div class="pager">';
+        $this->displayLeftSide();
+        for ($i = 0; $i < count($pager); $i++) {
+            print($pager[$i]);
+        }
+        $this->displayRightSide();
+        print("</div>");
+    }
+
+    /**
+     * Displays go to previous and first page.
+     */
+    private function displayLeftSide()
+    {
+        if ($this->currentPage != 1) {
+            if ($this->currentPage - 4 > 1) {
+                echo '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=1' . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '" style="font-weight: 400; font-size: 1.2rem; padding-top: 8px; line-height: 0">«</a>';
+            }
+            echo '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . ($this->currentPage - 1) . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '" class="icon" style="font-size: 1rem; padding-top: 2px;">&lt;</a>';
+        }
+    }
+
+    /**
+     * Displays go to next and go to last page.
+     */
+    private function displayRightSide()
+    {
+        if ($this->currentPage != $this->maxPage) {
+            echo '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . ($this->currentPage + 1) . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '" class="icon" style="font-size: 1rem; padding-top: 2px;">&gt;</a>';
+            if ($this->currentPage + 4 < $this->maxPage) {
+                echo '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $this->maxPage . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '" style="font-weight: 400; font-size: 1.2rem; padding-top: 8px; line-height: 0">»</a>';
+            }
+        }
     }
 
     private function getQueryString()
