@@ -49,7 +49,7 @@ class View
     {
         $options = [
             'cache' => Configuration::getConfiguration('pug', 'cache'),
-            'basedir' => ROOT_DIR . '/app/views'
+            'basedir' => ROOT_DIR . '/public'
         ];
         if (Configuration::getApplicationConfiguration('env') == "prod") {
             $options['upToDateCheck'] = false;
