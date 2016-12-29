@@ -23,6 +23,53 @@ class Form
      */
     private $validations = [];
 
+    /**
+     * Reads a memorized value for a given fieldId. If value has not been set the
+     * specified default value is assigned (empty if not set). Excellent to set
+     * remembered data in forms.
+     *
+     * @param string $fieldId
+     * @param string $defaultValue
+     * @return string
+     */
+    public static function readMemorizedValue($fieldId, $defaultValue = "")
+    {
+        return (isset($_SESSION['_FIELDS'][$fieldId])) ? $_SESSION['_FIELDS'][$fieldId] : $defaultValue;
+    }
+
+    /**
+     * Memorizes the specified value for the given fieldId. Allows to be read by
+     * the readMemorizedValue() function afterward.
+     *
+     * @param string $fieldId
+     * @param string $value
+     */
+    public static function memorizeValue($fieldId, $value)
+    {
+        if (!isset($_SESSION['_FIELDS'])) {
+            $_SESSION['_FIELDS'] = [];
+        }
+        $_SESSION['_FIELDS'][$fieldId] = $value;
+    }
+
+    /**
+     * Removes the specified fieldId from memory or clears the entire memorized
+     * fields if not set.
+     *
+     * @param string $fieldId
+     */
+    public static function removeMemorizedValue($fieldId = null)
+    {
+        if (isset($_SESSION['_FIELDS'])) {
+            if (is_null($fieldId)) {
+                $_SESSION['_FIELDS'] = null;
+                unset($_SESSION['_FIELDS']);
+            } else {
+                unset($_SESSION['_FIELDS'][$fieldId]);
+            }
+        }
+    }
+
     public function __construct($initializeFromRequest = true)
     {
         if ($initializeFromRequest) {
@@ -144,8 +191,9 @@ class Form
             }
             if (!$this->executeRule($field, $validation['callback'])) {
                 $this->errors[$field][] = $validation['message'];
+                self::removeMemorizedValue($field);
             } else {
-                _mem($field, $this->fields[$field]);
+                self::memorizeValue($field, $this->fields[$field]);
             }
         }
     }

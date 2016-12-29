@@ -47,7 +47,7 @@ class View
             $args['pager'] = $this->pager;
         }
         $output = $this->pug->render(ROOT_DIR . '/app/views/' . $this->pageToRender . $this->pug->getExtension(), $args);
-        clearFieldMemory();
+        Form::removeMemorizedValue();
         return $output;
     }
 
@@ -72,7 +72,7 @@ class View
     {
         $args = Flash::readAll();
         $args['val'] = function($fieldId, $defaultValue = "") {
-            return _val($fieldId, $defaultValue);
+            return Form::readMemorizedValue($fieldId, $defaultValue);
         };
         $args['format'] = $this->addFormatFunction();
         $this->pug->share($args);
