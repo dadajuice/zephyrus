@@ -7,15 +7,10 @@ html
     #container
       if flash.success
         div.success=flash.success
-      h2 Example #{$format('date', '2016-12-01')}
+      h2 Example #{format('time', '2016-01-01')}
       ul
       each item in items
-        li
-          :php $price = $item->getPrice();
-          a(href='/examples/#{item.id}') #{item.name} #{item.price}
-          |&nbsp;(
-          =$format('money', $price)
-          |)
+        li Example #{item.name} #{format('money', item.price)}
       br
       pager
       br
