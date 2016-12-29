@@ -9,7 +9,9 @@ abstract class Controller
     protected function render($page, $args = [], Pager $pager = null)
     {
         $view = new View($page);
-        $view->setPager($pager);
+        if (!is_null($pager)) {
+            $view->setPager($pager);
+        }
         echo $view->render($args);
     }
 
