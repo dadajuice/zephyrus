@@ -1,6 +1,5 @@
 <?php
 
-use Zephyrus\Application\Formatter;
 use Zephyrus\Security\ContentSecurityPolicy;
 use Zephyrus\Security\Uploaders\FileUpload;
 use Zephyrus\Network\Request;
@@ -97,53 +96,6 @@ function seoUrl($name)
     return preg_replace("/[\s_]/", "-", $url);
 }
 
-/**
- * Reads a memorized value for a given fieldId. If value has not been set the
- * specified default value is assigned (empty if not set). Excellent to set
- * remembered data in forms.
- *
- * @param string $fieldId
- * @param string $defaultValue
- * @return string
- */
-function _val($fieldId, $defaultValue = "")
-{
-    return (isset($_SESSION['_FIELDS'][$fieldId])) ? $_SESSION['_FIELDS'][$fieldId] : $defaultValue;
-}
-
-/**
- * Memorizes the specified value for the given fieldId. Allows to be read by
- * the _val() function afterward.
- *
- * @param string $fieldId
- * @param string $value
- */
-function _mem($fieldId, $value)
-{
-    if (!isset($_SESSION['_FIELDS'])) {
-        $_SESSION['_FIELDS'] = [];
-    }
-    $_SESSION['_FIELDS'][$fieldId] = $value;
-}
-
-/**
- * Removes the specified fieldId from memory or clears the entire memorized
- * fields if not set.
- *
- * @param string $fieldId
- */
-function clearFieldMemory($fieldId = null)
-{
-    if (isset($_SESSION['_FIELDS'])) {
-        if (is_null($fieldId)) {
-            $_SESSION['_FIELDS'] = null;
-            unset($_SESSION['_FIELDS']);
-        } else {
-            unset($_SESSION['_FIELDS'][$fieldId]);
-        }
-    }
-}
-
 function getPartialMonthName($index)
 {
     $partialMonths = ['jan', 'fév', 'mar', 'avr', 'mai', 'jun', 'jui', 'aoû', 'sep', 'oct', 'nov', 'déc'];
@@ -168,67 +120,6 @@ function getWeekDayName($index)
     return $fullDays[$index];
 }
 
-/* Quick functions */
-function formatElapsedDateTime(\DateTime $dateTime)
-{
-    return Formatter::formatElapsedDateTime($dateTime);
-}
-
-function formatFrenchDate(DateTime $dateTime, $capitalize = false, $useFullMonths = true)
-{
-    return Formatter::formatFrenchDate($dateTime, $capitalize, $useFullMonths);
-}
-
-function formatFrenchDateTime(DateTime $dateTime, $capitalize = false, $useFullMonths = true)
-{
-    return Formatter::formatFrenchDateTime($dateTime, $capitalize, $useFullMonths);
-}
-
-function formatFrenchPeriod(DateTime $startDate, DateTime $endDate)
-{
-    return Formatter::formatFrenchPeriod($startDate, $endDate);
-}
-
-function formatTime(DateTime $dateTime)
-{
-    return Formatter::formatTime($dateTime);
-}
-
-function formatPercent($number, $minDecimals = 2, $maxDecimals = 4)
-{
-    return Formatter::formatPercent($number, $minDecimals, $maxDecimals);
-}
-
-function formatMoney($amount, $minDecimals = 2, $maxDecimals = 2, $roundUp = true)
-{
-    return Formatter::formatMoney($amount, $minDecimals, $maxDecimals, $roundUp);
-}
-
-function formatDecimal($number, $minDecimals = 2, $maxDecimals = 4, $roundUp = true)
-{
-    return Formatter::formatDecimal($number, $minDecimals, $maxDecimals, $roundUp);
-}
-
-function formatHumanFileSize($size)
-{
-    return Formatter::formatHumanFileSize($size);
-}
-
-function success($message)
-{
-    $_SESSION['success'] = $message;
-}
-
-function warning($message)
-{
-    $_SESSION['warning'] = $message;
-}
-
-function info($message)
-{
-    $_SESSION['info'] = $message;
-}
-
 /**
  * @return int
  */
@@ -248,11 +139,4 @@ function getRequestNonce()
 function getCurrentUrl()
 {
     return Request::getBaseUrl() . Request::getUri();
-}
-
-function buildDescription($data, $size = 150)
-{
-    $base = strip_tags(html_entity_decode($data, ENT_QUOTES | ENT_XHTML, 'UTF-8'));
-    $base = trim(preg_replace('/\s+/', ' ', $base));
-    return mb_strimwidth($base, 0, $size, "...");
 }
