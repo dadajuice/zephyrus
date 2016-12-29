@@ -7,6 +7,9 @@
     "php-http/curl-client": "^1.6",
     "guzzlehttp/psr7": "^1.3"
   },
+  "require-dev": {
+    "phpunit/phpunit": "5.5.*"
+  },
   "autoload": {
     "psr-4": {
       "Zephyrus\\": "app/zephyrus",

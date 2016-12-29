@@ -55,10 +55,13 @@ class View
     {
         $options = [
             'cache' => Configuration::getConfiguration('pug', 'cache'),
-            'basedir' => ROOT_DIR . '/public'
+            'basedir' => ROOT_DIR . '/public',
+            'expressionLanguage' => 'js',
+            $options['upToDateCheck'] = false
         ];
-        if (Configuration::getApplicationConfiguration('env') == "prod") {
-            $options['upToDateCheck'] = false;
+        if (Configuration::getApplicationConfiguration('env') == "dev") {
+            $options['upToDateCheck'] = true;
+            $options['prettyprint'] = true;
         }
         $this->pug = new Pug($options);
         $this->assignPugSharedArguments();
@@ -68,7 +71,7 @@ class View
     private function assignPugSharedArguments()
     {
         $args = Flash::readAll();
-        $args['_val'] = function($fieldId, $defaultValue = "") {
+        $args['val'] = function($fieldId, $defaultValue = "") {
             return _val($fieldId, $defaultValue);
         };
         $args['format'] = $this->addFormatFunction();
