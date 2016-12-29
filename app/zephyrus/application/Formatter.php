@@ -2,8 +2,11 @@
 
 class Formatter
 {
-    public static function formatElapsedDateTime(\DateTime $dateTime)
+    public static function formatElapsedDateTime($dateTime)
     {
+        if (!$dateTime instanceof \DateTime) {
+            $dateTime = new \DateTime($dateTime);
+        }
         $now = new \DateTime();
         $diff = $dateTime->diff($now);
 
@@ -22,26 +25,35 @@ class Formatter
         return self::formatFrenchDateTime($dateTime);
     }
 
-    public static function formatFrenchPeriod(\DateTime $startDate, \DateTime $endDate)
+    public static function formatFrenchPeriod($startDate, $endDate)
     {
+        if (!$startDate instanceof \DateTime) {
+            $startDate = new \DateTime($startDate);
+        }
+        if (!$endDate instanceof \DateTime) {
+            $endDate = new \DateTime($endDate);
+        }
         $beginDateStr = $startDate->format("Y-m-d");
         $endDateStr = $endDate->format("Y-m-d");
         $beginTime = $startDate->format("H:i");
         $endTime = $endDate->format("H:i");
 
         if ($beginDateStr == $endDateStr) {
-            return formatFrenchDate($startDate) . ", " . formatTime($startDate) . " - " . formatTime($endDate);
+            return self::formatFrenchDate($startDate) . ", " . self::formatTime($startDate) . " - " . self::formatTime($endDate);
         }
 
         if ($beginTime == "00:00" && $endTime == "00:00") {
-            return formatFrenchDate($startDate) . " au " . formatFrenchDate($endDate);
+            return self::formatFrenchDate($startDate) . " au " . self::formatFrenchDate($endDate);
         }
 
-        return formatFrenchDateTime($startDate) . " au " . formatFrenchDateTime($endDate);
+        return self::formatFrenchDateTime($startDate) . " au " . self::formatFrenchDateTime($endDate);
     }
 
-    public static function formatFrenchDate(\DateTime $dateTime, $capitalize = false, $useFullMonths = true)
+    public static function formatFrenchDate($dateTime, $capitalize = false, $useFullMonths = true)
     {
+        if (!$dateTime instanceof \DateTime) {
+            $dateTime = new \DateTime($dateTime);
+        }
         $partialMonths = ['jan', 'fév', 'mar', 'avr', 'mai', 'jun', 'jui', 'aoû', 'sep', 'oct', 'nov', 'déc'];
         $fullMonths = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
         $i = $dateTime->format('n') - 1;
@@ -54,13 +66,19 @@ class Formatter
         return $dateTime->format('j') . ' ' . $month . ' ' . $dateTime->format('Y');
     }
 
-    public static function formatFrenchDateTime(\DateTime $dateTime, $capitalize = false, $useFullMonths = true)
+    public static function formatFrenchDateTime($dateTime, $capitalize = false, $useFullMonths = true)
     {
+        if (!$dateTime instanceof \DateTime) {
+            $dateTime = new \DateTime($dateTime);
+        }
         return self::formatFrenchDate($dateTime, $capitalize, $useFullMonths) . ', ' . $dateTime->format('H:i');
     }
 
-    public static function formatTime(\DateTime $dateTime)
+    public static function formatTime($dateTime)
     {
+        if (!$dateTime instanceof \DateTime) {
+            $dateTime = new \DateTime($dateTime);
+        }
         return $dateTime->format('H:i');
     }
 
@@ -105,19 +123,19 @@ class Formatter
 
     /**
      * http://stackoverflow.com/questions/15188033/human-readable-file-size
-     * @param int $size in bytes
+     * @param int $sizeInBytes
      * @return string
      */
-    public static function formatHumanFileSize($size)
+    public static function formatHumanFileSize($sizeInBytes)
     {
-        if ($size >= 1073741824) {
-            $fileSize = round($size / 1024 / 1024 / 1024, 1) . ' go';
-        } elseif ($size >= 1048576) {
-            $fileSize = round($size / 1024 / 1024, 1) . ' mo';
-        } elseif($size >= 1024) {
-            $fileSize = round($size / 1024, 1) . ' ko';
+        if ($sizeInBytes >= 1073741824) {
+            $fileSize = round($sizeInBytes / 1024 / 1024 / 1024, 1) . ' go';
+        } elseif ($sizeInBytes >= 1048576) {
+            $fileSize = round($sizeInBytes / 1024 / 1024, 1) . ' mo';
+        } elseif($sizeInBytes >= 1024) {
+            $fileSize = round($sizeInBytes / 1024, 1) . ' ko';
         } else {
-            $fileSize = $size . ' octets';
+            $fileSize = $sizeInBytes . ' octets';
         }
         return str_replace('.', ',', $fileSize);
     }

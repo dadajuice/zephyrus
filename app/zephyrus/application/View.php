@@ -86,38 +86,36 @@ class View
                 case 'filesize' :
                     return Formatter::formatHumanFileSize($value);
                 case 'time' :
-                    return Formatter::formatTime(($value instanceof \DateTime) ? $value : new \DateTime($value));
+                    return Formatter::formatTime($value);
                 case 'elapsed':
                 case 'french_elapsed' :
-                    return Formatter::formatElapsedDateTime(($value instanceof \DateTime) ? $value : new \DateTime($value));
+                    return Formatter::formatElapsedDateTime($value);
                 case 'datetime':
                 case 'french_datetime' :
                     if ($argc == 0) {
-                        return Formatter::formatFrenchDateTime(($value instanceof \DateTime) ? $value : new \DateTime($value));
+                        return Formatter::formatFrenchDateTime($value);
                     } elseif ($argc == 1) {
-                        return Formatter::formatFrenchDateTime(($value instanceof \DateTime) ? $value : new \DateTime($value), $args[0]);
+                        return Formatter::formatFrenchDateTime($value, $args[0]);
                     } elseif ($argc == 2) {
-                        return Formatter::formatFrenchDateTime(($value instanceof \DateTime) ? $value : new \DateTime($value), $args[0], $args[1]);
+                        return Formatter::formatFrenchDateTime($value, $args[0], $args[1]);
                     } else {
                         return 'French datetime format must between 0 and 2 arguments (' . $argc . ' provided)';
                     }
                 case 'date':
                 case 'french_date' :
                     if ($argc == 0) {
-                        return Formatter::formatFrenchDate(($value instanceof \DateTime) ? $value : new \DateTime($value));
+                        return Formatter::formatFrenchDate($value);
                     } elseif ($argc == 1) {
-                        return Formatter::formatFrenchDate(($value instanceof \DateTime) ? $value : new \DateTime($value), $args[0]);
+                        return Formatter::formatFrenchDate($value, $args[0]);
                     } elseif ($argc == 2) {
-                        return Formatter::formatFrenchDate(($value instanceof \DateTime) ? $value : new \DateTime($value), $args[0], $args[1]);
+                        return Formatter::formatFrenchDate($value, $args[0], $args[1]);
                     } else {
                         return 'French date format must between 0 and 2 arguments (' . $argc . ' provided)';
                     }
                 case 'period':
                 case 'french_period' :
                     if ($argc == 2) {
-                        return Formatter::formatFrenchPeriod(
-                            ($value instanceof \DateTime) ? $value : new \DateTime($value),
-                            ($args[0] instanceof \DateTime) ? $args[0] : new \DateTime($args[0]));
+                        return Formatter::formatFrenchPeriod($value, $args[0]);
                     } else {
                         return 'French period format must have 2 arguments (' . $argc . ' provided)';
                     }
