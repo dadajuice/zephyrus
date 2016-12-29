@@ -1,5 +1,6 @@
-<?php namespace Zephyrus\Application;
+<?php namespace Zephyrus\Utilities;
 
+use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\PayPalException;
 
 class PayPal
@@ -204,7 +205,6 @@ class PayPal
         $tvq_rate = 0;
 
         // Création des paramètre NVP
-        $nvpstr = '';
         $nvpstr_items = '';
         $item_amt = 0.00;
         $handling_amt = $this->handlingPrice;
@@ -399,7 +399,7 @@ class PayPal
         $response_array = $this->nvpToArray($nvp_response);
 
         // Convertir la requête en tableau associatif
-        $request_array = $this->nvpToArray($nvp_request);
+        //$request_array = $this->nvpToArray($nvp_request);
 
         // Appliquer la requête dans la session
         // $_SESSION['PAYPAL']['REQUEST_HASH'] = $request_array;

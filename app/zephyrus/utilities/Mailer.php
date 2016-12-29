@@ -1,6 +1,7 @@
-<?php namespace Zephyrus\Application;
+<?php namespace Zephyrus\Utilities;
 
 use Mailgun\Mailgun;
+use Zephyrus\Application\Configuration;
 
 class Mailer
 {
