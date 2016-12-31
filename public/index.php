@@ -1,18 +1,19 @@
 <?php
 
 use Zephyrus\Network\Router as Router;
+use Zephyrus\Application\ClassLocator;
 
 $router = new Router();
 foreach (recursiveGlob('../app/Routes/*.php') as $file) {
     include($file);
 }
-$router->run();
 
-function recursiveGlob($pattern, $flags = 0)
-{
-    $files = glob($pattern, $flags);
-    foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
-        $files = array_merge($files, recursiveGlob($dir.'/'.basename($pattern), $flags));
+$controllers = ClassLocator::getClassesInNamespace("Controllers");
+foreach ($controllers as $controller) {
+    $reflection = new \ReflectionClass($controller);
+    if ($reflection->implementsInterface('Zephyrus\Application\Routable')) {
+        call_user_func($controller .'::initializeRoutes', $router);
     }
-    return $files;
 }
+
+$router->run();
