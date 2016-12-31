@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Application;
 
 use Pug\Pug;
+use Zephyrus\Security\CsrfGuard;
 use Zephyrus\Utilities\Pager;
 
 class View
@@ -66,6 +67,7 @@ class View
         $this->pug = new Pug($options);
         $this->assignPugSharedArguments();
         $this->addPagerKeyword();
+        $this->addCsrfKeyword();
     }
 
     private function assignPugSharedArguments()
@@ -168,6 +170,16 @@ class View
             }
             return array(
                 'beginPhp' => $begin,
+                'endPhp' => ';',
+            );
+        });
+    }
+
+    private function addCsrfKeyword()
+    {
+        $this->pug->addKeyword('csrf', function ($arguments, $block, $keyword) {
+            return array(
+                'beginPhp' => 'echo Zephyrus\Security\CsrfGuard::getInstance()->generateHiddenFields()',
                 'endPhp' => ';',
             );
         });
