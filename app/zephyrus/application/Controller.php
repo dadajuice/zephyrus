@@ -2,6 +2,7 @@
 
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Response;
+use Zephyrus\Network\Router;
 use Zephyrus\Utilities\Pager;
 
 abstract class Controller
@@ -46,5 +47,10 @@ abstract class Controller
             exit;
         }
         throw new \RuntimeException("Cannot parse specified data as XML");
+    }
+
+    protected static function bind($method)
+    {
+        return [get_called_class(), $method];
     }
 }

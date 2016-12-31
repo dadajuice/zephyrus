@@ -20,10 +20,10 @@ class ExampleController extends Controller implements Routable
      */
     public static function initializeRoutes(Router $router)
     {
-        $router->get("/", [get_class(), "index"]);
-        $router->get("/insert", [get_class(), "insertForm"]);
-        $router->post("/insert", [get_class(), "insert"]);
-        $router->get("/test/basic-html", [get_class(), "displayBasicHtml2"]);
+        $router->get("/", self::bind("index"));
+        $router->get("/insert", self::bind("insertForm"));
+        $router->post("/insert", self::bind("insert"));
+        $router->get("/test/basic-html", self::bind("displayBasicHtml2"));
     }
 
     public function index()
