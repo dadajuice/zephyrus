@@ -1,5 +1,6 @@
 Options +FollowSymLinks
 Options -Indexes
+ServerSignature Off
 
 # ----------------------------- ERROR HANDLING ------------------------------ #
 php_flag display_startup_errors on
@@ -22,6 +23,7 @@ AddDefaultCharset UTF-8
 DefaultLanguage fr-CA
 
 # --------------------------- SECURITY SETTINGS ----------------------------- #
+php_flag expose_php Off
 
 # Maximum allowed upload size
 php_value post_max_size 20M
