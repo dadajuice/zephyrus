@@ -18,14 +18,6 @@ class SecureRouter extends Router
     }
 
     /**
-     * @return string
-     */
-    public static function getRequestNonce()
-    {
-        return ContentSecurityPolicy::getRequestNonce();
-    }
-
-    /**
      * This method is automatically called when a route has been found before
      * any user defined code. This method sends security headers, runs the
      * IDS (if specified in config) and checks for CSRF token (if specified
@@ -36,8 +28,8 @@ class SecureRouter extends Router
      */
     protected function beforeCallback($route)
     {
-        /*SecureHeader::getInstance()->send();
-
+        SecureHeader::getInstance()->send();
+        /*
         if (Configuration::getIdsConfiguration('active')) {
             IntrusionDetection::getInstance()->run();
         }*/
