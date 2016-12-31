@@ -16,7 +16,7 @@ class ContentSecurityPolicy
      *
      * @var string
      */
-    private static $nonce;
+    private static $nonce = null;
 
     /**
      * Defines the defaults for most directives left unspecified. Generally, this
@@ -167,10 +167,15 @@ class ContentSecurityPolicy
     private $reportUri;
 
     /**
+     * Generates a nonce if its has not been already done.
+     *
      * @return string
      */
     public static function getRequestNonce()
     {
+        if (is_null(self::$nonce)) {
+            self::generateNonce();
+        }
         return self::$nonce;
     }
 
