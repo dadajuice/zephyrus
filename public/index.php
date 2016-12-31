@@ -1,6 +1,6 @@
 <?php
 
-use Zephyrus\Security\SecureRouter as Router;
+use Zephyrus\Network\Router;
 use Zephyrus\Application\ClassLocator;
 
 $router = new Router();
