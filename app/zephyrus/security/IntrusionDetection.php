@@ -66,10 +66,10 @@ class IntrusionDetection
 
         $this->manager->run($guard);
         if ($this->manager->getImpact() > 0) {
-            //$data = $this->getDetectionData($this->manager->getReports());
+            $data = $this->getDetectionData($this->manager->getReports());
             if (!is_null($this->detectionCallback)) {
                 $callback = $this->detectionCallback;
-                $callback($this->manager->getReports());
+                $callback($data);
             } else {
                 throw new \Exception("No intrusion detection callback defined");
             }
@@ -139,7 +139,7 @@ class IntrusionDetection
     {
         $filters = new FilterCollection();
         $filters->load();
-        $this->manager = new Manager($filters);
+        $this->manager = new Manager($filters, SystemLog::getInstance()->getSecurityLogger());
         $this->surveillance = self::GET | self::POST;
     }
 
@@ -172,27 +172,32 @@ class IntrusionDetection
      * when an intrusion is detected. Will contains essential data such as
      * impact, targeted inputs and detection descriptions.
      *
-     * @param Report $result
+     * @param Report[] $reports
      * @return mixed[]
      */
-    /*private function getDetectionData(Report $result)
+    private function getDetectionData($reports)
     {
         $data = [
-            'impact'     => $result->getImpact(),
+            'impact' => 0,
             'detections' => []
         ];
-        foreach ($result->getIterator() as $key => $value) {
-            $data['detections'][$key] = [
-                'value'  => $value->getValue(),
-                'events' => []
-            ];
-            foreach ($value->getFilters() as $filter) {
-                $data['detections'][$key]['events'][] = [
-                    'description' => $filter->getDescription(),
-                    'impact'      => $filter->getImpact()
+        foreach ($reports as $report) {
+            $variableName = $report->getVarName();
+            $filters = $report->getFilterMatch();
+            if (!isset($data['detections'][$variableName])) {
+                $data['detections'][$variableName] = [
+                    'value' => $report->getVarValue(),
+                    'events' => []
                 ];
+            }
+            foreach ($filters as $filter) {
+                $data['detections'][$variableName]['events'][] = [
+                    'description' => $filter->getDescription(),
+                    'impact' => $filter->getImpact()
+                ];
+                $data['impact'] += $filter->getImpact();
             }
         }
         return $data;
-    }*/
+    }
 }
