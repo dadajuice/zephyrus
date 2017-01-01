@@ -2,8 +2,6 @@
 
 use Pug\Pug;
 use Zephyrus\Security\ContentSecurityPolicy;
-use Zephyrus\Security\CsrfGuard;
-use Zephyrus\Security\SystemLog;
 use Zephyrus\Utilities\Pager;
 
 class View
