@@ -6,8 +6,8 @@ use Zephyrus\Application\Controller;
 use Zephyrus\Application\Flash;
 use Zephyrus\Application\Form;
 use Zephyrus\Application\Routable;
-use Zephyrus\Network\Request;
 use Zephyrus\Network\Router;
+use Zephyrus\Security\Uploaders\FileUpload;
 use Zephyrus\Utilities\Validator;
 
 class ExampleController extends Controller implements Routable
@@ -61,7 +61,7 @@ class ExampleController extends Controller implements Routable
 
     public function insertForm()
     {
-        $this->render('form');
+        $this->render('form', ['uploadSize' => FileUpload::getServerMaxUploadSize()]);
     }
 
     public function displayBasicHtml()
