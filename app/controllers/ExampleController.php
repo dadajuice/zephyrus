@@ -21,6 +21,7 @@ class ExampleController extends Controller implements Routable
     public static function initializeRoutes(Router $router)
     {
         $router->get("/", self::bind("index"));
+        $router->get("/sse", self::bind("sseTest"));
         $router->get("/insert", self::bind("insertForm"));
         $router->post("/insert", self::bind("insert"));
         $router->get("/test/basic-html", self::bind("displayBasicHtml2"));
@@ -32,6 +33,11 @@ class ExampleController extends Controller implements Routable
         $pager = $broker->buildPager($broker->countAll(), 2);
         $items = $broker->findAll();
         $this->render('example', ["items" => $items], $pager);
+    }
+
+    public function sseTest()
+    {
+        $this->sse(time());
     }
 
     public function insert()
