@@ -115,15 +115,24 @@ class Formatter
      */
     public static function formatHumanFileSize($sizeInBytes)
     {
+        $terms = [
+            'fr' => ['G' => 'go', 'M' => 'mo', 'K' => 'ko', 'B' => 'octets'],
+            'en' => ['G' => 'gb', 'M' => 'mb', 'K' => 'kb', 'B' => 'bytes']
+        ];
+        $lang = (strpos(Configuration::getApplicationConfiguration('locale'), 'fr') !== false) ? $terms['fr'] : $terms['en'];
         if ($sizeInBytes >= 1073741824) {
-            $fileSize = round($sizeInBytes / 1024 / 1024 / 1024, 1) . ' go';
+            $fileSize = round($sizeInBytes / 1024 / 1024 / 1024, 1);
+            $unit = $lang['G'];
         } elseif ($sizeInBytes >= 1048576) {
-            $fileSize = round($sizeInBytes / 1024 / 1024, 1) . ' mo';
+            $fileSize = round($sizeInBytes / 1024 / 1024, 1);
+            $unit = $lang['M'];
         } elseif($sizeInBytes >= 1024) {
-            $fileSize = round($sizeInBytes / 1024, 1) . ' ko';
+            $fileSize = round($sizeInBytes / 1024, 1);
+            $unit = $lang['K'];
         } else {
-            $fileSize = $sizeInBytes . ' octets';
+            $fileSize = $sizeInBytes;
+            $unit = $lang['B'];
         }
-        return str_replace('.', ',', $fileSize);
+        return self::formatDecimal($fileSize, 0, 2) . ' ' . $unit;
     }
 }
