@@ -22,7 +22,7 @@ class Formatter
             return "Hier, " . self::formatTime($dateTime);
         }
 
-        return self::formatFrenchDateTime($dateTime);
+        return self::formatDateTime($dateTime);
     }
 
     public static function formatFrenchPeriod($startDate, $endDate)
@@ -39,39 +39,30 @@ class Formatter
         $endTime = $endDate->format("H:i");
 
         if ($beginDateStr == $endDateStr) {
-            return self::formatFrenchDate($startDate) . ", " . self::formatTime($startDate) . " - " . self::formatTime($endDate);
+            return self::formatDate($startDate) . ", " . self::formatTime($startDate) . " - " . self::formatTime($endDate);
         }
 
         if ($beginTime == "00:00" && $endTime == "00:00") {
-            return self::formatFrenchDate($startDate) . " au " . self::formatFrenchDate($endDate);
+            return self::formatDate($startDate) . " au " . self::formatDate($endDate);
         }
 
-        return self::formatFrenchDateTime($startDate) . " au " . self::formatFrenchDateTime($endDate);
+        return self::formatDateTime($startDate) . " au " . self::formatDateTime($endDate);
     }
 
-    public static function formatFrenchDate($dateTime, $capitalize = false, $useFullMonths = true)
+    public static function formatDate($dateTime)
     {
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new \DateTime($dateTime);
         }
-        $partialMonths = ['jan', 'fév', 'mar', 'avr', 'mai', 'jun', 'jui', 'aoû', 'sep', 'oct', 'nov', 'déc'];
-        $fullMonths = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-        $i = $dateTime->format('n') - 1;
-        $month = ($useFullMonths)
-            ? $fullMonths[$i]
-            : $partialMonths[$i];
-        if ($capitalize) {
-            $month = ucfirst($month);
-        }
-        return $dateTime->format('j') . ' ' . $month . ' ' . $dateTime->format('Y');
+        return strftime(Configuration::getConfiguration('lang', 'date'), $dateTime->getTimestamp());
     }
 
-    public static function formatFrenchDateTime($dateTime, $capitalize = false, $useFullMonths = true)
+    public static function formatDateTime($dateTime)
     {
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new \DateTime($dateTime);
         }
-        return self::formatFrenchDate($dateTime, $capitalize, $useFullMonths) . ', ' . $dateTime->format('H:i');
+        return strftime(Configuration::getConfiguration('lang', 'datetime'), $dateTime->getTimestamp());
     }
 
     public static function formatTime($dateTime)
@@ -79,7 +70,7 @@ class Formatter
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new \DateTime($dateTime);
         }
-        return $dateTime->format('H:i');
+        return strftime(Configuration::getConfiguration('lang', 'time'), $dateTime->getTimestamp());
     }
 
     public static function formatPercent($number, $minDecimals = 2, $maxDecimals = 4)

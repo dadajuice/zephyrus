@@ -95,27 +95,9 @@ class View
                 case 'french_elapsed' :
                     return Formatter::formatElapsedDateTime($value);
                 case 'datetime':
-                case 'french_datetime' :
-                    if ($argc == 0) {
-                        return Formatter::formatFrenchDateTime($value);
-                    } elseif ($argc == 1) {
-                        return Formatter::formatFrenchDateTime($value, $args[0]);
-                    } elseif ($argc == 2) {
-                        return Formatter::formatFrenchDateTime($value, $args[0], $args[1]);
-                    } else {
-                        return 'French datetime format must between 0 and 2 arguments (' . $argc . ' provided)';
-                    }
+                    return Formatter::formatDateTime($value);
                 case 'date':
-                case 'french_date' :
-                    if ($argc == 0) {
-                        return Formatter::formatFrenchDate($value);
-                    } elseif ($argc == 1) {
-                        return Formatter::formatFrenchDate($value, $args[0]);
-                    } elseif ($argc == 2) {
-                        return Formatter::formatFrenchDate($value, $args[0], $args[1]);
-                    } else {
-                        return 'French date format must between 0 and 2 arguments (' . $argc . ' provided)';
-                    }
+                    return Formatter::formatDate($value);
                 case 'period':
                 case 'french_period' :
                     if ($argc == 2) {
