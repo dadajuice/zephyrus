@@ -98,13 +98,6 @@ class View
                     return Formatter::formatDateTime($value);
                 case 'date':
                     return Formatter::formatDate($value);
-                case 'period':
-                case 'french_period' :
-                    if ($argc == 2) {
-                        return Formatter::formatFrenchPeriod($value, $args[0]);
-                    } else {
-                        return 'French period format must have 2 arguments (' . $argc . ' provided)';
-                    }
                 case 'percent' :
                     if ($argc == 0) {
                         return Formatter::formatPercent($value);

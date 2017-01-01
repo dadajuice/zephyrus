@@ -25,30 +25,6 @@ class Formatter
         return self::formatDateTime($dateTime);
     }
 
-    public static function formatFrenchPeriod($startDate, $endDate)
-    {
-        if (!$startDate instanceof \DateTime) {
-            $startDate = new \DateTime($startDate);
-        }
-        if (!$endDate instanceof \DateTime) {
-            $endDate = new \DateTime($endDate);
-        }
-        $beginDateStr = $startDate->format("Y-m-d");
-        $endDateStr = $endDate->format("Y-m-d");
-        $beginTime = $startDate->format("H:i");
-        $endTime = $endDate->format("H:i");
-
-        if ($beginDateStr == $endDateStr) {
-            return self::formatDate($startDate) . ", " . self::formatTime($startDate) . " - " . self::formatTime($endDate);
-        }
-
-        if ($beginTime == "00:00" && $endTime == "00:00") {
-            return self::formatDate($startDate) . " au " . self::formatDate($endDate);
-        }
-
-        return self::formatDateTime($startDate) . " au " . self::formatDateTime($endDate);
-    }
-
     public static function formatDate($dateTime)
     {
         if (!$dateTime instanceof \DateTime) {
