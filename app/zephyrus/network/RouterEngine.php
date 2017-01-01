@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Network;
 
-//use Zephyrus\Security\Sanitizer;
 use Zephyrus\Exceptions\RouteNotFoundException;
 use Zephyrus\Exceptions\RouteDefinitionException;
 use Zephyrus\Exceptions\RouteNotAcceptedException;
@@ -327,7 +326,7 @@ abstract class RouterEngine
             $values = [];
             $n = count($matches);
             for ($i = 1; $i < $n; ++$i) {
-                $values[] = /*$this->sanitizeParameter(*/$matches[$i][0]/*)*/;
+                $values[] = /*purify(*/$matches[$i][0]/*)*/;
             }
 
             if (count($route['params']) != count($values)) {
@@ -409,15 +408,4 @@ abstract class RouterEngine
         }
         return $regex;
     }
-
-    /**
-     * Used to filter parameters before adding them in the super-globals
-     *
-     * @param string $param
-     * @return string
-     */
-    /*private function sanitizeParameter($param)
-    {
-        return Sanitizer::purify($param);
-    }*/
 }
