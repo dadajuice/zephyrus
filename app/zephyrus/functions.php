@@ -85,37 +85,12 @@ function sendMessage($id, $data, $retry = 1000) {
  */
 function seoUrl($name)
 {
-    setlocale(LC_CTYPE, 'en_CA.utf8');
     $url = strtolower($name);
     $url = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $url);
     $url = preg_replace("/[^a-z0-9_\s-]/", "", $url);
     $url = preg_replace("/[\s-]+/", " ", $url);
     $url = trim($url);
     return preg_replace("/[\s_]/", "-", $url);
-}
-
-function getPartialMonthName($index)
-{
-    $partialMonths = ['jan', 'fév', 'mar', 'avr', 'mai', 'jun', 'jui', 'aoû', 'sep', 'oct', 'nov', 'déc'];
-    return $partialMonths[$index];
-}
-
-function getMonthName($index)
-{
-    $fullMonths = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-    return $fullMonths[$index];
-}
-
-function getPartialWeekDayName($index)
-{
-    $partialDays = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
-    return $partialDays[$index];
-}
-
-function getWeekDayName($index)
-{
-    $fullDays = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
-    return $fullDays[$index];
 }
 
 /**
