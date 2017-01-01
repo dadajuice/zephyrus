@@ -32,6 +32,19 @@ abstract class Controller
         exit;
     }
 
+    protected function sse($data, $id = 0, $retry = 1000)
+    {
+        Response::sendResponseCode();
+        Response::sendContentType(ContentType::SSE);
+        Response::sendHeader('Cache-Control', 'no-cache');
+        echo "id: $id" . PHP_EOL;
+        echo "retry: " . $retry . PHP_EOL;
+        echo "data: " . json_encode($data) . PHP_EOL;
+        echo PHP_EOL;
+        ob_flush();
+        flush();
+    }
+
     protected function xml($data, $root = "")
     {
         Response::sendResponseCode();
