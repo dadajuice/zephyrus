@@ -90,7 +90,7 @@ class FileUpload
     private $originalMimeType;
 
     /**
-     * Returns the maximum allowed upload size (in MB) based on the server
+     * Returns the maximum allowed upload size (in bytes) based on the server
      * configurations. To increment this size the upload_max_filesize and
      * post_max_size properties must be modified (either directly in the
      * PHP.ini, in a .htaccess or using ini_set function).
@@ -99,10 +99,9 @@ class FileUpload
      */
     public static final function getServerMaxUploadSize()
     {
-        $maxUpload = (int)(ini_get('upload_max_filesize'));
-        $maxPost = (int)(ini_get('post_max_size'));
-        $memoryLimit = (int)(ini_get('memory_limit'));
-        return min($maxUpload, $maxPost, $memoryLimit);
+        $maxUpload = self::anySizeToBytes(ini_get('upload_max_filesize'));
+        $maxPost = self::anySizeToBytes(ini_get('post_max_size'));
+        return min($maxUpload, $maxPost);
     }
 
     /**
@@ -485,5 +484,17 @@ class FileUpload
     private function getRandomFilename()
     {
         return md5(uniqid(rand(0, time()), true)) . '.' . $this->extension;
+    }
+
+    /**
+     * Converts any string size as specified in the php.ini.
+     *
+     * @param string $size
+     * @return int
+     */
+    private static function anySizeToBytes($size) {
+        $size = trim($size);
+        $s = ['g' => 1<<30, 'm' => 1<<20, 'k' => 1<<10];
+        return intval($size) * ($s[strtolower(substr($size, -1))] ?: 1);
     }
 }
