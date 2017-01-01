@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Application;
 
 use Pug\Pug;
+use Zephyrus\Security\ContentSecurityPolicy;
 use Zephyrus\Security\CsrfGuard;
 use Zephyrus\Security\SystemLog;
 use Zephyrus\Utilities\Pager;
@@ -79,6 +80,7 @@ class View
         };
         $args['format'] = $this->addFormatFunction();
         $args['email'] = $this->addEmailFunction();
+        $args['nonce'] = $this->addNonceFunction();
         $this->pug->share($args);
     }
 
@@ -166,6 +168,13 @@ class View
     {
         return function($email) {
             echo secureEmail($email);
+        };
+    }
+
+    private function addNonceFunction()
+    {
+        return function() {
+            return ContentSecurityPolicy::getRequestNonce();
         };
     }
 
