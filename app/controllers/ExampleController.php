@@ -21,10 +21,11 @@ class ExampleController extends Controller implements Routable
     public static function initializeRoutes(Router $router)
     {
         $router->get("/", self::bind("index"));
-        $router->get("/sse", self::bind("sseTest"));
         $router->get("/insert", self::bind("insertForm"));
         $router->post("/insert", self::bind("insert"));
         $router->get("/test/basic-html", self::bind("displayBasicHtml2"));
+        $router->get("/xml", self::bind("xmlTest"));
+        $router->get("/sse", self::bind("sseTest"));
     }
 
     public function index()
@@ -33,11 +34,6 @@ class ExampleController extends Controller implements Routable
         $pager = $broker->buildPager($broker->countAll(), 2);
         $items = $broker->findAll();
         $this->render('example', ["items" => $items], $pager);
-    }
-
-    public function sseTest()
-    {
-        $this->sse(time());
     }
 
     public function insert()
@@ -84,5 +80,20 @@ class ExampleController extends Controller implements Routable
         ?>
         <p>Testing without ob_start()</p>
         <?php
+    }
+
+    public function xmlTest()
+    {
+        $arr = [
+            "batman" => [
+                "enemies" => ["Joker", "TwoFace"]
+            ]
+        ];
+        $this->xml($arr, "bob");
+    }
+
+    public function testSse()
+    {
+        $this->sse(time());
     }
 }
