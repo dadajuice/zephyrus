@@ -35,11 +35,6 @@ class Configuration
         return self::getConfiguration('session', $config);
     }
 
-    public static function getIdsConfiguration($config = null)
-    {
-        return self::getConfiguration('ids', $config);
-    }
-
     /**
      * @param string $section
      * @param string $config
