@@ -1,8 +1,6 @@
 <?php
 
 use Zephyrus\Security\ContentSecurityPolicy;
-use Zephyrus\Security\Uploaders\FileUpload;
-use Zephyrus\Network\Request;
 
 /**
  * Redirect user to specified URL. Throws an HTTP "303 See Other" header
@@ -39,7 +37,7 @@ function purify($data)
  */
 function secureEmail($email)
 {
-    $result = '<script type="text/javascript" nonce="' . getRequestNonce() . '">';
+    $result = '<script type="text/javascript" nonce="' . ContentSecurityPolicy::getRequestNonce() . '">';
     $result .= 'document.write("' . str_rot13($email) . '".replace(/[a-zA-Z]/g, function(c){return String.fromCharCode((c<="Z"?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26);}));';
     $result .= '</script>';
     return $result;
@@ -56,7 +54,7 @@ function secureEmail($email)
  */
 function secureEmailAnchor($email, $label = null)
 {
-    $result = '<script type="text/javascript" nonce="' . getRequestNonce() . '">';
+    $result = '<script type="text/javascript" nonce="' . ContentSecurityPolicy::getRequestNonce() . '">';
     $result .= 'document.write("<n uers=\"znvygb:' . str_rot13($email) . '\" ery=\"absbyybj\">' . str_rot13((!is_null($label)) ? $label : $email) . '</n>".replace(/[a-zA-Z]/g, function(c){return String.fromCharCode((c<="Z"?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26);}));';
     $result .= '</script>';
     return $result;
@@ -118,27 +116,6 @@ function getWeekDayName($index)
 {
     $fullDays = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
     return $fullDays[$index];
-}
-
-/**
- * @return int
- */
-function maxUploadSize()
-{
-    return FileUpload::getServerMaxUploadSize();
-}
-
-/**
- * @return string
- */
-function getRequestNonce()
-{
-    return ContentSecurityPolicy::getRequestNonce();
-}
-
-function getCurrentUrl()
-{
-    return Request::getBaseUrl() . Request::getUri();
 }
 
 /**
