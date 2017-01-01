@@ -84,8 +84,7 @@ class Formatter
 
     public static function formatPercent($number, $minDecimals = 2, $maxDecimals = 4)
     {
-        $formatter = new \NumberFormatter('fr_CA', \NumberFormatter::PERCENT);
-        $formatter->setAttribute(\NumberFormatter::DECIMAL_ALWAYS_SHOWN, ($minDecimals > 0 || $maxDecimals > 0));
+        $formatter = new \NumberFormatter(Configuration::getApplicationConfiguration('locale'), \NumberFormatter::PERCENT);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
@@ -95,20 +94,24 @@ class Formatter
         return $result;
     }
 
-    public static function formatMoney($amount, $minDecimals = 2, $maxDecimals = 2, $roundUp = true)
+    public static function formatMoney($amount, $minDecimals = 2, $maxDecimals = 2, $roundUp = false)
     {
-        $negative = $amount < 0;
-        $decimal = self::formatDecimal(abs($amount), $minDecimals, $maxDecimals, $roundUp);
-        if ($negative) {
-            $decimal = "($decimal)";
+        $formatter = new \NumberFormatter(Configuration::getApplicationConfiguration('locale'), \NumberFormatter::CURRENCY);
+        $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
+        $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
+        if ($roundUp && $minDecimals == 0 && $maxDecimals == 0) {
+            $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_UP);
         }
-        return $decimal . ' $';
+        $result = $formatter->formatCurrency($amount, Configuration::getApplicationConfiguration('currency'));
+        if (intl_is_failure($formatter->getErrorCode())) {
+            throw new \Exception("Formatter error : " . $formatter->getErrorMessage());
+        }
+        return $result;
     }
 
-    public static function formatDecimal($number, $minDecimals = 2, $maxDecimals = 4, $roundUp = true)
+    public static function formatDecimal($number, $minDecimals = 2, $maxDecimals = 4, $roundUp = false)
     {
-        $formatter = new \NumberFormatter('fr_CA', \NumberFormatter::DECIMAL);
-        $formatter->setAttribute(\NumberFormatter::DECIMAL_ALWAYS_SHOWN, ($minDecimals > 0 || $maxDecimals > 0));
+        $formatter = new \NumberFormatter(Configuration::getApplicationConfiguration('locale'), \NumberFormatter::DECIMAL);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         if ($roundUp && $minDecimals == 0 && $maxDecimals == 0) {
