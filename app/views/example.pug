@@ -8,6 +8,10 @@ html
       if flash.success
         div.success=flash.success
       h2 Example #{format('time', '2016-01-01')}
+
+      script(type='text/javascript', nonce=nonce()).
+        document.write("test");
+
       ul
       each item in items
         li Example #{item.name} #{format('money', item.price)}
