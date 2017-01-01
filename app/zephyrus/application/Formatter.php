@@ -92,6 +92,23 @@ class Formatter
     }
 
     /**
+     * Returns a SEO compatible url based on the specified string. Be sure to check the LC_CTYPE locale setting if
+     * getting any question marks in result. Run locale -a on server to see full list of supported locales.
+     *
+     * @param string $name
+     * @return string
+     */
+    function formatSeoUrl($name)
+    {
+        $url = strtolower($name);
+        $url = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $url);
+        $url = preg_replace("/[^a-z0-9_\s-]/", "", $url);
+        $url = preg_replace("/[\s-]+/", " ", $url);
+        $url = trim($url);
+        return preg_replace("/[\s_]/", "-", $url);
+    }
+
+    /**
      * http://stackoverflow.com/questions/15188033/human-readable-file-size
      * @param int $sizeInBytes
      * @return string
