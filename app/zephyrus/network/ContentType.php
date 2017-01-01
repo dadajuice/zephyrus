@@ -12,4 +12,5 @@ interface ContentType
     const JAVASCRIPT = 'application/javascript'; /* RFC 4329 */
     const PDF = 'application/pdf'; /* RFC 3778 */
     const GZIP = 'application/gzip'; /* RFC 6713 */
+    const SSE = 'text/event-stream';
 }
