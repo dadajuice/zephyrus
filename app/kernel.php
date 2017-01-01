@@ -5,16 +5,20 @@ require ROOT_DIR . '/vendor/autoload.php';
 
 use Zephyrus\Application\Configuration;
 use Zephyrus\Security\Session;
+use Zephyrus\Security\IntrusionDetection;
 
 include('handlers.php');
 include('zephyrus/functions.php');
 
+setlocale(LC_ALL, Configuration::getApplicationConfiguration('locale') . '.' . Configuration::getApplicationConfiguration('charset'));
 $session = Session::getInstance(Configuration::getSessionConfiguration());
 $session->start();
 
-/*if (Configuration::getIdsConfiguration('active')) {
-    $ids = IntrusionDetection::getInstance(Configuration::getIdsConfiguration());
-    $ids->onDetection(function ($data) {
-        Log::addSecurity("IDS detection : " . json_encode($data));
-    });
-}*/
+include('security.php');
+
+/*$ids = IntrusionDetection::getInstance();
+$ids->onDetection(function($data) {
+    echo "IDS !";
+    \Zephyrus\Security\SystemLog::getInstance()->addSecurity(json_encode($data));
+    exit;
+});*/
