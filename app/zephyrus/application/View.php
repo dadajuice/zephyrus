@@ -2,6 +2,7 @@
 
 use Pug\Pug;
 use Zephyrus\Security\CsrfGuard;
+use Zephyrus\Security\SystemLog;
 use Zephyrus\Utilities\Pager;
 
 class View
@@ -77,6 +78,7 @@ class View
             return Form::readMemorizedValue($fieldId, $defaultValue);
         };
         $args['format'] = $this->addFormatFunction();
+        $args['email'] = $this->addEmailFunction();
         $this->pug->share($args);
     }
 
@@ -157,6 +159,13 @@ class View
                     }
             }
             return 'FORMAT TYPE [' . $type . '] NOT DEFINED !';
+        };
+    }
+
+    private function addEmailFunction()
+    {
+        return function($email) {
+            echo secureEmail($email);
         };
     }
 
