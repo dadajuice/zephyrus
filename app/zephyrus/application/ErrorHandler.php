@@ -103,13 +103,13 @@ class ErrorHandler
         $parameters = $reflection->getParameters();
         if (count($parameters) == 1) {
             $argumentClass = $parameters[0]->getClass();
-            if ($argumentClass->getShortName() == 'Exception' || $argumentClass->isSubclassOf('Exception')) {
+            if ($argumentClass->getShortName() == 'Exception' || $argumentClass->isSubclassOf('Throwable')) {
                 $this->registeredExceptionCallbacks[$argumentClass->getShortName()] = $callback;
             } else {
-                throw new \Exception("Specified callback argument must be hinted as an Exception class");
+                throw new \Exception("Specified callback argument must be hinted as a Throwable class");
             }
         } else {
-            throw new \Exception("Specified callback must only have one argument hinted as an Exception class");
+            throw new \Exception("Specified callback must only have one argument hinted as a Throwable class");
         }
     }
 
