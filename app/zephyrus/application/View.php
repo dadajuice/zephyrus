@@ -92,7 +92,6 @@ class View
                 case 'time' :
                     return Formatter::formatTime($value);
                 case 'elapsed':
-                case 'french_elapsed' :
                     return Formatter::formatElapsedDateTime($value);
                 case 'datetime':
                     return Formatter::formatDateTime($value);

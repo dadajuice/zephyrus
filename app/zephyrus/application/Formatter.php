@@ -4,24 +4,33 @@ class Formatter
 {
     public static function formatElapsedDateTime($dateTime)
     {
+        $inFrench = strpos(Configuration::getApplicationConfiguration('locale'), 'fr') !== false;
+        $terms = [
+            'fr' => ['YESTERDAY' => 'Hier, ', 'TODAY' => 'Aujourd\'hui, '],
+            'en' => ['YESTERDAY' => 'Yesterday, ', 'TODAY' => 'Today, ']
+        ];
+        $lang = ($inFrench) ? $terms['fr'] : $terms['en'];
+
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new \DateTime($dateTime);
         }
         $now = new \DateTime();
         $diff = $dateTime->diff($now);
-
         if ($diff->d == 0) {
             if ($diff->h == 0) {
                 if ($diff->i == 0) {
-                    return "Il y a " . $diff->s . " seconde" . (($diff->s > 1) ? 's' : '');
+                    return ($inFrench) ?
+                        ("Il y a " . $diff->s . " seconde" . (($diff->s > 1) ? 's' : '')) :
+                        ($diff->s . " second" . (($diff->s > 1) ? 's' : '') . ' ago');
                 }
-                return "Il y a " . $diff->i . " minute" . (($diff->i > 1) ? 's' : '');
+                return ($inFrench) ?
+                    ("Il y a " . $diff->i . " minute" . (($diff->i > 1) ? 's' : '')) :
+                    ($diff->i . " minute" . (($diff->i > 1) ? 's' : '') . ' ago');
             }
-            return "Aujourd'hui, " . self::formatTime($dateTime);
+            return $lang['TODAY'] . self::formatTime($dateTime);
         } elseif ($diff->d == 1 && $diff->h == 0) {
-            return "Hier, " . self::formatTime($dateTime);
+            return $lang['YESTERDAY'] . self::formatTime($dateTime);
         }
-
         return self::formatDateTime($dateTime);
     }
 
