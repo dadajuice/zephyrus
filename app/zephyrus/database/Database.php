@@ -134,9 +134,13 @@ class Database
      */
     private function initializeConnectionHandle()
     {
-        $connectionString = "mysql:dbname={$this->config['database']};
+        if (isset($this->config['dsn'])) {
+            $connectionString = $this->config['dsn'];
+        } else {
+            $connectionString = "mysql:dbname={$this->config['database']};
                              host={$this->config['host']};
                              charset={$this->config['charset']}";
+        }
         try {
             $this->handle = new TransactionPDO($connectionString,
                                      $this->config['username'],
