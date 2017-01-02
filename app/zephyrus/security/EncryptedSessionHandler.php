@@ -104,7 +104,7 @@ class EncryptedSessionHandler extends \SessionHandler
      * @param string $data
      * @return string
      */
-    private function encrypt($data)
+    private function encrypt(string $data): string
     {
         $cipher = Cryptography::encrypt($data, $this->cryptKey);
         list($iv, $cipher) = explode(':', $cipher);
@@ -121,7 +121,7 @@ class EncryptedSessionHandler extends \SessionHandler
      * @param string $data
      * @return string|bool
      */
-    private function decrypt($data)
+    private function decrypt(string $data): string
     {
         list($hmac, $iv, $cipher) = explode(':', $data);
         $ivReal = base64_decode($iv);
