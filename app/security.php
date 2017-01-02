@@ -2,7 +2,18 @@
 
 use Zephyrus\Network\Request;
 use Zephyrus\Security\ContentSecurityPolicy;
+use Zephyrus\Security\IntrusionDetection;
 use Zephyrus\Security\SecureHeader;
+use Zephyrus\Application\Configuration;
+
+if (Configuration::getSecurityConfiguration('ids_enabled')) {
+    $ids = IntrusionDetection::getInstance();
+    $ids->onDetection(function($data) {
+        echo "IDS !";
+        \Zephyrus\Security\SystemLog::addSecurity('IDS Detection : ' . json_encode($data));
+        exit;
+    });
+}
 
 $csp = new ContentSecurityPolicy();
 $csp::generateNonce();
