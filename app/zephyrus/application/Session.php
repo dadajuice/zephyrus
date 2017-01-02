@@ -82,7 +82,7 @@ class Session
      * @param mixed[] $config
      * @return Session
      */
-    public static function getInstance($config = null)
+    public static function getInstance($config = null): Session
     {
         if (is_null(self::$instance)) {
             self::$instance = new self($config);
@@ -105,8 +105,12 @@ class Session
         $this->setupRefreshOnIntervalHandler();
         $this->setupFingerprintHandler();
 
+        if (isset($_SESSION['__HANDLER_DESTROYED']) && $_SESSION['__HANDLER_DESTROYED'] < time() - 300) {
+            $this->destroy();
+        }
+
         if (!isset($_SESSION['__HANDLER_INITIATED'])) {
-            session_regenerate_id(true);
+            $this->refresh();
             if (!is_null($this->decoys)) {
                 $this->throwDecoys();
             }
@@ -142,7 +146,9 @@ class Session
      */
     public function refresh()
     {
-        session_regenerate_id(true);
+        $_SESSION['__HANDLER_DESTROYED'] = time();
+        session_regenerate_id(true); // disable automatic old session delete for instable network
+        unset($_SESSION['__HANDLER_DESTROYED']);
         $this->initiateExpiration();
     }
 
@@ -458,7 +464,7 @@ class Session
         $this->httpOnly = true;
         $this->userAgentFingerprinted = isset($config['fingerprint_agent'])
             ? $config['fingerprint_agent']
-            : true;
+            : false;
         $this->ipAddressFingerprinted = isset($config['fingerprint_ip'])
             ? $config['fingerprint_ip']
             : false;
