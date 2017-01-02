@@ -1,4 +1,7 @@
-<?php namespace Zephyrus\Security;
+<?php namespace Zephyrus\Application;
+
+use Zephyrus\Security\Cryptography;
+use Zephyrus\Security\EncryptedSessionHandler;
 
 class Session
 {
@@ -695,8 +698,7 @@ class Session
         );
         session_name($this->name);
         if ($this->encryptionEnabled) {
-            $sessionHandler = new EncryptedSessionHandler();
-            session_set_save_handler($sessionHandler);
+            session_set_save_handler(new EncryptedSessionHandler());
         }
     }
 

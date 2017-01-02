@@ -4,9 +4,9 @@ define('ROOT_DIR', __DIR__ . '/..');
 require ROOT_DIR . '/vendor/autoload.php';
 
 use Zephyrus\Application\Configuration;
-use Zephyrus\Security\Session;
+use Zephyrus\Application\Session;
 use Zephyrus\Security\IntrusionDetection;
-
+//TODO: make two handlers : dev and prod
 include('handlers.php');
 include('zephyrus/functions.php');
 
