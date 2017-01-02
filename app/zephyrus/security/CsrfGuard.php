@@ -300,10 +300,13 @@ class CsrfGuard
      */
     private function __construct()
     {
-        $methodsToFilter = Configuration::getSecurityConfiguration('csrf_guard_req');
-        $this->setPostSecured(in_array('POST', $methodsToFilter));
-        $this->setPutSecured(in_array('PUT', $methodsToFilter));
-        $this->setDeleteSecured(in_array('DELETE', $methodsToFilter));
-        $this->setGetSecured(in_array('GET', $methodsToFilter));
+        $configs = Configuration::getSecurityConfiguration();
+        if (isset($configs['csrf_guard_req'])) {
+            $methodsToFilter = $configs['csrf_guard_req'];
+            $this->setPostSecured(in_array('POST', $methodsToFilter));
+            $this->setPutSecured(in_array('PUT', $methodsToFilter));
+            $this->setDeleteSecured(in_array('DELETE', $methodsToFilter));
+            $this->setGetSecured(in_array('GET', $methodsToFilter));
+        }
     }
 }
