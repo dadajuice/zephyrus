@@ -1,26 +1,7 @@
 <?php namespace Zephyrus\Security;
 
-/**
- * BASED ON Class CryptoLib (v0.8 Christmas)
- * Created by Junade Ali
- * Requires OpenSSL, MCrypt > 2.4.x, PHP 5.3.0+
- *
- * CryptoLib is an open-source PHP Cryptography library.
- * Copyright (C) 2014  Junade Ali
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+use Zephyrus\Application\Configuration;
+
 class Cryptography
 {
     /**
@@ -109,7 +90,8 @@ class Cryptography
     }
 
     /**
-     * Random hex generator using pseudoBytes function in this class.
+     * Returns a random hex of desired byte length.
+     *
      * @param int $length
      * @return string
      * @throws \Exception
@@ -122,10 +104,12 @@ class Cryptography
     }
 
     /**
-     * Random integer generator using pseudoBytes function in this class.
-     * @param $min
-     * @param $max
-     * @return mixed
+     * Returns a random integer between the provided min and max using random
+     * bytes. Throws exception if min and max arguments have inconsistencies.
+     *
+     * @param int $min
+     * @param int $max
+     * @return int
      * @throws \Exception
      */
     public static function randomInt($min, $max)
@@ -147,15 +131,21 @@ class Cryptography
     }
 
     /**
-     * Random string generator using randomInt function in this class.
-     * @param $length
-     * @param $characters
+     * Returns a random string of the desired length using only the given
+     * characters. If none is provided, alphanumeric characters ([0-9a-Z]) are
+     * used.
+     *
+     * @param int $length
+     * @param string | array $characters
      * @return string
      */
     public static function randomString($length, $characters = null)
     {
         if (is_null($characters)) {
             $characters = array_merge(range('a', 'z'), range('A', 'Z'), range('0', '9'));
+        }
+        if (is_string($characters)) {
+            $characters = str_split($characters);
         }
         $result = '';
         $n = count($characters);
@@ -166,7 +156,10 @@ class Cryptography
     }
 
     /**
-     * Will return openssl_random_pseudo_bytes with desired length is $strong is set to true.
+     * Returns random bytes based on openssl. This method is used by all other
+     * "random" methods. Throws an exception if the result is not considered
+     * strong enough by the openssl lib.
+     *
      * @param int $length
      * @throws \Exception
      * @returns int $bytes
@@ -177,7 +170,69 @@ class Cryptography
         if ($strong === true) {
             return $bytes;
         } else {
-            throw new \Exception ('OpenSSL Random byte generation insecure');
+            throw new \Exception('OpenSSL Random byte generation insecure');
         }
+    }
+
+    /**
+     * Encrypts the given data using the configured encryption algorithm and
+     * the provided key. Returns a concatenation of the generated IV and the
+     * cipher. Resulting cipher should only be decrypted using the decrypt
+     * method.
+     *
+     * @param string $data
+     * @param string $key
+     * @return string
+     */
+    public static function encrypt($data, $key)
+    {
+        $method = Configuration::getSecurityConfiguration('encryption_algorithm');
+        $iv = self::randomBytes(openssl_cipher_iv_length($method));
+        $cipher = openssl_encrypt($data, $method, $key, 0, $iv);
+        return base64_encode($iv) . ':' . base64_encode($cipher);
+    }
+
+    /**
+     * Decrypts the given cipher using the configured encryption algorithm and
+     * the provided decryption key. Throws exception if the cipher seems
+     * invalid (which means it does not seem to include the IV).
+     *
+     * @param string $cipher
+     * @param string $key
+     * @return string
+     * @throws \Exception
+     */
+    public static function decrypt($cipher, $key)
+    {
+        if (strpos($cipher, ':') === false) {
+            throw new \Exception("Invalid cipher to decrypt");
+        }
+        $method = Configuration::getSecurityConfiguration('encryption_algorithm');
+        list($iv, $cipher) = explode(':', $cipher);
+        $cipher = base64_decode($cipher);
+        $iv = base64_decode($iv);
+        return openssl_decrypt($cipher, $method, $key, 0, $iv);
+    }
+
+    /**
+     * Returns the required initialisation vector length for encryption based
+     * on the configured algorithm.
+     *
+     * @return int
+     */
+    public static function getEncryptionIvLength()
+    {
+        return openssl_cipher_iv_length(Configuration::getSecurityConfiguration('encryption_algorithm'));
+    }
+
+    /**
+     * Returns the configured encryption algorithm to be used in the
+     * application.
+     *
+     * @return string
+     */
+    public static function getEncryptionAlgorithm()
+    {
+        return Configuration::getSecurityConfiguration('encryption_algorithm');
     }
 }
