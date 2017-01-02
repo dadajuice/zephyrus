@@ -139,7 +139,7 @@ class IntrusionDetection
     {
         $filters = new FilterCollection();
         $filters->load();
-        $this->manager = new Manager($filters, SystemLog::getInstance()->getSecurityLogger());
+        $this->manager = new Manager($filters, SystemLog::getSecurityLogger());
         $this->surveillance = self::GET | self::POST;
     }
 
