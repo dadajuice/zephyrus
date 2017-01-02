@@ -17,7 +17,7 @@ class Cryptography
      * @throws \RuntimeException
      * @return string
      */
-    public static function hash($string, $salt = null, $cost = null)
+    public static function hash(string $string, string $salt = null, int $cost = null): string
     {
         $hashOptions = [];
         if (!is_null($salt)) {
@@ -29,7 +29,7 @@ class Cryptography
 
         $hash = password_hash($string, PASSWORD_DEFAULT, $hashOptions);
         if (!$hash) {
-            throw new \RuntimeException("An error occurred in hashing process. Please review your PHP configuration.");
+            throw new \RuntimeException("An error occurred in hashing process. Please review your configuration.");
         }
         return (string)$hash;
     }
@@ -41,7 +41,7 @@ class Cryptography
      * @param string $hash
      * @return bool
      */
-    public static function verifyHash($string, $hash)
+    public static function verifyHash(string $string, string $hash): bool
     {
         return password_verify($string, $hash);
     }
@@ -53,10 +53,10 @@ class Cryptography
      *
      * @param string $hash
      * @param string | null $salt
-     * @param string | null $cost
-     * @return string
+     * @param int | null $cost
+     * @return bool
      */
-    public static function isRehashNeeded($hash, $salt = null, $cost = null)
+    public static function isRehashNeeded(string $hash, string $salt = null, int $cost = null): bool
     {
         $hashOptions = [];
         if (!is_null($salt)) {
@@ -76,7 +76,7 @@ class Cryptography
      * @see http://php.net/manual/en/function.password-hash.php
      * @return int
      */
-    public static function findHighestHashCost()
+    public static function findHighestHashCost(): int
     {
         $timeTarget = 0.05; // 50 milliseconds
         $cost = 8;
@@ -96,7 +96,7 @@ class Cryptography
      * @return string
      * @throws \Exception
      */
-    public static function randomHex($length = 128)
+    public static function randomHex(int $length = 128): string
     {
         $bytes = ceil($length / 2);
         $hex = bin2hex(self::randomBytes($bytes));
@@ -112,7 +112,7 @@ class Cryptography
      * @return int
      * @throws \Exception
      */
-    public static function randomInt($min, $max)
+    public static function randomInt(int $min, int $max): int
     {
         if ($max <= $min) {
             throw new \Exception('Minimum equal or greater than maximum!');
@@ -139,7 +139,7 @@ class Cryptography
      * @param string | array $characters
      * @return string
      */
-    public static function randomString($length, $characters = null)
+    public static function randomString(int $length, $characters = null): string
     {
         if (is_null($characters)) {
             $characters = array_merge(range('a', 'z'), range('A', 'Z'), range('0', '9'));
@@ -162,9 +162,9 @@ class Cryptography
      *
      * @param int $length
      * @throws \Exception
-     * @returns int $bytes
+     * @returns string
      */
-    public static function randomBytes($length = 1)
+    public static function randomBytes(int $length = 1): string
     {
         $bytes = openssl_random_pseudo_bytes($length, $strong);
         if ($strong === true) {
@@ -184,7 +184,7 @@ class Cryptography
      * @param string $key
      * @return string
      */
-    public static function encrypt($data, $key)
+    public static function encrypt(string $data, string $key): string
     {
         $method = Configuration::getSecurityConfiguration('encryption_algorithm');
         $iv = self::randomBytes(openssl_cipher_iv_length($method));
@@ -202,7 +202,7 @@ class Cryptography
      * @return string
      * @throws \Exception
      */
-    public static function decrypt($cipher, $key)
+    public static function decrypt(string $cipher, string $key): string
     {
         if (strpos($cipher, ':') === false) {
             throw new \Exception("Invalid cipher to decrypt");
@@ -220,7 +220,7 @@ class Cryptography
      *
      * @return int
      */
-    public static function getEncryptionIvLength()
+    public static function getEncryptionIvLength(): int
     {
         return openssl_cipher_iv_length(Configuration::getSecurityConfiguration('encryption_algorithm'));
     }
@@ -231,7 +231,7 @@ class Cryptography
      *
      * @return string
      */
-    public static function getEncryptionAlgorithm()
+    public static function getEncryptionAlgorithm(): string
     {
         return Configuration::getSecurityConfiguration('encryption_algorithm');
     }
