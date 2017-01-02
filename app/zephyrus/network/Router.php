@@ -3,6 +3,7 @@
 use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Security\CsrfGuard;
+use Zephyrus\Security\IntrusionDetection;
 use Zephyrus\Security\SecureHeader;
 
 class Router extends RouterEngine
@@ -85,6 +86,9 @@ class Router extends RouterEngine
      */
     protected function beforeCallback($route)
     {
+        if (Configuration::getSecurityConfiguration('ids_enabled')) {
+            IntrusionDetection::getInstance()->run();
+        }
         SecureHeader::getInstance()->send();
         if (Configuration::getSecurityConfiguration('csrf_guard_enabled')) {
             CsrfGuard::getInstance()->guard();
