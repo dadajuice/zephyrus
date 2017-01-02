@@ -1,7 +1,5 @@
 <?php namespace Zephyrus\Security;
 
-use Zephyrus\Application\SessionHandler;
-
 class Session
 {
     /**
@@ -73,17 +71,6 @@ class Session
      * @var bool defines if the stored session date should be encrypted
      */
     private $encryptionEnabled = false;
-
-    /**
-     * @var string In case encryption is enabled, this defined the MCRYPT
-     * compatible algorithm to use.
-     */
-    private $encryptionAlgorithm = null;
-
-    /**
-     * @var SessionHandler
-     */
-    private $sessionHandler = null;
 
     /**
      * Obtain the single allowed instance for Session through singleton pattern
@@ -234,22 +221,6 @@ class Session
     {
         $this->deniedChangesWhenSessionStarted();
         $this->encryptionEnabled = (bool)$encryptionEnabled;
-    }
-
-    /**
-     * @return string
-     */
-    public function getEncryptionAlgorithm() {
-        return $this->encryptionAlgorithm;
-    }
-
-    /**
-     * @param $encryptionAlgorithm
-     */
-    public function setEncryptionAlgorithm($encryptionAlgorithm)
-    {
-        $this->deniedChangesWhenSessionStarted();
-        $this->encryptionAlgorithm = $encryptionAlgorithm;
     }
 
     /**
@@ -724,8 +695,8 @@ class Session
         );
         session_name($this->name);
         if ($this->encryptionEnabled) {
-            $this->sessionHandler = new EncryptedSessionHandler();
-            session_set_save_handler($this->sessionHandler);
+            $sessionHandler = new EncryptedSessionHandler();
+            session_set_save_handler($sessionHandler);
         }
     }
 
