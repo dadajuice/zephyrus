@@ -1,9 +1,0 @@
-[01-Jan-2017 21:08:02 America/New_York] PHP Warning:  Uncaught TypeError: Return value of Zephyrus\Security\EncryptedSessionHandler::createEncryptionCookie() must be an instance of Zephyrus\Security\void, none returned in /media/sf_www/zephyrus/app/zephyrus/Security/EncryptedSessionHandler.php:98
-Stack trace:
-#0 /media/sf_www/zephyrus/app/zephyrus/Security/EncryptedSessionHandler.php(34): Zephyrus\Security\EncryptedSessionHandler->createEncryptionCookie()
-#1 [internal function]: Zephyrus\Security\EncryptedSessionHandler->open('/var/lib/php/se...', 'kViaaDAH3L3cDMA...')
-#2 /media/sf_www/zephyrus/app/zephyrus/Security/Session.php(100): session_start()
-#3 /media/sf_www/zephyrus/app/kernel.php(15): Zephyrus\Security\Session->start()
-#4 {main}
-  thrown in /media/sf_www/zephyrus/app/zephyrus/Security/EncryptedSessionHandler.php on line 98
-[01-Jan-2017 21:08:02 America/New_York] PHP Fatal error:  session_start() [<a href='0function.session-start0'>function.session-start0</a>]: Failed to initialize storage module: user (path: /var/lib/php/sessions) in /media/sf_www/zephyrus/app/zephyrus/Security/Session.php on line 100
