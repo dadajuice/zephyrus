@@ -3,6 +3,7 @@
 use Expose\FilterCollection;
 use Expose\Manager;
 use Expose\Report;
+use Zephyrus\Application\Configuration;
 
 class IntrusionDetection
 {
@@ -35,13 +36,12 @@ class IntrusionDetection
      * Obtain the single allowed instance for IntrusionDetection through
      * singleton pattern method.
      *
-     * @param mixed[] | null $config
      * @return IntrusionDetection
      */
-    public static function getInstance($config = null)
+    public static function getInstance()
     {
         if (is_null(self::$instance)) {
-            self::$instance = new self($config);
+            self::$instance = new self();
         }
         return self::$instance;
     }
@@ -137,9 +137,13 @@ class IntrusionDetection
      */
     private function __construct()
     {
+        $config = Configuration::getSecurityConfiguration();
         $filters = new FilterCollection();
         $filters->load();
         $this->manager = new Manager($filters, SystemLog::getSecurityLogger());
+        if (isset($config['ids_exceptions'])) {
+            $this->manager->setException($config['ids_exceptions']);
+        }
         $this->surveillance = self::GET | self::POST;
     }
 
