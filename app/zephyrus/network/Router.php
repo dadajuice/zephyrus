@@ -1,7 +1,8 @@
 <?php namespace Zephyrus\Network;
 
 use Zephyrus\Application\Configuration;
-use Zephyrus\Exceptions\InvalidCsrfException;
+use Zephyrus\Exceptions\UnauthorizedAccessException;
+use Zephyrus\Security\Authorization;
 use Zephyrus\Security\CsrfGuard;
 use Zephyrus\Security\IntrusionDetection;
 use Zephyrus\Security\SecureHeader;
@@ -82,10 +83,14 @@ class Router extends RouterEngine
      * in config).
      *
      * @param array $route
-     * @throws InvalidCsrfException
+     * @throws UnauthorizedAccessException
      */
     protected function beforeCallback($route)
     {
+        $failedRequirements = [];
+        if (!Authorization::getInstance()->isAuthorized($route, $failedRequirements)) {
+            throw new UnauthorizedAccessException($route['uri'], $failedRequirements);
+        }
         if (Configuration::getSecurityConfiguration('ids_enabled')) {
             IntrusionDetection::getInstance()->run();
         }
