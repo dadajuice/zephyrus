@@ -8,6 +8,7 @@ use Zephyrus\Application\Form;
 use Zephyrus\Application\Routable;
 use Zephyrus\Network\Router;
 use Zephyrus\Security\Uploaders\FileUpload;
+use Zephyrus\Security\Uploaders\Uploader;
 use Zephyrus\Utilities\Validator;
 
 class ExampleController extends Controller implements Routable
@@ -47,6 +48,22 @@ class ExampleController extends Controller implements Routable
         }, "Le prix doit être entre 0.01$ et 1000$", Form::TRIGGER_FIELD_NO_ERROR);
 
         if (!$form->verify()) {
+            $messages = $form->getErrorMessages();
+            Flash::error($messages);
+            redirect("/insert");
+        }
+
+        try {
+            $uploader = new Uploader('profile');
+            foreach ($uploader->getFiles() as $file) {
+                $file->setDestinationDirectory('public');
+                $file->upload();
+            }
+            //$upload = new FileUpload(Request::getFile('profile'));
+            //$upload->setDestinationDirectory('public');
+            //$upload->upload("bob.jpg");
+        } catch (\Exception $e) {
+            $form->addError("profile", $e->getMessage());
             $messages = $form->getErrorMessages();
             Flash::error($messages);
             redirect("/insert");
