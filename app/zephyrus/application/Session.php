@@ -79,13 +79,12 @@ class Session
      * Obtain the single allowed instance for Session through singleton pattern
      * method.
      *
-     * @param mixed[] $config
      * @return Session
      */
-    public static function getInstance($config = null): Session
+    public static function getInstance(): Session
     {
         if (is_null(self::$instance)) {
-            self::$instance = new self($config);
+            self::$instance = new self();
         }
         return self::$instance;
     }
@@ -447,11 +446,11 @@ class Session
      * exception. Also make sure the cookie is always accessible through HTTP
      * only and automatically make it secure when HTTPS connection is used.
      *
-     * @param mixed[] $config
      * @throws \Exception
      */
-    private function __construct($config = null)
+    private function __construct()
     {
+        $config = Configuration::getSessionConfiguration();
         $this->name = isset($config['name'])
             ? $config['name']
             : 'PHPSESSID';
@@ -479,9 +478,6 @@ class Session
             : null;
         $this->encryptionEnabled = isset($config['encryption_enabled'])
             ? $config['encryption_enabled']
-            : false;
-        $this->encryptionAlgorithm = isset($config['encryption_algorithm'])
-            ? $config['encryption_algorithm']
             : false;
         if (isset($config['decoys'])) {
             if (is_numeric($config['decoys'])) {
