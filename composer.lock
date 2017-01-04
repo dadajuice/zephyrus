@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "2705545f024a9f960996fe491a9af4b8",
-    "content-hash": "5d45a2fc941e0d0cb3303d09841e1068",
+    "hash": "d930cdb27503479d6f16b7e27c3c3867",
+    "content-hash": "5cfde3996785c51400b4325912e2272b",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -285,16 +285,16 @@
         },
         {
             "name": "php-http/curl-client",
-            "version": "v1.6.1",
+            "version": "v1.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-http/curl-client.git",
-                "reference": "38c5e38311839eef4e5f68cb2a0c9c6a49fc1dc8"
+                "reference": "3f9ff1ffbe2496ed793734a9ab92b784a05d277a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-http/curl-client/zipball/38c5e38311839eef4e5f68cb2a0c9c6a49fc1dc8",
-                "reference": "38c5e38311839eef4e5f68cb2a0c9c6a49fc1dc8",
+                "url": "https://api.github.com/repos/php-http/curl-client/zipball/3f9ff1ffbe2496ed793734a9ab92b784a05d277a",
+                "reference": "3f9ff1ffbe2496ed793734a9ab92b784a05d277a",
                 "shasum": ""
             },
             "require": {
@@ -337,7 +337,7 @@
                 "curl",
                 "http"
             ],
-            "time": "2016-11-11 12:44:28"
+            "time": "2017-01-02 15:39:30"
         },
         {
             "name": "php-http/discovery",
@@ -2436,6 +2436,8 @@
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=7.0"
+    },
     "platform-dev": []
 }
