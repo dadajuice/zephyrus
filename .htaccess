@@ -15,9 +15,19 @@ AddDefaultCharset UTF-8
 DefaultLanguage fr-CA
 
 # --------------------------- SECURITY SETTINGS ----------------------------- #
+# Maximum allowed upload size
+php_value post_max_size 20M
+php_value upload_max_filesize 20M
+
 # Limit HTTP request body according to the maximum allowed upload
 # size (20M in bytes).
 LimitRequestBody 20480000
+
+# Time limit (in seconds) for script execution
+php_value max_execution_time 15
+
+# Time limit (in seconds) to parse input data (GET, POST, ...)
+php_value max_input_time 180
 
 # Disable directory browsing and server exposition
 Options All -Indexes
@@ -41,9 +51,3 @@ php_flag allow_url_include Off
     deny from all
     satisfy all
 </Files>
-
-# Time limit (in seconds) to parse input data (GET, POST, ...)
-php_value max_input_time 180
-
-# Time limit (in seconds) for script execution
-php_value max_execution_time 15
