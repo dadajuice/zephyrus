@@ -1,4 +1,13 @@
 {
+  "name": "dadajuice/zephyrus",
+  "description": "My first Composer project",
+  "authors": [
+    {
+      "name": "David Tucker",
+      "email": "davidt2003@msn.com"
+    }
+  ],
+  "minimum-stability": "dev",
   "require": {
     "monolog/monolog": "^1.22",
     "pug-php/pug": "^2.5",
@@ -11,9 +20,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Zephyrus\\": "app/zephyrus",
-      "Models\\": "app/models",
-      "Controllers\\": "app/controllers"
+      "Zephyrus\\": "src/zephyrus"
     }
   }
 }
