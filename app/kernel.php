@@ -7,7 +7,7 @@ use Zephyrus\Application\Configuration;
 use Zephyrus\Application\Bootstrap;
 
 include(Bootstrap::getHelperFunctionsPath());
-include((Configuration::getApplicationConfiguration('env') == 'dev') ? 'handlers_dev.php' : 'handlers_prod.php');
+//include((Configuration::getApplicationConfiguration('env') == 'dev') ? 'handlers_dev.php' : 'handlers_prod.php');
 Bootstrap::start();
 
 include('security.php');
