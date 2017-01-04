@@ -1,8 +1,10 @@
 <?php
 
-$auth = \Zephyrus\Security\Authorization::getInstance();
-$auth->setMode(\Zephyrus\Security\Authorization::MODE_BLACKLIST);
+use Zephyrus\Security\Authorization;
+
+$auth = Authorization::getInstance();
+$auth->setMode(Authorization::MODE_BLACKLIST);
 $auth->addSessionRequirement('admin', 'AUTH_LEVEL', 'admin');
-$auth->protect('/insert', \Zephyrus\Security\Authorization::ALL, 'admin');
+$auth->protect('/insert', Authorization::ALL, 'admin');
 
 $_SESSION['AUTH_LEVEL'] = 'admin';
