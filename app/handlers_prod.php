@@ -9,6 +9,10 @@ use Zephyrus\Network\Response;
 
 $errorHandler = ErrorHandler::getInstance();
 
+$errorHandler->exception(function(Error $e) {
+    Response::abortInternalError();
+});
+
 $errorHandler->exception(function(Exception $e) {
     Response::abortInternalError();
 });

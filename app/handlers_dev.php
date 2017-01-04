@@ -8,6 +8,10 @@ use Zephyrus\Exceptions\DatabaseException;
 
 $errorHandler = ErrorHandler::getInstance();
 
+$errorHandler->exception(function(Error $e) {
+    die($e->getMessage() . ' : ' . $e->getTraceAsString());
+});
+
 $errorHandler->exception(function(Exception $e) {
     die($e->getMessage() . ' : ' . $e->getTraceAsString());
 });
