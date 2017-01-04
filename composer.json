@@ -8,6 +8,7 @@
       "role": "Developer"
     }
   ],
+  "license": "Apache-2.0",
   "minimum-stability": "dev",
   "require": {
     "php": ">=7.0",
