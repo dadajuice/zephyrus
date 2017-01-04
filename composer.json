@@ -1,6 +1,6 @@
 {
   "name": "dadajuice/zephyrus",
-  "description": "My first Composer project",
+  "description": "Simple PHP framework",
   "authors": [
     {
       "name": "David Tucker",

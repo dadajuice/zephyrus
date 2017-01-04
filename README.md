@@ -1,6 +1,6 @@
 ![Zephyrus](https://cloud.githubusercontent.com/assets/4491532/21475508/82430ca8-cafa-11e6-8310-0683459d5f21.png)
 
-Framework PHP léger orienté MVC avec mécanisme de routes REST destiné à être utilisé pour les projets de développement Web de Vovan Tucker.
+Framework PHP léger orienté MVC avec mécanisme de routes REST.
 
 # Prérequis
 Zephyrus fonctionne avec PHP 7 intégré avec le serveur web Apache2. Il nécessite uniquement le gestionnaire de dépendances [composer](https://getcomposer.org/). Pour procéder à son installation dans un environnement Debian, suivez les instructions ci-dessous. Pour tout autre environnement, référez-vous à la documentation officielle.   
