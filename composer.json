@@ -3,7 +3,6 @@
     "monolog/monolog": "^1.22",
     "pug-php/pug": "^2.5",
     "enygma/expose": "^2.4",
-    "mailgun/mailgun-php": "^2.1",
     "php-http/curl-client": "^1.6",
     "guzzlehttp/psr7": "^1.3"
   },
