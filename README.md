@@ -2,6 +2,10 @@
 
 > Framework PHP simple et léger.
 
+[![GitHub release](https://img.shields.io/github/release/dadajuice/zephyrus-framework.svg)]()
+[![GitHub issues](https://img.shields.io/github/issues/dadajuice/zephyrus-framework.svg)]()
+[![Packagist](https://img.shields.io/packagist/l/zephyrus/framework.svg)]()
+
 # Fonctionnalités
 * Structure de projet simpliste
 * Routes avec mécanisme MVC
