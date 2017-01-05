@@ -14,7 +14,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 [![GitHub release](https://img.shields.io/github/release/dadajuice/zephyrus.svg)]()
 [![GitHub issues](https://img.shields.io/github/issues/dadajuice/zephyrus.svg)]()
-[![Packagist](https://img.shields.io/packagist/l/zephyrus/zephyrus.svg)]()
+[![license](https://img.shields.io/github/license/dadajuice/zephyrus.svg)]()
 
 # Fonctionnalités
 * Structure de projet simpliste
