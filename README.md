@@ -3,7 +3,8 @@
 </p>
 
 ---
-                              Framework PHP simple et léger
+<p align="center">Framework PHP simple et léger</p>
+
 ---
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
