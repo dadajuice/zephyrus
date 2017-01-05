@@ -1,11 +1,11 @@
 <div style="text-align: center;">
-    <img align="center" src="https://cloud.githubusercontent.com/assets/4491532/21667795/e69dec6e-d2c9-11e6-8563-133291489ed3.png" width="60%">
-        
-    Framework PHP simple et léger   
+    <img align="center" src="https://cloud.githubusercontent.com/assets/4491532/21667795/e69dec6e-d2c9-11e6-8563-133291489ed3.png" width="60%">           
+</div>
+Framework PHP simple et léger
+
 [![GitHub release](https://img.shields.io/github/release/dadajuice/zephyrus-framework.svg)]()
 [![GitHub issues](https://img.shields.io/github/issues/dadajuice/zephyrus-framework.svg)]()
 [![Packagist](https://img.shields.io/packagist/l/zephyrus/framework.svg)]()
-</div>
 
 # Fonctionnalités
 * Structure de projet simpliste
