@@ -640,7 +640,7 @@ class Session
                 ? getenv('HTTP_X_FORWARDED_FOR')
                 : getenv('REMOTE_ADDR');
         }
-        if ($this->userAgentFingerprinted) {
+        if ($this->userAgentFingerprinted && isset($_SERVER['HTTP_USER_AGENT'])) {
             $fingerprint .= $_SERVER['HTTP_USER_AGENT'];
         }
         return hash('sha256', $fingerprint);
