@@ -55,14 +55,15 @@ class View
     private function buildPug()
     {
         $options = [
-            'cache' => Configuration::getConfiguration('pug', 'cache'),
             'basedir' => ROOT_DIR . '/public',
-            'expressionLanguage' => 'js',
-            $options['upToDateCheck'] = false
+            'expressionLanguage' => 'js'
         ];
         if (Configuration::getApplicationConfiguration('env') == "dev") {
             $options['upToDateCheck'] = true;
             $options['prettyprint'] = true;
+        } else {
+            $options['upToDateCheck'] = false;
+            $options['cache'] = Configuration::getConfiguration('pug', 'cache');
         }
         $this->pug = new Pug($options);
         $this->assignPugSharedArguments();
