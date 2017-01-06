@@ -70,14 +70,11 @@ class Formatter
         return $result;
     }
 
-    public static function formatMoney($amount, $minDecimals = 2, $maxDecimals = 2, $roundUp = false)
+    public static function formatMoney($amount, $minDecimals = 2, $maxDecimals = 2)
     {
         $formatter = new \NumberFormatter(Configuration::getApplicationConfiguration('locale'), \NumberFormatter::CURRENCY);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
-        if ($roundUp && $minDecimals == 0 && $maxDecimals == 0) {
-            $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_UP);
-        }
         $result = $formatter->formatCurrency($amount, Configuration::getApplicationConfiguration('currency'));
         if (intl_is_failure($formatter->getErrorCode())) {
             throw new \Exception("Formatter error : " . $formatter->getErrorMessage());
@@ -85,14 +82,11 @@ class Formatter
         return $result;
     }
 
-    public static function formatDecimal($number, $minDecimals = 2, $maxDecimals = 4, $roundUp = false)
+    public static function formatDecimal($number, $minDecimals = 2, $maxDecimals = 4)
     {
         $formatter = new \NumberFormatter(Configuration::getApplicationConfiguration('locale'), \NumberFormatter::DECIMAL);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
-        if ($roundUp && $minDecimals == 0 && $maxDecimals == 0) {
-            $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_UP);
-        }
         $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
         if (intl_is_failure($formatter->getErrorCode())) {
             throw new \Exception("Formatter error : " . $formatter->getErrorMessage());
