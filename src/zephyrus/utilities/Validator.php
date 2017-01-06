@@ -37,7 +37,7 @@ class Validator
 
     public static function isDecimal($data)
     {
-        return self::isRegexValid($data, "[0-9]+(\.[0-9]+)?");
+        return self::isRegexValid($data, "[0-9]+((\.|,)[0-9]+)?");
     }
 
     public static function isInteger($data)
@@ -47,7 +47,7 @@ class Validator
 
     public static function isSignedDecimal($data)
     {
-        return self::isRegexValid($data, "-?[0-9]+(\.[0-9]+)?");
+        return self::isRegexValid($data, "-?[0-9]+((\.|,)[0-9]+)?");
     }
 
     public static function isSignedInteger($data)
