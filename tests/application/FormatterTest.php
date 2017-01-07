@@ -1,7 +1,6 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Zephyrus\Application\Configuration;
 use Zephyrus\Application\Formatter;
 
 class FormatterTest extends TestCase
@@ -9,9 +8,10 @@ class FormatterTest extends TestCase
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
-        date_default_timezone_set(Configuration::getApplicationConfiguration('timezone'));
-        setlocale(LC_MESSAGES, Configuration::getApplicationConfiguration('locale') . '.' . Configuration::getApplicationConfiguration('charset'));
-        setlocale(LC_TIME, Configuration::getApplicationConfiguration('locale') . '.' . Configuration::getApplicationConfiguration('charset'));
+        date_default_timezone_set('America/New_York');
+        setlocale(LC_MESSAGES, 'fr_CA.utf8');
+        setlocale(LC_TIME, 'fr_CA.utf8');
+        setlocale(LC_CTYPE, 'fr_CA.utf8');
     }
 
     public function testFormatDecimal()

@@ -8,7 +8,9 @@ class Bootstrap
     {
         date_default_timezone_set(Configuration::getApplicationConfiguration('timezone'));
         self::initializeErrorReporting();
-        setlocale(LC_ALL, Configuration::getApplicationConfiguration('locale') . '.' . Configuration::getApplicationConfiguration('charset'));
+        setlocale(LC_MESSAGES, Configuration::getApplicationConfiguration('locale') . '.' . Configuration::getApplicationConfiguration('charset'));
+        setlocale(LC_TIME, Configuration::getApplicationConfiguration('locale') . '.' . Configuration::getApplicationConfiguration('charset'));
+        setlocale(LC_CTYPE, Configuration::getApplicationConfiguration('locale') . '.' . Configuration::getApplicationConfiguration('charset'));
         Session::getInstance()->start();
     }
 
