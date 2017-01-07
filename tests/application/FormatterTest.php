@@ -1,10 +1,18 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Application\Configuration;
 use Zephyrus\Application\Formatter;
 
 class FormatterTest extends TestCase
 {
+    public function __construct($name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        date_default_timezone_set(Configuration::getApplicationConfiguration('timezone'));
+        setlocale(LC_ALL, Configuration::getApplicationConfiguration('locale') . '.' . Configuration::getApplicationConfiguration('charset'));
+    }
+
     public function testFormatDecimal()
     {
         $result = Formatter::formatDecimal(12.342743);
@@ -53,5 +61,29 @@ class FormatterTest extends TestCase
         self::assertEquals('15 %', $result);
         $result = Formatter::formatPercent(0.875, 1);
         self::assertEquals('87,5 %', $result);
+    }
+
+    public function testFormatTime()
+    {
+        $result = Formatter::formatTime('2016-01-01 23:15:00');
+        self::assertEquals('23:15', $result);
+    }
+
+    public function testFormatDate()
+    {
+        $result = Formatter::formatDate('2016-01-01 23:15:00');
+        self::assertEquals(' 1 janvier 2016', $result);
+    }
+
+    public function testFormatDateTime()
+    {
+        $result = Formatter::formatDateTime('2016-01-01 23:15:00');
+        self::assertEquals(' 1 janvier 2016, 23:15', $result);
+    }
+
+    public function testFormatElapsed()
+    {
+        $result = Formatter::formatElapsedDateTime('2016-01-01 23:15:00');
+        self::assertEquals(' 1 janvier 2016, 23:15', $result);
     }
 }
