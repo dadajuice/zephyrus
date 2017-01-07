@@ -23,9 +23,9 @@
                 <file>./src/Zephyrus/Application/Bootstrap.php</file>
                 <file>./src/Zephyrus/Application/Configuration.php</file>
                 <file>./src/Zephyrus/Application/Session.php</file>
-                <file>./src/Zephyrus/network/RouterEngine.php</file>
-                <file>./src/Zephyrus/security/Cryptography.php</file>
-                <file>./src/Zephyrus/security/EncryptedSessionHandler.php</file>
+                <file>./src/Zephyrus/Network/RouterEngine.php</file>
+                <file>./src/Zephyrus/Security/Cryptography.php</file>
+                <file>./src/Zephyrus/Security/EncryptedSessionHandler.php</file>
             </exclude>
         </whitelist>
     </filter>
