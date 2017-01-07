@@ -2,8 +2,13 @@ language: php
 
 php:
   - 7.0
+env:
+    global:
+        - LANG=fr_CA.utf8
+        - LC_ALL=fr_CA.utf8
 
 before_script:
+  - locale -a
   - travis_retry composer self-update
   - travis_retry composer install --no-interaction
 
