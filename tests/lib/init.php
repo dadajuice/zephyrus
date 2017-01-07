@@ -6,7 +6,7 @@ if (!@require __DIR__ . '/../../vendor/autoload.php') {
 
 define('ROOT_DIR', __DIR__ . '/..');
 
-use Zephyrus\Application\Bootstrap;
+//use Zephyrus\Application\Bootstrap;
 
-include(Bootstrap::getHelperFunctionsPath());
-Bootstrap::start();
+//include(Bootstrap::getHelperFunctionsPath());
+//Bootstrap::start();
