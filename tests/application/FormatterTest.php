@@ -23,8 +23,6 @@ class FormatterTest extends TestCase
         self::assertEquals("12,10", $result);
         $result = Formatter::formatDecimal(12);
         self::assertEquals("12,00", $result);
-        $result = Formatter::formatDecimal("er");
-        self::assertEquals("0,00", $result);
         $result = Formatter::formatDecimal(12.342743, 2, 2);
         self::assertEquals("12,34", $result);
         $result = Formatter::formatDecimal(12.346, 2, 2);
