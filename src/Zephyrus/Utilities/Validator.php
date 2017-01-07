@@ -15,52 +15,38 @@ class Validator
     const URL_STRICT = ['Zephyrus\Utilities\Validator', 'isStrictUrl'];
     const URL_YOUTUBE = ['Zephyrus\Utilities\Validator', 'isYoutubeUrl'];
     const PHONE = ['Zephyrus\Utilities\Validator', 'isPhone'];
-    const UPLOAD = ['Zephyrus\Utilities\Validator', 'isValidUpload'];
 
-    /**
-     * @param array $data
-     * @return bool
-     */
-    public static function isValidUpload($data)
-    {
-        return (is_array($data) && $data['error'] > UPLOAD_ERR_OK);
-    }
-
-    /**
-     * @param string $data
-     * @return boolean
-     */
-    public static function isNotEmpty($data)
+    public static function isNotEmpty($data): bool
     {
         return !empty(trim($data));
     }
 
-    public static function isDecimal($data)
+    public static function isDecimal($data): bool
     {
         return self::isRegexValid($data, "[0-9]+((\.|,)[0-9]+)?");
     }
 
-    public static function isInteger($data)
+    public static function isInteger($data): bool
     {
         return self::isRegexValid($data, "[0-9]+");
     }
 
-    public static function isSignedDecimal($data)
+    public static function isSignedDecimal($data): bool
     {
         return self::isRegexValid($data, "-?[0-9]+((\.|,)[0-9]+)?");
     }
 
-    public static function isSignedInteger($data)
+    public static function isSignedInteger($data): bool
     {
         return self::isRegexValid($data, "-?[0-9]+");
     }
 
-    public static function isAlphanumeric($data)
+    public static function isAlphanumeric($data): bool
     {
         return preg_match('/^[a-zA-Z0-9]+$/', $data);
     }
 
-    public static function isPasswordCompliant($data)
+    public static function isPasswordCompliant($data): bool
     {
         $uppercase = preg_match('@[A-Z]@', $data);
         $lowercase = preg_match('@[a-z]@', $data);
@@ -68,18 +54,18 @@ class Validator
         return strlen($data) >= 8 && $uppercase && $lowercase && $number;
     }
 
-    public static function isDate($data)
+    public static function isDate($data): bool
     {
         $d = \DateTime::createFromFormat('Y-m-d', $data);
         return $d && $d->format('Y-m-d') == $data;
     }
 
-    public static function isEmail($data)
+    public static function isEmail($data): bool
     {
         return filter_var($data, FILTER_VALIDATE_EMAIL);
     }
 
-    public static function isRegexValid($data, $regex)
+    public static function isRegexValid($data, $regex): bool
     {
         return preg_match('/^' . $regex . '$/', $data);
     }
@@ -89,12 +75,12 @@ class Validator
      *
      * @see https://en.wikipedia.org/wiki/North_American_Numbering_Plan#Numbering_system
      */
-    public static function isPhone($data)
+    public static function isPhone($data): bool
     {
         return self::isRegexValid($data, "([\(\+])?([0-9]{1,3}([\s])?)?([\+|\(|\-|\)|\s])?([0-9]{2,4})([\-|\)|\.|\s]([\s])?)?([0-9]{2,4})?([\.|\-|\s])?([0-9]{4,8})");
     }
 
-    public static function isUrl($data)
+    public static function isUrl($data): bool
     {
         return self::isRegexValid($data, "(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\\\".,<>?«»“”‘’]))");
     }
@@ -103,9 +89,9 @@ class Validator
      * Force protocol.
      *
      * @param string $data
-     * @return int
+     * @return bool
      */
-    public static function isStrictUrl($data)
+    public static function isStrictUrl($data): bool
     {
         return self::isRegexValid($data, "(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\\\".,<>?«»“”‘’]))");
     }
@@ -114,7 +100,7 @@ class Validator
      * @param string $data
      * @return bool
      */
-    public static function isYoutubeUrl($data)
+    public static function isYoutubeUrl($data): bool
     {
         $parts = parse_url($data);
         if ($parts['scheme'] != 'http' && $parts['scheme'] != 'https') {
