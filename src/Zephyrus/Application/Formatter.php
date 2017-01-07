@@ -78,7 +78,8 @@ class Formatter
 
     public static function formatDecimal($number, $minDecimals = 2, $maxDecimals = 4)
     {
-        $formatter = new \NumberFormatter(Configuration::getApplicationConfiguration('locale'), \NumberFormatter::DECIMAL);
+        $formatter = \NumberFormatter::create(Configuration::getApplicationConfiguration('locale'), \NumberFormatter::DECIMAL);
+        //$formatter = new \NumberFormatter(Configuration::getApplicationConfiguration('locale'), \NumberFormatter::DECIMAL);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
