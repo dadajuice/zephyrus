@@ -4,7 +4,7 @@
         backupGlobals="false"
         backupStaticAttributes="false"
         processIsolation="false"
-        stopOnFailure="true"
+        stopOnFailure="false"
         syntaxCheck="false"
         convertErrorsToExceptions="true"
         convertNoticesToExceptions="true"
@@ -12,13 +12,13 @@
     <testsuites>
         <testsuite name="application">
             <directory>tests/application</directory>
+            <directory>tests/utilities</directory>
         </testsuite>
     </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">src</directory>
             <exclude>
-                <file>./src/Zephyrus/Application/Configuration.php</file>
                 <file>./src/Zephyrus/Network/RouterEngine.php</file>
             </exclude>
         </whitelist>
