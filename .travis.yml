@@ -8,10 +8,10 @@ before_script:
   - travis_retry composer install --no-interaction
 
 script:
-  - vendor/bin/phpunit --verbose --coverage-text --coverage-clover=coverage.xml
+  - vendor/bin/phpunit --verbose --coverage-clover=tests/coverage/results.xml
 
 after_script:
-  - vendor/bin/test-reporter --coverage-report coverage.xml
+  - vendor/bin/test-reporter --coverage-report tests/coverage/results.xml
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
