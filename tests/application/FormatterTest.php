@@ -34,4 +34,14 @@ class FormatterTest extends TestCase
         $result = Formatter::formatSeoUrl("École en frAnçais");
         self::assertEquals("ecole-en-francais", $result);
     }
+
+    public function testFormatMoney()
+    {
+        $result = Formatter::formatMoney(500.45);
+        self::assertEquals('500,45 $', $result);
+        $result = Formatter::formatMoney(500.459);
+        self::assertEquals('500,46 $', $result);
+        $result = Formatter::formatMoney(500.75657645345, 0, 0);
+        self::assertEquals('501 $', $result);
+    }
 }
