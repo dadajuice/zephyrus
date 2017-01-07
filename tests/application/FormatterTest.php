@@ -10,7 +10,8 @@ class FormatterTest extends TestCase
     {
         parent::__construct($name, $data, $dataName);
         date_default_timezone_set(Configuration::getApplicationConfiguration('timezone'));
-        setlocale(LC_ALL, Configuration::getApplicationConfiguration('locale') . '.' . Configuration::getApplicationConfiguration('charset'));
+        setlocale(LC_MESSAGES, Configuration::getApplicationConfiguration('locale') . '.' . Configuration::getApplicationConfiguration('charset'));
+        setlocale(LC_TIME, Configuration::getApplicationConfiguration('locale') . '.' . Configuration::getApplicationConfiguration('charset'));
     }
 
     public function testFormatDecimal()
