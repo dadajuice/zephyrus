@@ -1,13 +1,10 @@
 language: php
-
+sudo: required
 php:
   - 7.0
-env:
-    global:
-        - LANG=fr_CA.utf8
-        - LC_ALL=fr_CA.utf8
 
 before_script:
+  - sudo locale-gen --no-archive fr_CA.UTF-8
   - locale -a
   - travis_retry composer self-update
   - travis_retry composer install --no-interaction
