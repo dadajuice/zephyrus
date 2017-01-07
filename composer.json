@@ -22,8 +22,13 @@
     "codeclimate/php-test-reporter": "dev-master"
   },
   "autoload": {
-    "psr-0": {
-      "Zephyrus": "src"
+    "psr-4": {
+      "Zephyrus\\": "src/zephyrus"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Zephyrus\\Tests\\": "tests"
     }
   }
 }
