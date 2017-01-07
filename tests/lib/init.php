@@ -1,7 +1,10 @@
 <?php namespace Zephyrus\Tests;
 
+if (!@require __DIR__ . '/../../vendor/autoload.php') {
+    die('You must set up the project dependencies, run composer install');
+}
+
 define('ROOT_DIR', __DIR__ . '/..');
-require ROOT_DIR . '/../vendor/autoload.php';
 
 use Zephyrus\Application\Bootstrap;
 
