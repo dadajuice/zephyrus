@@ -64,9 +64,6 @@ class Formatter
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
-        if (intl_is_failure($formatter->getErrorCode())) {
-            throw new \Exception("Formatter error : " . $formatter->getErrorMessage());
-        }
         return $result;
     }
 
@@ -76,9 +73,6 @@ class Formatter
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $result = $formatter->formatCurrency($amount, Configuration::getApplicationConfiguration('currency'));
-        if (intl_is_failure($formatter->getErrorCode())) {
-            throw new \Exception("Formatter error : " . $formatter->getErrorMessage());
-        }
         return $result;
     }
 
@@ -88,9 +82,6 @@ class Formatter
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
-        if (intl_is_failure($formatter->getErrorCode())) {
-            throw new \Exception("Formatter error : " . $formatter->getErrorMessage());
-        }
         return $result;
     }
 
