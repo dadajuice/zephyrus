@@ -5,7 +5,7 @@ use Zephyrus\Application\Formatter;
 
 class FormatterTest extends TestCase
 {
-    public function testDefaultFormatDecimal()
+    public function testFormatDecimal()
     {
         $result = Formatter::formatDecimal(12.342743);
         self::assertEquals("12,3427", $result);
@@ -27,5 +27,11 @@ class FormatterTest extends TestCase
         self::assertEquals("12,2", $result);
         $result = Formatter::formatDecimal(12, 0, 0);
         self::assertEquals("12", $result);
+    }
+
+    public function testFormatSeoUrl()
+    {
+        $result = Formatter::formatSeoUrl("École en frAnçais");
+        self::assertEquals("ecole-en-francais", $result);
     }
 }
