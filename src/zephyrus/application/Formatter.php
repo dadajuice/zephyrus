@@ -92,9 +92,9 @@ class Formatter
      * @param string $name
      * @return string
      */
-    function formatSeoUrl($name)
+    public static function formatSeoUrl($name)
     {
-        $url = strtolower($name);
+        $url = mb_strtolower($name);
         $url = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $url);
         $url = preg_replace("/[^a-z0-9_\s-]/", "", $url);
         $url = preg_replace("/[\s-]+/", " ", $url);
