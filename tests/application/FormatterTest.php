@@ -44,4 +44,14 @@ class FormatterTest extends TestCase
         $result = Formatter::formatMoney(500.75657645345, 0, 0);
         self::assertEquals('501 $', $result);
     }
+
+    public function testFormatPercent()
+    {
+        $result = Formatter::formatPercent(0.15);
+        self::assertEquals('15,00 %', $result);
+        $result = Formatter::formatPercent(0.15, 0, 0);
+        self::assertEquals('15 %', $result);
+        $result = Formatter::formatPercent(0.875, 1);
+        self::assertEquals('87,5 %', $result);
+    }
 }
