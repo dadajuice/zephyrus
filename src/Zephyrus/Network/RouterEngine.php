@@ -54,6 +54,14 @@ abstract class RouterEngine
     }
 
     /**
+     * @return Request
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    /**
      * Launch the routing process to determine, according to the
      * initiated request, the best route to execute. Cannot be overridden.
      */
