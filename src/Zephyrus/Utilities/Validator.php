@@ -56,8 +56,8 @@ class Validator
 
     public static function isDate($data): bool
     {
-        $d = \DateTime::createFromFormat('Y-m-d', $data);
-        return $d && $d->format('Y-m-d') == $data;
+        $date = \DateTime::createFromFormat('Y-m-d', $data);
+        return $date && $date->format('Y-m-d') == $data;
     }
 
     public static function isEmail($data): bool
@@ -82,46 +82,11 @@ class Validator
 
     public static function isUrl($data): bool
     {
-        return self::isRegexValid($data, "(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\\\".,<>?«»“”‘’]))");
+        return self::isRegexValid($data, "(?i)\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\\\".,<>?«»“”‘’]))");
     }
-
-    /**
-     * Force protocol.
-     *
-     * @param string $data
-     * @return bool
-     */
-    public static function isStrictUrl($data): bool
-    {
-        return self::isRegexValid($data, "(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\\\".,<>?«»“”‘’]))");
-    }
-
-    /**
-     * @param string $data
-     * @return bool
-     */
+    
     public static function isYoutubeUrl($data): bool
     {
-        $parts = parse_url($data);
-        if ($parts['scheme'] != 'http' && $parts['scheme'] != 'https') {
-            return false;
-        }
-
-        if (strpos($parts['host'], 'youtu.be') !== false) {
-            if (!empty($parts['path'])) {
-                return true;
-            }
-        } elseif (strpos($parts['host'], 'youtube.com') !== false) {
-            if (strpos($parts['path'], '/v/') !== false) {
-                return true;
-            } elseif (strpos($parts['path'], '/embed/') !== false) {
-                return true;
-            } elseif ($parts['path'] == "/watch" && strpos($parts['query'], 'v=') !== false) {
-                return true;
-            }
-            return false;
-        }
-
-        return false;
+        return self::isRegexValid($data, "((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?");
     }
 }
