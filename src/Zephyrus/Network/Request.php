@@ -92,8 +92,6 @@ class Request
      */
     private $files;
 
-    //TODO: method pour call
-
     public function __construct($uri = '', $method = '', $parameters = [], $cookies = [], $files = [], $server = [])
     {
         $this->uri = $uri;
