@@ -1,6 +1,6 @@
 <?php namespace Zephyrus\Utilities;
 
-use Zephyrus\Network\Request;
+use Zephyrus\Network\RequestFactory;
 
 class Pager
 {
@@ -39,13 +39,14 @@ class Pager
 
     public function __construct($recordCount, $maxEntities = self::PAGE_MAX_ENTITIES, $urlParameter = self::URL_PARAMETER)
     {
+        $request = RequestFactory::create();
         $this->urlParameter = $urlParameter;
-        $page = Request::getParameter($urlParameter);
+        $page = $request->getParameter($urlParameter);
         $this->maxEntities = $maxEntities;
         $this->currentPage = (is_null($page)) ? 1 : $page;
         $this->maxPage = ceil($recordCount / $maxEntities);
-        $this->pageUrl = Request::getPath();
-        $this->pageQuery = $this->getQueryString();
+        $this->pageUrl = $request->getPath();
+        $this->pageQuery = $this->getQueryString($request->getQuery());
         $this->validate();
     }
 
@@ -183,9 +184,8 @@ class Pager
         }
     }
 
-    private function getQueryString()
+    private function getQueryString(string $query)
     {
-        $query = Request::getQuery();
         return preg_replace("/(&?" . $this->urlParameter . "=[0-9]*&?)/", "", $query);
     }
 }
