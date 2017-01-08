@@ -5,167 +5,149 @@ class Request
     /**
      * @var mixed[] every parameters included in the request
      */
-    private static $parameters = [];
+    private $parameters = [];
 
     /**
      * @var string HTTP method used by client
      */
-    private static $method;
+    private $method;
 
     /**
      * @var string ip address of originated request
      */
-    private static $clientIp;
+    private $clientIp;
 
     /**
      * @var string accepted representation from the client
      */
-    private static $accept;
+    private $accept;
 
     /**
      * @var string destined uri of the request
      */
-    private static $uri;
+    private $uri;
 
     /**
      * @var string destined full url of request
      */
-    private static $baseUrl;
+    private $baseUrl;
 
     /**
      * @var boolean determines if request is under HTTPS
      */
-    private static $isSecure;
+    private $isSecure;
 
     /**
      * @var string scheme (protocol) of requested uri (e.g http)
      */
-    private static $scheme;
+    private $scheme;
 
     /**
      * @var string hostname (domain or ip address) of requested uri (e.g example.com)
      */
-    private static $host;
+    private $host;
 
     /**
      * @var string specified username of requested uri
      */
-    private static $username;
+    private $username;
 
     /**
      * @var string specified password of requested uri
      */
-    private static $password;
+    private $password;
 
     /**
      * @var string complete resource path of requested uri (e.g /example/foo)
      */
-    private static $path;
+    private $path;
 
     /**
      * @var string query string of requested uri (e.g ?id=34&foo=1)
      */
-    private static $query;
+    private $query;
 
     /**
      * @var string specified anchor of requested uri (e.g #example)
      */
-    private static $fragment;
+    private $fragment;
+
+    /**
+     * @var string specified user agent (e.g Chrome)
+     */
+    private $userAgent;
+
+    /**
+     * @var mixed[] list of all server variables ($_SERVER)
+     */
+    private $serverVariables;
 
     /**
      * @var mixed[] list of all specified cookies
      */
-    private static $cookies;
+    private $cookies;
 
     /**
      * @var mixed[] list of all uploaded files
      */
-    private static $files;
+    private $files;
 
-    /**
-     * Automatically load every data of the current HTTP request.
-     */
-    private static function initialize()
+    //TODO: method pour call
+
+    public function __construct($uri = '', $method = '', $parameters = [], $cookies = [], $files = [], $server = [])
     {
-        if (empty(self::$uri)) {
-            self::$uri = $_SERVER['REQUEST_URI'];
-            if (self::$uri != '/') {
-                self::$uri = rtrim(self::$uri, '/');
-            }
-            $urlParts = parse_url(self::$uri);
-            self::$scheme = (isset($urlParts['scheme']))
-                ? $urlParts['scheme']
-                : null;
-            self::$host = $_SERVER['HTTP_HOST'];
-            self::$username = (isset($urlParts['username']))
-                ? $urlParts['username']
-                : null;
-            self::$password = (isset($urlParts['password']))
-                ? $urlParts['password']
-                : null;
-            self::$path = (isset($urlParts['path']))
-                ? $urlParts['path']
-                : null;
-            self::$query = $_SERVER["QUERY_STRING"];
-            self::$fragment = (isset($urlParts['fragment']))
-                ? $urlParts['fragment']
-                : null;
-            self::$method = strtoupper($_SERVER['REQUEST_METHOD']);
-            self::$accept = (isset($_SERVER['HTTP_ACCEPT'])) ? $_SERVER['HTTP_ACCEPT'] : '';
-            self::$isSecure = isset($_SERVER['HTTPS']);
-            self::$clientIp = (getenv('HTTP_X_FORWARDED_FOR'))
-                ? getenv('HTTP_X_FORWARDED_FOR')
-                : getenv('REMOTE_ADDR');
-            self::addParametersFromRequestMethod();
-            self::$cookies = $_COOKIE;
-            self::$files = $_FILES;
-
-            self::$baseUrl = (self::$isSecure) ? 'https://' : 'http://';
-            self::$baseUrl .= self::$host;
+        $this->uri = $uri;
+        if ($this->uri != '/') {
+            $this->uri = rtrim($this->uri, '/');
         }
+        $this->method = $method;
+        $this->parameters = $parameters;
+        $this->serverVariables = $server;
+        $this->cookies = $cookies;
+        $this->files = $files;
+        $this->initializeServer();
+        $this->initializeUriParts();
+        $this->initializeBaseUrl();
     }
 
     /**
      * @param string $name
+     * @param string $default
      * @return string
      */
-    public static function getCookieValue($name)
+    public function getCookieValue($name, $default = null)
     {
-        self::initialize();
-        if (isset(self::$cookies[$name])) {
-            return self::$cookies[$name];
+        if (isset($this->cookies[$name])) {
+            return $this->cookies[$name];
         }
-        return null;
+        return $default;
     }
 
     /**
      * @param string $name
      * @return bool
      */
-    public static function hasCookie($name)
+    public function hasCookie($name)
     {
-        self::initialize();
-        return isset(self::$cookies[$name]);
+        return isset($this->cookies[$name]);
     }
 
     /**
      * @return mixed[]
      */
-    public static function getCookies()
+    public function getCookies()
     {
-        self::initialize();
-        return self::$cookies;
+        return $this->cookies;
     }
 
     /**
      * @param $name
      * @return mixed[]
      */
-    public static function getFile($name)
+    public function getFile($name)
     {
-        self::initialize();
-        if (isset(self::$files[$name])) {
-            return self::$files[$name];
+        if (isset($this->files[$name])) {
+            return $this->files[$name];
         }
         return null;
     }
@@ -173,210 +155,180 @@ class Request
     /**
      * @return mixed[]
      */
-    public static function getFiles()
+    public function getFiles()
     {
-        self::initialize();
-        return self::$files;
+        return $this->files;
     }
 
     /**
      * @return string
      */
-    public static function getClientIp()
+    public function getClientIp()
     {
-        self::initialize();
-        return self::$clientIp;
+        return $this->clientIp;
     }
 
     /**
      * @return string
      */
-    public static function getQuery()
+    public function getQuery()
     {
-        self::initialize();
-        return self::$query;
+        return $this->query;
     }
 
     /**
      * @return string
      */
-    public static function getPath()
+    public function getPath()
     {
-        self::initialize();
-        return self::$path;
+        return $this->path;
     }
 
     /**
      * @return bool
      */
-    public static function isSecure()
+    public function isSecure()
     {
-        self::initialize();
-        return self::$isSecure;
+        return $this->isSecure;
+    }
+
+    /**
+     * @return string
+     */
+    public function getScheme()
+    {
+        return $this->scheme;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFragment()
+    {
+        return $this->fragment;
     }
 
     /**
      * @param string $name
      * @param string $value
      */
-    public static function addParameter($name, $value)
+    public function addParameter($name, $value)
     {
-        self::initialize();
-        self::$parameters[$name] = $value;
+        $this->parameters[$name] = $value;
     }
 
     /**
      * @param string $name
      * @param string $value
      */
-    public static function prependParameter($name, $value)
+    public function prependParameter($name, $value)
     {
-        self::initialize();
-        self::$parameters = array_merge([$name => $value], self::$parameters);
+        $this->parameters = array_merge([$name => $value], $this->parameters);
     }
 
     /**
      * @return mixed[]
      */
-    public static function getParameters()
+    public function getParameters()
     {
-        self::initialize();
-        return self::$parameters;
+        return $this->parameters;
     }
 
-    /**
-     * @param string $name
-     * @return string | null
-     */
-    public static function getParameter($name)
+    public function getParameter(string $name, $default = null)
     {
-        self::initialize();
-        if (isset(self::$parameters[$name])) {
-            return self::$parameters[$name];
+        if (isset($this->parameters[$name])) {
+            return $this->parameters[$name];
         }
-        return null;
+        return $default;
     }
 
     /**
      * @return string
      */
-    public static function getMethod()
+    public function getMethod()
     {
-        self::initialize();
-        return self::$method;
+        return $this->method;
     }
 
     /**
      * @return string
      */
-    public static function getAccept()
+    public function getAccept()
     {
-        self::initialize();
-        return self::$accept;
+        return $this->accept;
     }
 
     /**
      * @return string
      */
-    public static function getUri()
+    public function getUri()
     {
-        self::initialize();
-        return self::$uri;
+        return $this->uri;
     }
 
     /**
      * @return string
      */
-    public static function getUserAgent()
+    public function getUserAgent()
     {
-        return $_SERVER['HTTP_USER_AGENT'];
+        return $this->userAgent;
     }
-
-    /**
-     * @return string[]
-     */
-    public static function getUriSegments()
-    {
-        self::initialize();
-        $uri = self::$uri;
-        $results = ['index'];
-        if ($uri != '/') {
-            $uri = trim($uri, '/');
-            $results = explode('/', $uri);
-        }
-        return $results;
-    }
-
 
     /**
      * @return string
      */
-    public static function getHost()
+    public function getHost()
     {
-        self::initialize();
-        return self::$host;
-    }
-
-    public static function getBaseUrl()
-    {
-        self::initialize();
-        return self::$baseUrl;
+        return $this->host;
     }
 
     /**
-     * Load every request parameters depending on the request method
-     * used (currently supported : GET, POST, PUT and DELETE). Other method
-     * parameters are ignored.
+     * @return string
      */
-    private static function addParametersFromRequestMethod()
+    public function getBaseUrl()
     {
-        switch (self::$method) {
-            case 'GET':
-                self::addParametersFromGlobal($_GET);
-                self::addParametersFromGlobal($_FILES);
-                break;
-
-            case 'POST':
-                self::addParametersFromGlobal($_GET);
-                self::addParametersFromGlobal($_POST);
-                self::addParametersFromGlobal($_FILES);
-                break;
-
-            case 'PUT':
-            case 'DELETE':
-                self::addParametersFromGlobal($_GET);
-                self::addParametersFromGlobal($_FILES);
-                parse_str(file_get_contents('php://input'), $paramsSource);
-                self::addParametersFromGlobal($paramsSource);
-                break;
-        }
+        return $this->baseUrl;
     }
 
-    /**
-     * Add request parameters from a specified associative array (normally a
-     * super global such as $_GET and $_POST).
-     *
-     * @param mixed[] $global
-     * @throws \InvalidArgumentException
-     */
-    private static function addParametersFromGlobal($global)
+    private function initializeServer()
     {
-        if (!is_array($global)) {
-            throw new \InvalidArgumentException("Argument must be an array");
-        }
-        foreach ($global as $name => $value) {
-            if (is_string($value)) {
-                self::$parameters[$name] = trim($value);
-            } elseif (is_array($value)) {
-                if (!isset(self::$parameters[$name])) {
-                    self::$parameters[$name] = [];
-                }
-                foreach ($value as $index => $item) {
-                    self::$parameters[$name][$index] = $item;
-                }
-            } else {
-                self::$parameters[$name] = $value;
-            }
-        }
+        $this->accept = $this->serverVariables['HTTP_ACCEPT'] ?? '';
+        $this->userAgent = $this->serverVariables['HTTP_USER_AGENT'] ?? '';
+        $this->clientIp = $this->serverVariables['REMOTE_ADDR'] ?? '';
+    }
+
+    private function initializeUriParts()
+    {
+        $urlParts = parse_url($this->uri);
+        $this->host = $urlParts['host'] ?? null;
+        $this->scheme = $urlParts['scheme'] ?? null;
+        $this->isSecure = $this->scheme == 'https';
+        $this->username = $urlParts['user'] ?? null;
+        $this->password = $urlParts['pass'] ?? null;
+        $this->path = $urlParts['path'] ?? null;
+        $this->query = $urlParts['query'] ?? null;
+        $this->fragment = $urlParts['fragment']?? null;
+    }
+
+    private function initializeBaseUrl()
+    {
+        $this->baseUrl = ($this->isSecure) ? 'https://' : 'http://';
+        $this->baseUrl .= $this->host;
     }
 }
