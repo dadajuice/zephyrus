@@ -13,6 +13,7 @@
         <testsuite name="application">
             <directory>tests/application</directory>
             <directory>tests/utilities</directory>
+            <directory>tests/network</directory>
         </testsuite>
     </testsuites>
     <filter>
