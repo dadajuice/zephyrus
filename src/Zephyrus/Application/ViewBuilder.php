@@ -46,12 +46,10 @@ class ViewBuilder
     {
         $options = [
             'basedir' => ROOT_DIR . '/public',
-            'expressionLanguage' => 'js'
+            'expressionLanguage' => 'js',
+            'upToDateCheck' => true
         ];
-        if (Configuration::getApplicationConfiguration('env') == "dev") {
-            $options['upToDateCheck'] = true;
-            $options['prettyprint'] = true;
-        } else {
+        if (Configuration::getApplicationConfiguration('env') == "prod") {
             $options['upToDateCheck'] = false;
             $options['cache'] = Configuration::getConfiguration('pug', 'cache');
         }
