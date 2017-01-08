@@ -65,9 +65,8 @@ class Configuration
     {
         if (is_readable(ROOT_DIR . '/config.ini')) {
             self::$config = parse_ini_file(ROOT_DIR . '/config.ini', true);
-        } else {
-            throw new \Exception("Cannot parse configurations file (config.ini)");
         }
+        throw new \Exception("Cannot parse configurations file (config.ini)");
     }
 
     /**
