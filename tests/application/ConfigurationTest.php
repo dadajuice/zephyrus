@@ -5,6 +5,7 @@ use Zephyrus\Application\Configuration;
 
 class ConfigurationTest extends TestCase
 {
+    /*
     public function testReadAllConfigurations()
     {
         $config = Configuration::getConfigurations();
@@ -40,7 +41,7 @@ class ConfigurationTest extends TestCase
         $precise = (bool)Configuration::getSessionConfiguration('encryption_enabled');
         self::assertTrue($precise);
         self::assertEquals('60', $config['refresh_after_interval']);
-    }
+    }*/
 
     /**
      * @expectedException \Exception
