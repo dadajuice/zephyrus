@@ -33,6 +33,11 @@ abstract class RouterEngine
     private $requestedRepresentation;
 
     /**
+     * @var Request
+     */
+    private $request;
+
+    /**
      * @var int Route processing start time to get total execution time
      */
     private $startTime = -1;
@@ -42,9 +47,10 @@ abstract class RouterEngine
      */
     public function __construct()
     {
-        $this->requestedUri = Request::getPath();
-        $this->requestedMethod = Request::getMethod();
-        $this->requestedRepresentation = Request::getAccept();
+        $this->request = RequestFactory::create();
+        $this->requestedUri = $this->request->getPath();
+        $this->requestedMethod = $this->request->getMethod();
+        $this->requestedRepresentation = $this->request->getAccept();
     }
 
     /**
@@ -303,7 +309,7 @@ abstract class RouterEngine
     {
         $arguments = [];
         if (!empty($reflection->getParameters())) {
-            $requestedParameters = Request::getParameters();
+            $requestedParameters = $this->request->getParameters();
             foreach ($requestedParameters as $name => $value) {
                 $arguments[] = $value;
             }
@@ -336,7 +342,7 @@ abstract class RouterEngine
             $i = 0;
             foreach ($route['params'] as $param) {
                 $_GET[$param] = $values[$i];
-                Request::prependParameter($param, $values[$i]);
+                $this->request->prependParameter($param, $values[$i]);
                 ++$i;
             }
         }
