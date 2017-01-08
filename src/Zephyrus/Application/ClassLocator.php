@@ -39,20 +39,21 @@ class ClassLocator
      * definitions in the composer.json file.
      *
      * @param $namespace
-     * @return bool|string
+     * @return string
+     * @throws \Exception
      */
     private static function getNamespaceDirectory($namespace)
     {
         $composerNamespaces = self::getDefinedNamespaces();
         $namespaceFragments = explode('\\', $namespace);
         $undefinedNamespaceFragments = [];
-        while($namespaceFragments) {
+        while ($namespaceFragments) {
             $possibleNamespace = implode('\\', $namespaceFragments) . '\\';
-            if(array_key_exists($possibleNamespace, $composerNamespaces)){
+            if (array_key_exists($possibleNamespace, $composerNamespaces)) {
                 return realpath(ROOT_DIR . DIRECTORY_SEPARATOR . $composerNamespaces[$possibleNamespace] . implode('/', $undefinedNamespaceFragments));
             }
             $undefinedNamespaceFragments[] = array_pop($namespaceFragments);
         }
-        return false;
+        throw new \Exception("Specified namespace [$namespace] has not been defined");
     }
 }
