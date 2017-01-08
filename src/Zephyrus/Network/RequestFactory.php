@@ -3,20 +3,28 @@
 class RequestFactory
 {
     /**
+     * @var Request
+     */
+    private static $httpRequest = null;
+
+    /**
      * Creates a Request object using the client HTTP request data.
      *
      * @return Request
      */
     public static function create(): Request
     {
-        $server = $_SERVER;
-        $uri = $server['REQUEST_URI'];
-        $method = strtoupper($server['REQUEST_METHOD']);
-        $server['REMOTE_ADDR'] = (getenv('HTTP_X_FORWARDED_FOR'))
-            ? getenv('HTTP_X_FORWARDED_FOR')
-            : getenv('REMOTE_ADDR');
-        $parameters = self::getParametersFromMethod($method);
-        return new Request($uri, $method, $parameters, $_COOKIE, $_FILES, $server);
+        if (is_null(self::$httpRequest)) {
+            $server = $_SERVER;
+            $uri = $server['REQUEST_URI'];
+            $method = strtoupper($server['REQUEST_METHOD']);
+            $server['REMOTE_ADDR'] = (getenv('HTTP_X_FORWARDED_FOR'))
+                ? getenv('HTTP_X_FORWARDED_FOR')
+                : getenv('REMOTE_ADDR');
+            $parameters = self::getParametersFromMethod($method);
+            self::$httpRequest = new Request($uri, $method, $parameters, $_COOKIE, $_FILES, $server);
+        }
+        return self::$httpRequest;
     }
 
     /**
