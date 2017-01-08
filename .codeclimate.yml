@@ -1,21 +1,20 @@
 engines:
   csslint:
     enabled: true
+  duplication:
+    config:
+      languages:
+        - php
+        - javascript
+    enabled: true
   fixme:
     enabled: true
   phpcodesniffer:
     enabled: true
   phpmd:
     enabled: true
-  duplication:
-  	enabled: true
-    config:
-    	languages:
-          - php
-            #mass_threshold: 30
-          - javascript
+exclude_paths:
+  - tests/
 ratings:
   paths:
-  - "**.php"
-exclude_paths:
-- "tests/"
+    - "**.php"
