@@ -22,7 +22,8 @@ class ErrorHandler
     /**
      * @return ErrorHandler
      */
-    public static function getInstance() {
+    public static function getInstance()
+    {
         if (is_null(self::$instance)) {
             self::$instance = new self();
         }
@@ -36,7 +37,7 @@ class ErrorHandler
      * @param callable $callback
      * @throws \Exception
      */
-    public function notice(Callable $callback)
+    public function notice(callable $callback)
     {
         $this->registerError(E_DEPRECATED, $callback);
         $this->registerError(E_USER_DEPRECATED, $callback);
@@ -52,7 +53,7 @@ class ErrorHandler
      * @param callable $callback
      * @throws \Exception
      */
-    public function warning(Callable $callback)
+    public function warning(callable $callback)
     {
         $this->registerError(E_WARNING, $callback);
         $this->registerError(E_USER_WARNING, $callback);
@@ -67,7 +68,7 @@ class ErrorHandler
      * @param callable $callback
      * @throws \Exception
      */
-    public function error(Callable $callback)
+    public function error(callable $callback)
     {
         $this->registerError(E_USER_ERROR, $callback);
     }
@@ -79,7 +80,7 @@ class ErrorHandler
      * @param callable $callback
      * @throws \Exception
      */
-    public function fatal(Callable $callback)
+    public function fatal(callable $callback)
     {
         $this->registerError(E_COMPILE_ERROR, $callback);
         $this->registerError(E_CORE_ERROR, $callback);
@@ -97,20 +98,18 @@ class ErrorHandler
      * @param callable $callback
      * @throws \Exception
      */
-    public function exception(Callable $callback)
+    public function exception(callable $callback)
     {
         $reflection = new \ReflectionFunction($callback);
         $parameters = $reflection->getParameters();
-        if (count($parameters) == 1) {
-            $argumentClass = $parameters[0]->getClass();
-            if ($argumentClass->getShortName() == 'Exception' || $argumentClass->isSubclassOf('Throwable')) {
-                $this->registeredExceptionCallbacks[$argumentClass->getShortName()] = $callback;
-            } else {
-                throw new \Exception("Specified callback argument must be hinted as a Throwable class");
-            }
-        } else {
+        if (count($parameters) != 1) {
             throw new \Exception("Specified callback must only have one argument hinted as a Throwable class");
         }
+        $argumentClass = $parameters[0]->getClass();
+        if ($argumentClass->getShortName() != 'Exception' && !$argumentClass->isSubclassOf('Throwable')) {
+            throw new \Exception("Specified callback argument must be hinted as a Throwable class");
+        }
+        $this->registeredExceptionCallbacks[$argumentClass->getShortName()] = $callback;
     }
 
     /**
@@ -123,12 +122,11 @@ class ErrorHandler
      * @param callable $callback
      * @throws \Exception
      */
-    public function registerError($level, Callable $callback)
+    public function registerError($level, callable $callback)
     {
         $reflection = new \ReflectionFunction($callback);
         $parameters = $reflection->getParameters();
-        $n = count($parameters);
-        if ($n > 4) {
+        if (count($parameters) > 4) {
             throw new \Exception("Specified callback cannot have more than 4 arguments (message, file, line, context)");
         }
         $this->registeredErrorCallbacks[$level] = $callback;
@@ -142,28 +140,15 @@ class ErrorHandler
      * to die the script. Should not be called manually. Used as a registered
      * PHP handler.
      *
-     * @param \Throwable $e
+     * @param \Throwable $error
+     * @throws \Throwable
      */
-    public function exceptionHandler(\Throwable $e)
+    public function exceptionHandler(\Throwable $error)
     {
-        $reflection = new \ReflectionClass($e);
-        $triggeredExceptionClass = $reflection->getShortName();
-
-        if (isset($this->registeredExceptionCallbacks[$triggeredExceptionClass])) {
-            $this->registeredExceptionCallbacks[$triggeredExceptionClass]($e);
-        } else {
-            $foundMatchingParent = false;
-            while (!$foundMatchingParent && $parent = $reflection->getParentClass()) {
-                if (isset($this->registeredExceptionCallbacks[$parent->getShortName()])) {
-                    $this->registeredExceptionCallbacks[$parent->getShortName()]($e);
-                    $foundMatchingParent = true;
-                    break;
-                }
-                $reflection = $parent;
-            }
-            if (!$foundMatchingParent) {
-                die($e->getMessage());
-            }
+        $reflection = new \ReflectionClass($error);
+        $registeredException = $this->findRegisteredExceptions($reflection);
+        if (!is_null($registeredException)) {
+            $registeredException($error);
         }
     }
 
@@ -178,8 +163,7 @@ class ErrorHandler
     public function fatalHandler()
     {
         $error = error_get_last();
-        $this->errorHandler($error['type'], $error['message'], $error['file'],
-                            $error['line'], null);
+        $this->errorHandler($error['type'], $error['message'], $error['file'], $error['line'], null);
     }
 
     /**
@@ -209,12 +193,22 @@ class ErrorHandler
             $reflection = new \ReflectionFunction($callback);
             $parameters = $reflection->getParameters();
             switch (count($parameters)) {
-                case 0: $args = []; break;
-                case 1: $args = [$message]; break;
-                case 2: $args = [$message, $file]; break;
-                case 3: $args = [$message, $file, $line]; break;
-                case 4: $args = [$message, $file, $line, $context]; break;
-                default :
+                case 0:
+                    $args = [];
+                    break;
+                case 1:
+                    $args = [$message];
+                    break;
+                case 2:
+                    $args = [$message, $file];
+                    break;
+                case 3:
+                    $args = [$message, $file, $line];
+                    break;
+                case 4:
+                    $args = [$message, $file, $line, $context];
+                    break;
+                default:
                     throw new \Exception("Specified callback cannot have more than 4 arguments");
             }
             $reflection->invokeArgs($args);
@@ -225,10 +219,30 @@ class ErrorHandler
     }
 
     /**
+     * @param \ReflectionClass $reflection
+     * @return callable|null
+     */
+    private function findRegisteredExceptions(\ReflectionClass $reflection)
+    {
+        $triggeredExceptionClass = $reflection->getShortName();
+        if (isset($this->registeredExceptionCallbacks[$triggeredExceptionClass])) {
+            return $this->registeredExceptionCallbacks[$triggeredExceptionClass];
+        }
+        while ($parent = $reflection->getParentClass()) {
+            if (isset($this->registeredExceptionCallbacks[$parent->getShortName()])) {
+                return $this->registeredExceptionCallbacks[$parent->getShortName()];
+            }
+            $reflection = $parent;
+        }
+        return null;
+    }
+
+    /**
      * Initialize every handlers (error, fatal and exceptions). Singleton
      * pattern.
      */
-    private function __construct() {
+    private function __construct()
+    {
         set_exception_handler([$this, 'exceptionHandler']);
         set_error_handler([$this, 'errorHandler']);
         register_shutdown_function([$this, 'fatalHandler']);
