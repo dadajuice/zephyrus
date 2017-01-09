@@ -11,7 +11,7 @@ class ErrorHandler
      * @var mixed[] Contains exception class name as key and corresponding
      * callback as value.
      */
-    private $registeredExceptionCallbacks = [];
+    private $registeredThrowableCallbacks = [];
 
     /**
      * @var mixed[] Contains error type as key and corresponding callback as
@@ -103,13 +103,13 @@ class ErrorHandler
         $reflection = new \ReflectionFunction($callback);
         $parameters = $reflection->getParameters();
         if (count($parameters) != 1) {
-            throw new \Exception("Specified callback must only have one argument hinted as a Throwable class");
+            throw new \InvalidArgumentException("Specified callback must only have one argument hinted as a Throwable class");
         }
         $argumentClass = $parameters[0]->getClass();
-        if ($argumentClass->getShortName() != 'Exception' && !$argumentClass->isSubclassOf('Throwable')) {
-            throw new \Exception("Specified callback argument must be hinted as a Throwable class");
+        if (!$argumentClass->isSubclassOf('Throwable')) {
+            throw new \InvalidArgumentException("Specified callback argument must be hinted child of a Throwable class");
         }
-        $this->registeredExceptionCallbacks[$argumentClass->getShortName()] = $callback;
+        $this->registeredThrowableCallbacks[$argumentClass->getShortName()] = $callback;
     }
 
     /**
@@ -150,20 +150,6 @@ class ErrorHandler
         if (!is_null($registeredException)) {
             $registeredException($error);
         }
-    }
-
-    /**
-     * Specific handler for PHP fatal errors and warnings (e.g. E_ERROR,
-     * E_COMPILE_ERROR, E_PARSE, E_CORE_ERROR, E_WARNING, ...). This method
-     * catches all non user defined error types and tries to manage them using
-     * the normal error handler.
-     *
-     * @throws \Exception
-     */
-    public function fatalHandler()
-    {
-        $error = error_get_last();
-        $this->errorHandler($error['type'], $error['message'], $error['file'], $error['line'], null);
     }
 
     /**
@@ -225,12 +211,12 @@ class ErrorHandler
     private function findRegisteredExceptions(\ReflectionClass $reflection)
     {
         $exceptionClass = $reflection->getShortName();
-        if (isset($this->registeredExceptionCallbacks[$exceptionClass])) {
-            return $this->registeredExceptionCallbacks[$exceptionClass];
+        if (isset($this->registeredThrowableCallbacks[$exceptionClass])) {
+            return $this->registeredThrowableCallbacks[$exceptionClass];
         }
         while ($parent = $reflection->getParentClass()) {
-            if (isset($this->registeredExceptionCallbacks[$parent->getShortName()])) {
-                return $this->registeredExceptionCallbacks[$parent->getShortName()];
+            if (isset($this->registeredThrowableCallbacks[$parent->getShortName()])) {
+                return $this->registeredThrowableCallbacks[$parent->getShortName()];
             }
             $reflection = $parent;
         }
@@ -245,6 +231,5 @@ class ErrorHandler
     {
         set_exception_handler([$this, 'exceptionHandler']);
         set_error_handler([$this, 'errorHandler']);
-        register_shutdown_function([$this, 'fatalHandler']);
     }
 }
