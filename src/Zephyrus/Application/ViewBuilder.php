@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Application;
 
 use Pug\Pug;
+use Zephyrus\Security\ContentSecurityPolicy;
 
 class ViewBuilder
 {
@@ -62,7 +63,7 @@ class ViewBuilder
     private function assignPugSharedArguments()
     {
         $args = Flash::readAll();
-        $args['val'] = function($fieldId, $defaultValue = "") {
+        $args['val'] = function ($fieldId, $defaultValue = "") {
             return Form::readMemorizedValue($fieldId, $defaultValue);
         };
         $args['format'] = $this->addFormatFunction();
@@ -73,12 +74,12 @@ class ViewBuilder
 
     private function addFormatFunction()
     {
-        return function($type, $value, ...$args) {
+        return function ($type, $value, ...$args) {
             $argc = count($args);
             switch ($type) {
-                case 'filesize' :
+                case 'filesize':
                     return Formatter::formatHumanFileSize($value);
-                case 'time' :
+                case 'time':
                     return Formatter::formatTime($value);
                 case 'elapsed':
                     return Formatter::formatElapsedDateTime($value);
@@ -86,7 +87,7 @@ class ViewBuilder
                     return Formatter::formatDateTime($value);
                 case 'date':
                     return Formatter::formatDate($value);
-                case 'percent' :
+                case 'percent':
                     if ($argc == 0) {
                         return Formatter::formatPercent($value);
                     } elseif ($argc == 1) {
@@ -96,27 +97,25 @@ class ViewBuilder
                     } else {
                         return 'Percent format must between 0 and 2 arguments (' . $argc . ' provided)';
                     }
-                case 'money' :
+                case 'money':
                     if ($argc == 0) {
                         return Formatter::formatMoney($value);
                     } elseif ($argc == 1) {
                         return Formatter::formatMoney($value, $args[0]);
                     } elseif ($argc == 2) {
                         return Formatter::formatMoney($value, $args[0], $args[1]);
-                    }  elseif ($argc == 3) {
-                        return Formatter::formatMoney($value, $args[0], $args[1], $args[2]);
                     } else {
                         return 'Money format must have between 0 and 3 arguments (' . $argc . ' provided)';
                     }
-                case 'decimal' :
+                case 'decimal':
+                    //$arguments[] = $value;
+                    //return forward_static_call_array(['Formatter', 'formatDecimal'], array_merge($arguments, $args));
                     if ($argc == 0) {
                         return Formatter::formatDecimal($value);
                     } elseif ($argc == 1) {
                         return Formatter::formatDecimal($value, $args[0]);
                     } elseif ($argc == 2) {
                         return Formatter::formatDecimal($value, $args[0], $args[1]);
-                    }  elseif ($argc == 3) {
-                        return Formatter::formatDecimal($value, $args[0], $args[1], $args[2]);
                     } else {
                         return 'Decimal format must have between 0 and 3 arguments (' . $argc . ' provided)';
                     }
@@ -127,21 +126,21 @@ class ViewBuilder
 
     private function addEmailFunction()
     {
-        return function($email) {
+        return function ($email) {
             echo secureEmail($email);
         };
     }
 
     private function addNonceFunction()
     {
-        return function() {
+        return function () {
             return ContentSecurityPolicy::getRequestNonce();
         };
     }
 
     private function addPagerKeyword()
     {
-        $this->pug->addKeyword('pager', function ($arguments, $block, $keyword) {
+        $this->pug->addKeyword('pager', function () {
             if (is_null($this->pager)) {
                 $begin = 'echo "<div><strong style=\"color: red;\">PAGER NOT DEFINED !</strong></div>"';
             } else {
@@ -156,7 +155,7 @@ class ViewBuilder
 
     private function addCsrfKeyword()
     {
-        $this->pug->addKeyword('csrf', function ($arguments, $block, $keyword) {
+        $this->pug->addKeyword('csrf', function () {
             return array(
                 'beginPhp' => 'echo Zephyrus\Security\CsrfGuard::getInstance()->generateHiddenFields()',
                 'endPhp' => ';',
