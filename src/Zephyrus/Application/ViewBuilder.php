@@ -16,6 +16,11 @@ class ViewBuilder
     private $pug;
 
     /**
+     * @var ViewHelper
+     */
+    private $viewHelper;
+
+    /**
      * @return ViewBuilder
      */
     public static function getInstance(): ViewBuilder
@@ -55,116 +60,21 @@ class ViewBuilder
             $options['cache'] = Configuration::getConfiguration('pug', 'cache');
         }
         $this->pug = new Pug($options);
-        $this->assignPugSharedArguments();
-        $this->addPagerKeyword();
-        $this->addCsrfKeyword();
     }
 
-    private function assignPugSharedArguments()
+    private function addPugHelpers()
     {
-        $args = Flash::readAll();
-        $args['val'] = function ($fieldId, $defaultValue = "") {
-            return Form::readMemorizedValue($fieldId, $defaultValue);
-        };
-        $args['format'] = $this->addFormatFunction();
-        $args['email'] = $this->addEmailFunction();
-        $args['nonce'] = $this->addNonceFunction();
-        $this->pug->share($args);
-    }
-
-    private function addFormatFunction()
-    {
-        return function ($type, $value, ...$args) {
-            $argc = count($args);
-            switch ($type) {
-                case 'filesize':
-                    return Formatter::formatHumanFileSize($value);
-                case 'time':
-                    return Formatter::formatTime($value);
-                case 'elapsed':
-                    return Formatter::formatElapsedDateTime($value);
-                case 'datetime':
-                    return Formatter::formatDateTime($value);
-                case 'date':
-                    return Formatter::formatDate($value);
-                case 'percent':
-                    if ($argc == 0) {
-                        return Formatter::formatPercent($value);
-                    } elseif ($argc == 1) {
-                        return Formatter::formatPercent($value, $args[0]);
-                    } elseif ($argc == 2) {
-                        return Formatter::formatPercent($value, $args[0], $args[1]);
-                    } else {
-                        return 'Percent format must between 0 and 2 arguments (' . $argc . ' provided)';
-                    }
-                case 'money':
-                    if ($argc == 0) {
-                        return Formatter::formatMoney($value);
-                    } elseif ($argc == 1) {
-                        return Formatter::formatMoney($value, $args[0]);
-                    } elseif ($argc == 2) {
-                        return Formatter::formatMoney($value, $args[0], $args[1]);
-                    } else {
-                        return 'Money format must have between 0 and 3 arguments (' . $argc . ' provided)';
-                    }
-                case 'decimal':
-                    //$arguments[] = $value;
-                    //return forward_static_call_array(['Formatter', 'formatDecimal'], array_merge($arguments, $args));
-                    if ($argc == 0) {
-                        return Formatter::formatDecimal($value);
-                    } elseif ($argc == 1) {
-                        return Formatter::formatDecimal($value, $args[0]);
-                    } elseif ($argc == 2) {
-                        return Formatter::formatDecimal($value, $args[0], $args[1]);
-                    } else {
-                        return 'Decimal format must have between 0 and 3 arguments (' . $argc . ' provided)';
-                    }
-            }
-            return 'FORMAT TYPE [' . $type . '] NOT DEFINED !';
-        };
-    }
-
-    private function addEmailFunction()
-    {
-        return function ($email) {
-            echo secureEmail($email);
-        };
-    }
-
-    private function addNonceFunction()
-    {
-        return function () {
-            return ContentSecurityPolicy::getRequestNonce();
-        };
-    }
-
-    private function addPagerKeyword()
-    {
-        $this->pug->addKeyword('pager', function () {
-            if (is_null($this->pager)) {
-                $begin = 'echo "<div><strong style=\"color: red;\">PAGER NOT DEFINED !</strong></div>"';
-            } else {
-                $begin = 'echo $pager';
-            }
-            return array(
-                'beginPhp' => $begin,
-                'endPhp' => ';',
-            );
-        });
-    }
-
-    private function addCsrfKeyword()
-    {
-        $this->pug->addKeyword('csrf', function () {
-            return array(
-                'beginPhp' => 'echo Zephyrus\Security\CsrfGuard::getInstance()->generateHiddenFields()',
-                'endPhp' => ';',
-            );
-        });
+        foreach ($this->viewHelper->getKeywords() as $keyword => $action) {
+            $this->pug->addKeyword($keyword, $action);
+        }
+        $this->pug->share($this->viewHelper->getFunctions());
+        $this->pug->share(Flash::readAll());
     }
 
     private function __construct()
     {
         $this->buildPug();
+        $this->viewHelper = new ViewHelper();
+        $this->addPugHelpers();
     }
 }
