@@ -224,9 +224,9 @@ class ErrorHandler
      */
     private function findRegisteredExceptions(\ReflectionClass $reflection)
     {
-        $triggeredExceptionClass = $reflection->getShortName();
-        if (isset($this->registeredExceptionCallbacks[$triggeredExceptionClass])) {
-            return $this->registeredExceptionCallbacks[$triggeredExceptionClass];
+        $exceptionClass = $reflection->getShortName();
+        if (isset($this->registeredExceptionCallbacks[$exceptionClass])) {
+            return $this->registeredExceptionCallbacks[$exceptionClass];
         }
         while ($parent = $reflection->getParentClass()) {
             if (isset($this->registeredExceptionCallbacks[$parent->getShortName()])) {
