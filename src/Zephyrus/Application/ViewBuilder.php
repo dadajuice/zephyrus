@@ -1,7 +1,6 @@
 <?php namespace Zephyrus\Application;
 
 use Pug\Pug;
-use Zephyrus\Security\ContentSecurityPolicy;
 
 class ViewBuilder
 {

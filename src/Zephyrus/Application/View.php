@@ -28,6 +28,7 @@ class View
     public function __construct(Pug $pug, string $content)
     {
         $this->pug = $pug;
+        $this->addPagerKeyword();
         $this->content = $content;
     }
 
@@ -54,5 +55,20 @@ class View
         $output = $this->pug->render($this->content, $args);
         Form::removeMemorizedValue();
         return $output;
+    }
+
+    private function addPagerKeyword()
+    {
+        $this->pug->addKeyword('pager', function () {
+            if (is_null($this->pager)) {
+                $begin = 'echo "<div><strong style=\"color: red;\">PAGER NOT DEFINED !</strong></div>"';
+            } else {
+                $begin = 'echo $pager';
+            }
+            return [
+                'beginPhp' => $begin,
+                'endPhp' => ';',
+            ];
+        });
     }
 }

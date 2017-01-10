@@ -14,7 +14,6 @@ class ViewHelper
         $this->addFormatFunction();
         $this->addValFunction();
         $this->addCsrfKeyword();
-        $this->addPagerKeyword();
     }
 
     public function addFunction($name, callable $callback)
@@ -42,21 +41,6 @@ class ViewHelper
         $this->keywords['csrf'] = function() {
             return [
                 'beginPhp' => 'echo Zephyrus\Security\CsrfGuard::getInstance()->generateHiddenFields()',
-                'endPhp' => ';',
-            ];
-        };
-    }
-
-    private function addPagerKeyword()
-    {
-        $this->keywords['pager'] = function () {
-            //if (is_null($this->pager)) {
-            $begin = 'echo "<div><strong style=\"color: red;\">PAGER NOT DEFINED !</strong></div>"';
-            //} else {
-            //    $begin = 'echo $pager';
-            //}
-            return [
-                'beginPhp' => $begin,
                 'endPhp' => ';',
             ];
         };
