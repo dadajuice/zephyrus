@@ -19,7 +19,7 @@ class Bootstrap
         $controllers = ClassLocator::getClassesInNamespace("Controllers");
         foreach ($controllers as $controller) {
             $reflection = new \ReflectionClass($controller);
-            if ($reflection->implementsInterface('Zephyrus\Application\Routable')) {
+            if ($reflection->implementsInterface('Zephyrus\Network\Routable')) {
                 call_user_func($controller .'::initializeRoutes', $router);
             }
         }
