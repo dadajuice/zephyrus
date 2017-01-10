@@ -184,7 +184,7 @@ class Pager
         }
     }
 
-    private function getQueryString(string $query)
+    private function getQueryString($query)
     {
         return preg_replace("/(&?" . $this->urlParameter . "=[0-9]*&?)/", "", $query);
     }
