@@ -43,19 +43,6 @@ abstract class RouterEngine
     private $startTime = -1;
 
     /**
-     * Keeps references of request uri and request method
-     *
-     * @param Request $request
-     */
-    public function __construct(Request $request)
-    {
-        $this->request = $request;
-        $this->requestedUri = $this->request->getPath();
-        $this->requestedMethod = $this->request->getMethod();
-        $this->requestedRepresentation = $this->request->getAccept();
-    }
-
-    /**
      * @return Request
      */
     public function getRequest()
@@ -66,9 +53,15 @@ abstract class RouterEngine
     /**
      * Launch the routing process to determine, according to the
      * initiated request, the best route to execute. Cannot be overridden.
+     *
+     * @param Request $request
      */
-    public final function run()
+    public final function run(Request $request)
     {
+        $this->request = $request;
+        $this->requestedUri = $this->request->getPath();
+        $this->requestedMethod = $this->request->getMethod();
+        $this->requestedRepresentation = $this->request->getAccept();
         $this->startTime = microtime(true);
         $this->verifyRequestMethod();
         $route = $this->findRouteFromRequest();
