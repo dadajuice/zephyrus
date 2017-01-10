@@ -6,7 +6,7 @@ use Zephyrus\Network\RequestFactory;
 use Zephyrus\Network\Response;
 use Zephyrus\Utilities\Pager;
 
-abstract class Controller
+abstract class Controller implements Routable
 {
     /**
      * @var Request;
