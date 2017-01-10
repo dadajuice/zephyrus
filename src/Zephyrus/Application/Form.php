@@ -1,7 +1,5 @@
 <?php namespace Zephyrus\Application;
 
-use Zephyrus\Network\Request;
-
 class Form
 {
     const TRIGGER_ALWAYS = 0;
@@ -70,16 +68,6 @@ class Form
         }
     }
 
-    public function __construct($initializeFromRequest = true)
-    {
-        if ($initializeFromRequest) {
-            $parameters = Request::getParameters();
-            foreach ($parameters as $field => $value) {
-                $this->addField($field, $value);
-            }
-        }
-    }
-
     /**
      * @return bool
      */
@@ -94,29 +82,23 @@ class Form
     public function addRule($field, $validation, $errorMessage, $trigger = self::TRIGGER_ALWAYS)
     {
         if (!array_key_exists($field, $this->fields)) {
-            throw new \Exception("Specified field [$field] has not been registered in this request");
-        }
-
-        $callback = null;
-        if (is_callable($validation)) {
-            //TODO: validate callback
-            $callback = $validation;
+            throw new \InvalidArgumentException("Specified field [$field] has not been registered in this request");
         }
 
         $this->validations[$field][] = [
-            'callback' => $callback,
+            'callback' => $validation,
             'message' => $errorMessage,
             'trigger' => $trigger
         ];
     }
 
     /**
-     * @param string[] $parameterNames
+     * @param string[] $parameters
      */
-    public function addFields(array $parameterNames)
+    public function addFields(array $parameters)
     {
-        foreach ($parameterNames as $parameter) {
-            $this->addField($parameter);
+        foreach ($parameters as $parameterName => $value) {
+            $this->addField($parameterName, $value);
         }
     }
 
@@ -124,9 +106,9 @@ class Form
      * @param string $parameterName
      * @param mixed $value
      */
-    public function addField($parameterName, $value = null)
+    public function addField($parameterName, $value)
     {
-        $this->fields[$parameterName] = is_null($value) ? Request::getParameter($parameterName) : $value;
+        $this->fields[$parameterName] = $value;
     }
 
     /**
@@ -152,7 +134,7 @@ class Form
     public function getErrorMessages()
     {
         $results = [];
-        foreach ($this->errors as $fields => $errors) {
+        foreach ($this->errors as $errors) {
             foreach ($errors as $message) {
                 $results[] = $message;
             }
@@ -165,7 +147,7 @@ class Form
         return $this->fields[$field];
     }
 
-    public function getValues()
+    public function getFields()
     {
         return $this->fields;
     }
@@ -199,18 +181,15 @@ class Form
     }
 
     /**
-     * @param $field
-     * @param $callback
+     * @param string $field
+     * @param callable $callback
      * @return mixed
      */
     private function executeRule($field, $callback)
     {
-        $isObjectMethod = is_array($callback);
-        if ($isObjectMethod) {
-            return $this->executeMethod($field, $callback);
-        } else {
-            return $this->executeFunction($field, $callback);
-        }
+        return (is_array($callback))
+            ? $this->executeMethod($field, $callback)
+            : $this->executeFunction($field, $callback);
     }
 
     /**
