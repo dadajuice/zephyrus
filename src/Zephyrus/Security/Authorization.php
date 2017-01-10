@@ -1,6 +1,6 @@
 <?php namespace Zephyrus\Security;
 
-use Zephyrus\Network\Request;
+use Zephyrus\Network\RequestFactory;
 
 class Authorization
 {
@@ -71,7 +71,7 @@ class Authorization
             throw new \Exception("Requirement $name is already defined");
         }
         $this->requirements[$name] = function() use($ip) {
-            return Request::getClientIp() == $ip;
+            return RequestFactory::create()->getClientIp() == $ip;
         };
     }
 
@@ -129,11 +129,11 @@ class Authorization
 
     private function findRule(string $uri): array
     {
-        if (!isset($this->rules[Request::getMethod()])) {
+        $method = RequestFactory::create()->getMethod();
+        if (!isset($this->rules[$method])) {
             return [];
         }
-
-        $rulesForMethod = $this->rules[Request::getMethod()];
+        $rulesForMethod = $this->rules[$method];
         foreach ($rulesForMethod as $path => $requirements) {
             if (preg_match('/' . str_replace('/', '\/', $path) . '/', $uri)) {
                 return (is_array($requirements)) ? $requirements : [$requirements];
