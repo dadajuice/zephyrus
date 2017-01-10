@@ -14,11 +14,6 @@ abstract class RouterEngine
     private $routes = [];
 
     /**
-     * @var bool Route acceptance verification mode
-     */
-    private $strict = false;
-
-    /**
      * @var string HTTP method associated with current request
      */
     private $requestedMethod;
@@ -39,11 +34,6 @@ abstract class RouterEngine
     private $request;
 
     /**
-     * @var int Route processing start time to get total execution time
-     */
-    private $startTime = -1;
-
-    /**
      * Launch the routing process to determine, according to the
      * initiated request, the best route to execute. Cannot be overridden.
      *
@@ -55,102 +45,47 @@ abstract class RouterEngine
         $this->requestedUri = $this->request->getPath();
         $this->requestedMethod = $this->request->getMethod();
         $this->requestedRepresentation = $this->request->getAccept();
-        $this->startTime = microtime(true);
         $this->verifyRequestMethod();
         $route = $this->findRouteFromRequest();
         $this->prepareResponse($route);
     }
 
     /**
-     * Get if the route acceptance verification mode must be strict. In
-     * strict mode the value of the HTTP_ACCEPT header must exactly be
-     * the same as the one specified in the route. Cannot be overridden.
-     *
-     * @return bool
+     * @return Request
      */
-    public final function isStrict()
+    public final function getRequest()
     {
-        return (bool)$this->strict;
-    }
-
-    /**
-     * Set if the route acceptance verification mode must be strict. In
-     * strict mode the value of the HTTP_ACCEPT header must exactly be
-     * the same as the one specified in the route. Cannot be overridden.
-     *
-     * @param bool $strict
-     */
-    public final function setStrict($strict)
-    {
-        $this->strict = (bool)$strict;
-    }
-
-    /**
-     * @return string
-     */
-    public final function getRequestedMethod()
-    {
-        return $this->requestedMethod;
-    }
-
-    /**
-     * @return string
-     */
-    public final function getRequestedUri()
-    {
-        return $this->requestedUri;
-    }
-
-    /**
-     * @return int
-     */
-    public final function getElapsedSeconds()
-    {
-        return ($this->startTime == -1)
-            ? 0
-            : microtime(true) - $this->startTime;
+        return $this->request;
     }
 
     /**
      * Add a new route for the application. Make sure to create the
      * adequate structure with corresponding parameters regex pattern if
-     * needed. Extensible because of the <extras> arguments which can be
-     * provided optionally by children implementations. Cannot be
-     * overridden.
+     * needed. Cannot be overridden.
      *
      * @param string $method
      * @param string $uri
      * @param callable $callback
      * @param string | array | null $acceptedRequestFormats
-     * @param mixed[] $extras (optional)
-     * @throws RouteDefinitionException
-     * @throws RouteMethodUnsupportedException
      */
-    protected final function addRoute($method, $uri,  $callback,
-                                      $acceptedRequestFormats,
-                                      $extras = [])
+    protected final function addRoute($method, $uri,  $callback, $acceptedRequestFormats)
     {
-        if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE'])) {
-            throw new RouteMethodUnsupportedException($method);
-        }
         if ($uri != '/') {
             $uri = rtrim($uri, '/');
         }
-
         $params = $this->getUriParameters($uri);
         if (!empty($params) && count($params) != count(array_unique($params))) {
             throw new RouteDefinitionException($uri);
         }
 
         $this->routes[$method][] = [
-            'uri'                    => $uri,
-            'regex'                  => (!empty($params))
+            'uri' => $uri,
+            'regex' => (!empty($params))
                 ? $this->getUriRegexFromParameters($uri, $params)
                 : null,
-            'params'                 => $params,
-            'callback'               => $callback,
-            'acceptedRequestFormats' => $acceptedRequestFormats,
-            'extras'                 => $extras
+            'params' => $params,
+            'callback' => $callback,
+            'acceptedRequestFormats' => $acceptedRequestFormats
         ];
     }
 
@@ -195,11 +130,10 @@ abstract class RouterEngine
         foreach ($routes as $route) {
             $pattern = '/^' . $route['regex'] . '$/';
             if ($route['uri'] == $this->requestedUri || (!empty($route['regex']) && preg_match($pattern, $this->requestedUri))) {
-                if ($this->isRequestAcceptedForRoute($route)) {
-                    return $route;
-                } else {
+                if (!$this->isRequestAcceptedForRoute($route)) {
                     throw new RouteNotAcceptedException($this->requestedRepresentation);
                 }
+                return $route;
             }
         }
         throw new RouteNotFoundException($this->requestedUri, $this->requestedMethod);
@@ -216,23 +150,18 @@ abstract class RouterEngine
     private function isRequestAcceptedForRoute($route)
     {
         $acceptedFormats = $route['acceptedRequestFormats'];
-        if (!is_null($acceptedFormats)) {
-            if (is_array($acceptedFormats)) {
-                $matches = 0;
-                foreach ($acceptedFormats as $format) {
-                    if (strpos($this->requestedRepresentation, $format) !== false) {
-                        ++$matches;
-                    }
-                }
-
-                return ($this->strict && $matches == count($acceptedFormats))
-                    || (!$this->strict && $matches >= 1);
-            } else {
-                return ($this->strict && $this->requestedRepresentation == $acceptedFormats)
-                    || (!$this->strict && strpos($this->requestedRepresentation, $acceptedFormats) !== false);
-            }
+        if (is_null($acceptedFormats)) {
+            return true;
         }
-        return true;
+        if (is_array($acceptedFormats)) {
+            foreach ($acceptedFormats as $format) {
+                if (strpos($this->requestedRepresentation, $format) !== false) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return strpos($this->requestedRepresentation, $acceptedFormats) !== false;
     }
 
     /**
@@ -335,10 +264,6 @@ abstract class RouterEngine
             $n = count($matches);
             for ($i = 1; $i < $n; ++$i) {
                 $values[] = /*purify(*/$matches[$i][0]/*)*/;
-            }
-
-            if (count($route['params']) != count($values)) {
-                throw new \RuntimeException("Cannot properly load request GET parameters. Unexpected error.");
             }
 
             $i = 0;
