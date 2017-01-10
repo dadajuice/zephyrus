@@ -4,6 +4,7 @@ use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 use Zephyrus\Network\Response;
+use Zephyrus\Network\Routable;
 use Zephyrus\Utilities\Pager;
 
 abstract class Controller implements Routable
