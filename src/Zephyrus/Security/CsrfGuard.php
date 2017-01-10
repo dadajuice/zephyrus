@@ -3,6 +3,7 @@
 use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Network\Request;
+use Zephyrus\Network\RequestFactory;
 
 class CsrfGuard
 {
@@ -18,6 +19,11 @@ class CsrfGuard
      * @var CsrfGuard
      */
     private static $instance = null;
+
+    /**
+     * @var Request
+     */
+    private $request;
 
     /**
      * Determines if the HTTP GET requests are secured by the CSRF filter. It
@@ -86,7 +92,7 @@ class CsrfGuard
      */
     public function guard()
     {
-        if ($this->isHttpMethodFiltered(Request::getMethod())) {
+        if ($this->isHttpMethodFiltered($this->request->getMethod())) {
             $formName = $this->getProvidedFormName();
             $providedToken = $this->getProvidedCsrfToken();
             if (is_null($formName) || is_null($providedToken)) {
@@ -236,6 +242,7 @@ class CsrfGuard
      * Obtains the CSRF token stored by the server for the corresponding
      * client. Returns null if undefined.
      *
+     * @param string $formName
      * @return null|string
      */
     private function getStoredCsrfToken($formName)
@@ -252,7 +259,7 @@ class CsrfGuard
      */
     private function getProvidedCsrfToken()
     {
-        $token = Request::getParameter(self::REQUEST_TOKEN_VALUE);
+        $token = $this->request->getParameter(self::REQUEST_TOKEN_VALUE);
         if (is_null($token)) {
             $token = isset($_SERVER[self::HEADER_TOKEN]) ? $_SERVER[self::HEADER_TOKEN] : null;
         }
@@ -267,7 +274,7 @@ class CsrfGuard
      */
     private function getProvidedFormName()
     {
-        $formName = Request::getParameter(self::REQUEST_TOKEN_NAME);
+        $formName = $this->request->getParameter(self::REQUEST_TOKEN_NAME);
         if (is_null($formName)) {
             $formName = isset($_SERVER[self::HEADER_NAME]) ? $_SERVER[self::HEADER_NAME] : null;
         }
@@ -300,6 +307,7 @@ class CsrfGuard
      */
     private function __construct()
     {
+        $this->request = RequestFactory::create();
         $configs = Configuration::getSecurityConfiguration();
         if (isset($configs['csrf_guard_req'])) {
             $methodsToFilter = $configs['csrf_guard_req'];
