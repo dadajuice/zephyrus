@@ -1,11 +1,23 @@
 <?php namespace Zephyrus\Application;
 
 use Zephyrus\Network\ContentType;
+use Zephyrus\Network\Request;
+use Zephyrus\Network\RequestFactory;
 use Zephyrus\Network\Response;
 use Zephyrus\Utilities\Pager;
 
 abstract class Controller
 {
+    /**
+     * @var Request;
+     */
+    protected $request;
+
+    public function __construct()
+    {
+        $this->request = RequestFactory::create();
+    }
+
     /**
      * Renders the specified Pug view with corresponding arguments. If a pager
      * is to be shown in the page, it must be given.
@@ -16,11 +28,21 @@ abstract class Controller
      */
     protected function render($page, $args = [], Pager $pager = null)
     {
-        $view = new View($page);
+        $view = ViewBuilder::getInstance()->build($page);
         if (!is_null($pager)) {
             $view->setPager($pager);
         }
         echo $view->render($args);
+    }
+
+    /**
+     * @return Form
+     */
+    protected function buildForm(): Form
+    {
+        $form = new Form();
+        $form->addFields($this->request->getParameters());
+        return $form;
     }
 
     /**
