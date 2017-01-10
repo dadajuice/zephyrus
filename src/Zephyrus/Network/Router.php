@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Network;
 
 use Zephyrus\Application\Configuration;
+use Zephyrus\Application\RouterEngine;
 use Zephyrus\Exceptions\UnauthorizedAccessException;
 use Zephyrus\Security\Authorization;
 use Zephyrus\Security\CsrfGuard;
@@ -87,7 +88,7 @@ class Router extends RouterEngine
      */
     protected function beforeCallback($route)
     {
-        $failedRequirements = [];
+        /*$failedRequirements = [];
         if (!Authorization::getInstance()->isAuthorized($route, $failedRequirements)) {
             throw new UnauthorizedAccessException($route['uri'], $failedRequirements);
         }
@@ -100,7 +101,7 @@ class Router extends RouterEngine
             if (Configuration::getSecurityConfiguration('csrf_guard_automatic_html')) {
                 ob_start();
             }
-        }
+        }*/
     }
 
     /**
@@ -113,9 +114,9 @@ class Router extends RouterEngine
      */
     protected function afterCallback($route)
     {
-        if (Configuration::getSecurityConfiguration('csrf_guard_enabled')
+        /*if (Configuration::getSecurityConfiguration('csrf_guard_enabled')
             && Configuration::getSecurityConfiguration('csrf_guard_automatic_html')) {
             echo CsrfGuard::getInstance()->injectForms(ob_get_clean());
-        }
+        }*/
     }
 }

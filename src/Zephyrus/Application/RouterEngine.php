@@ -1,9 +1,10 @@
-<?php namespace Zephyrus\Network;
+<?php namespace Zephyrus\Application;
 
 use Zephyrus\Exceptions\RouteNotFoundException;
 use Zephyrus\Exceptions\RouteDefinitionException;
 use Zephyrus\Exceptions\RouteNotAcceptedException;
 use Zephyrus\Exceptions\RouteMethodUnsupportedException;
+use Zephyrus\Network\Request;
 
 abstract class RouterEngine
 {
@@ -160,7 +161,10 @@ abstract class RouterEngine
      *
      * @param mixed[] $route
      */
-    protected function beforeCallback($route) { }
+    protected function beforeCallback($route)
+    {
+
+    }
 
     /**
      * Method called immediately after calling the associated route callback
@@ -169,7 +173,10 @@ abstract class RouterEngine
      *
      * @param mixed[] $route
      */
-    protected function afterCallback($route) { }
+    protected function afterCallback($route)
+    {
+
+    }
 
     /**
      * Find a route corresponding to the client request. Matches direct

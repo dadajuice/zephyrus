@@ -47,4 +47,6 @@ class RouterTest extends TestCase
         });
         $router->run($req);
     }
+
+    //TODO 4 route exceptions
 }
