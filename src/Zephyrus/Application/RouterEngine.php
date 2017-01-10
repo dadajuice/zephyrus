@@ -67,6 +67,7 @@ abstract class RouterEngine
      * @param string $uri
      * @param callable $callback
      * @param string | array | null $acceptedRequestFormats
+     * @throws RouteDefinitionException
      */
     protected final function addRoute($method, $uri,  $callback, $acceptedRequestFormats)
     {
