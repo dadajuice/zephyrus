@@ -63,10 +63,10 @@ class Configuration
      */
     private static function initializeConfigurations()
     {
-        if (is_readable(ROOT_DIR . '/config.ini')) {
-            self::$config = parse_ini_file(ROOT_DIR . '/config.ini', true);
+        if (!is_readable(ROOT_DIR . '/config.ini')) {
+            throw new \Exception("Cannot parse configurations file (config.ini)");
         }
-        throw new \Exception("Cannot parse configurations file (config.ini)");
+        self::$config = parse_ini_file(ROOT_DIR . '/config.ini', true);
     }
 
     /**
