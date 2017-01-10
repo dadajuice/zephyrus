@@ -17,6 +17,16 @@ class ViewHelper
         $this->addPagerKeyword();
     }
 
+    public function addFunction($name, callable $callback)
+    {
+        $this->functions[$name] = $callback;
+    }
+
+    public function addKeyword($name, callable $callback)
+    {
+        $this->keywords[$name] = $callback;
+    }
+
     public function getKeywords()
     {
         return $this->keywords;
