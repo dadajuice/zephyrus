@@ -47,7 +47,4 @@ class RouterTest extends TestCase
         });
         $router->run($req);
     }
-
-    //TODO: test route exceptions
-    //TODO: test POST, PUT, DELETE
 }
