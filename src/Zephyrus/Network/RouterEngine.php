@@ -44,10 +44,12 @@ abstract class RouterEngine
 
     /**
      * Keeps references of request uri and request method
+     *
+     * @param Request $request
      */
-    public function __construct()
+    public function __construct(Request $request)
     {
-        $this->request = RequestFactory::create();
+        $this->request = $request;
         $this->requestedUri = $this->request->getPath();
         $this->requestedMethod = $this->request->getMethod();
         $this->requestedRepresentation = $this->request->getAccept();
