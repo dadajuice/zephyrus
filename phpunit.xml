@@ -19,6 +19,9 @@
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">src</directory>
+            <exclude>
+                <file>./src/Zephyrus/Network/Routable.php</file>
+            </exclude>
         </whitelist>
     </filter>
     <logging>
