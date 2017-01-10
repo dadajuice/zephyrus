@@ -95,9 +95,6 @@ class Request
     public function __construct($uri = '', $method = '', $parameters = [], $cookies = [], $files = [], $server = [])
     {
         $this->uri = $uri;
-        if ($this->uri != '/') {
-            $this->uri = rtrim($this->uri, '/');
-        }
         $this->method = $method;
         $this->parameters = $parameters;
         $this->serverVariables = $server;
