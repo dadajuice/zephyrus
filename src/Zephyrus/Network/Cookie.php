@@ -23,7 +23,7 @@ class Cookie
     /**
      * @var int Cookie expire time (timestamp)
      */
-    private $expire;
+    private $lifetime;
 
     /**
      * @var string The domain that the cookie is available to
@@ -76,7 +76,7 @@ class Cookie
     {
         $this->name = $name;
         $this->value = $value;
-        $this->expire = $expire;
+        $this->lifetime = $expire;
         $this->path = $path;
         $this->secure = $secure;
         $this->httpOnly = $httpOnly;
@@ -123,11 +123,11 @@ class Cookie
     /**
      * Apply a new expiration date. Updates cookie immediately.
      *
-     * @param int $expire
+     * @param int $lifetime
      */
-    public function setExpire($expire)
+    public function setLifetime($lifetime)
     {
-        $this->expire = (int)$expire;
+        $this->lifetime = (int)$lifetime;
         $this->setCookie();
     }
 
@@ -220,7 +220,7 @@ class Cookie
             setrawcookie(
                 $this->name,
                 $this->value,
-                time() + $this->expire,
+                time() + $this->lifetime,
                 $this->path,
                 $this->domain,
                 $this->secure,
@@ -230,7 +230,7 @@ class Cookie
             setcookie(
                 $this->name,
                 $this->value,
-                time() + $this->expire,
+                time() + $this->lifetime,
                 $this->path,
                 $this->domain,
                 $this->secure,
