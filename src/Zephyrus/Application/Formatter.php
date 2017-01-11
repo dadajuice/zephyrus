@@ -7,9 +7,24 @@ class Formatter
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new \DateTime($dateTime);
         }
-        return (self::isFrench())
-            ? self::formatFrenchElapsedDateTime($dateTime)
-            : self::formatEnglishElapsedDateTime($dateTime);
+        $now = new \DateTime();
+        $diff = $dateTime->diff($now);
+        if ($diff->d == 0) {
+            if ($diff->h == 0) {
+                if ($diff->i == 0) {
+                    return (self::isFrench())
+                        ? self::getFrenchElapsedMessage($diff->s, 'seconde')
+                        : self::getEnglishElapsedMessage($diff->s, 'second');
+                }
+                return (self::isFrench())
+                    ? self::getFrenchElapsedMessage($diff->i, 'minute')
+                    : self::getEnglishElapsedMessage($diff->i, 'minute');
+            }
+            return ((self::isFrench()) ? 'Aujourd\'hui ' : 'Today ') . self::formatTime($dateTime);
+        } elseif ($diff->d == 1 && $diff->h == 0) {
+            return ((self::isFrench()) ? 'Hier ' : 'Yesterday ') . self::formatTime($dateTime);
+        }
+        return self::formatDateTime($dateTime);
     }
 
     public static function formatDate($dateTime)
@@ -108,42 +123,6 @@ class Formatter
             $unit = $lang['K'];
         }
         return self::formatDecimal($fileSize, 0, 2) . ' ' . $unit;
-    }
-
-    private static function formatFrenchElapsedDateTime(\DateTime $dateTime)
-    {
-        $now = new \DateTime();
-        $diff = $dateTime->diff($now);
-        if ($diff->d == 0) {
-            if ($diff->h == 0) {
-                if ($diff->i == 0) {
-                    return self::getFrenchElapsedMessage($diff->s, 'seconde');
-                }
-                return self::getFrenchElapsedMessage($diff->i, 'minute');
-            }
-            return 'Aujourd\'hui' . self::formatTime($dateTime);
-        } elseif ($diff->d == 1 && $diff->h == 0) {
-            return 'Hier' . self::formatTime($dateTime);
-        }
-        return self::formatDateTime($dateTime);
-    }
-
-    private static function formatEnglishElapsedDateTime(\DateTime $dateTime)
-    {
-        $now = new \DateTime();
-        $diff = $dateTime->diff($now);
-        if ($diff->d == 0) {
-            if ($diff->h == 0) {
-                if ($diff->i == 0) {
-                    return self::getEnglishElapsedMessage($diff->s, 'second');
-                }
-                return self::getEnglishElapsedMessage($diff->i, 'minute');
-            }
-            return 'Today' . self::formatTime($dateTime);
-        } elseif ($diff->d == 1 && $diff->h == 0) {
-            return 'Yesterday' . self::formatTime($dateTime);
-        }
-        return self::formatDateTime($dateTime);
     }
 
     private static function getFrenchElapsedMessage($delay, $word)
