@@ -94,6 +94,7 @@ class SessionStorage
     {
         $_SESSION['__HANDLER_DESTROYED'] = time();
         session_regenerate_id(true);
+        $this->id = session_id();
         unset($_SESSION['__HANDLER_DESTROYED']);
     }
 
