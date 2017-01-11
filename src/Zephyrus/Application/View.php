@@ -59,7 +59,7 @@ class View
 
     private function addPagerKeyword()
     {
-        $this->pug->addKeyword('pager', function () {
+        $this->pug->setKeyword('pager', function () {
             if (is_null($this->pager)) {
                 $begin = 'echo "<div><strong style=\"color: red;\">PAGER NOT DEFINED !</strong></div>"';
             } else {
