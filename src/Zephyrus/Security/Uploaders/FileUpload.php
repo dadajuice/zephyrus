@@ -97,7 +97,7 @@ class FileUpload
      *
      * @return int
      */
-    public static final function getServerMaxUploadSize()
+    final public static function getServerMaxUploadSize()
     {
         $maxUpload = self::anySizeToBytes(ini_get('upload_max_filesize'));
         $maxPost = self::anySizeToBytes(ini_get('post_max_size'));
@@ -105,22 +105,13 @@ class FileUpload
     }
 
     /**
-     * @param string $name
-     * @return bool
-     */
-    public static final function hasError($name)
-    {
-        return $_FILES[$name]['error'] > UPLOAD_ERR_OK;
-    }
-
-    /**
      * @param mixed[] $data
      * @throws UploadException
      * @throws \Exception
      */
-    public function __construct($data)
+    public function __construct(array $data)
     {
-        $this->rawData = $data;
+        $this->initializeRawData($data);
         if ($this->rawData['error'] > UPLOAD_ERR_OK) {
             throw new UploadException($this->rawData['error']);
         }
@@ -136,29 +127,23 @@ class FileUpload
      * will throw an exception otherwise.
      *
      * @param string $filename (optional)
-     * @param bool $forceExtension (optional)
      * @return string
      * @throws \Exception
      */
-    public final function upload($filename = null, $forceExtension = true)
+    final public function upload($filename = null)
     {
         if (!is_null($filename)) {
-            $this->setDestinationFilename($filename, $forceExtension);
+            $this->setDestinationFilename($filename);
         }
-
         $this->initializeDefaultFilename();
-
         $this->validateUpload();
-        $destination = $this->destinationDirectory . $this->destinationFilename;
-
+        $destination = $this->getDestinationTarget();
         if (!$this->overwritePermitted && file_exists($destination)) {
             throw new \Exception("File ({$destination}) already exists and overwrite is not allowed");
         }
-
         if (!move_uploaded_file($this->temporaryFilename, $destination)) {
             throw new \Exception("Upload failed");
         }
-
         return $destination;
     }
 
@@ -167,7 +152,7 @@ class FileUpload
      *
      * @param string $extension
      */
-    public function addAllowedExtension($extension)
+    public function addAllowedExtension(string $extension)
     {
         $this->allowedExtensions[] = $extension;
     }
@@ -177,18 +162,15 @@ class FileUpload
      *
      * @param string[] $extensions
      */
-    public function addAllowedExtensions($extensions)
+    public function addAllowedExtensions(array $extensions)
     {
-        if (!is_array($extensions)) {
-            throw new \InvalidArgumentException("Specified argument must be an array");
-        }
         $this->allowedExtensions = array_merge($this->allowedExtensions, $extensions);
     }
 
     /**
      * @return string[]
      */
-    public function getAllowedExtensions()
+    public function getAllowedExtensions(): array
     {
         return $this->allowedExtensions;
     }
@@ -198,7 +180,7 @@ class FileUpload
      *
      * @param string $mimeType
      */
-    public function addAllowedMimeType($mimeType)
+    public function addAllowedMimeType(string $mimeType)
     {
         $this->allowedMimeTypes[] = $mimeType;
     }
@@ -208,34 +190,31 @@ class FileUpload
      *
      * @param string[] $mimeTypes
      */
-    public function addAllowedMimeTypes($mimeTypes)
+    public function addAllowedMimeTypes(array $mimeTypes)
     {
-        if (!is_array($mimeTypes)) {
-            throw new \InvalidArgumentException("Specified argument must be an array");
-        }
         $this->allowedMimeTypes = array_merge($this->allowedMimeTypes, $mimeTypes);
     }
 
     /**
      * @return string[]
      */
-    public function getAllowedMimeTypes()
+    public function getAllowedMimeTypes(): array
     {
         return $this->allowedMimeTypes;
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
-    public function isOverwritePermitted()
+    public function isOverwritePermitted(): bool
     {
         return $this->overwritePermitted;
     }
 
     /**
-     * @param boolean $overwritePermitted
+     * @param bool $overwritePermitted
      */
-    public function setOverwritePermitted($overwritePermitted)
+    public function setOverwritePermitted(bool $overwritePermitted)
     {
         $this->overwritePermitted = $overwritePermitted;
     }
@@ -243,7 +222,7 @@ class FileUpload
     /**
      * @return int
      */
-    public function getMaxSize()
+    public function getMaxSize(): int
     {
         return $this->maxSize;
     }
@@ -251,7 +230,7 @@ class FileUpload
     /**
      * @param int $maxSize
      */
-    public function setMaxSize($maxSize)
+    public function setMaxSize(int $maxSize)
     {
         $this->maxSize = $maxSize;
     }
@@ -259,15 +238,15 @@ class FileUpload
     /**
      * @return int
      */
-    public function getSize()
+    public function getSize(): int
     {
-        return (int)$this->size;
+        return $this->size;
     }
 
     /**
      * @return string
      */
-    public function getMimeType()
+    public function getMimeType(): string
     {
         return $this->mimeType;
     }
@@ -275,7 +254,7 @@ class FileUpload
     /**
      * @return string
      */
-    public function getExtension()
+    public function getExtension(): string
     {
         return $this->extension;
     }
@@ -287,7 +266,7 @@ class FileUpload
      *
      * @param string $destinationDirectory
      */
-    public function setDestinationDirectory($destinationDirectory)
+    public function setDestinationDirectory(string $destinationDirectory)
     {
         $destinationDirectory = ltrim($destinationDirectory, DIRECTORY_SEPARATOR);
         if ($destinationDirectory[strlen($destinationDirectory) - 1] != DIRECTORY_SEPARATOR) {
@@ -299,32 +278,21 @@ class FileUpload
     /**
      * @return string
      */
-    public function getDestinationDirectory()
+    public function getDestinationDirectory(): string
     {
         return $this->destinationDirectory;
     }
 
     /**
-     * @return string
-     */
-    public function getTemporaryFilePath()
-    {
-        return $this->temporaryFilename;
-    }
-
-    /**
      * Apply the uploaded filename to be used in the destination directory. To
-     * keep the same extension, simply omit to specify it in the filename and
-     * if it is needed to explicitly upload a file with no extension, disable
-     * the last argument (forceExtension).
+     * keep the same extension, simply omit to specify it in the filename.
      *
      * @param string $filename
-     * @param bool $forceExtension (optional)
      */
-    public function setDestinationFilename($filename, $forceExtension = true)
+    public function setDestinationFilename(string $filename)
     {
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
-        if (empty($extension) && $forceExtension) {
+        if (empty($extension) && !empty($this->extension)) {
             $filename .= '.' . $this->extension;
         }
         $this->destinationFilename = $filename;
@@ -333,7 +301,7 @@ class FileUpload
     /**
      * @return string
      */
-    public function getDestinationFilename()
+    public function getDestinationFilename(): string
     {
         return $this->destinationFilename;
     }
@@ -341,7 +309,7 @@ class FileUpload
     /**
      * @return string
      */
-    public function getDestinationTarget()
+    public function getDestinationTarget(): string
     {
         return $this->destinationDirectory . $this->destinationFilename;
     }
@@ -349,16 +317,18 @@ class FileUpload
     /**
      * Allows to keep the original filename (as specified by the uploader) as a
      * destination filename if no other has been provided. NOT RECOMMENDED.
+     *
+     * @param bool $keep
      */
-    public function keepOriginalFilename()
+    public function setKeepOriginalFilename(bool $keep)
     {
-        $this->randomizeFilename = false;
+        $this->randomizeFilename = !$keep;
     }
 
     /**
      * @return string
      */
-    public function getOriginalFilename()
+    public function getOriginalFilename(): string
     {
         return $this->originalFilename;
     }
@@ -377,19 +347,15 @@ class FileUpload
         if (!$this->hasValidSize()) {
             throw new UploadException(UploadException::ERR_FILE_SIZE);
         }
-
         if (!$this->hasValidExtension()) {
             throw new UploadException(UploadException::ERR_EXTENSION);
         }
-
         if (!$this->hasValidMimeType()) {
             throw new UploadException(UploadException::ERR_MIME_TYPE);
         }
-
         if (!is_dir($this->destinationDirectory)) {
             throw new UploadException(UploadException::ERR_DIRECTORY_EXISTS);
         }
-
         if (!is_writable($this->destinationDirectory)) {
             throw new UploadException(UploadException::ERR_DIRECTORY_WRITABLE);
         }
@@ -398,32 +364,15 @@ class FileUpload
     /**
      * @return string
      */
-    protected function getTemporaryFilename()
+    protected function getTemporaryFilename(): string
     {
         return $this->temporaryFilename;
     }
 
     /**
-     * Initialize object from raw data obtain from $_FILES
-     */
-    private function initialize()
-    {
-        $info = pathinfo($this->rawData['name']);
-        $this->originalFilename = $info['basename'];
-        $this->originalBasename = $info['filename'];
-        $this->originalMimeType = $this->rawData['type'];
-        $this->temporaryFilename = $this->rawData['tmp_name'];
-        $this->size = $this->rawData['size'];
-        $this->mimeType = $this->getRealMimeType();
-        $this->extension = strtolower($info['extension']);
-        $this->destinationDirectory = ROOT_DIR;
-        $this->destinationFilename = null;
-    }
-
-    /**
      * @return bool
      */
-    private function hasValidSize()
+    private function hasValidSize(): bool
     {
         return (($this->size / 1024 / 1024) <= $this->maxSize);
     }
@@ -431,23 +380,17 @@ class FileUpload
     /**
      * @return bool
      */
-    private function hasValidExtension()
+    private function hasValidExtension(): bool
     {
-        if (!empty($this->allowedExtensions) && !in_array($this->extension, $this->allowedExtensions)) {
-            return false;
-        }
-        return true;
+        return empty($this->allowedExtensions) || in_array($this->extension, $this->allowedExtensions);
     }
 
     /**
      * @return bool
      */
-    private function hasValidMimeType()
+    private function hasValidMimeType(): bool
     {
-        if (!empty($this->allowedMimeTypes) && !in_array($this->mimeType, $this->allowedMimeTypes)) {
-            return false;
-        }
-        return true;
+        return empty($this->allowedMimeTypes) || in_array($this->mimeType, $this->allowedMimeTypes);
     }
 
     /**
@@ -464,6 +407,47 @@ class FileUpload
     }
 
     /**
+     * @return string
+     */
+    private function getRandomFilename(): string
+    {
+        $file = md5(uniqid(rand(0, time()), true));
+        $extension = (!empty($this->extension)) ? '.' . $this->extension : '';
+        return $file . $extension;
+    }
+
+    /**
+     * @param array $data
+     * @throws \InvalidArgumentException
+     */
+    private function initializeRawData(array $data)
+    {
+        $keys = ['error', 'tmp_name', 'type', 'name', 'size'];
+        $missingKeys = array_diff_key(array_flip($keys), $data);
+        if (!empty($missingKeys)) {
+            throw new \InvalidArgumentException("Argument must be a valid file data [" . print_r($missingKeys, true) . " missing]");
+        }
+        $this->rawData = $data;
+    }
+
+    /**
+     * Initialize object from raw data obtain from $_FILES
+     */
+    private function initialize()
+    {
+        $info = pathinfo($this->rawData['name']);
+        $this->originalFilename = $info['basename'];
+        $this->originalBasename = $info['filename'];
+        $this->originalMimeType = $this->rawData['type'];
+        $this->temporaryFilename = $this->rawData['tmp_name'];
+        $this->size = $this->rawData['size'];
+        $this->mimeType = $this->getRealMimeType();
+        $this->extension = strtolower($info['extension']);
+        $this->destinationDirectory = null;
+        $this->destinationFilename = null;
+    }
+
+    /**
      * Obtain the concrete mime type of uploaded file based signature. This
      * mime type should be used for security check instead of the one provided
      * in the HTTP request which could be spoofed.
@@ -472,18 +456,10 @@ class FileUpload
      */
     private function getRealMimeType()
     {
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mime = finfo_file($finfo, $this->temporaryFilename);
-        finfo_close($finfo);
+        $info = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($info, $this->temporaryFilename);
+        finfo_close($info);
         return $mime;
-    }
-
-    /**
-     * @return string
-     */
-    private function getRandomFilename()
-    {
-        return md5(uniqid(rand(0, time()), true)) . '.' . $this->extension;
     }
 
     /**
@@ -492,9 +468,10 @@ class FileUpload
      * @param string $size
      * @return int
      */
-    private static function anySizeToBytes($size) {
+    private static function anySizeToBytes($size)
+    {
         $size = trim($size);
-        $s = ['g' => 1<<30, 'm' => 1<<20, 'k' => 1<<10];
-        return intval($size) * ($s[strtolower(substr($size, -1))] ?: 1);
+        $sizeUnits = ['g' => 1<<30, 'm' => 1<<20, 'k' => 1<<10];
+        return intval($size) * ($sizeUnits[strtolower(substr($size, -1))] ?: 1);
     }
 }
