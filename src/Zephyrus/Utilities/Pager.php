@@ -104,14 +104,12 @@ class Pager
 
         $page = 0;
         for ($i = $pageStart; $i < $tmp; $i++) {
-            $pager[$page] = '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
+            $pager[$page] = '<a href="' . $this->buildHref($i) . '">' . $i . '</a>';
             $page++;
         }
 
         for ($i = $tmp; $i <= $pageEnd && $page < 9; $i++) {
-            $pager[$page] = ($i == $this->currentPage)
-                ? "<span>$i</span>"
-                : '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
+            $pager[$page] = $this->buildAnchor($i);
             $page++;
         }
         return $pager;
@@ -126,9 +124,7 @@ class Pager
     {
         $pager = [];
         for ($i = 1; $i <= $this->maxPage; $i++) {
-            $pager[$i - 1] = ($i == $this->currentPage)
-                ? "<span>$i</span>"
-                : '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
+            $pager[$i - 1] = $this->buildAnchor($i);
         }
         return $pager;
     }
@@ -155,9 +151,9 @@ class Pager
     {
         if ($this->currentPage != 1) {
             if ($this->currentPage - 4 > 1) {
-                echo '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=1' . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '" style="font-weight: 400; font-size: 1.2rem; padding-top: 8px; line-height: 0">«</a>';
+                echo '<a href="' . $this->buildHref(1) . '">«</a>';
             }
-            echo '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . ($this->currentPage - 1) . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '" class="icon" style="font-size: 1rem; padding-top: 2px;">&lt;</a>';
+            echo '<a href="' . $this->buildHref($this->currentPage - 1) . '">&lt;</a>';
         }
     }
 
@@ -167,9 +163,9 @@ class Pager
     private function displayRightSide()
     {
         if ($this->currentPage != $this->maxPage) {
-            echo '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . ($this->currentPage + 1) . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '" class="icon" style="font-size: 1rem; padding-top: 2px;">&gt;</a>';
+            echo '<a href="' . $this->buildHref($this->currentPage + 1) . '">&gt;</a>';
             if ($this->currentPage + 4 < $this->maxPage) {
-                echo '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $this->maxPage . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '" style="font-weight: 400; font-size: 1.2rem; padding-top: 8px; line-height: 0">»</a>';
+                echo '<a href="' . $this->buildHref($this->maxPage) . '">»</a>';
             }
         }
     }
@@ -177,6 +173,20 @@ class Pager
     private function getQueryString($query)
     {
         return preg_replace("/(&?" . $this->urlParameter . "=[0-9]*&?)/", "", $query);
+    }
+
+    private function buildAnchor($pageNumber)
+    {
+        return ($pageNumber == $this->currentPage)
+            ? "<span>$pageNumber</span>"
+            : '<a href="' . $this->buildHref($pageNumber) . '">' . $pageNumber . '</a>';
+    }
+
+    private function buildHref($pageNumber)
+    {
+        $page = $this->urlParameter . '=' . $pageNumber;
+        $query = (!empty($this->pageQuery)) ? '&' . $this->pageQuery : '';
+        return $this->pageUrl . '?' . $page . $query;
     }
 
     private function validate()
