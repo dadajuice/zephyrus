@@ -11,6 +11,28 @@ class ContentSecurityPolicy
     const HTTPS_ONLY = "https:";
 
     /**
+     * Defines the supported source types.
+     *
+     * @var array
+     */
+    private $sourceTypes = [
+        'default-src',
+        'script-src',
+        'style-src',
+        'font-src',
+        'img-src',
+        'child-src',
+        'base-uri',
+        'connect-src',
+        'form-action',
+        'frame-ancestors',
+        'media-src',
+        'object-src',
+        'plugin-types',
+        'sandbox'
+    ];
+
+    /**
      * Define script execution by requiring the presence of the specified nonce
      * on script elements. Must be used in script tag: <script nonce=...>
      *
@@ -19,116 +41,11 @@ class ContentSecurityPolicy
     private static $nonce = null;
 
     /**
-     * Defines the defaults for most directives left unspecified. Generally, this
-     * applies to any directive that ends with -src. The following directives don’t
-     * use default-src as a fallback : base-uri, form-action, frame-ancestors,
-     * plugin-types, report-uri, sandbox.
+     * Defines the content for each supported source types.
      *
-     * @var string[]
+     * @var array
      */
-    private $defaultSources = [];
-
-    /**
-     * Define which scripts the protected resource can execute.
-     *
-     * @var string[]
-     */
-    private $scriptSources = [];
-
-    /**
-     * Is script-src’s counterpart for stylesheets.
-     *
-     * @var string[]
-     */
-    private $styleSources = [];
-
-    /**
-     * Allows control over Flash and other plugins.
-     *
-     * @var string[]
-     */
-    private $objectSources = [];
-
-    /**
-     * Defines the origins from which images can be loaded.
-     *
-     * @var string[]
-     */
-    private $imageSources = [];
-
-    /**
-     * Restricts the origins allowed to deliver video and audio.
-     *
-     * @var string[]
-     */
-    private $mediaSources = [];
-
-    /**
-     * Lists the URLs for workers and embedded frame contents. For example:
-     * child-src https://youtube.com would enable embedding videos from YouTube
-     * but not from other origins. Use this in place of the deprecated frame-src
-     * directive.
-     *
-     * @var string[]
-     */
-    private $childSources = [];
-
-    /**
-     * Specifies the sources that can embed the current page. This directive
-     * applies to <frame>, <iframe>, <embed>, and <applet> tags. This
-     * directive cant be used in <meta> tags and applies only to non-HTML
-     * resources.
-     *
-     * @var string[]
-     */
-    private $frameAncestors = [];
-
-    /**
-     * Specifies the origins that can serve web fonts. Google’s Web Fonts could
-     * be enabled via font-src https://themes.googleusercontent.com.
-     *
-     * @var string[]
-     */
-    private $fontSources = [];
-
-    /**
-     * Limits the origins to which you can connect (via XHR, WebSockets, and
-     * EventSource).
-     *
-     * @var string[]
-     */
-    private $connectSources = [];
-
-    /**
-     * Lists valid endpoints for submission from <form> tags.
-     *
-     * @var string[]
-     */
-    private $formActionSources = [];
-
-    /**
-     * Limits the kinds of plugins a page may invoke.
-     *
-     * @var string[]
-     */
-    private $pluginTypes = [];
-
-    /**
-     * Restricts the URLs that can appear in a page’s <base> element.
-     *
-     * @var string[]
-     */
-    private $baseUri = [];
-
-    /**
-     * Places restrictions on actions the page can take, rather than on resources
-     * that the page can load. If the sandbox directive is present, the page will
-     * be treated as though it was loaded inside of an iframe with a sandbox
-     * attribute.
-     *
-     * @var string[]
-     */
-    private $sandbox = [];
+    private $headers = [];
 
     /**
      * The policy specified in report-only mode won’t block restricted
@@ -147,7 +64,7 @@ class ContentSecurityPolicy
      *
      * @var bool
      */
-    private $sendCompatibilityHeaders = false;
+    private $compatible = false;
 
     /**
      * Instructs a user agent to activate or deactivate any heuristics used to
@@ -179,12 +96,14 @@ class ContentSecurityPolicy
         return self::$nonce;
     }
 
-    /**
-     * Generate a cryptographic nonce to be used for inline style and script.
-     */
-    public static function generateNonce()
+    public function __construct()
     {
-        self::$nonce = Cryptography::randomString(27);
+        foreach ($this->sourceTypes as $type) {
+            $this->headers[$type] = [];
+        }
+        if (empty(self::$nonce)) {
+            self::generateNonce();
+        }
     }
 
     /**
@@ -196,7 +115,7 @@ class ContentSecurityPolicy
         $header = $this->buildCompleteHeader();
         $reportOnly = ($this->reportOnly) ? "-Report-Only" : "";
         header("Content-Security-Policy$reportOnly: " . $header);
-        if ($this->sendCompatibilityHeaders) {
+        if ($this->compatible) {
             header("X-Content-Security-Policy$reportOnly: " . $header);
         }
     }
@@ -204,239 +123,281 @@ class ContentSecurityPolicy
     /**
      * @return string[]
      */
-    public function getDefaultSources()
+    public function getDefaultSources(): array
     {
-        return $this->defaultSources;
+        return $this->headers['default-src'];
     }
 
     /**
+     * Defines the defaults for most directives left unspecified. Generally, this
+     * applies to any directive that ends with -src. The following directives don’t
+     * use default-src as a fallback : base-uri, form-action, frame-ancestors,
+     * plugin-types, report-uri, sandbox.
+     *
      * @param string[] $defaultSources
      */
-    public function setDefaultSources($defaultSources)
+    public function setDefaultSources(array $defaultSources)
     {
-        $this->defaultSources = $defaultSources;
+        $this->headers['default-src'] = $defaultSources;
     }
 
     /**
      * @return string[]
      */
-    public function getScriptSources()
+    public function getScriptSources(): array
     {
-        return $this->scriptSources;
+        return $this->headers['script-src'];
     }
 
     /**
+     * Define which scripts the protected resource can execute.
+     *
      * @param string[] $scriptSources
      */
-    public function setScriptSources($scriptSources)
+    public function setScriptSources(array $scriptSources)
     {
-        $this->scriptSources = $scriptSources;
+        $this->headers['script-src'] = $scriptSources;
     }
 
     /**
      * @return string[]
      */
-    public function getStyleSources()
+    public function getStyleSources(): array
     {
-        return $this->styleSources;
+        return $this->headers['style-src'];
     }
 
     /**
+     * Is script-src’s counterpart for stylesheets.
+     *
      * @param string[] $styleSources
      */
-    public function setStyleSources($styleSources)
+    public function setStyleSources(array $styleSources)
     {
-        $this->styleSources = $styleSources;
+        $this->headers['style-src'] = $styleSources;
     }
 
     /**
      * @return string[]
      */
-    public function getObjectSources()
+    public function getObjectSources(): array
     {
-        return $this->objectSources;
+        return $this->headers['object-src'];
     }
 
     /**
+     * Allows control over Flash and other plugins.
+     *
      * @param string[] $objectSources
      */
-    public function setObjectSources($objectSources)
+    public function setObjectSources(array $objectSources)
     {
-        $this->objectSources = $objectSources;
+        $this->headers['object-src'] = $objectSources;
     }
 
     /**
      * @return string[]
      */
-    public function getImageSources()
+    public function getImageSources(): array
     {
-        return $this->imageSources;
+        return $this->headers['img-src'];
     }
 
     /**
+     * Defines the origins from which images can be loaded.
+     *
      * @param string[] $imageSources
      */
-    public function setImageSources($imageSources)
+    public function setImageSources(array $imageSources)
     {
-        $this->imageSources = $imageSources;
+        $this->headers['img-src'] = $imageSources;
     }
 
     /**
      * @return string[]
      */
-    public function getMediaSources()
+    public function getMediaSources(): array
     {
-        return $this->mediaSources;
+        return $this->headers['media-src'];
     }
 
     /**
+     * Restricts the origins allowed to deliver video and audio.
+     *
      * @param string[] $mediaSources
      */
-    public function setMediaSources($mediaSources)
+    public function setMediaSources(array $mediaSources)
     {
-        $this->mediaSources = $mediaSources;
+        $this->headers['media-src'] = $mediaSources;
     }
 
     /**
      * @return string[]
      */
-    public function getChildSources()
+    public function getChildSources(): array
     {
-        return $this->childSources;
+        return $this->headers['child-src'];
     }
 
     /**
+     * Lists the URLs for workers and embedded frame contents. For example:
+     * child-src https://youtube.com would enable embedding videos from YouTube
+     * but not from other origins. Use this in place of the deprecated frame-src
+     * directive.
+     *
      * @param string[] $childSources
      */
-    public function setChildSources($childSources)
+    public function setChildSources(array $childSources)
     {
-        $this->childSources = $childSources;
+        $this->headers['child-src'] = $childSources;
     }
 
     /**
      * @return string[]
      */
-    public function getFrameAncestors()
+    public function getFrameAncestors(): array
     {
-        return $this->frameAncestors;
+        return $this->headers['frame-ancestors'];
     }
 
     /**
+     * Specifies the sources that can embed the current page. This directive
+     * applies to <frame>, <iframe>, <embed>, and <applet> tags. This
+     * directive cant be used in <meta> tags and applies only to non-HTML
+     * resources.
+     *
      * @param string[] $frameAncestors
      */
-    public function setFrameAncestors($frameAncestors)
+    public function setFrameAncestors(array $frameAncestors)
     {
-        $this->frameAncestors = $frameAncestors;
+        $this->headers['frame-ancestors'] = $frameAncestors;
     }
 
     /**
      * @return string[]
      */
-    public function getFontSources()
+    public function getFontSources(): array
     {
-        return $this->fontSources;
+        return $this->headers['font-src'];
     }
 
     /**
+     * Specifies the origins that can serve web fonts. Google’s Web Fonts could
+     * be enabled via font-src https://themes.googleusercontent.com.
+     *
      * @param string[] $fontSources
      */
-    public function setFontSources($fontSources)
+    public function setFontSources(array $fontSources)
     {
-        $this->fontSources = $fontSources;
+        $this->headers['font-src'] = $fontSources;
     }
 
     /**
      * @return string[]
      */
-    public function getConnectSources()
+    public function getConnectSources(): array
     {
-        return $this->connectSources;
+        return $this->headers['connect-src'];
     }
 
     /**
+     * Limits the origins to which you can connect (via XHR, WebSockets, and
+     * EventSource).
+     *
      * @param string[] $connectSources
      */
-    public function setConnectSources($connectSources)
+    public function setConnectSources(array $connectSources)
     {
-        $this->connectSources = $connectSources;
+        $this->headers['connect-src'] = $connectSources;
     }
 
     /**
      * @return string[]
      */
-    public function getFormActionSources()
+    public function getFormActionSources(): array
     {
-        return $this->formActionSources;
+        return $this->headers['form-action'];
     }
 
     /**
+     * Lists valid endpoints for submission from <form> tags.
+     *
      * @param string[] $formActionSources
      */
-    public function setFormActionSources($formActionSources)
+    public function setFormActionSources(array $formActionSources)
     {
-        $this->formActionSources = $formActionSources;
+        $this->headers['form-action'] = $formActionSources;
     }
 
     /**
      * @return string[]
      */
-    public function getPluginTypes()
+    public function getPluginTypes(): array
     {
-        return $this->pluginTypes;
+        return $this->headers['plugin-types'];
     }
 
     /**
+     * Limits the kinds of plugins a page may invoke.
+     *
      * @param string[] $pluginTypes
      */
-    public function setPluginTypes($pluginTypes)
+    public function setPluginTypes(array $pluginTypes)
     {
-        $this->pluginTypes = $pluginTypes;
+        $this->headers['plugin-types'] = $pluginTypes;
     }
 
     /**
      * @return string[]
      */
-    public function getBaseUri()
+    public function getBaseUri(): array
     {
-        return $this->baseUri;
+        return $this->headers['base-uri'];
     }
 
     /**
+     * Restricts the URLs that can appear in a page’s <base> element.
+     *
      * @param string[] $baseUri
      */
-    public function setBaseUri($baseUri)
+    public function setBaseUri(array $baseUri)
     {
-        $this->baseUri = $baseUri;
+        $this->headers['base-uri'] = $baseUri;
     }
 
     /**
      * @return string[]
      */
-    public function getSandbox()
+    public function getSandbox(): array
     {
-        return $this->sandbox;
+        return $this->headers['sandbox'];
     }
 
     /**
+     * Places restrictions on actions the page can take, rather than on resources
+     * that the page can load. If the sandbox directive is present, the page will
+     * be treated as though it was loaded inside of an iframe with a sandbox
+     * attribute.
+     *
      * @param string[] $sandbox
      */
-    public function setSandbox($sandbox)
+    public function setSandbox(array $sandbox)
     {
-        $this->sandbox = $sandbox;
+        $this->headers['sandbox'] = $sandbox;
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
-    public function isOnlyReporting()
+    public function isOnlyReporting(): bool
     {
         return $this->reportOnly;
     }
 
     /**
-     * @param boolean $reportOnly
+     * @param bool $reportOnly
      */
-    public function setReportOnly($reportOnly)
+    public function setReportOnly(bool $reportOnly)
     {
         $this->reportOnly = $reportOnly;
     }
@@ -444,7 +405,7 @@ class ContentSecurityPolicy
     /**
      * @return string
      */
-    public function getReflectedXss()
+    public function getReflectedXss(): string
     {
         return $this->reflectedXss;
     }
@@ -452,7 +413,7 @@ class ContentSecurityPolicy
     /**
      * @param string $reflectedXss
      */
-    public function setReflectedXss($reflectedXss)
+    public function setReflectedXss(string $reflectedXss)
     {
         $this->reflectedXss = $reflectedXss;
     }
@@ -460,7 +421,7 @@ class ContentSecurityPolicy
     /**
      * @return string
      */
-    public function getReportUri()
+    public function getReportUri(): string
     {
         return $this->reportUri;
     }
@@ -468,7 +429,7 @@ class ContentSecurityPolicy
     /**
      * @param string $reportUri
      */
-    public function setReportUri($reportUri)
+    public function setReportUri(string $reportUri)
     {
         $this->reportUri = $reportUri;
     }
@@ -476,17 +437,17 @@ class ContentSecurityPolicy
     /**
      * @return boolean
      */
-    public function isCompatibilityHeadersSent()
+    public function isCompatible(): bool
     {
-        return $this->sendCompatibilityHeaders;
+        return $this->compatible;
     }
 
     /**
-     * @param boolean $sendCompatibilityHeaders
+     * @param boolean $compatible
      */
-    public function setSendCompatibilityHeaders($sendCompatibilityHeaders)
+    public function setCompatible(bool $compatible)
     {
-        $this->sendCompatibilityHeaders = $sendCompatibilityHeaders;
+        $this->compatible = $compatible;
     }
 
     /**
@@ -494,22 +455,12 @@ class ContentSecurityPolicy
      *
      * @return string
      */
-    private function buildCompleteHeader()
+    private function buildCompleteHeader(): string
     {
-        $header = $this->buildHeaderLine('default-src', $this->defaultSources);
-        $header .= $this->buildHeaderLine('script-src', $this->scriptSources);
-        $header .= $this->buildHeaderLine('style-src', $this->styleSources);
-        $header .= $this->buildHeaderLine('font-src', $this->fontSources);
-        $header .= $this->buildHeaderLine('img-src', $this->imageSources);
-        $header .= $this->buildHeaderLine('child-src', $this->childSources);
-        $header .= $this->buildHeaderLine('base-uri', $this->baseUri);
-        $header .= $this->buildHeaderLine('connect-src', $this->connectSources);
-        $header .= $this->buildHeaderLine('form-action', $this->formActionSources);
-        $header .= $this->buildHeaderLine('frame-ancestors', $this->frameAncestors);
-        $header .= $this->buildHeaderLine('media-src', $this->mediaSources);
-        $header .= $this->buildHeaderLine('object-src', $this->objectSources);
-        $header .= $this->buildHeaderLine('plugin-types', $this->pluginTypes);
-        $header .= $this->buildHeaderLine('sandbox', $this->sandbox);
+        $header = "";
+        foreach ($this->headers as $sourceType => $value) {
+            $header .= $this->buildHeaderLine($sourceType, $value);
+        }
         if (!empty($this->reportUri)) {
             $header .= 'report-uri ' . $this->reportUri . ';';
         }
@@ -526,10 +477,10 @@ class ContentSecurityPolicy
      * @param string[] $sources
      * @return string
      */
-    private function buildHeaderLine($name, $sources)
+    private function buildHeaderLine(string $name, array $sources): string
     {
         $header = '';
-        if (is_array($sources) && !empty($sources)) {
+        if (!empty($sources)) {
             $value = "";
             foreach ($sources as $source) {
                 if (!empty($value)) {
@@ -537,12 +488,18 @@ class ContentSecurityPolicy
                 }
                 $value .= $source;
             }
-            if ($name == "script-src" && !empty(self::$nonce)) {
-                $header = "$name $value 'nonce-" . self::$nonce . "';";
-            } else {
-                $header = "$name $value;";
-            }
+            $header = ($name == "script-src" && !empty(self::$nonce))
+                ? "$name $value 'nonce-" . self::$nonce . "';"
+                : "$name $value;";
         }
         return $header;
+    }
+
+    /**
+     * Generate a cryptographic nonce to be used for inline style and script.
+     */
+    private static function generateNonce()
+    {
+        self::$nonce = Cryptography::randomString(27);
     }
 }
