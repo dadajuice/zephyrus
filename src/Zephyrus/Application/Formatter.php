@@ -4,34 +4,12 @@ class Formatter
 {
     public static function formatElapsedDateTime($dateTime)
     {
-        $inFrench = strpos(Configuration::getApplicationConfiguration('locale'), 'fr') !== false;
-        $terms = [
-            'fr' => ['YESTERDAY' => 'Hier, ', 'TODAY' => 'Aujourd\'hui, '],
-            'en' => ['YESTERDAY' => 'Yesterday, ', 'TODAY' => 'Today, ']
-        ];
-        $lang = ($inFrench) ? $terms['fr'] : $terms['en'];
-
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new \DateTime($dateTime);
         }
-        $now = new \DateTime();
-        $diff = $dateTime->diff($now);
-        if ($diff->d == 0) {
-            if ($diff->h == 0) {
-                if ($diff->i == 0) {
-                    return ($inFrench) ?
-                        ("Il y a " . $diff->s . " seconde" . (($diff->s > 1) ? 's' : '')) :
-                        ($diff->s . " second" . (($diff->s > 1) ? 's' : '') . ' ago');
-                }
-                return ($inFrench) ?
-                    ("Il y a " . $diff->i . " minute" . (($diff->i > 1) ? 's' : '')) :
-                    ($diff->i . " minute" . (($diff->i > 1) ? 's' : '') . ' ago');
-            }
-            return $lang['TODAY'] . self::formatTime($dateTime);
-        } elseif ($diff->d == 1 && $diff->h == 0) {
-            return $lang['YESTERDAY'] . self::formatTime($dateTime);
-        }
-        return self::formatDateTime($dateTime);
+        return (self::isFrench())
+            ? self::formatFrenchElapsedDateTime($dateTime)
+            : self::formatEnglishElapsedDateTime($dateTime);
     }
 
     public static function formatDate($dateTime)
@@ -60,7 +38,8 @@ class Formatter
 
     public static function formatPercent($number, $minDecimals = 2, $maxDecimals = 4)
     {
-        $formatter = new \NumberFormatter(Configuration::getApplicationConfiguration('locale'), \NumberFormatter::PERCENT);
+        $locale = Configuration::getApplicationConfiguration('locale');
+        $formatter = new \NumberFormatter($locale, \NumberFormatter::PERCENT);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
@@ -69,7 +48,8 @@ class Formatter
 
     public static function formatMoney($amount, $minDecimals = 2, $maxDecimals = 2)
     {
-        $formatter = new \NumberFormatter(Configuration::getApplicationConfiguration('locale'), \NumberFormatter::CURRENCY);
+        $locale = Configuration::getApplicationConfiguration('locale');
+        $formatter = new \NumberFormatter($locale, \NumberFormatter::CURRENCY);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $result = $formatter->formatCurrency($amount, Configuration::getApplicationConfiguration('currency'));
@@ -78,7 +58,8 @@ class Formatter
 
     public static function formatDecimal($number, $minDecimals = 2, $maxDecimals = 4)
     {
-        $formatter = new \NumberFormatter(Configuration::getApplicationConfiguration('locale'), \NumberFormatter::DECIMAL);
+        $locale = Configuration::getApplicationConfiguration('locale');
+        $formatter = new \NumberFormatter($locale, \NumberFormatter::DECIMAL);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
@@ -113,20 +94,73 @@ class Formatter
             'fr' => ['G' => 'go', 'M' => 'mo', 'K' => 'ko', 'B' => 'octets'],
             'en' => ['G' => 'gb', 'M' => 'mb', 'K' => 'kb', 'B' => 'bytes']
         ];
-        $lang = (strpos(Configuration::getApplicationConfiguration('locale'), 'fr') !== false) ? $terms['fr'] : $terms['en'];
+        $lang = (self::isFrench()) ? $terms['fr'] : $terms['en'];
+        $fileSize = $sizeInBytes;
+        $unit = $lang['B'];
         if ($sizeInBytes >= 1073741824) {
             $fileSize = round($sizeInBytes / 1024 / 1024 / 1024, 1);
             $unit = $lang['G'];
         } elseif ($sizeInBytes >= 1048576) {
             $fileSize = round($sizeInBytes / 1024 / 1024, 1);
             $unit = $lang['M'];
-        } elseif($sizeInBytes >= 1024) {
+        } elseif ($sizeInBytes >= 1024) {
             $fileSize = round($sizeInBytes / 1024, 1);
             $unit = $lang['K'];
-        } else {
-            $fileSize = $sizeInBytes;
-            $unit = $lang['B'];
         }
         return self::formatDecimal($fileSize, 0, 2) . ' ' . $unit;
+    }
+
+    private static function formatFrenchElapsedDateTime(\DateTime $dateTime)
+    {
+        $now = new \DateTime();
+        $diff = $dateTime->diff($now);
+        if ($diff->d == 0) {
+            if ($diff->h == 0) {
+                if ($diff->i == 0) {
+                    return self::getFrenchElapsedMessage($diff->s, 'seconde');
+                }
+                return self::getFrenchElapsedMessage($diff->i, 'minute');
+            }
+            return 'Aujourd\'hui' . self::formatTime($dateTime);
+        } elseif ($diff->d == 1 && $diff->h == 0) {
+            return 'Hier' . self::formatTime($dateTime);
+        }
+        return self::formatDateTime($dateTime);
+    }
+
+    private static function formatEnglishElapsedDateTime(\DateTime $dateTime)
+    {
+        $now = new \DateTime();
+        $diff = $dateTime->diff($now);
+        if ($diff->d == 0) {
+            if ($diff->h == 0) {
+                if ($diff->i == 0) {
+                    return self::getEnglishElapsedMessage($diff->s, 'second');
+                }
+                return self::getEnglishElapsedMessage($diff->i, 'minute');
+            }
+            return 'Today' . self::formatTime($dateTime);
+        } elseif ($diff->d == 1 && $diff->h == 0) {
+            return 'Yesterday' . self::formatTime($dateTime);
+        }
+        return self::formatDateTime($dateTime);
+    }
+
+    private static function getFrenchElapsedMessage($delay, $word)
+    {
+        return "Il y a $delay $word" . (($delay > 1) ? 's' : '');
+    }
+
+    private static function getEnglishElapsedMessage($delay, $word)
+    {
+        return "$delay $word" . (($delay > 1) ? 's' : '') . ' ago';
+    }
+
+    /**
+     * @return bool
+     */
+    private static function isFrench()
+    {
+        return strpos(Configuration::getApplicationConfiguration('locale'), 'fr') !== false;
     }
 }
