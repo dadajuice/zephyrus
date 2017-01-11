@@ -187,45 +187,9 @@ class Form
      */
     private function executeRule($field, $callback)
     {
-        return (is_array($callback))
-            ? $this->executeMethod($field, $callback)
-            : $this->executeFunction($field, $callback);
-    }
-
-    /**
-     * Execute the specified callback function
-     *
-     * @param string $field
-     * @param callable $callback
-     * @return mixed
-     */
-    private function executeFunction($field, $callback)
-    {
-        $reflection = new \ReflectionFunction($callback);
-        $arguments = $this->getFunctionArguments($reflection, $field);
-        return $reflection->invokeArgs($arguments);
-    }
-
-    /**
-     * Execute the specified callback object method. Works with static calls
-     * or instance method.
-     *
-     * @param string $field
-     * @param callable $callback
-     * @return mixed
-     */
-    private function executeMethod($field, $callback)
-    {
-        $reflection = new \ReflectionMethod($callback[0], $callback[1]);
-        $arguments = $this->getFunctionArguments($reflection, $field);
-        if ($reflection->isStatic()) {
-            return $reflection->invokeArgs(null, $arguments);
-        } elseif (is_object($callback[0])) {
-            return $reflection->invokeArgs($callback[0], $arguments);
-        } else {
-            $instance = new $callback[0]();
-            return $reflection->invokeArgs($instance, $arguments);
-        }
+        $callback = new Callback($callback);
+        $arguments = $this->getFunctionArguments($callback->getReflection(), $field);
+        return $callback->executeArray($arguments);
     }
 
     /**

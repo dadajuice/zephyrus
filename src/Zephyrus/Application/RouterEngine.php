@@ -177,57 +177,10 @@ abstract class RouterEngine
     {
         $this->loadRequestParameters($route);
         $this->beforeCallback($route);
-        $this->executeCallback($route['callback']);
+        $callback = new Callback($route['callback']);
+        $arguments = $this->getFunctionArguments($callback->getReflection());
+        $callback->executeArray($arguments);
         $this->afterCallback($route);
-    }
-
-    /**
-     * Execute the specified callback function or method.
-     *
-     * @param $callback
-     * @throws \Exception
-     */
-    private function executeCallback($callback)
-    {
-        $isObjectMethod = is_array($callback);
-        if ($isObjectMethod) {
-            $this->executeMethod($callback);
-        } else {
-            $this->executeFunction($callback);
-        }
-    }
-
-    /**
-     * Execute the specified callback function
-     *
-     * @param $callback
-     */
-    private function executeFunction($callback)
-    {
-        $reflection = new \ReflectionFunction($callback);
-        $arguments = $this->getFunctionArguments($reflection);
-        $reflection->invokeArgs($arguments);
-    }
-
-    /**
-     * Execute the specified callback object method. Works with static calls
-     * or instance method.
-     *
-     * @param $callback
-     */
-    private function executeMethod($callback)
-    {
-        $reflection = new \ReflectionMethod($callback[0], $callback[1]);
-        $arguments = $this->getFunctionArguments($reflection);
-
-        if ($reflection->isStatic()) {
-            $reflection->invokeArgs(null, $arguments);
-        } elseif (is_object($callback[0])) {
-            $reflection->invokeArgs($callback[0], $arguments);
-        } else {
-            $instance = new $callback[0]();
-            $reflection->invokeArgs($instance, $arguments);
-        }
     }
 
     /**
