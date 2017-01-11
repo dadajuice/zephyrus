@@ -12,10 +12,10 @@ class ClassLocator
     public static function getClassesInNamespace($namespace)
     {
         $files = scandir(self::getNamespaceDirectory($namespace));
-        $classes = array_map(function($file) use ($namespace){
+        $classes = array_map(function ($file) use ($namespace) {
             return $namespace . '\\' . str_replace('.php', '', $file);
         }, $files);
-        return array_values(array_filter($classes, function($possibleClass){
+        return array_values(array_filter($classes, function ($possibleClass){
             return class_exists($possibleClass);
         }));
     }
@@ -46,13 +46,14 @@ class ClassLocator
     {
         $composerNamespaces = self::getDefinedNamespaces();
         $namespaceFragments = explode('\\', $namespace);
-        $undefinedNamespaceFragments = [];
+        $undefinedFragments = [];
         while ($namespaceFragments) {
             $possibleNamespace = implode('\\', $namespaceFragments) . '\\';
             if (array_key_exists($possibleNamespace, $composerNamespaces)) {
-                return realpath(ROOT_DIR . DIRECTORY_SEPARATOR . $composerNamespaces[$possibleNamespace] . implode('/', $undefinedNamespaceFragments));
+                return realpath(ROOT_DIR . DIRECTORY_SEPARATOR . $composerNamespaces[$possibleNamespace] .
+                    implode('/', $undefinedFragments));
             }
-            $undefinedNamespaceFragments[] = array_pop($namespaceFragments);
+            $undefinedFragments[] = array_pop($namespaceFragments);
         }
         throw new \Exception("Specified namespace [$namespace] has not been defined");
     }
