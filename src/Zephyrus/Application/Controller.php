@@ -105,7 +105,7 @@ abstract class Controller implements Routable
         if ((!$data instanceof \SimpleXMLElement) && !is_array($data)) {
             throw new \RuntimeException("Cannot parse specified data as XML");
         }
-        
+
         if ($data instanceof \SimpleXMLElement) {
             echo $data->asXML();
         }
