@@ -6,22 +6,6 @@ class Response
     private static $responseContentTypeSent = false;
 
     /**
-     * @return boolean
-     */
-    public static function isResponseCodeSent()
-    {
-        return (bool) self::$responseCodeSent;
-    }
-
-    /**
-     * @return boolean
-     */
-    public static function isResponseContentTypeSent()
-    {
-        return (bool) self::$responseContentTypeSent;
-    }
-
-    /**
      * Send the HTTP response code.
      *
      * @param int $responseCode
