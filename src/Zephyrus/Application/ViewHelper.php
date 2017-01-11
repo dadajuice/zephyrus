@@ -38,7 +38,7 @@ class ViewHelper
 
     private function addCsrfKeyword()
     {
-        $this->keywords['csrf'] = function() {
+        $this->keywords['csrf'] = function () {
             return [
                 'beginPhp' => 'echo Zephyrus\Security\CsrfGuard::getInstance()->generateHiddenFields()',
                 'endPhp' => ';',
@@ -69,51 +69,25 @@ class ViewHelper
 
     private function addFormatFunction()
     {
-        $this->functions['format'] = function ($type, $value, ...$args) {
-            $argc = count($args);
+        $this->functions['format'] = function ($type, ...$args) {
+            $class = '\Zephyrus\Application\Formatter';
             switch ($type) {
                 case 'filesize':
-                    return Formatter::formatHumanFileSize($value);
+                    return forward_static_call_array([$class, 'formatHumanFileSize'], $args);
                 case 'time':
-                    return Formatter::formatTime($value);
+                    return forward_static_call_array([$class, 'formatTime'], $args);
                 case 'elapsed':
-                    return Formatter::formatElapsedDateTime($value);
+                    return forward_static_call_array([$class, 'formatElapsedDateTime'], $args);
                 case 'datetime':
-                    return Formatter::formatDateTime($value);
+                    return forward_static_call_array([$class, 'formatDateTime'], $args);
                 case 'date':
-                    return Formatter::formatDate($value);
+                    return forward_static_call_array([$class, 'formatDate'], $args);
                 case 'percent':
-                    if ($argc == 0) {
-                        return Formatter::formatPercent($value);
-                    } elseif ($argc == 1) {
-                        return Formatter::formatPercent($value, $args[0]);
-                    } elseif ($argc == 2) {
-                        return Formatter::formatPercent($value, $args[0], $args[1]);
-                    } else {
-                        return 'Percent format must between 0 and 2 arguments (' . $argc . ' provided)';
-                    }
+                    return forward_static_call_array([$class, 'formatPercent'], $args);
                 case 'money':
-                    if ($argc == 0) {
-                        return Formatter::formatMoney($value);
-                    } elseif ($argc == 1) {
-                        return Formatter::formatMoney($value, $args[0]);
-                    } elseif ($argc == 2) {
-                        return Formatter::formatMoney($value, $args[0], $args[1]);
-                    } else {
-                        return 'Money format must have between 0 and 3 arguments (' . $argc . ' provided)';
-                    }
+                    return forward_static_call_array([$class, 'formatMoney'], $args);
                 case 'decimal':
-                    //$arguments[] = $value;
-                    //return forward_static_call_array(['Formatter', 'formatDecimal'], array_merge($arguments, $args));
-                    if ($argc == 0) {
-                        return Formatter::formatDecimal($value);
-                    } elseif ($argc == 1) {
-                        return Formatter::formatDecimal($value, $args[0]);
-                    } elseif ($argc == 2) {
-                        return Formatter::formatDecimal($value, $args[0], $args[1]);
-                    } else {
-                        return 'Decimal format must have between 0 and 3 arguments (' . $argc . ' provided)';
-                    }
+                    return forward_static_call_array([$class, 'formatDecimal'], $args);
             }
             return 'FORMAT TYPE [' . $type . '] NOT DEFINED !';
         };
