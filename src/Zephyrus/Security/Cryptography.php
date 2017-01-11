@@ -122,7 +122,9 @@ class Cryptography
         }
 
         $difference = $max - $min;
-        for ($power = 8; pow(2, $power) < $difference; $power = $power * 2) {;}
+        for ($power = 8; pow(2, $power) < $difference; $power = $power * 2) {
+            ;
+        }
         $powerExp = $power / 8;
         do {
             $randDiff = hexdec(bin2hex(self::randomBytes($powerExp)));
@@ -148,9 +150,9 @@ class Cryptography
             $characters = str_split($characters);
         }
         $result = '';
-        $n = count($characters);
+        $characterCount = count($characters);
         for ($i = 0; $i < $length; ++$i) {
-            $result .= $characters[self::randomInt(0, $n - 1)];
+            $result .= $characters[self::randomInt(0, $characterCount - 1)];
         }
         return $result;
     }
@@ -167,11 +169,10 @@ class Cryptography
     public static function randomBytes(int $length = 1): string
     {
         $bytes = openssl_random_pseudo_bytes($length, $strong);
-        if ($strong === true) {
-            return $bytes;
-        } else {
+        if ($strong !== true) {
             throw new \Exception('OpenSSL Random byte generation insecure');
         }
+        return $bytes;
     }
 
     /**
@@ -187,9 +188,9 @@ class Cryptography
     public static function encrypt(string $data, string $key): string
     {
         $method = Configuration::getSecurityConfiguration('encryption_algorithm');
-        $iv = self::randomBytes(openssl_cipher_iv_length($method));
-        $cipher = openssl_encrypt($data, $method, $key, 0, $iv);
-        return base64_encode($iv) . ':' . base64_encode($cipher);
+        $initializationVector = self::randomBytes(openssl_cipher_iv_length($method));
+        $cipher = openssl_encrypt($data, $method, $key, 0, $initializationVector);
+        return base64_encode($initializationVector) . ':' . base64_encode($cipher);
     }
 
     /**
@@ -208,10 +209,10 @@ class Cryptography
             throw new \Exception("Invalid cipher to decrypt");
         }
         $method = Configuration::getSecurityConfiguration('encryption_algorithm');
-        list($iv, $cipher) = explode(':', $cipher);
+        list($initializationVector, $cipher) = explode(':', $cipher);
         $cipher = base64_decode($cipher);
-        $iv = base64_decode($iv);
-        return openssl_decrypt($cipher, $method, $key, 0, $iv);
+        $initializationVector = base64_decode($initializationVector);
+        return openssl_decrypt($cipher, $method, $key, 0, $initializationVector);
     }
 
     /**
