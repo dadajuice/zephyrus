@@ -88,26 +88,6 @@ class FormTest extends TestCase
         self::assertTrue($result);
     }
 
-    public function testValidationMethod()
-    {
-        $form = new Form();
-        $form->addField('name', 'bob');
-        $form->addField('price', '12.00');
-        $form->addRule('price', [$this, 'validPrice'], 'err_1');
-        $result = $form->verify();
-        self::assertTrue($result);
-    }
-
-    public function testValidationClass()
-    {
-        $form = new Form();
-        $form->addField('name', 'bob');
-        $form->addField('price', '12.00');
-        $form->addRule('price', ['\Zephyrus\Tests\ValidationTesting', 'validPrice'], 'err_1');
-        $result = $form->verify();
-        self::assertTrue($result);
-    }
-
     /**
      * @expectedException \InvalidArgumentException
      */
@@ -116,18 +96,5 @@ class FormTest extends TestCase
         $form = new Form();
         $form->addField('name', '');
         $form->addRule('bob', Validator::ALPHANUMERIC, "err_1");
-    }
-
-    public function validPrice($value)
-    {
-        return $value > 10;
-    }
-}
-
-class ValidationTesting
-{
-    public function validPrice($value)
-    {
-        return $value > 10;
     }
 }
