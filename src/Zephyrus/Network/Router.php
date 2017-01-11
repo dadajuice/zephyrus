@@ -15,11 +15,11 @@ class Router extends RouterEngine
      *
      * @param string $uri
      * @param callable $callback
-     * @param string | array | null $acceptedRequestFormats
+     * @param string | array | null $acceptedFormats
      */
-    public function get($uri, $callback, $acceptedRequestFormats = null)
+    public function get($uri, $callback, $acceptedFormats = null)
     {
-        parent::addRoute('GET', $uri, $callback, $acceptedRequestFormats);
+        parent::addRoute('GET', $uri, $callback, $acceptedFormats);
     }
 
     /**
@@ -31,11 +31,11 @@ class Router extends RouterEngine
      *
      * @param string $uri
      * @param callable $callback
-     * @param string| array | null $acceptedRequestFormats
+     * @param string| array | null $acceptedFormats
      */
-    public function post($uri, $callback, $acceptedRequestFormats = null)
+    public function post($uri, $callback, $acceptedFormats = null)
     {
-        parent::addRoute('POST', $uri, $callback, $acceptedRequestFormats);
+        parent::addRoute('POST', $uri, $callback, $acceptedFormats);
     }
 
     /**
@@ -47,11 +47,11 @@ class Router extends RouterEngine
      *
      * @param string $uri
      * @param callable $callback
-     * @param string | array | null $acceptedRequestFormats
+     * @param string | array | null $acceptedFormats
      */
-    public function put($uri, $callback, $acceptedRequestFormats = null)
+    public function put($uri, $callback, $acceptedFormats = null)
     {
-        parent::addRoute('PUT', $uri, $callback, $acceptedRequestFormats);
+        parent::addRoute('PUT', $uri, $callback, $acceptedFormats);
     }
 
     /**
@@ -64,10 +64,10 @@ class Router extends RouterEngine
      *
      * @param string $uri
      * @param callable $callback
-     * @param string | array | null $acceptedRequestFormats
+     * @param string | array | null $acceptedFormats
      */
-    public function delete($uri, $callback, $acceptedRequestFormats = null)
+    public function delete($uri, $callback, $acceptedFormats = null)
     {
-        parent::addRoute('DELETE', $uri, $callback, $acceptedRequestFormats);
+        parent::addRoute('DELETE', $uri, $callback, $acceptedFormats);
     }
 }
