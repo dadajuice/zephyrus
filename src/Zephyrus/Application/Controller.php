@@ -56,7 +56,6 @@ abstract class Controller implements Routable
         Response::sendResponseCode();
         Response::sendContentType(ContentType::HTML);
         echo $data;
-        exit;
     }
 
     /**
@@ -69,7 +68,6 @@ abstract class Controller implements Routable
         Response::sendResponseCode();
         Response::sendContentType(ContentType::JSON);
         echo json_encode($data);
-        exit;
     }
 
     /**
@@ -104,17 +102,18 @@ abstract class Controller implements Routable
     {
         Response::sendResponseCode();
         Response::sendContentType(ContentType::XML);
+        if ((!$data instanceof \SimpleXMLElement) && !is_array($data)) {
+            throw new \RuntimeException("Cannot parse specified data as XML");
+        }
+        
         if ($data instanceof \SimpleXMLElement) {
             echo $data->asXML();
-            exit;
         }
         if (is_array($data)) {
             $xml = new \SimpleXMLElement('<' . $root . '/>');
             array_walk_recursive($data, array ($xml, 'addChild'));
             echo $xml->asXML();
-            exit;
         }
-        throw new \RuntimeException("Cannot parse specified data as XML");
     }
 
     /**
