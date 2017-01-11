@@ -50,13 +50,6 @@ class Pager
         $this->validate();
     }
 
-    private function validate()
-    {
-        if ($this->currentPage < 1 || $this->currentPage > $this->maxPage) {
-            redirect($this->pageUrl);
-        }
-    }
-
     public function getSqlLimit()
     {
         $offset = $this->maxEntities * ($this->currentPage - 1);
@@ -97,7 +90,9 @@ class Pager
         $pageEnd = $this->maxPage;
         $tmp = $this->currentPage;
         $pager = [];
-        while(($pageEnd - $tmp) < 4) $tmp--;
+        while (($pageEnd - $tmp) < 4) {
+            $tmp--;
+        }
 
         if ($tmp != $this->currentPage) {
             $pageStart = 1 + ($tmp - 5);
@@ -114,14 +109,11 @@ class Pager
         }
 
         for ($i = $tmp; $i <= $pageEnd && $page < 9; $i++) {
-            if ($i == $this->currentPage) {
-                $pager[$page] = "<span>$i</span>";
-            } else {
-                $pager[$page] = '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
-            }
+            $pager[$page] = ($i == $this->currentPage)
+                ? "<span>$i</span>"
+                : '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
             $page++;
         }
-
         return $pager;
     }
 
@@ -134,11 +126,9 @@ class Pager
     {
         $pager = [];
         for ($i = 1; $i <= $this->maxPage; $i++) {
-            if ($i == $this->currentPage) {
-                $pager[$i - 1] = "<span>$i</span>";
-            } else {
-                $pager[$i - 1] = '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
-            }
+            $pager[$i - 1] = ($i == $this->currentPage)
+                ? "<span>$i</span>"
+                : '<a href="' . $this->pageUrl . '?' . $this->urlParameter . '=' . $i . ((!empty($this->pageQuery)) ? '&' . $this->pageQuery : '') . '">' . $i . '</a>';
         }
         return $pager;
     }
@@ -187,5 +177,12 @@ class Pager
     private function getQueryString($query)
     {
         return preg_replace("/(&?" . $this->urlParameter . "=[0-9]*&?)/", "", $query);
+    }
+
+    private function validate()
+    {
+        if ($this->currentPage < 1 || $this->currentPage > $this->maxPage) {
+            redirect($this->pageUrl);
+        }
     }
 }
