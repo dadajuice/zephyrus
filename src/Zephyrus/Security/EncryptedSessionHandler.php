@@ -32,40 +32,36 @@ class EncryptedSessionHandler extends \SessionHandler
         $this->cookieKeyName = "key_$sessionName";
         if (empty($_COOKIE[$this->cookieKeyName]) || strpos($_COOKIE[$this->cookieKeyName], ':') === false) {
             $this->createEncryptionCookie();
-        } else {
-            list($this->cryptKey, $this->cryptAuth) = explode(':', $_COOKIE[$this->cookieKeyName]);
-            $this->cryptKey = base64_decode($this->cryptKey);
-            $this->cryptAuth = base64_decode($this->cryptAuth);
+            return true;
         }
+        list($this->cryptKey, $this->cryptAuth) = explode(':', $_COOKIE[$this->cookieKeyName]);
+        $this->cryptKey = base64_decode($this->cryptKey);
+        $this->cryptAuth = base64_decode($this->cryptAuth);
         return true;
     }
 
-    public function read($id)
+    public function read($sessionId)
     {
-        $data = parent::read($id);
-        if (!$data) {
-            return "";
-        } else {
-            return $this->decrypt($data);
-        }
+        $data = parent::read($sessionId);
+        return (!$data) ? "" : $this->decrypt($data);
     }
 
-    public function write($id, $data)
+    public function write($sessionId, $data)
     {
         $data = $this->encrypt($data);
-        return parent::write($id, $data);
+        return parent::write($sessionId, $data);
     }
 
     /**
      * Destroy session file on disk and delete encryption cookie if no session
      * is active after deletion.
      *
-     * @param string $id
+     * @param string $sessionId
      * @return bool
      */
-    public function destroy($id)
+    public function destroy($sessionId)
     {
-        parent::destroy($id);
+        parent::destroy($sessionId);
         if (empty(session_id())) {
             if (isset($_COOKIE[$this->cookieKeyName])) {
                 setcookie($this->cookieKeyName, '', 1);
@@ -107,11 +103,11 @@ class EncryptedSessionHandler extends \SessionHandler
     private function encrypt(string $data): string
     {
         $cipher = Cryptography::encrypt($data, $this->cryptKey);
-        list($iv, $cipher) = explode(':', $cipher);
-        $iv = base64_decode($iv);
+        list($initializationVector, $cipher) = explode(':', $cipher);
+        $initializationVector = base64_decode($initializationVector);
         $cipher = base64_decode($cipher);
-        $hmac = hash_hmac('sha256', $iv . Cryptography::getEncryptionAlgorithm() . $cipher, $this->cryptAuth);
-        return $hmac . ':' . base64_encode($iv) . ':' . base64_encode($cipher);
+        $hmac = hash_hmac('sha256', $initializationVector . Cryptography::getEncryptionAlgorithm() . $cipher, $this->cryptAuth);
+        return $hmac . ':' . base64_encode($initializationVector) . ':' . base64_encode($cipher);
     }
 
     /**
@@ -123,14 +119,15 @@ class EncryptedSessionHandler extends \SessionHandler
      */
     private function decrypt(string $data): string
     {
-        list($hmac, $iv, $cipher) = explode(':', $data);
-        $ivReal = base64_decode($iv);
+        list($hmac, $initializationVector, $cipher) = explode(':', $data);
+        $ivReal = base64_decode($initializationVector);
         $cipherReal = base64_decode($cipher);
-        $newHmac = hash_hmac('sha256', $ivReal . Cryptography::getEncryptionAlgorithm() . $cipherReal, $this->cryptAuth);
+        $validHash = $ivReal . Cryptography::getEncryptionAlgorithm() . $cipherReal;
+        $newHmac = hash_hmac('sha256', $validHash, $this->cryptAuth);
         if ($hmac !== $newHmac) {
             return false;
         }
-        $decrypt = Cryptography::decrypt($iv . ':' . $cipher, $this->cryptKey);
+        $decrypt = Cryptography::decrypt($initializationVector . ':' . $cipher, $this->cryptKey);
         return $decrypt;
     }
 }
