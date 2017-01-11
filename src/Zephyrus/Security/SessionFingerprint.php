@@ -1,6 +1,6 @@
 <?php namespace Zephyrus\Security;
 
-use Zephyrus\Network\RequestFactory;
+use Zephyrus\Network\Request;
 
 class SessionFingerprint
 {
@@ -14,8 +14,14 @@ class SessionFingerprint
      */
     private $ipAddressFingerprinted;
 
-    public function __construct(array $config)
+    /**
+     * @var Request
+     */
+    private $request;
+
+    public function __construct(array $config, Request $request)
     {
+        $this->request = $request;
         $this->userAgentFingerprinted = $config['fingerprint_agent'] ?? false;
         $this->ipAddressFingerprinted = $config['fingerprint_ip'] ?? false;
     }
@@ -83,10 +89,10 @@ class SessionFingerprint
     {
         $fingerprint = '';
         if ($this->ipAddressFingerprinted) {
-            $fingerprint .= RequestFactory::create()->getClientIp();
+            $fingerprint .= $this->request->getClientIp();
         }
         if ($this->userAgentFingerprinted) {
-            $fingerprint .= RequestFactory::create()->getUserAgent();
+            $fingerprint .= $this->request->getUserAgent();
         }
         return hash('sha256', $fingerprint);
     }
