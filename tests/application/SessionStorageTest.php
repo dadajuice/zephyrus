@@ -44,5 +44,6 @@ class SessionStorageTest extends TestCase
         $_SESSION['test'] = '123';
         $storage->restart();
         self::assertFalse(isset($_SESSION['test']));
+        $storage->destroy();
     }
 }
