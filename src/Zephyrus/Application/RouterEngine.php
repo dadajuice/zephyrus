@@ -53,7 +53,7 @@ abstract class RouterEngine
     /**
      * @return Request
      */
-    public final function getRequest()
+    final public function getRequest()
     {
         return $this->request;
     }
