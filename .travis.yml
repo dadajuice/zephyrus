@@ -10,7 +10,7 @@ before_script:
   - travis_retry composer install --no-interaction
 
 script:
-  - vendor/bin/phpunit --verbose --coverage-clover=tests/coverage/results.xml
+  - vendor/bin/phpunit --verbose --stderr --coverage-clover=tests/coverage/results.xml
 
 after_script:
   - vendor/bin/test-reporter --coverage-report tests/coverage/results.xml

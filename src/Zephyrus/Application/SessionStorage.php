@@ -75,7 +75,7 @@ class SessionStorage
         }
         session_start();
         $this->id = session_id();
-        $this->content = $_SESSION;
+        $this->content = &$_SESSION;
         $this->started = true;
         if (isset($_SESSION['__HANDLER_DESTROYED']) && $_SESSION['__HANDLER_DESTROYED'] < time() - 300) {
             $this->destroy();
@@ -110,7 +110,7 @@ class SessionStorage
     /**
      * @return array
      */
-    public function getContent(): array
+    public function &getContent(): array
     {
         return $this->content;
     }
