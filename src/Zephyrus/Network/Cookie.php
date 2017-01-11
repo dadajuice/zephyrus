@@ -23,37 +23,37 @@ class Cookie
     /**
      * @var int Cookie expire time (timestamp)
      */
-    private $lifetime;
+    private $lifetime = self::DURATION_SESSION;
 
     /**
      * @var string The domain that the cookie is available to
      */
-    private $domain;
+    private $domain = '';
 
     /**
      * @var string The path on the server which the cookie will be available
      * on. If set to '/', the cookie will be available to the entire specified
      * domain.
      */
-    private $path;
+    private $path = '/';
 
     /**
      * @var bool Determines if the cookie should be sent only over HTTPS from
      * the client side.
      */
-    private $secure;
+    private $secure = false;
 
     /**
      * @var bool Determines if the cookie is made accessible only through the
      * HTTP protocol and thus making it inaccessible from scripting
      * language.
      */
-    private $httpOnly;
+    private $httpOnly = true;
 
     /**
      * @var bool Determines if url encoding should be used for the cookie value
      */
-    private $urlEncodedValue;
+    private $urlEncodedValue = false;
 
     /**
      * Cookie constructor which automatically create the cookie in the HTTP
@@ -62,38 +62,34 @@ class Cookie
      *
      * @param string $name
      * @param string $value
-     * @param int $expire
-     * @param string $path
-     * @param string $domain
-     * @param bool $secure
-     * @param bool $httpOnly
-     * @param bool $urlEncodedValue
      */
-    public function __construct($name, $value = null,
-                                $expire = self::DURATION_SESSION,
-                                $path = '/', $domain = '', $secure = false,
-                                $httpOnly = true, $urlEncodedValue = false)
+    public function __construct($name, $value = null)
     {
         $this->name = $name;
         $this->value = $value;
-        $this->lifetime = $expire;
-        $this->path = $path;
-        $this->secure = $secure;
-        $this->httpOnly = $httpOnly;
-        $this->urlEncodedValue = $urlEncodedValue;
-        if (is_null($value)) {
-            $this->load();
-        } else {
-            $this->setCookie();
-        }
     }
 
     /**
-     * @return bool
+     * Save the cookie in the HTTP response header using the default PHP
+     * functions setcookie or setrawcookie depending on the need to save the
+     * cookie value without url encoding.
+     *
+     * @see http://php.net/manual/en/function.setcookie.php
+     * @see http://php.net/manual/en/function.setrawcookie.php
      */
-    public function exists()
+    public function send()
     {
-        return isset($_COOKIE[$this->name]);
+        $args = [
+            $this->name,
+            $this->value,
+            time() + $this->lifetime,
+            $this->path,
+            $this->domain,
+            $this->secure,
+            $this->httpOnly
+        ];
+        $function = (!$this->urlEncodedValue) ? 'setrawcookie' : 'setcookie';
+        call_user_func_array($function, $args);
     }
 
     /**
@@ -110,60 +106,55 @@ class Cookie
     }
 
     /**
-     * Apply a new value. Updates cookie immediately.
+     * Apply a new value.
      *
      * @param string $value
      */
-    public function setValue($value)
+    public function setValue(string $value)
     {
         $this->value = $value;
-        $this->setCookie();
     }
 
     /**
-     * Apply a new expiration date. Updates cookie immediately.
+     * Apply a new expiration date.
      *
      * @param int $lifetime
      */
-    public function setLifetime($lifetime)
+    public function setLifetime(int $lifetime)
     {
-        $this->lifetime = (int)$lifetime;
-        $this->setCookie();
+        $this->lifetime = $lifetime;
     }
 
     /**
-     * Apply a new accessibility domain. Update cookie immediately.
+     * Apply a new accessibility domain.
      *
      * @param string $domain
      */
-    public function setDomain($domain)
+    public function setDomain(string $domain)
     {
         $this->domain = $domain;
-        $this->setCookie();
     }
 
     /**
      * Apply a new availability path. If '/' is specified, the cookie will be
-     * available for the entire domain. Updates cookie immediately.
+     * available for the entire domain.
      *
      * @param string $path
      */
-    public function setPath($path)
+    public function setPath(string $path)
     {
         $this->path = $path;
-        $this->setCookie();
     }
 
     /**
      * Specify if the cookie should only be transmitted on HTTPS from the
-     * client side. Updates cookie immediately.
+     * client side.
      *
      * @param bool $secure
      */
-    public function setSecure($secure)
+    public function setSecure(bool $secure)
     {
-        $this->secure = (bool)$secure;
-        $this->setCookie();
+        $this->secure = $secure;
     }
 
     /**
@@ -172,28 +163,25 @@ class Cookie
      *
      * @param bool $httpOnly
      */
-    public function setHttpOnly($httpOnly)
+    public function setHttpOnly(bool $httpOnly)
     {
-        $this->httpOnly = (bool)$httpOnly;
-        $this->setCookie();
+        $this->httpOnly = $httpOnly;
     }
 
     /**
-     * Specify if the cookie value is urlencoded (default TRUE). Updates
-     * cookie immediately.
+     * Specify if the cookie value is urlencoded (default FALSE).
      *
      * @param bool $urlEncodedValue
      */
-    public function setIsValueUrlEncoded($urlEncodedValue)
+    public function setIsValueUrlEncoded(bool $urlEncodedValue)
     {
-        $this->urlEncodedValue = (bool)$urlEncodedValue;
-        $this->setCookie();
+        $this->urlEncodedValue = $urlEncodedValue;
     }
 
     /**
      * @return string Cookie name
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -201,51 +189,8 @@ class Cookie
     /**
      * @return string Cookie value
      */
-    public function getValue()
+    public function getValue(): string
     {
         return $this->value;
-    }
-
-    /**
-     * Save the cookie in the HTTP response header using the default PHP
-     * functions setcookie or setrawcookie depending on the need to save the
-     * cookie value without url encoding.
-     *
-     * @see http://php.net/manual/en/function.setcookie.php
-     * @see http://php.net/manual/en/function.setrawcookie.php
-     */
-    private function setCookie()
-    {
-        if (!$this->urlEncodedValue) {
-            setrawcookie(
-                $this->name,
-                $this->value,
-                time() + $this->lifetime,
-                $this->path,
-                $this->domain,
-                $this->secure,
-                $this->httpOnly
-            );
-        } else {
-            setcookie(
-                $this->name,
-                $this->value,
-                time() + $this->lifetime,
-                $this->path,
-                $this->domain,
-                $this->secure,
-                $this->httpOnly
-            );
-        }
-    }
-
-    /**
-     * Loads the saved cookie value if it exists.
-     */
-    private function load()
-    {
-        if (isset($_COOKIE[$this->name])) {
-            $this->value = $_COOKIE[$this->name];
-        }
     }
 }
