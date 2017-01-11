@@ -425,7 +425,8 @@ class FileUpload
         $keys = ['error', 'tmp_name', 'type', 'name', 'size'];
         $missingKeys = array_diff_key(array_flip($keys), $data);
         if (!empty($missingKeys)) {
-            throw new \InvalidArgumentException("Argument must be a valid file data [" . print_r($missingKeys, true) . " missing]");
+            throw new \InvalidArgumentException("Argument must be a valid file data [" .
+                print_r($missingKeys, true) . " missing]");
         }
         $this->rawData = $data;
     }
