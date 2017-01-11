@@ -14,6 +14,11 @@ abstract class Controller implements Routable
      */
     protected $request;
 
+    /**
+     * @var Response
+     */
+    protected $response;
+
     public function __construct()
     {
         $this->request = RequestFactory::create();
@@ -53,8 +58,8 @@ abstract class Controller implements Routable
      */
     protected function html($data)
     {
-        Response::sendResponseCode();
-        Response::sendContentType(ContentType::HTML);
+        $this->response->sendResponseCode();
+        $this->response->sendContentType(ContentType::HTML);
         echo $data;
     }
 
@@ -65,8 +70,8 @@ abstract class Controller implements Routable
      */
     protected function json($data)
     {
-        Response::sendResponseCode();
-        Response::sendContentType(ContentType::JSON);
+        $this->response->sendResponseCode();
+        $this->response->sendContentType(ContentType::JSON);
         echo json_encode($data);
     }
 
@@ -79,9 +84,9 @@ abstract class Controller implements Routable
      */
     protected function sse($data, $id = 0, $retry = 1000)
     {
-        Response::sendResponseCode();
-        Response::sendContentType(ContentType::SSE);
-        Response::sendHeader('Cache-Control', 'no-cache');
+        $this->response->sendResponseCode();
+        $this->response->sendContentType(ContentType::SSE);
+        $this->response->sendHeader('Cache-Control', 'no-cache');
         echo "id: $id" . PHP_EOL;
         echo "retry: " . $retry . PHP_EOL;
         echo "data: " . json_encode($data) . PHP_EOL;
@@ -100,8 +105,8 @@ abstract class Controller implements Routable
      */
     protected function xml($data, $root = "")
     {
-        Response::sendResponseCode();
-        Response::sendContentType(ContentType::XML);
+        $this->response->sendResponseCode();
+        $this->response->sendContentType(ContentType::XML);
         if ((!$data instanceof \SimpleXMLElement) && !is_array($data)) {
             throw new \RuntimeException("Cannot parse specified data as XML");
         }

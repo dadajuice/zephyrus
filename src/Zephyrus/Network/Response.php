@@ -2,28 +2,28 @@
 
 class Response
 {
-    private static $responseCodeSent = false;
-    private static $responseContentTypeSent = false;
+    private $responseCodeSent = false;
+    private $responseContentTypeSent = false;
 
     /**
      * Send the HTTP response code.
      *
      * @param int $responseCode
      */
-    public static function sendResponseCode($responseCode = 200)
+    public function sendResponseCode($responseCode = 200)
     {
-        if (self::$responseCodeSent) {
+        if ($this->responseCodeSent) {
             throw new \RuntimeException("HTTP response status code already sent");
         }
         http_response_code($responseCode);
-        self::$responseCodeSent = true;
+        $this->responseCodeSent = true;
     }
 
     /**
      * @param string $name
      * @param string $content
      */
-    public static function sendHeader($name, $content)
+    public function sendHeader($name, $content)
     {
         header("$name:$content");
     }
@@ -32,19 +32,19 @@ class Response
      * @param string $contentType
      * @param string $charset
      */
-    public static function sendContentType($contentType = ContentType::HTML, $charset = 'UTF-8')
+    public function sendContentType($contentType = ContentType::HTML, $charset = 'UTF-8')
     {
-        if (self::$responseContentTypeSent) {
+        if ($this->responseContentTypeSent) {
             throw new \RuntimeException("HTTP Content-Type header already sent");
         }
         header('Content-Type: ' . $contentType . ';charset=' . $charset);
-        self::$responseContentTypeSent = true;
+        $this->responseContentTypeSent = true;
     }
 
-    public static function abort($httpStatusCode)
+    public function abort($httpStatusCode)
     {
-        self::sendResponseCode($httpStatusCode);
-        self::sendContentType();
+        $this->sendResponseCode($httpStatusCode);
+        $this->sendContentType();
         exit;
     }
 
