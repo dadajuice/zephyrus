@@ -54,7 +54,7 @@ class Authorization
         if (isset($this->requirements[$name])) {
             throw new \Exception("Requirement $name is already defined");
         }
-        $this->requirements[$name] = function() use($key, $value) {
+        $this->requirements[$name] = function () use ($key, $value) {
             if (!isset($_SESSION[$key])) {
                 return false;
             }
@@ -65,13 +65,13 @@ class Authorization
         };
     }
 
-    public function addIpAddressRequirement(string $name, string $ip)
+    public function addIpAddressRequirement(string $name, string $idAddress)
     {
         if (isset($this->requirements[$name])) {
             throw new \Exception("Requirement $name is already defined");
         }
-        $this->requirements[$name] = function() use($ip) {
-            return RequestFactory::create()->getClientIp() == $ip;
+        $this->requirements[$name] = function () use ($idAddress) {
+            return RequestFactory::create()->getClientIp() == $idAddress;
         };
     }
 
@@ -155,5 +155,7 @@ class Authorization
         $this->rules[$httpMethod][$pathRegex] = $requirements;
     }
 
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 }
