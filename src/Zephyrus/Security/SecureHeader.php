@@ -157,11 +157,11 @@ class SecureHeader
     }
 
     /**
-     * @param string $strictTransportSecurity
+     * @param string $strict
      */
-    public function setStrictTransportSecurity($strictTransportSecurity)
+    public function setStrictTransportSecurity($strict)
     {
-        $this->strictTransportSecurity = $strictTransportSecurity;
+        $this->strictTransportSecurity = $strict;
     }
 
     /**
@@ -173,15 +173,17 @@ class SecureHeader
     }
 
     /**
-     * @param ContentSecurityPolicy $contentSecurityPolicy
+     * @param ContentSecurityPolicy $csp
      */
-    public function setContentSecurityPolicy($contentSecurityPolicy)
+    public function setContentSecurityPolicy($csp)
     {
-        $this->contentSecurityPolicy = $contentSecurityPolicy;
+        $this->contentSecurityPolicy = $csp;
     }
 
     /**
      * Private SecureHeader constructor for singleton pattern.
      */
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 }
