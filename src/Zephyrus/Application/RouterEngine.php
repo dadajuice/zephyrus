@@ -39,7 +39,7 @@ abstract class RouterEngine
      *
      * @param Request $request
      */
-    public final function run(Request $request)
+    final public function run(Request $request)
     {
         $this->request = $request;
         $this->requestedUri = $this->request->getPath();
@@ -66,10 +66,10 @@ abstract class RouterEngine
      * @param string $method
      * @param string $uri
      * @param callable $callback
-     * @param string | array | null $acceptedRequestFormats
+     * @param string | array | null $acceptedFormats
      * @throws RouteDefinitionException
      */
-    protected final function addRoute($method, $uri,  $callback, $acceptedRequestFormats)
+    final protected function addRoute($method, $uri, $callback, $acceptedFormats)
     {
         if ($uri != '/') {
             $uri = rtrim($uri, '/');
@@ -86,7 +86,7 @@ abstract class RouterEngine
                 : null,
             'params' => $params,
             'callback' => $callback,
-            'acceptedRequestFormats' => $acceptedRequestFormats
+            'acceptedRequestFormats' => $acceptedFormats
         ];
     }
 
@@ -99,7 +99,6 @@ abstract class RouterEngine
      */
     protected function beforeCallback($route)
     {
-
     }
 
     /**
@@ -111,7 +110,6 @@ abstract class RouterEngine
      */
     protected function afterCallback($route)
     {
-
     }
 
     /**
@@ -130,7 +128,8 @@ abstract class RouterEngine
         $routes = $this->routes[$this->requestedMethod];
         foreach ($routes as $route) {
             $pattern = '/^' . $route['regex'] . '$/';
-            if ($route['uri'] == $this->requestedUri || (!empty($route['regex']) && preg_match($pattern, $this->requestedUri))) {
+            $match = !empty($route['regex']) && preg_match($pattern, $this->requestedUri);
+            if ($route['uri'] == $this->requestedUri || $match) {
                 if (!$this->isRequestAcceptedForRoute($route)) {
                     throw new RouteNotAcceptedException($this->requestedRepresentation);
                 }
@@ -242,7 +241,7 @@ abstract class RouterEngine
         $arguments = [];
         if (!empty($reflection->getParameters())) {
             $requestedParameters = $this->request->getParameters();
-            foreach ($requestedParameters as $name => $value) {
+            foreach ($requestedParameters as $value) {
                 $arguments[] = $value;
             }
         }
@@ -262,14 +261,13 @@ abstract class RouterEngine
             preg_match_all($pattern, $this->requestedUri, $matches);
 
             $values = [];
-            $n = count($matches);
-            for ($i = 1; $i < $n; ++$i) {
+            $matchCount = count($matches);
+            for ($i = 1; $i < $matchCount; ++$i) {
                 $values[] = /*purify(*/$matches[$i][0]/*)*/;
             }
 
             $i = 0;
             foreach ($route['params'] as $param) {
-                $_GET[$param] = $values[$i];
                 $this->request->prependParameter($param, $values[$i]);
                 ++$i;
             }
