@@ -46,8 +46,7 @@ class Database
     public function query($query, $parameters = [])
     {
         try {
-            $statement = $this->handle->prepare(
-                $query, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
+            $statement = $this->handle->prepare($query, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
             if (!$statement->execute($parameters)) {
                 throw new DatabaseException('Error executing query « ' . $query . ' »');
             }
@@ -134,18 +133,11 @@ class Database
      */
     private function initializeConnectionHandle()
     {
-        if (isset($this->config['dsn'])) {
-            $connectionString = $this->config['dsn'];
-        } else {
-            $connectionString = "mysql:dbname={$this->config['database']};
-                             host={$this->config['host']};
-                             charset={$this->config['charset']}";
-        }
+        $connectionString = (isset($this->config['dsn']))
+            ? $this->config['dsn']
+            : "mysql:dbname={$this->config['database']};host={$this->config['host']};charset={$this->config['charset']}";
         try {
-            $this->handle = new TransactionPDO($connectionString,
-                                     $this->config['username'],
-                                     $this->config['password']
-            );
+            $this->handle = new TransactionPDO($connectionString, $this->config['username'], $this->config['password']);
             $this->handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (\PDOException $e) {
             throw new DatabaseException("Connection failed to database : " . $e->getMessage());

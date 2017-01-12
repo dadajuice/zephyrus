@@ -89,38 +89,38 @@ class ImageUpload extends FileUpload
      */
     private function rebuildImage($width, $height)
     {
-        $final_image = imagecreatetruecolor($width, $height);
-        $temp_image = null;
+        $finalImage = imagecreatetruecolor($width, $height);
+        $tempImage = null;
         $ext = $this->getExtension();
 
         switch ($ext) {
             case 'jpg':
             case 'jpeg':
-                $temp_image = @imagecreatefromjpeg($this->getTemporaryFilename());
+                $tempImage = @imagecreatefromjpeg($this->getTemporaryFilename());
                 break;
 
             case 'gif':
-                $temp_image = @imagecreatefromgif($this->getTemporaryFilename());
+                $tempImage = @imagecreatefromgif($this->getTemporaryFilename());
                 break;
 
             case 'png':
-                $temp_image = @imagecreatefrompng($this->getTemporaryFilename());
+                $tempImage = @imagecreatefrompng($this->getTemporaryFilename());
                 break;
         }
 
-        if (!$temp_image) {
+        if (!$tempImage) {
             throw new \Exception("Uploaded image appears to be corrupt (possible injection)");
         }
 
         // Maintenir la transparence possible d'une image
-        imagealphablending($final_image, false);
-        imagesavealpha($final_image, true);
+        imagealphablending($finalImage, false);
+        imagesavealpha($finalImage, true);
 
         // Copier l'image temporaire vers le tampon finale selon les
         // nouvelles dimensions.
         imagecopyresampled(
-            $final_image,
-            $temp_image,
+            $finalImage,
+            $tempImage,
             0,
             0,
             0,
@@ -135,15 +135,15 @@ class ImageUpload extends FileUpload
         switch ($ext) {
             case 'jpg':
             case 'jpeg':
-                imagejpeg($final_image, $this->getTemporaryFilename(), 100);
+                imagejpeg($finalImage, $this->getTemporaryFilename(), 100);
                 break;
 
             case 'gif':
-                imagegif($final_image, $this->getTemporaryFilename());
+                imagegif($finalImage, $this->getTemporaryFilename());
                 break;
 
             case 'png':
-                imagepng($final_image, $this->getTemporaryFilename());
+                imagepng($finalImage, $this->getTemporaryFilename());
                 break;
         }
     }

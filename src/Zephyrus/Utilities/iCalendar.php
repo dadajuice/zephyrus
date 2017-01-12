@@ -242,7 +242,8 @@ END:VCALENDAR<?php
      * @param string $string
      * @return string
      */
-    private function escapeString($string) {
-        return preg_replace('/([\,;])/','\\\$1', $string);
+    private function escapeString($string)
+    {
+        return preg_replace('/([\,;])/', '\\\$1', $string);
     }
 }
