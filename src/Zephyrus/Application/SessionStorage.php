@@ -12,7 +12,7 @@ class SessionStorage
     /**
      * @var string
      */
-    private $id;
+    private $sessionId;
 
     /**
      * @var string
@@ -47,7 +47,7 @@ class SessionStorage
      */
     public function getId()
     {
-        return $this->id;
+        return $this->sessionId;
     }
 
     /**
@@ -74,7 +74,7 @@ class SessionStorage
             session_set_save_handler($this->handler);
         }
         session_start();
-        $this->id = session_id();
+        $this->sessionId = session_id();
         $this->content = &$_SESSION;
         $this->started = true;
         if (isset($_SESSION['__HANDLER_DESTROYED']) && $_SESSION['__HANDLER_DESTROYED'] < time() - 300) {
@@ -94,7 +94,7 @@ class SessionStorage
     {
         $_SESSION['__HANDLER_DESTROYED'] = time();
         session_regenerate_id(true);
-        $this->id = session_id();
+        $this->sessionId = session_id();
         unset($_SESSION['__HANDLER_DESTROYED']);
     }
 

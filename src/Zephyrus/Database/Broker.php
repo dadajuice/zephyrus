@@ -96,11 +96,11 @@ abstract class Broker
             $statement->setAllowedHtmlTags($this->allowedHtmlTags);
         }
         $statement->setAllowedHtmlTags($allowedTags);
-        $n = $statement->count();
-        if ($n == 0) {
+        $count = $statement->count();
+        if ($count == 0) {
             return null;
-        } elseif ($n > 1) {
-            throw new DatabaseException("Specified SELECT query « $query » should return a unique row, but $n rows found");
+        } elseif ($count > 1) {
+            throw new DatabaseException("Specified SELECT query « $query » should return a unique row, but $count rows found");
         }
         return $statement->next();
     }
@@ -141,7 +141,7 @@ abstract class Broker
      * @return mixed
      * @throws DatabaseException
      */
-    protected function transaction(Callable $callback)
+    protected function transaction(callable $callback)
     {
         try {
             $this->database->beginTransaction();

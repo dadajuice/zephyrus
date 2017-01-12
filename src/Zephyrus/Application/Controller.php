@@ -79,15 +79,15 @@ abstract class Controller implements Routable
      * Does a server-sent event response.
      *
      * @param string $data
-     * @param int $id
+     * @param int $eventId
      * @param int $retry
      */
-    protected function sse($data, $id = 0, $retry = 1000)
+    protected function sse($data, $eventId = 0, $retry = 1000)
     {
         $this->response->sendResponseCode();
         $this->response->sendContentType(ContentType::SSE);
         $this->response->sendHeader('Cache-Control', 'no-cache');
-        echo "id: $id" . PHP_EOL;
+        echo "id: $eventId" . PHP_EOL;
         echo "retry: " . $retry . PHP_EOL;
         echo "data: " . json_encode($data) . PHP_EOL;
         echo PHP_EOL;

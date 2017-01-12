@@ -45,8 +45,7 @@ class Uploader
         }
 
         if ($this->multipleFiles) {
-            $n = count($this->rawData['error']);
-            for ($i = 0; $i < $n; ++$i) {
+            for ($i = 0; $i < count($this->rawData['error']); ++$i) {
                 if ($this->rawData['error'][$i] > UPLOAD_ERR_OK) {
                     throw new UploadException($this->rawData['error'][$i]);
                 }

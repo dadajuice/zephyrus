@@ -71,12 +71,12 @@ class SessionFingerprint
     }
 
     /**
-     * @param boolean $ipAddressFingerprinted
+     * @param boolean $fingerprinted
      * @throws \RuntimeException
      */
-    public function setIpAddressFingerprinted(bool $ipAddressFingerprinted)
+    public function setIpAddressFingerprinted(bool $fingerprinted)
     {
-        $this->ipAddressFingerprinted = $ipAddressFingerprinted;
+        $this->ipAddressFingerprinted = $fingerprinted;
     }
 
     /**

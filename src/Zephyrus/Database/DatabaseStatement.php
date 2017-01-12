@@ -95,7 +95,7 @@ class DatabaseStatement
      */
     private function sanitizeOutput(&$row)
     {
-        foreach ($row as $col => &$value) {
+        foreach ($row as &$value) {
             $value = strip_tags($value, $this->allowedHtmlTags);
         }
     }

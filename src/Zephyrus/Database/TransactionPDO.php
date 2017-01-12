@@ -2,7 +2,7 @@
 
 class TransactionPDO extends \PDO
 {
-    private static $SAVEPOINT_ENABLED_SGBD = ["pgsql", "mysql"];
+    private static $savepointEnabled = ["pgsql", "mysql"];
 
     /**
      * @var int
@@ -55,6 +55,6 @@ class TransactionPDO extends \PDO
      * @return bool
      */
     private function nestable() {
-        return in_array($this->getAttribute(\PDO::ATTR_DRIVER_NAME), self::$SAVEPOINT_ENABLED_SGBD);
+        return in_array($this->getAttribute(\PDO::ATTR_DRIVER_NAME), self::$savepointEnabled);
     }
 }

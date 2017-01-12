@@ -54,7 +54,7 @@ class IntrusionDetection
      * @param callable | null $detectionCallback (optional)
      * @throws \Exception
      */
-    public function run(Callable $detectionCallback = null)
+    public function run(callable $detectionCallback = null)
     {
         if (!is_null($detectionCallback)) {
             $this->detectionCallback = $detectionCallback;
@@ -82,7 +82,7 @@ class IntrusionDetection
      *
      * @param callable $callback
      */
-    public function onDetection(Callable $callback)
+    public function onDetection(callable $callback)
     {
         $this->detectionCallback = $callback;
     }

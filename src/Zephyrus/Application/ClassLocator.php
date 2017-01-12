@@ -15,7 +15,7 @@ class ClassLocator
         $classes = array_map(function ($file) use ($namespace) {
             return $namespace . '\\' . str_replace('.php', '', $file);
         }, $files);
-        return array_values(array_filter($classes, function ($possibleClass){
+        return array_values(array_filter($classes, function ($possibleClass) {
             return class_exists($possibleClass);
         }));
     }

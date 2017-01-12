@@ -144,11 +144,11 @@ class SessionExpiration
     }
 
     /**
-     * @param int $refreshAfterNthRequests
+     * @param int $nthRequests
      */
-    public function setRefreshAfterNthRequests(int $refreshAfterNthRequests)
+    public function setRefreshAfterNthRequests(int $nthRequests)
     {
-        $this->refreshAfterNthRequests = $refreshAfterNthRequests;
+        $this->refreshAfterNthRequests = $nthRequests;
     }
 
     /**

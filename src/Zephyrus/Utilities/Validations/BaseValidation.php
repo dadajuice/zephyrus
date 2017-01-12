@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Utilities\Validations;
 
-
 class BaseValidation
 {
     public static function isNotEmpty($data): bool

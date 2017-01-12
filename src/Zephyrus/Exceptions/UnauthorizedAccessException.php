@@ -10,11 +10,10 @@ class UnauthorizedAccessException extends \Exception
         $this->uri = $uri;
         $this->requirements = $requirements;
         $data = implode(', ', $requirements);
-        if (!empty($uri) && !empty($requirements)) {
-            parent::__construct("Unauthorized access! Requirement(s) [$data] failed for route [$uri]");
-        } else {
-            parent::__construct("Unauthorized access!");
-        }
+        parent::__construct((!empty($uri) && !empty($requirements))
+            ? "Unauthorized access! Requirement(s) [$data] failed for route [$uri]"
+            : "Unauthorized access!");
+
     }
 
     public function getRequirements()
