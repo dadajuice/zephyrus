@@ -29,7 +29,7 @@ class SessionFingerprint
     public function __construct(array $config, SessionStorage $storage)
     {
         $this->content = &$storage->getContent();
-        $this->request = RequestFactory::create();
+        $this->request = RequestFactory::read();
         $this->userAgentFingerprinted = $config['fingerprint_agent'] ?? false;
         $this->ipAddressFingerprinted = $config['fingerprint_ip'] ?? false;
     }

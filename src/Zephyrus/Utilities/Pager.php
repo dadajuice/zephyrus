@@ -39,7 +39,7 @@ class Pager
 
     public function __construct($recordCount, $maxEntities = self::PAGE_MAX_ENTITIES, $urlParameter = self::URL_PARAMETER)
     {
-        $request = RequestFactory::create();
+        $request = RequestFactory::read();
         $this->urlParameter = $urlParameter;
         $page = $request->getParameter($urlParameter);
         $this->maxEntities = $maxEntities;

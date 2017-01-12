@@ -12,19 +12,38 @@ class RequestFactory
      *
      * @return Request
      */
-    public static function create(): Request
+    public static function read(): Request
     {
         if (is_null(self::$httpRequest)) {
-            $server = $_SERVER;
-            $uri = $server['REQUEST_URI'];
-            $method = strtoupper($server['REQUEST_METHOD']);
-            $server['REMOTE_ADDR'] = (getenv('HTTP_X_FORWARDED_FOR'))
-                ? getenv('HTTP_X_FORWARDED_FOR')
-                : getenv('REMOTE_ADDR');
-            $parameters = self::getParametersFromMethod($method);
-            self::$httpRequest = new Request($uri, $method, $parameters, $_COOKIE, $_FILES, $server);
+            self::captureHttpRequest();
         }
         return self::$httpRequest;
+    }
+
+    /**
+     * Applies a custom request instance to be stored in the factory accessible
+     * with the read method.
+     *
+     * @param Request $request
+     */
+    public static function set(Request $request)
+    {
+        self::$httpRequest = $request;
+    }
+
+    /**
+     * Reads the HTTP data to build corresponding request instance.
+     */
+    private static function captureHttpRequest()
+    {
+        $server = $_SERVER;
+        $uri = $server['REQUEST_URI'];
+        $method = strtoupper($server['REQUEST_METHOD']);
+        $server['REMOTE_ADDR'] = (getenv('HTTP_X_FORWARDED_FOR'))
+            ? getenv('HTTP_X_FORWARDED_FOR')
+            : getenv('REMOTE_ADDR');
+        $parameters = self::getParametersFromMethod($method);
+        self::$httpRequest = new Request($uri, $method, $parameters, $_COOKIE, $_FILES, $server);
     }
 
     /**

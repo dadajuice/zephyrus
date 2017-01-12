@@ -307,7 +307,7 @@ class CsrfGuard
      */
     private function __construct()
     {
-        $this->request = RequestFactory::create();
+        $this->request = RequestFactory::read();
         $configs = Configuration::getSecurityConfiguration();
         if (isset($configs['csrf_guard_req'])) {
             $methodsToFilter = $configs['csrf_guard_req'];

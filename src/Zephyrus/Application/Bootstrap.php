@@ -39,7 +39,7 @@ class Bootstrap
     private static function initializeSession()
     {
         $session = Session::getInstance();
-        $storage = new SessionStorage(Configuration::getSessionConfiguration(), RequestFactory::create());
+        $storage = new SessionStorage(Configuration::getSessionConfiguration(), RequestFactory::read());
         $session->setSessionStorage($storage);
         Session::getInstance()->start();
     }

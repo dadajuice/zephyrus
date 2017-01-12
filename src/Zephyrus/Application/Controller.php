@@ -21,7 +21,7 @@ abstract class Controller implements Routable
 
     public function __construct()
     {
-        $this->request = RequestFactory::create();
+        $this->request = RequestFactory::read();
         $this->response = new Response();
     }
 

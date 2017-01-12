@@ -71,7 +71,7 @@ class Authorization
             throw new \Exception("Requirement $name is already defined");
         }
         $this->requirements[$name] = function () use ($idAddress) {
-            return RequestFactory::create()->getClientIp() == $idAddress;
+            return RequestFactory::read()->getClientIp() == $idAddress;
         };
     }
 
@@ -129,7 +129,7 @@ class Authorization
 
     private function findRule(string $uri): array
     {
-        $method = RequestFactory::create()->getMethod();
+        $method = RequestFactory::read()->getMethod();
         if (!isset($this->rules[$method])) {
             return [];
         }
