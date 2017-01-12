@@ -142,14 +142,6 @@ class ContentSecurityPolicy
     }
 
     /**
-     * @return string[]
-     */
-    public function getScriptSources(): array
-    {
-        return $this->headers['script-src'];
-    }
-
-    /**
      * Define which scripts the protected resource can execute.
      *
      * @param string[] $scriptSources
@@ -157,14 +149,6 @@ class ContentSecurityPolicy
     public function setScriptSources(array $scriptSources)
     {
         $this->headers['script-src'] = $scriptSources;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getStyleSources(): array
-    {
-        return $this->headers['style-src'];
     }
 
     /**
@@ -178,14 +162,6 @@ class ContentSecurityPolicy
     }
 
     /**
-     * @return string[]
-     */
-    public function getObjectSources(): array
-    {
-        return $this->headers['object-src'];
-    }
-
-    /**
      * Allows control over Flash and other plugins.
      *
      * @param string[] $objectSources
@@ -193,14 +169,6 @@ class ContentSecurityPolicy
     public function setObjectSources(array $objectSources)
     {
         $this->headers['object-src'] = $objectSources;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getImageSources(): array
-    {
-        return $this->headers['img-src'];
     }
 
     /**
@@ -214,14 +182,6 @@ class ContentSecurityPolicy
     }
 
     /**
-     * @return string[]
-     */
-    public function getMediaSources(): array
-    {
-        return $this->headers['media-src'];
-    }
-
-    /**
      * Restricts the origins allowed to deliver video and audio.
      *
      * @param string[] $mediaSources
@@ -229,14 +189,6 @@ class ContentSecurityPolicy
     public function setMediaSources(array $mediaSources)
     {
         $this->headers['media-src'] = $mediaSources;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getChildSources(): array
-    {
-        return $this->headers['child-src'];
     }
 
     /**
@@ -253,14 +205,6 @@ class ContentSecurityPolicy
     }
 
     /**
-     * @return string[]
-     */
-    public function getFrameAncestors(): array
-    {
-        return $this->headers['frame-ancestors'];
-    }
-
-    /**
      * Specifies the sources that can embed the current page. This directive
      * applies to <frame>, <iframe>, <embed>, and <applet> tags. This
      * directive cant be used in <meta> tags and applies only to non-HTML
@@ -271,14 +215,6 @@ class ContentSecurityPolicy
     public function setFrameAncestors(array $frameAncestors)
     {
         $this->headers['frame-ancestors'] = $frameAncestors;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getFontSources(): array
-    {
-        return $this->headers['font-src'];
     }
 
     /**
@@ -293,14 +229,6 @@ class ContentSecurityPolicy
     }
 
     /**
-     * @return string[]
-     */
-    public function getConnectSources(): array
-    {
-        return $this->headers['connect-src'];
-    }
-
-    /**
      * Limits the origins to which you can connect (via XHR, WebSockets, and
      * EventSource).
      *
@@ -309,14 +237,6 @@ class ContentSecurityPolicy
     public function setConnectSources(array $connectSources)
     {
         $this->headers['connect-src'] = $connectSources;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getFormActionSources(): array
-    {
-        return $this->headers['form-action'];
     }
 
     /**
@@ -330,14 +250,6 @@ class ContentSecurityPolicy
     }
 
     /**
-     * @return string[]
-     */
-    public function getPluginTypes(): array
-    {
-        return $this->headers['plugin-types'];
-    }
-
-    /**
      * Limits the kinds of plugins a page may invoke.
      *
      * @param string[] $pluginTypes
@@ -348,14 +260,6 @@ class ContentSecurityPolicy
     }
 
     /**
-     * @return string[]
-     */
-    public function getBaseUri(): array
-    {
-        return $this->headers['base-uri'];
-    }
-
-    /**
      * Restricts the URLs that can appear in a page’s <base> element.
      *
      * @param string[] $baseUri
@@ -363,14 +267,6 @@ class ContentSecurityPolicy
     public function setBaseUri(array $baseUri)
     {
         $this->headers['base-uri'] = $baseUri;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getSandbox(): array
-    {
-        return $this->headers['sandbox'];
     }
 
     /**
