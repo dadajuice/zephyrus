@@ -1,5 +1,7 @@
 <?php namespace Zephyrus\Security\Session;
 
+use Zephyrus\Application\SessionStorage;
+
 class SessionExpiration
 {
     /**
@@ -18,17 +20,12 @@ class SessionExpiration
     private $refreshProbability;
 
     /**
-     * @var array
-     */
-    private $content = [];
-
-    /**
      * @param array $config
-     * @param array $content
+     * @param SessionStorage $storage
      */
-    public function __construct(array $config, &$content)
+    public function __construct(array $config, SessionStorage $storage)
     {
-        $this->content = $content;
+        $this->content = &$storage->getContent();
         $this->refreshAfterNthRequests = $config['refresh_after_requests'] ?? null;
         $this->refreshAfterInterval = $config['refresh_after_interval'] ?? null;
         $this->refreshProbability = $config['refresh_probability'] ?? null;
@@ -76,8 +73,8 @@ class SessionExpiration
             }
         }
         if (isset($this->content['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
-            $timeDifference = time() - $_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP'];
-            if ($timeDifference >= $_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH']) {
+            $timeDifference = time() - $this->content['__HANDLER_LAST_ACTIVITY_TIMESTAMP'];
+            if ($timeDifference >= $this->content['__HANDLER_SECONDS_BEFORE_REFRESH']) {
                 return true;
             }
         }
