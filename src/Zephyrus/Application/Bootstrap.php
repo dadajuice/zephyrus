@@ -7,7 +7,6 @@ class Bootstrap
 {
     public static function start()
     {
-        date_default_timezone_set(Configuration::getApplicationConfiguration('timezone'));
         self::initializeErrorReporting();
         self::initializeLocale();
         self::initializeSession();
@@ -47,6 +46,7 @@ class Bootstrap
 
     private static function initializeLocale()
     {
+        date_default_timezone_set(Configuration::getApplicationConfiguration('timezone'));
         $charset = Configuration::getApplicationConfiguration('charset');
         $locale = Configuration::getApplicationConfiguration('locale') . '.' . $charset;
         setlocale(LC_MESSAGES, $locale);
