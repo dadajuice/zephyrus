@@ -20,6 +20,11 @@ class SessionExpiration
     private $refreshProbability;
 
     /**
+     * @var array
+     */
+    protected $content = [];
+
+    /**
      * @param array $config
      * @param SessionStorage $storage
      */

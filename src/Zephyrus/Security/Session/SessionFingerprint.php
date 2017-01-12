@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Security\Session;
 
+use Zephyrus\Application\SessionStorage;
 use Zephyrus\Network\Request;
 
 class SessionFingerprint
@@ -19,8 +20,14 @@ class SessionFingerprint
      */
     private $request;
 
-    public function __construct(array $config, Request $request)
+    /**
+     * @var array
+     */
+    protected $content = [];
+
+    public function __construct(array $config, SessionStorage $storage, Request $request)
     {
+        $this->content = &$storage->getContent();
         $this->request = $request;
         $this->userAgentFingerprinted = $config['fingerprint_agent'] ?? false;
         $this->ipAddressFingerprinted = $config['fingerprint_ip'] ?? false;
@@ -39,8 +46,8 @@ class SessionFingerprint
      */
     public function hasValidFingerprint()
     {
-        if (isset($_SESSION['__HANDLER_FINGERPRINT'])) {
-            return $_SESSION['__HANDLER_FINGERPRINT'] === $this->createFingerprint();
+        if (isset($this->content['__HANDLER_FINGERPRINT'])) {
+            return $this->content['__HANDLER_FINGERPRINT'] === $this->createFingerprint();
         }
         return true;
     }
@@ -105,12 +112,12 @@ class SessionFingerprint
     private function setupFingerprintHandler()
     {
         if (!$this->userAgentFingerprinted && !$this->ipAddressFingerprinted) {
-            if (isset($_SESSION['__HANDLER_FINGERPRINT'])) {
-                unset($_SESSION['__HANDLER_FINGERPRINT']);
+            if (isset($this->content['__HANDLER_FINGERPRINT'])) {
+                unset($this->content['__HANDLER_FINGERPRINT']);
             }
         } else {
-            if (!isset($_SESSION['__HANDLER_FINGERPRINT'])) {
-                $_SESSION['__HANDLER_FINGERPRINT'] = $this->createFingerprint();
+            if (!isset($this->content['__HANDLER_FINGERPRINT'])) {
+                $this->content['__HANDLER_FINGERPRINT'] = $this->createFingerprint();
             }
         }
     }
