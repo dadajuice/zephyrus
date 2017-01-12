@@ -39,4 +39,37 @@ class SecureSessionStorageTest extends TestCase
         $_SESSION['test'] = '1234';
         $storage->destroy();
     }
+
+    public function testDecoy()
+    {
+        $config = [
+            'name' => 'bob',
+            'encryption_enabled' => false,
+            'decoys' => 10
+        ];
+        $server['REMOTE_ADDR'] = '127.0.0.1';
+        $server['HTTP_USER_AGENT'] = 'chrome';
+        $req = new Request('http://test.local', 'GET');
+        $storage = new SessionStorage($config, $req);
+        $storage->start();
+        self::assertEquals(10, count($_COOKIE));
+        $storage->destroy();
+    }
+
+    public function testDecoyArray()
+    {
+        $config = [
+            'name' => 'bob',
+            'encryption_enabled' => false,
+            'decoys' => ['bob', 'lewis', 'carol']
+        ];
+        $server['REMOTE_ADDR'] = '127.0.0.1';
+        $server['HTTP_USER_AGENT'] = 'chrome';
+        $req = new Request('http://test.local', 'GET');
+        $storage = new SessionStorage($config, $req);
+        $storage->start();
+        self::assertEquals(3, count($_COOKIE));
+        self::assertTrue(isset($_COOKIE['bob']));
+        $storage->destroy();
+    }
 }

@@ -43,6 +43,7 @@ class SessionDecoy
                 $params['secure'],
                 $params['httponly']
             );
+            $_COOKIE[$decoy] = $value;
         }
     }
 
