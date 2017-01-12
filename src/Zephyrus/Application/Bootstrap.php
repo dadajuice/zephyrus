@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Application;
 
 use Zephyrus\Network\Router;
+use Zephyrus\Security\SessionStorage;
 
 class Bootstrap
 {
