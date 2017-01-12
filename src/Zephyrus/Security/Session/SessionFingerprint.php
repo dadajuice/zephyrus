@@ -2,6 +2,7 @@
 
 use Zephyrus\Application\SessionStorage;
 use Zephyrus\Network\Request;
+use Zephyrus\Network\RequestFactory;
 
 class SessionFingerprint
 {
@@ -25,10 +26,10 @@ class SessionFingerprint
      */
     protected $content = [];
 
-    public function __construct(array $config, SessionStorage $storage, Request $request)
+    public function __construct(array $config, SessionStorage $storage)
     {
         $this->content = &$storage->getContent();
-        $this->request = $request;
+        $this->request = RequestFactory::create();
         $this->userAgentFingerprinted = $config['fingerprint_agent'] ?? false;
         $this->ipAddressFingerprinted = $config['fingerprint_ip'] ?? false;
     }

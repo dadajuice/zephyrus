@@ -28,12 +28,12 @@ class SessionStorage extends BaseSessionStorage
      */
     private $encryptionEnabled;
 
-    public function __construct(array $config, Request $request)
+    public function __construct(array $config)
     {
         parent::__construct($config['name'] ?? null);
         $this->encryptionEnabled = $config['encryption_enabled'] ?? false;
         $this->expiration = new SessionExpiration($config, $this);
-        $this->fingerprint = new SessionFingerprint($config, $this, $request);
+        $this->fingerprint = new SessionFingerprint($config, $this);
         $this->decoy = new SessionDecoy($config);
     }
 
