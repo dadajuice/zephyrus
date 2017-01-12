@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Application;
 
+use Zephyrus\Network\RequestFactory;
 use Zephyrus\Network\Router;
 
 class Bootstrap
@@ -8,12 +9,8 @@ class Bootstrap
     {
         date_default_timezone_set(Configuration::getApplicationConfiguration('timezone'));
         self::initializeErrorReporting();
-        $charset = Configuration::getApplicationConfiguration('charset');
-        $locale = Configuration::getApplicationConfiguration('locale') . '.' . $charset;
-        setlocale(LC_MESSAGES, $locale);
-        setlocale(LC_TIME, $locale);
-        setlocale(LC_CTYPE, $locale);
-        Session::getInstance()->start();
+        self::initializeLocale();
+        self::initializeSession();
     }
 
     public static function initializeRoutableControllers(Router $router)
@@ -38,5 +35,22 @@ class Bootstrap
         ini_set('display_startup_errors', $dev);
         ini_set('display_errors', $dev);
         ini_set('error_log', ROOT_DIR . '/logs/errors.log');
+    }
+
+    private static function initializeSession()
+    {
+        $session = Session::getInstance();
+        $storage = new SessionStorage(Configuration::getSessionConfiguration(), RequestFactory::create());
+        $session->setSessionStorage($storage);
+        Session::getInstance()->start();
+    }
+
+    private static function initializeLocale()
+    {
+        $charset = Configuration::getApplicationConfiguration('charset');
+        $locale = Configuration::getApplicationConfiguration('locale') . '.' . $charset;
+        setlocale(LC_MESSAGES, $locale);
+        setlocale(LC_TIME, $locale);
+        setlocale(LC_CTYPE, $locale);
     }
 }
