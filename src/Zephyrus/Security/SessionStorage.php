@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Security;
 
 use Zephyrus\Application\SessionStorage as BaseSessionStorage;
+use Zephyrus\Network\Request;
 use Zephyrus\Security\Session\SessionDecoy;
 use Zephyrus\Security\Session\SessionExpiration;
 use Zephyrus\Security\Session\SessionFingerprint;
@@ -27,10 +28,13 @@ class SessionStorage extends BaseSessionStorage
      */
     private $encryptionEnabled;
 
-    public function __construct(array $config)
+    public function __construct(array $config, Request $request)
     {
         parent::__construct($config['name'] ?? null);
         $this->encryptionEnabled = $config['encryption_enabled'] ?? false;
+        $this->expiration = new SessionExpiration($config, $this->getContent());
+        $this->fingerprint = new SessionFingerprint($config, $request);
+        $this->decoy = new SessionDecoy($config);
     }
 
     public function start()
@@ -39,18 +43,12 @@ class SessionStorage extends BaseSessionStorage
             $this->setHandler(new EncryptedSessionHandler());
         }
         parent::start();
-        if (!is_null($this->expiration)) {
-            $this->expiration->start();
-        }
-        if (!is_null($this->fingerprint)) {
-            $this->fingerprint->start();
-        }
+        $this->expiration->start();
+        $this->fingerprint->start();
 
         if (!isset($_SESSION['__HANDLER_INITIATED'])) {
             $this->refresh();
-            if (!is_null($this->decoy)) {
-                $this->decoy->throwDecoys();
-            }
+            $this->decoy->throwDecoys();
             $_SESSION['__HANDLER_INITIATED'] = true;
         } else {
             if (!$this->fingerprint->hasValidFingerprint()) {
@@ -95,14 +93,6 @@ class SessionStorage extends BaseSessionStorage
     }
 
     /**
-     * @param SessionExpiration $expiration
-     */
-    public function setExpiration(SessionExpiration $expiration)
-    {
-        $this->expiration = $expiration;
-    }
-
-    /**
      * @return SessionDecoy
      */
     public function getDecoy(): SessionDecoy
@@ -111,26 +101,10 @@ class SessionStorage extends BaseSessionStorage
     }
 
     /**
-     * @param SessionDecoy $decoy
-     */
-    public function setDecoy(SessionDecoy $decoy)
-    {
-        $this->decoy = $decoy;
-    }
-
-    /**
      * @return SessionFingerprint
      */
     public function getFingerprint(): SessionFingerprint
     {
         return $this->fingerprint;
-    }
-
-    /**
-     * @param SessionFingerprint $fingerprint
-     */
-    public function setFingerprint(SessionFingerprint $fingerprint)
-    {
-        $this->fingerprint = $fingerprint;
     }
 }

@@ -1,5 +1,7 @@
 <?php namespace Zephyrus\Security\Session;
 
+use Zephyrus\Security\Cryptography;
+
 class SessionDecoy
 {
     /**
@@ -30,7 +32,6 @@ class SessionDecoy
     {
         $params = session_get_cookie_params();
         $len = strlen(session_id());
-
         foreach ($this->decoys as $decoy) {
             $value = Cryptography::randomString($len);
             setcookie(

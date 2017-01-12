@@ -18,10 +18,17 @@ class SessionExpiration
     private $refreshProbability;
 
     /**
-     * @param array $config
+     * @var array
      */
-    public function __construct(array $config)
+    private $content = [];
+
+    /**
+     * @param array $config
+     * @param array $content
+     */
+    public function __construct(array $config, &$content)
     {
+        $this->content = $content;
         $this->refreshAfterNthRequests = $config['refresh_after_requests'] ?? null;
         $this->refreshAfterInterval = $config['refresh_after_interval'] ?? null;
         $this->refreshProbability = $config['refresh_probability'] ?? null;
@@ -40,11 +47,11 @@ class SessionExpiration
     public function initiateExpiration()
     {
         if (!empty($this->refreshAfterNthRequests)) {
-            $_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'] = $this->refreshAfterNthRequests;
+            $this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'] = $this->refreshAfterNthRequests;
         }
         if (!empty($this->refreshAfterInterval)) {
-            $_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH'] = $this->refreshAfterInterval;
-            $_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP'] = time();
+            $this->content['__HANDLER_SECONDS_BEFORE_REFRESH'] = $this->refreshAfterInterval;
+            $this->content['__HANDLER_LAST_ACTIVITY_TIMESTAMP'] = time();
         }
     }
 
@@ -61,14 +68,14 @@ class SessionExpiration
             return true;
         }
 
-        if (isset($_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
-            if ($_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'] < 1) {
+        if (isset($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
+            if ($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'] < 1) {
                 return true;
             } else {
-                $_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH']--;
+                $this->content['__HANDLER_REQUESTS_BEFORE_REFRESH']--;
             }
         }
-        if (isset($_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
+        if (isset($this->content['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
             $timeDifference = time() - $_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP'];
             if ($timeDifference >= $_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH']) {
                 return true;
@@ -101,12 +108,12 @@ class SessionExpiration
     private function setupRefreshOnNthRequestsHandler()
     {
         if (empty($this->refreshAfterNthRequests)) {
-            if (isset($_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
-                unset($_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH']);
+            if (isset($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
+                unset($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH']);
             }
         } else {
-            if (!isset($_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
-                $_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'] = $this->refreshAfterNthRequests;
+            if (!isset($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
+                $this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'] = $this->refreshAfterNthRequests;
             }
         }
     }
@@ -114,16 +121,16 @@ class SessionExpiration
     private function setupRefreshOnIntervalHandler()
     {
         if (empty($this->refreshAfterInterval)) {
-            if (isset($_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
-                unset($_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH']);
+            if (isset($this->content['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
+                unset($this->content['__HANDLER_SECONDS_BEFORE_REFRESH']);
             }
-            if (isset($_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP'])) {
-                unset($_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP']);
+            if (isset($this->content['__HANDLER_LAST_ACTIVITY_TIMESTAMP'])) {
+                unset($this->content['__HANDLER_LAST_ACTIVITY_TIMESTAMP']);
             }
         } else {
-            if (!isset($_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
-                $_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH'] = $this->refreshAfterInterval;
-                $_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP'] = time();
+            if (!isset($this->content['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
+                $this->content['__HANDLER_SECONDS_BEFORE_REFRESH'] = $this->refreshAfterInterval;
+                $this->content['__HANDLER_LAST_ACTIVITY_TIMESTAMP'] = time();
             }
         }
     }

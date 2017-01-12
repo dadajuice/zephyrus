@@ -2,7 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Network\Request;
-use Zephyrus\Security\Session\SessionFingerprint;
 use Zephyrus\Security\SessionStorage;
 
 class SecureSessionStorageTest extends TestCase
@@ -13,7 +12,8 @@ class SecureSessionStorageTest extends TestCase
             'name' => 'bob',
             'encryption_enabled' => true
         ];
-        $storage = new SessionStorage($config);
+        $req = new Request('http://test.local', 'GET');
+        $storage = new SessionStorage($config, $req);
         $storage->start();
         self::assertTrue($storage->isEncryptionEnabled());
         $path = SessionStorage::getSavePath();
@@ -34,9 +34,7 @@ class SecureSessionStorageTest extends TestCase
         $server['REMOTE_ADDR'] = '127.0.0.1';
         $server['HTTP_USER_AGENT'] = 'chrome';
         $req = new Request('http://test.local', 'GET', [], [], [], $server);
-        $fingerprint = new SessionFingerprint($config, $req);
-        $storage = new SessionStorage($config);
-        $storage->setFingerprint($fingerprint);
+        $storage = new SessionStorage($config, $req);
         $storage->start();
         $_SESSION['test'] = '1234';
         $storage->destroy();
