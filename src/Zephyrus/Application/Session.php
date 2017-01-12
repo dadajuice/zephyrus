@@ -1,8 +1,5 @@
 <?php namespace Zephyrus\Application;
 
-use Zephyrus\Security\Cryptography;
-use Zephyrus\Security\EncryptedSessionHandler;
-
 class Session
 {
     /**
@@ -27,6 +24,38 @@ class Session
             self::$instance = new self();
         }
         return self::$instance;
+    }
+
+    public function has($key, $value = null): bool
+    {
+        $session = &$this->sessionStorage->getContent();
+        return (is_null($value))
+            ? isset($session[$key])
+            : isset($session[$key]) && $session[$key] == $value;
+    }
+
+    public function set($key, $value)
+    {
+        $session = &$this->sessionStorage->getContent();
+        $session[$key] = $value;
+    }
+
+    public function remove($key)
+    {
+        $session = &$this->sessionStorage->getContent();
+        if (isset($session[$key])) {
+            $session[$key] = '';
+            unset($session[$key]);
+        }
+    }
+
+    public function read($key)
+    {
+        $session = &$this->sessionStorage->getContent();
+        if (isset($session[$key])) {
+            return $session[$key];
+        }
+        return null;
     }
 
     /**
