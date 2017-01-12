@@ -1,6 +1,9 @@
 <?php namespace Zephyrus\Security;
 
 use Zephyrus\Application\SessionStorage as BaseSessionStorage;
+use Zephyrus\Security\Session\SessionDecoy;
+use Zephyrus\Security\Session\SessionExpiration;
+use Zephyrus\Security\Session\SessionFingerprint;
 
 class SessionStorage extends BaseSessionStorage
 {

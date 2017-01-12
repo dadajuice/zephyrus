@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Security;
+<?php namespace Zephyrus\Security\Session;
 
 use Zephyrus\Network\Request;
 

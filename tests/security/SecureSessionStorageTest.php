@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Network\Request;
-use Zephyrus\Security\SessionFingerprint;
+use Zephyrus\Security\Session\SessionFingerprint;
 use Zephyrus\Security\SessionStorage;
 
 class SecureSessionStorageTest extends TestCase
