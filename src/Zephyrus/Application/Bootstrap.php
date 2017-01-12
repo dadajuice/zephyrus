@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Application;
 
-use Zephyrus\Network\RequestFactory;
 use Zephyrus\Network\Router;
 
 class Bootstrap
@@ -39,7 +38,7 @@ class Bootstrap
     private static function initializeSession()
     {
         $session = Session::getInstance();
-        $storage = new SessionStorage(Configuration::getSessionConfiguration(), RequestFactory::read());
+        $storage = new SessionStorage(Configuration::getSessionConfiguration());
         $session->setSessionStorage($storage);
         Session::getInstance()->start();
     }
