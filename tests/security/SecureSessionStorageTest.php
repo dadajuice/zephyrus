@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Network\Request;
+use Zephyrus\Network\RequestFactory;
 use Zephyrus\Security\SessionStorage;
 
 class SecureSessionStorageTest extends TestCase
@@ -13,6 +14,7 @@ class SecureSessionStorageTest extends TestCase
             'encryption_enabled' => true
         ];
         $req = new Request('http://test.local', 'GET');
+        RequestFactory::set($req);
         $storage = new SessionStorage($config, $req);
         $storage->start();
         self::assertTrue($storage->isEncryptionEnabled());
@@ -34,6 +36,7 @@ class SecureSessionStorageTest extends TestCase
         $server['REMOTE_ADDR'] = '127.0.0.1';
         $server['HTTP_USER_AGENT'] = 'chrome';
         $req = new Request('http://test.local', 'GET', [], [], [], $server);
+        RequestFactory::set($req);
         $storage = new SessionStorage($config, $req);
         $storage->start();
         $_SESSION['test'] = '1234';
@@ -50,6 +53,7 @@ class SecureSessionStorageTest extends TestCase
         $server['REMOTE_ADDR'] = '127.0.0.1';
         $server['HTTP_USER_AGENT'] = 'chrome';
         $req = new Request('http://test.local', 'GET');
+        RequestFactory::set($req);
         $storage = new SessionStorage($config, $req);
         $storage->start();
         self::assertEquals(10, count($_COOKIE));
@@ -66,6 +70,7 @@ class SecureSessionStorageTest extends TestCase
         $server['REMOTE_ADDR'] = '127.0.0.1';
         $server['HTTP_USER_AGENT'] = 'chrome';
         $req = new Request('http://test.local', 'GET');
+        RequestFactory::set($req);
         $storage = new SessionStorage($config, $req);
         $storage->start();
         self::assertEquals(3, count($_COOKIE));
