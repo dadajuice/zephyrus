@@ -16,8 +16,8 @@ class DatabaseTest extends TestCase
     {
         $db = Database::getInstance();
         $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
-        $db->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
-        $db = Database::getInstance();
+        $res = $db->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
+        self::assertEquals(1, $res->count());
         self::assertEquals(1, $db->getLastInsertedId());
     }
 
