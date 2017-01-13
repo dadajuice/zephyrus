@@ -13,25 +13,16 @@ class Cryptography
      *
      * @param string $string
      * @param string | null $salt
-     * @param int | null $cost
      * @throws \RuntimeException
      * @return string
      */
-    public static function hash(string $string, string $salt = null, int $cost = null): string
+    public static function hash(string $string, string $salt = null): string
     {
         $hashOptions = [];
         if (!is_null($salt)) {
             $hashOptions['salt'] = $salt;
         }
-        if (!is_null($cost)) {
-            $hashOptions['cost'] = $cost;
-        }
-
-        $hash = password_hash($string, PASSWORD_DEFAULT, $hashOptions);
-        if (!$hash) {
-            throw new \RuntimeException("An error occurred in hashing process. Please review your configuration.");
-        }
-        return (string)$hash;
+        return password_hash($string, PASSWORD_DEFAULT, $hashOptions);
     }
 
     /**
@@ -53,44 +44,19 @@ class Cryptography
      *
      * @param string $hash
      * @param string | null $salt
-     * @param int | null $cost
      * @return bool
      */
-    public static function isRehashNeeded(string $hash, string $salt = null, int $cost = null): bool
+    public static function isRehashNeeded(string $hash, string $salt = null): bool
     {
         $hashOptions = [];
         if (!is_null($salt)) {
             $hashOptions['salt'] = $salt;
         }
-        if (!is_null($cost)) {
-            $hashOptions['cost'] = $cost;
-        }
         return password_needs_rehash($hash, PASSWORD_DEFAULT, $hashOptions);
     }
 
     /**
-     * Benchmark method to determine how high of a cost the current server can
-     * afford without slowing down the server (somewhere between 8 - 10 is a
-     * good baseline). Benchmark aims for ≤ 50 milliseconds stretching time.
-     *
-     * @see http://php.net/manual/en/function.password-hash.php
-     * @return int
-     */
-    public static function findHighestHashCost(): int
-    {
-        $timeTarget = 0.05; // 50 milliseconds
-        $cost = 8;
-        do {
-            $cost++;
-            $start = microtime(true);
-            password_hash("test", PASSWORD_BCRYPT, ["cost" => $cost]);
-            $end = microtime(true);
-        } while (($end - $start) < $timeTarget);
-        return $cost;
-    }
-
-    /**
-     * Returns a random hex of desired byte length.
+     * Returns a random hex of desired length.
      *
      * @param int $length
      * @return string
@@ -168,11 +134,7 @@ class Cryptography
      */
     public static function randomBytes(int $length = 1): string
     {
-        $bytes = openssl_random_pseudo_bytes($length, $strong);
-        if ($strong !== true) {
-            throw new \Exception('OpenSSL Random byte generation insecure');
-        }
-        return $bytes;
+        return openssl_random_pseudo_bytes($length);
     }
 
     /**
