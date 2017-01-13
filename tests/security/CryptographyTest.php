@@ -60,12 +60,6 @@ class CryptographyTest extends TestCase
         self::assertTrue(Cryptography::verifyHash('test', $hash));
     }
 
-    public function testHashWithCustomSalt()
-    {
-        $hash = Cryptography::hash('test', '123456789012345678901234567890');
-        self::assertTrue(Cryptography::verifyHash('test', $hash));
-    }
-
     public function testRehashNeeded()
     {
         $shaHash = '18EE24150DCB1D96752A4D6DD0F20DFD8BA8C38527E40AA8509B7ADECF78F9C6';

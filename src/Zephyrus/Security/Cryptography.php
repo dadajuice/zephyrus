@@ -8,21 +8,14 @@ class Cryptography
      * Cryptographically hash a specified string using the default PHP hashing
      * algorithm. This method uses the default hash function included in the
      * PHP core and thus automatically provides a cryptographically random
-     * salt. Optionally, a user defined salt can be specified, but is strongly
-     * discouraged. Throws exception if hashing failed.
+     * salt.
      *
      * @param string $string
-     * @param string | null $salt
-     * @throws \RuntimeException
      * @return string
      */
-    public static function hash(string $string, string $salt = null): string
+    public static function hash(string $string): string
     {
-        $hashOptions = [];
-        if (!is_null($salt)) {
-            $hashOptions['salt'] = $salt;
-        }
-        return password_hash($string, PASSWORD_DEFAULT, $hashOptions);
+        return password_hash($string, PASSWORD_DEFAULT);
     }
 
     /**
