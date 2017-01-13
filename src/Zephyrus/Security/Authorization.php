@@ -33,7 +33,7 @@ class Authorization
      */
     private $rules = [];
 
-    public static function getInstance()
+    public static function getInstance(): Authorization
     {
         if (is_null(self::$instance)) {
             self::$instance = new self();
@@ -55,13 +55,7 @@ class Authorization
             throw new \Exception("Requirement $name is already defined");
         }
         $this->requirements[$name] = function () use ($key, $value) {
-            if (!isset($_SESSION[$key])) {
-                return false;
-            }
-            if (!is_null($value) && $_SESSION[$key] != $value) {
-                return false;
-            }
-            return true;
+            return isset($_SESSION[$key]) && (is_null($value) || $_SESSION[$key] == $value);
         };
     }
 
@@ -95,10 +89,9 @@ class Authorization
         }
     }
 
-    public function isAuthorized(array $route, array &$failedRequirements = []): bool
+    public function isAuthorized(string $uri, array &$failedRequirements = []): bool
     {
         $match = false;
-        $uri = $route['uri'];
         foreach ($this->findRule($uri) as $requirement) {
             if (!isset($this->requirements[$requirement])) {
                 throw new \Exception("The specified requirement [$requirement] has not been defined");
