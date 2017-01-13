@@ -47,9 +47,7 @@ class Database
     {
         try {
             $statement = $this->handle->prepare($query, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
-            if (!$statement->execute($parameters)) {
-                throw new DatabaseException('Error executing query « ' . $query . ' »');
-            }
+            $statement->execute($parameters);
             return new DatabaseStatement($statement);
         } catch (\PDOException $e) {
             throw new DatabaseException('Error while preparing query « ' . $query . ' » (' . $e->getMessage() . ')', $query);
@@ -68,9 +66,7 @@ class Database
      */
     public function beginTransaction()
     {
-        if (!$this->handle->beginTransaction()) {
-            throw new DatabaseException("Couldn't start SQL transaction");
-        }
+        $this->handle->beginTransaction();
     }
 
     /**
@@ -133,9 +129,8 @@ class Database
      */
     private function initializeConnectionHandle()
     {
-        $connectionString = (isset($this->config['dsn']))
-            ? $this->config['dsn']
-            : "mysql:dbname={$this->config['database']};host={$this->config['host']};charset={$this->config['charset']}";
+        $connectionString = $this->config['dsn']
+            ?? "mysql:dbname={$this->config['database']};host={$this->config['host']};charset={$this->config['charset']}";
         try {
             $this->handle = new TransactionPDO($connectionString, $this->config['username'], $this->config['password']);
             $this->handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
