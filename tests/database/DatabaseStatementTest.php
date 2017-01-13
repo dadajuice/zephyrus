@@ -5,7 +5,7 @@ use Zephyrus\Database\Database;
 
 class DatabaseStatementTest extends TestCase
 {
-    public static function setUpBeforeClass()
+    public function testConnection()
     {
         $db = Database::getInstance();
         $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
@@ -18,6 +18,9 @@ class DatabaseStatementTest extends TestCase
         $db->query('DROP TABLE heroes;');
     }
 
+    /**
+     * @depends testConnection
+     */
     public function testHtmlSanitize()
     {
         $db = Database::getInstance();
@@ -27,6 +30,9 @@ class DatabaseStatementTest extends TestCase
         self::assertEquals('superman', $row['name']);
     }
 
+    /**
+     * @depends testConnection
+     */
     public function testAllowHtml()
     {
         $db = Database::getInstance();
