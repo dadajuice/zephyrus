@@ -18,7 +18,7 @@ class Router extends BaseRouter
     protected function beforeCallback($route)
     {
         $failedRequirements = [];
-        if (!Authorization::getInstance()->isAuthorized($route, $failedRequirements)) {
+        if (!Authorization::getInstance()->isAuthorized($route['uri'], $failedRequirements)) {
             throw new UnauthorizedAccessException($route['uri'], $failedRequirements);
         }
         if (Configuration::getSecurityConfiguration('ids_enabled')) {
