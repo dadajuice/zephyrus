@@ -192,7 +192,7 @@ class Pager
     private function validate()
     {
         if ($this->currentPage < 1 || $this->currentPage > $this->maxPage) {
-            redirect($this->pageUrl);
+            $this->currentPage = 1;
         }
     }
 }
