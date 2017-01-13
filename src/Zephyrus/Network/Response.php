@@ -48,27 +48,27 @@ class Response
         exit;
     }
 
-    public static function abortNotFound()
+    public function abortNotFound()
     {
         self::abort(404);
     }
 
-    public static function abortInternalError()
+    public function abortInternalError()
     {
         self::abort(500);
     }
 
-    public static function abortForbidden()
+    public function abortForbidden()
     {
         self::abort(403);
     }
 
-    public static function abortMethodNotAllowed()
+    public function abortMethodNotAllowed()
     {
         self::abort(405);
     }
 
-    public static function abortNotAcceptable()
+    public function abortNotAcceptable()
     {
         self::abort(406);
     }

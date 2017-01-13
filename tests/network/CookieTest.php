@@ -7,6 +7,7 @@ class CookieTest extends TestCase
 {
     public function testSend()
     {
+        //upgrade with tests including xdebug_get_headers set-cookie
         $cookie = new Cookie('test', '12345');
         $cookie->send();
         self::assertEquals('12345', $_COOKIE['test']);
