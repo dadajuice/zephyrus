@@ -52,26 +52,41 @@ class Response
         throw new NetworkException($httpStatusCode);
     }
 
+    /**
+     * @throws NetworkException
+     */
     public function abortNotFound()
     {
         throw new NetworkException(404);
     }
 
+    /**
+     * @throws NetworkException
+     */
     public function abortInternalError()
     {
         throw new NetworkException(500);
     }
 
+    /**
+     * @throws NetworkException
+     */
     public function abortForbidden()
     {
         throw new NetworkException(403);
     }
 
+    /**
+     * @throws NetworkException
+     */
     public function abortMethodNotAllowed()
     {
         throw new NetworkException(405);
     }
 
+    /**
+     * @throws NetworkException
+     */
     public function abortNotAcceptable()
     {
         throw new NetworkException(406);
