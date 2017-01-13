@@ -2,12 +2,17 @@
 
 class Formatter
 {
-    public static function formatElapsedDateTime($dateTime)
+    public static function formatElapsedDateTime($dateTime, $now = null)
     {
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new \DateTime($dateTime);
         }
-        $now = new \DateTime();
+        if (is_null($now)) {
+            $now = new \DateTime();
+        }
+        if (!$now instanceof \DateTime) {
+            $now = new \DateTime($now);
+        }
         $diff = $dateTime->diff($now);
         if ($diff->d == 0) {
             if ($diff->h == 0) {

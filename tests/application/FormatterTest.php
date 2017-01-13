@@ -87,4 +87,46 @@ class FormatterTest extends TestCase
         $result = Formatter::formatElapsedDateTime('2016-01-01 23:15:00');
         self::assertEquals(' 1 janvier 2016, 23:15', $result);
     }
+
+    public function testFormatElapsedSeconds()
+    {
+        $result = Formatter::formatElapsedDateTime('2016-01-01 23:15:10', '2016-01-01 23:15:20');
+        self::assertEquals('Il y a 10 secondes', $result);
+    }
+
+    public function testFormatElapsedMinutes()
+    {
+        $result = Formatter::formatElapsedDateTime('2016-01-01 23:16:10', '2016-01-01 23:14:20');
+        self::assertEquals('Il y a 1 minute', $result);
+    }
+
+    public function testFormatElapsedYesterday()
+    {
+        $result = Formatter::formatElapsedDateTime('2015-12-31 23:00:10', '2016-01-01 23:14:20');
+        self::assertEquals('Hier 23:00', $result);
+    }
+
+    public function testFormatElapsedToday()
+    {
+        $result = Formatter::formatElapsedDateTime('2016-01-01 10:00:10', '2016-01-01 23:14:20');
+        self::assertEquals('Aujourd\'hui 10:00', $result);
+    }
+
+    public function testFormatSizeKb()
+    {
+        $result = Formatter::formatHumanFileSize(1000000);
+        self::assertEquals('976,6 ko', $result);
+    }
+
+    public function testFormatSizeMb()
+    {
+        $result = Formatter::formatHumanFileSize(2000000);
+        self::assertEquals('1,9 mo', $result);
+    }
+
+    public function testFormatSizeGb()
+    {
+        $result = Formatter::formatHumanFileSize(2000000000);
+        self::assertEquals('1,9 go', $result);
+    }
 }
