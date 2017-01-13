@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Exceptions\NetworkException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Response;
 
@@ -35,5 +36,66 @@ class ResponseTest extends TestCase
         $response = new Response();
         $response->sendContentType();
         $response->sendContentType();
+    }
+
+    public function testAbortNotFound()
+    {
+        $response = new Response();
+        try {
+            $response->abortNotFound();
+        } catch (NetworkException $e) {
+            self::assertTrue($e->isNotFound());
+            self::assertEquals(404, $e->getHttpStatusCode());
+        }
+    }
+
+    public function testAbortInternalError()
+    {
+        $response = new Response();
+        try {
+            $response->abortInternalError();
+        } catch (NetworkException $e) {
+            self::assertTrue($e->isInternalError());
+        }
+    }
+
+    public function testAbortForbidden()
+    {
+        $response = new Response();
+        try {
+            $response->abortForbidden();
+        } catch (NetworkException $e) {
+            self::assertTrue($e->isForbidden());
+        }
+    }
+
+    public function testAbortMethodNotAllowed()
+    {
+        $response = new Response();
+        try {
+            $response->abortMethodNotAllowed();
+        } catch (NetworkException $e) {
+            self::assertTrue($e->isMethodNotAllowed());
+        }
+    }
+
+    public function testAbortNotAcceptable()
+    {
+        $response = new Response();
+        try {
+            $response->abortNotAcceptable();
+        } catch (NetworkException $e) {
+            self::assertTrue($e->isNotAcceptable());
+        }
+    }
+
+    public function testAbort()
+    {
+        $response = new Response();
+        try {
+            $response->abort(407);
+        } catch (NetworkException $e) {
+            self::assertEquals(407, $e->getHttpStatusCode());
+        }
     }
 }
