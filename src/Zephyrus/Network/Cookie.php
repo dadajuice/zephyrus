@@ -90,6 +90,7 @@ class Cookie
         ];
         $function = (!$this->urlEncodedValue) ? 'setrawcookie' : 'setcookie';
         call_user_func_array($function, $args);
+        $_COOKIE[$this->name] = $this->value;
     }
 
     /**
