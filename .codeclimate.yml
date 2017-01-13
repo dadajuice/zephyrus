@@ -15,6 +15,7 @@ engines:
     enabled: true
 exclude_paths:
   - tests/
+  - vendor/
 ratings:
   paths:
     - "**.php"
