@@ -84,15 +84,10 @@ class ContentSecurityPolicy
     private $reportUri;
 
     /**
-     * Generates a nonce if its has not been already done.
-     *
      * @return string
      */
     public static function getRequestNonce()
     {
-        if (is_null(self::$nonce)) {
-            self::generateNonce();
-        }
         return self::$nonce;
     }
 
@@ -123,9 +118,9 @@ class ContentSecurityPolicy
     /**
      * @return string[]
      */
-    public function getDefaultSources(): array
+    public function getAllHeader(): array
     {
-        return $this->headers['default-src'];
+        return $this->headers;
     }
 
     /**
@@ -299,14 +294,6 @@ class ContentSecurityPolicy
     }
 
     /**
-     * @return string
-     */
-    public function getReflectedXss(): string
-    {
-        return $this->reflectedXss;
-    }
-
-    /**
      * @param string $reflectedXss
      */
     public function setReflectedXss(string $reflectedXss)
@@ -315,27 +302,11 @@ class ContentSecurityPolicy
     }
 
     /**
-     * @return string
-     */
-    public function getReportUri(): string
-    {
-        return $this->reportUri;
-    }
-
-    /**
      * @param string $reportUri
      */
     public function setReportUri(string $reportUri)
     {
         $this->reportUri = $reportUri;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isCompatible(): bool
-    {
-        return $this->compatible;
     }
 
     /**
