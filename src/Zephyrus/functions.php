@@ -58,3 +58,25 @@ function recursiveGlob($pattern, $flags = 0)
     }
     return $files;
 }
+
+/**
+ * Sort a collection of objects naturally using a specified getter method.
+ *
+ * @param Object[] $objects
+ * @param string $getterMethod
+ * @return Object[]
+ */
+function naturalSort(array $objects, string $getterMethod = 'getNumber')
+{
+    $orderedResults = [];
+    $numbers = [];
+    foreach ($objects as $object) {
+        $numbers[] = $object->{$getterMethod}();
+    }
+    natsort($numbers);
+    $orderedKeys = array_keys($numbers);
+    foreach ($orderedKeys as $index) {
+        $orderedResults[] = $objects[$index];
+    }
+    return $orderedResults;
+}

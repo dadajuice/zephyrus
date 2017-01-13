@@ -56,28 +56,6 @@ abstract class Broker
     }
 
     /**
-     * Sort a collection of objects naturally using a specified getter method.
-     *
-     * @param Object[] $objects
-     * @param string $getterMethod
-     * @return Object[]
-     */
-    public static function naturalSort($objects, $getterMethod = 'getNumber')
-    {
-        $orderedResults = [];
-        $numbers = [];
-        foreach ($objects as $object) {
-            $numbers[] = $object->{$getterMethod}();
-        }
-        natsort($numbers);
-        $orderedKeys = array_keys($numbers);
-        foreach ($orderedKeys as $index) {
-            $orderedResults[] = $objects[$index];
-        }
-        return $orderedResults;
-    }
-
-    /**
      * Execute a SELECT query which should return a single data row. Best
      * suited for queries involving primary key in where. Will return null
      * if the query did not return any results. If more than one row is
@@ -92,16 +70,7 @@ abstract class Broker
     protected function selectUnique($query, $parameters = [], $allowedTags = "")
     {
         $statement = $this->query($query, $parameters);
-        if (!empty($this->allowedHtmlTags)) {
-            $statement->setAllowedHtmlTags($this->allowedHtmlTags);
-        }
         $statement->setAllowedHtmlTags($allowedTags);
-        $count = $statement->count();
-        if ($count == 0) {
-            return null;
-        } elseif ($count > 1) {
-            throw new DatabaseException("Specified SELECT query « $query » should return a unique row, but $count rows found");
-        }
         return $statement->next();
     }
 
@@ -120,9 +89,6 @@ abstract class Broker
             $query .= $this->pager->getSqlLimit();
         }
         $statement = $this->query($query, $parameters);
-        if (!empty($this->allowedHtmlTags)) {
-            $statement->setAllowedHtmlTags($this->allowedHtmlTags);
-        }
         $statement->setAllowedHtmlTags($allowedTags);
         $results = [];
         while ($row = $statement->next()) {
