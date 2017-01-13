@@ -1,5 +1,7 @@
 <?php namespace Zephyrus\Network;
 
+use Zephyrus\Exceptions\NetworkException;
+
 class Response
 {
     private $responseCodeSent = false;
@@ -41,35 +43,37 @@ class Response
         $this->responseContentTypeSent = true;
     }
 
-    public function abort($httpStatusCode)
+    /**
+     * @param int $httpStatusCode
+     * @throws NetworkException
+     */
+    public function abort(int $httpStatusCode)
     {
-        $this->sendResponseCode($httpStatusCode);
-        $this->sendContentType();
-        exit;
+        throw new NetworkException($httpStatusCode);
     }
 
     public function abortNotFound()
     {
-        self::abort(404);
+        throw new NetworkException(404);
     }
 
     public function abortInternalError()
     {
-        self::abort(500);
+        throw new NetworkException(500);
     }
 
     public function abortForbidden()
     {
-        self::abort(403);
+        throw new NetworkException(403);
     }
 
     public function abortMethodNotAllowed()
     {
-        self::abort(405);
+        throw new NetworkException(405);
     }
 
     public function abortNotAcceptable()
     {
-        self::abort(406);
+        throw new NetworkException(406);
     }
 }
