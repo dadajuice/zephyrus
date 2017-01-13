@@ -27,14 +27,9 @@ class DatabaseStatement
      * in database as escaping.
      *
      * @return array
-     * @throws \Exception
      */
     public function next()
     {
-        if (is_null($this->statement)) {
-            throw new DatabaseException("No resultset available");
-        }
-
         $row = $this->statement->fetch(PDO::FETCH_BOTH);
         if (is_array($row)) {
             $this->sanitizeOutput($row);
