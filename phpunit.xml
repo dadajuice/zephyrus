@@ -15,6 +15,7 @@
             <directory>tests/utilities</directory>
             <directory>tests/network</directory>
             <directory>tests/security</directory>
+            <directory>tests/database</directory>
         </testsuite>
     </testsuites>
     <filter>
