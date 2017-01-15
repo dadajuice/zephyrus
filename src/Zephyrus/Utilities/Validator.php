@@ -2,7 +2,7 @@
 
 class Validator
 {
-    const PASSWORD_COMPLIANT = ['Zephyrus\Utilities\Validations\BaseValidation', 'isNotEmpty'];
+    const PASSWORD_COMPLIANT = ['Zephyrus\Utilities\Validations\BaseValidation', 'isPasswordCompliant'];
     const NOT_EMPTY = ['Zephyrus\Utilities\Validations\BaseValidation', 'isNotEmpty'];
     const DECIMAL = ['Zephyrus\Utilities\Validations\NumericValidation', 'isDecimal'];
     const DECIMAL_SIGNED = ['Zephyrus\Utilities\NumericValidation', 'isSignedDecimal'];
