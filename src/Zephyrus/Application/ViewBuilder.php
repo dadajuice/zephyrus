@@ -47,6 +47,16 @@ class ViewBuilder
         return new View($this->pug, $pugCode);
     }
 
+    public function addKeyword($keyword, $action)
+    {
+        $this->pug->addKeyword($keyword, $action);
+    }
+
+    public function addFunction($name, $action)
+    {
+        $this->pug->share([$name => $action]);
+    }
+
     private function buildPug()
     {
         $options = [
