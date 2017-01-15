@@ -43,6 +43,9 @@ class RequestFactory
             ? getenv('HTTP_X_FORWARDED_FOR')
             : getenv('REMOTE_ADDR');
         $parameters = self::getParametersFromMethod($method);
+        if (isset($parameters['__method'])) {
+            $method = strtoupper($parameters['__method']);
+        }
         self::$httpRequest = new Request($uri, $method, $parameters, $_COOKIE, $_FILES, $server);
     }
 
