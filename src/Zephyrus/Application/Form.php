@@ -109,6 +109,7 @@ class Form
     public function addField($parameterName, $value)
     {
         $this->fields[$parameterName] = $value;
+        self::memorizeValue($parameterName, $value);
     }
 
     /**
@@ -174,8 +175,6 @@ class Form
             if (!$this->executeRule($field, $validation['callback'])) {
                 $this->errors[$field][] = $validation['message'];
                 self::removeMemorizedValue($field);
-            } else {
-                self::memorizeValue($field, $this->fields[$field]);
             }
         }
     }
