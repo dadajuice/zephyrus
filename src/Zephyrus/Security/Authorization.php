@@ -127,7 +127,15 @@ class Authorization
             return [];
         }
         $rulesForMethod = $this->rules[$method];
+        if ($uri == '/') {
+            if (isset($rulesForMethod['/'])) {
+                return (is_array($rulesForMethod['/'])) ? $rulesForMethod['/'] : [$rulesForMethod['/']];
+            }
+        }
         foreach ($rulesForMethod as $path => $requirements) {
+            if ($path == '/') {
+                continue;
+            }
             if (preg_match('/' . str_replace('/', '\/', $path) . '/', $uri)) {
                 return (is_array($requirements)) ? $requirements : [$requirements];
             }
