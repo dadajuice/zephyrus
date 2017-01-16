@@ -13,6 +13,7 @@ class ViewHelper
         $this->addEmailFunction();
         $this->addFormatFunction();
         $this->addValFunction();
+        $this->addSessionFunction();
         $this->addCsrfKeyword();
     }
 
@@ -64,6 +65,13 @@ class ViewHelper
     {
         $this->functions['val'] = function ($fieldId, $defaultValue = "") {
             return Form::readMemorizedValue($fieldId, $defaultValue);
+        };
+    }
+
+    private function addSessionFunction()
+    {
+        $this->functions['sess'] = function ($key) {
+            return Session::getInstance()->read($key);
         };
     }
 
