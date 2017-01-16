@@ -64,7 +64,7 @@ abstract class Broker
      * @param string $query
      * @param array $parameters
      * @param string $allowedTags
-     * @return array | null
+     * @return array | false
      * @throws DatabaseException
      */
     protected function selectUnique($query, $parameters = [], $allowedTags = "")
