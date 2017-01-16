@@ -41,7 +41,7 @@ $ composer create-project zephyrus/framework nom_projet
 ```
 $ mkdir nom_projet
 $ cd nom_projet
-$ wget https://github.com/dadajuice/zephyrus-framework/archive/v0.9.6.tar.gz
+$ wget https://github.com/dadajuice/zephyrus-framework/archive/v0.9.7.tar.gz
 $ tar -xvf v0.9.6.tar.gz --strip 1
 $ composer install
 ```
