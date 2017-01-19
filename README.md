@@ -7,6 +7,7 @@
 
 ---
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3d2428092784ac4906f8ad1dc725573)](https://www.codacy.com/app/dadajuice/zephyrus?utm_source=github.com&utm_medium=referral&utm_content=dadajuice/zephyrus&utm_campaign=badger)
 [![GitHub release](https://img.shields.io/github/release/dadajuice/zephyrus.svg)]()
 [![Travis](https://img.shields.io/travis/dadajuice/zephyrus.svg)]()
 [![Code Climate](https://img.shields.io/codeclimate/github/dadajuice/zephyrus.svg)]()
