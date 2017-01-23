@@ -4,43 +4,53 @@ class Flash
 {
     public static function error($message)
     {
-        $_SESSION['__FLASH']['ERROR'] = $message;
+        self::addFlash('ERROR', $message);
     }
 
     public static function success($message)
     {
-        $_SESSION['__FLASH']['SUCCESS'] = $message;
+        self::addFlash('SUCCESS', $message);
     }
 
     public static function warning($message)
     {
-        $_SESSION['__FLASH']['WARNING'] = $message;
+        self::addFlash('WARNING', $message);
     }
 
     public static function info($message)
     {
-        $_SESSION['__FLASH']['INFO'] = $message;
+        self::addFlash('INFO', $message);
     }
 
     public static function notice($message)
     {
-        $_SESSION['__FLASH']['NOTICE'] = $message;
+        self::addFlash('NOTICE', $message);
     }
 
-    public static function readAll()
+    public static function readAll(): array
     {
         $args = [];
-        $args["flash"]["success"] = (isset($_SESSION['__FLASH']['SUCCESS'])) ? $_SESSION['__FLASH']['SUCCESS'] : "";
-        $args["flash"]["warning"] = (isset($_SESSION['__FLASH']['WARNING'])) ? $_SESSION['__FLASH']['WARNING'] : "";
-        $args["flash"]["error"] = (isset($_SESSION['__FLASH']['ERROR'])) ? $_SESSION['__FLASH']['ERROR'] : "";
-        $args["flash"]["notice"] = (isset($_SESSION['__FLASH']['NOTICE'])) ? $_SESSION['__FLASH']['NOTICE'] : "";
-        $args["flash"]["info"] = (isset($_SESSION['__FLASH']['INFO'])) ? $_SESSION['__FLASH']['INFO'] : "";
+        $args["flash"]["success"] = $_SESSION['__FLASH']['SUCCESS'] ?? "";
+        $args["flash"]["warning"] = $_SESSION['__FLASH']['WARNING'] ?? "";
+        $args["flash"]["error"] = $_SESSION['__FLASH']['ERROR'] ?? "";
+        $args["flash"]["notice"] = $_SESSION['__FLASH']['NOTICE'] ?? "";
+        $args["flash"]["info"] = $_SESSION['__FLASH']['INFO'] ?? "";
         self::clearAll();
         return $args;
     }
 
-    private static function clearAll()
+    public static function clearAll()
     {
-        unset($_SESSION['__FLASH']);
+        Session::getInstance()->remove('__FLASH');
+    }
+
+    private static function addFlash($type, $message)
+    {
+        $flash = Session::getInstance()->read('__FLASH');
+        if (is_null($flash)) {
+            $flash = [];
+        }
+        $flash[$type] = $message;
+        Session::getInstance()->set('__FLASH', $flash);
     }
 }
