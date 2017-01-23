@@ -10,7 +10,7 @@
   ],
   "license": "MIT",
   "require": {
-    "php": ">=7.0",
+    "php": ">=7.1",
     "monolog/monolog": "^1.22",
     "pug-php/pug": "^2.5",
     "enygma/expose": "^2.4",
