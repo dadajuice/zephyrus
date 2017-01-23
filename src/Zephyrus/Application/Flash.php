@@ -29,12 +29,13 @@ class Flash
 
     public static function readAll(): array
     {
+        $flash = Session::getInstance()->read('__FLASH');
         $args = [];
-        $args["flash"]["success"] = $_SESSION['__FLASH']['SUCCESS'] ?? "";
-        $args["flash"]["warning"] = $_SESSION['__FLASH']['WARNING'] ?? "";
-        $args["flash"]["error"] = $_SESSION['__FLASH']['ERROR'] ?? "";
-        $args["flash"]["notice"] = $_SESSION['__FLASH']['NOTICE'] ?? "";
-        $args["flash"]["info"] = $_SESSION['__FLASH']['INFO'] ?? "";
+        $args["flash"]["success"] = $flash['SUCCESS'] ?? "";
+        $args["flash"]["warning"] = $flash['WARNING'] ?? "";
+        $args["flash"]["error"] = $flash['ERROR'] ?? "";
+        $args["flash"]["notice"] = $flash['NOTICE'] ?? "";
+        $args["flash"]["info"] = $flash['INFO'] ?? "";
         self::clearAll();
         return $args;
     }
