@@ -54,13 +54,13 @@ class Session
         }
     }
 
-    public function read($key)
+    public function read($key, $defaultValue = null)
     {
         $session = &$this->sessionStorage->getContent();
         if (isset($session[$key])) {
             return $session[$key];
         }
-        return null;
+        return $defaultValue;
     }
 
     /**
