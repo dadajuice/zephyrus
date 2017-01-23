@@ -1,7 +1,7 @@
 language: php
 sudo: required
 php:
-  - 7.0
+  - 7.1
 
 before_script:
   - sudo locale-gen --no-archive fr_CA.UTF-8
