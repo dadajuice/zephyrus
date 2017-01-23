@@ -72,6 +72,11 @@ class CsrfGuard
         return self::$instance;
     }
 
+    public static function kill()
+    {
+        self::$instance = null;
+    }
+
     /**
      * Returns the corresponding HTML hidden fields for the CSRF.
      */
