@@ -64,7 +64,8 @@ class RequestFactory
             case 'GET':
                 return array_merge($parameters, self::getParametersFromGlobal($_FILES));
             case 'POST':
-                return array_merge($parameters, self::getParametersFromGlobal($_POST), self::getParametersFromGlobal($_FILES));
+                return array_merge($parameters, self::getParametersFromGlobal($_POST),
+                    self::getParametersFromGlobal($_FILES));
             case 'PUT':
             case 'DELETE':
                 parse_str(file_get_contents('php://input'), $paramsSource);

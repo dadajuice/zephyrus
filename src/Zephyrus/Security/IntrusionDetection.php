@@ -61,7 +61,8 @@ class IntrusionDetection
         }
         $guard = $this->getMonitoringInputs();
         if (empty($guard)) {
-            throw new \Exception("Nothing to monitor ! Either configure the IDS to monitor at least one input or completely deactivate this feature.");
+            throw new \Exception("Nothing to monitor ! Either configure the IDS to monitor at least one input or 
+                completely deactivate this feature.");
         }
 
         $this->manager->run($guard);

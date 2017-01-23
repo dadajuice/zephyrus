@@ -13,7 +13,6 @@ class UnauthorizedAccessException extends \Exception
         parent::__construct((!empty($uri) && !empty($requirements))
             ? "Unauthorized access! Requirement(s) [$data] failed for route [$uri]"
             : "Unauthorized access!");
-
     }
 
     public function getRequirements()

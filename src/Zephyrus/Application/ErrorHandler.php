@@ -103,11 +103,13 @@ class ErrorHandler
         $reflection = new \ReflectionFunction($callback);
         $parameters = $reflection->getParameters();
         if (count($parameters) != 1) {
-            throw new \InvalidArgumentException("Specified callback must only have one argument hinted as a Throwable class");
+            throw new \InvalidArgumentException("Specified callback must only have one argument hinted as a 
+                Throwable class");
         }
         $argumentClass = $parameters[0]->getClass();
         if (!$argumentClass->isSubclassOf('Throwable')) {
-            throw new \InvalidArgumentException("Specified callback argument must be hinted child of a Throwable class");
+            throw new \InvalidArgumentException("Specified callback argument must be hinted child of a 
+                Throwable class");
         }
         $this->registeredThrowableCallbacks[$argumentClass->getShortName()] = $callback;
     }

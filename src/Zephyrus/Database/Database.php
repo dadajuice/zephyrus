@@ -50,7 +50,8 @@ class Database
             $statement->execute($parameters);
             return new DatabaseStatement($statement);
         } catch (\PDOException $e) {
-            throw new DatabaseException('Error while preparing query « ' . $query . ' » (' . $e->getMessage() . ')', $query);
+            throw new DatabaseException('Error while preparing query « ' . $query . ' » (' .
+                $e->getMessage() . ')', $query);
         }
     }
 
@@ -80,7 +81,8 @@ class Database
         try {
             $this->handle->commit();
         } catch (\PDOException $e) {
-            throw new DatabaseException("Couldn't commit SQL transaction. Are you sure a transaction has been started ?");
+            throw new DatabaseException("Couldn't commit SQL transaction. Are you sure a transaction 
+                has been started ?");
         }
     }
 
@@ -96,7 +98,8 @@ class Database
         try {
             $this->handle->rollBack();
         } catch (\PDOException $e) {
-            throw new DatabaseException("Couldn't rollback SQL transaction. Are you sure a transaction has been started ?");
+            throw new DatabaseException("Couldn't rollback SQL transaction. Are you sure a transaction 
+                has been started ?");
         }
     }
 
@@ -130,7 +133,9 @@ class Database
     private function initializeConnectionHandle()
     {
         $connectionString = $this->config['dsn']
-            ?? "mysql:dbname={$this->config['database']};host={$this->config['host']};charset={$this->config['charset']}";
+            ?? "mysql:dbname={$this->config['database']};
+                host={$this->config['host']};
+                charset={$this->config['charset']}";
         try {
             $this->handle = new TransactionPDO($connectionString, $this->config['username'], $this->config['password']);
             $this->handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

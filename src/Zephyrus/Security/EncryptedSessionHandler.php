@@ -106,7 +106,8 @@ class EncryptedSessionHandler extends \SessionHandler
         list($initializationVector, $cipher) = explode(':', $cipher);
         $initializationVector = base64_decode($initializationVector);
         $cipher = base64_decode($cipher);
-        $hmac = hash_hmac('sha256', $initializationVector . Cryptography::getEncryptionAlgorithm() . $cipher, $this->cryptAuth);
+        $content = $initializationVector . Cryptography::getEncryptionAlgorithm() . $cipher;
+        $hmac = hash_hmac('sha256', $content, $this->cryptAuth);
         return $hmac . ':' . base64_encode($initializationVector) . ':' . base64_encode($cipher);
     }
 
