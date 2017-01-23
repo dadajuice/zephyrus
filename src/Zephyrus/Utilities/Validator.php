@@ -1,6 +1,6 @@
 <?php namespace Zephyrus\Utilities;
 
-class Validator
+interface Validator
 {
     const PASSWORD_COMPLIANT = ['Zephyrus\Utilities\Validations\BaseValidation', 'isPasswordCompliant'];
     const NOT_EMPTY = ['Zephyrus\Utilities\Validations\BaseValidation', 'isNotEmpty'];
