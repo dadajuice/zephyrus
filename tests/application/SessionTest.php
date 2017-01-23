@@ -13,6 +13,7 @@ class SessionTest extends TestCase
     {
         ini_set('session.use_cookies', 0);
         ini_set('session.use_only_cookies', 0);
+        Session::kill();
         $session = Session::getInstance();
         $session->setSessionStorage(new SessionStorage('bob'));
         $session->start();

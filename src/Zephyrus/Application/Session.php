@@ -26,6 +26,11 @@ class Session
         return self::$instance;
     }
 
+    public static function kill()
+    {
+        self::$instance = null;
+    }
+
     public function has($key, $value = null): bool
     {
         $session = &$this->sessionStorage->getContent();
@@ -89,7 +94,7 @@ class Session
         $this->sessionStorage->restart();
     }
 
-    public function setSessionStorage(SessionStorage $sessionStorage)
+    public function setSessionStorage(?SessionStorage $sessionStorage)
     {
         $this->sessionStorage = $sessionStorage;
     }
