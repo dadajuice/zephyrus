@@ -13,6 +13,9 @@ engines:
     enabled: true
   phpmd:
     enabled: true
+    checks:
+          CleanCode/StaticAccess:
+            enabled: false
 exclude_paths:
   - tests/
   - vendor/
