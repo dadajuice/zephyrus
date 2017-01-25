@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Security;
 
 use Zephyrus\Application\Configuration;
+use Zephyrus\Application\Session;
 use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
@@ -206,10 +207,9 @@ class CsrfGuard
     private function generateToken($formName)
     {
         $token = Cryptography::randomString(self::TOKEN_LENGTH);
-        if (!isset($_SESSION['__CSRF_TOKEN'])) {
-            $_SESSION['__CSRF_TOKEN'] = [];
-        }
-        $_SESSION['__CSRF_TOKEN'][$formName] = $token;
+        $csrfData = Session::getInstance()->read('__CSRF_TOKEN', []);
+        $csrfData[$formName] = $token;
+        Session::getInstance()->set('__CSRF_TOKEN', $csrfData);
         return $token;
     }
 
@@ -236,8 +236,9 @@ class CsrfGuard
     {
         $sortedCsrf = $this->getStoredCsrfToken($formName);
         if (!is_null($sortedCsrf)) {
-            $_SESSION['__CSRF_TOKEN'][$formName] = '';
-            unset($_SESSION['__CSRF_TOKEN'][$formName]);
+            $csrfData = Session::getInstance()->read('__CSRF_TOKEN', []);
+            $csrfData[$formName] = '';
+            Session::getInstance()->set('__CSRF_TOKEN', $csrfData);
             return hash_equals($sortedCsrf, $token);
         }
         return false;
@@ -252,7 +253,11 @@ class CsrfGuard
      */
     private function getStoredCsrfToken($formName)
     {
-        return isset($_SESSION['__CSRF_TOKEN'][$formName]) ? $_SESSION['__CSRF_TOKEN'][$formName] : null;
+        $csrfData = Session::getInstance()->read('__CSRF_TOKEN');
+        if (is_null($csrfData)) {
+            return null;
+        }
+        return isset($csrfData[$formName]) ? $csrfData[$formName] : null;
     }
 
     /**
