@@ -18,7 +18,8 @@ class Bootstrap
         foreach ($controllers as $controller) {
             $reflection = new \ReflectionClass($controller);
             if ($reflection->implementsInterface('Zephyrus\Network\Routable')) {
-                call_user_func($controller .'::initializeRoutes', $router);
+                $controllerInstance = $reflection->newInstance($router);
+                $controllerInstance->initializeRoutes();
             }
         }
     }
