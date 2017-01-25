@@ -5,10 +5,16 @@ use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Routable;
+use Zephyrus\Network\Router;
 use Zephyrus\Utilities\Pager;
 
 abstract class Controller implements Routable
 {
+    /**
+     * @var Router
+     */
+    private $router;
+
     /**
      * @var Request;
      */
@@ -19,10 +25,31 @@ abstract class Controller implements Routable
      */
     protected $response;
 
-    public function __construct()
+    public function __construct(Router $router)
     {
+        $this->router = $router;
         $this->request = RequestFactory::read();
         $this->response = new Response();
+    }
+
+    protected function get($uri, $instanceMethod, $acceptedFormats = null)
+    {
+        $this->router->get($uri, [$this, $instanceMethod], $acceptedFormats);
+    }
+
+    protected function post($uri, $instanceMethod, $acceptedFormats = null)
+    {
+        $this->router->post($uri, [$this, $instanceMethod], $acceptedFormats);
+    }
+
+    protected function put($uri, $instanceMethod, $acceptedFormats = null)
+    {
+        $this->router->put($uri, [$this, $instanceMethod], $acceptedFormats);
+    }
+
+    protected function delete($uri, $instanceMethod, $acceptedFormats = null)
+    {
+        $this->router->delete($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
     /**
@@ -120,17 +147,5 @@ abstract class Controller implements Routable
             array_walk_recursive($data, array ($xml, 'addChild'));
             echo $xml->asXML();
         }
-    }
-
-    /**
-     * Helper method destined to simplify giving a class method as a route
-     * callback.
-     *
-     * @param string $method
-     * @return callable
-     */
-    protected static function bind($method)
-    {
-        return [get_called_class(), $method];
     }
 }
