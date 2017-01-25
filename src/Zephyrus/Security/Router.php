@@ -24,7 +24,7 @@ class Router extends BaseRouter
         if (Configuration::getSecurityConfiguration('ids_enabled')) {
             IntrusionDetection::getInstance()->run();
         }
-        SecureHeader::getInstance()->send();
+        //SecureHeader::getInstance()->send();
         if (Configuration::getSecurityConfiguration('csrf_guard_enabled')) {
             CsrfGuard::getInstance()->guard();
             if (Configuration::getSecurityConfiguration('csrf_guard_automatic_html')) {
