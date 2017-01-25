@@ -3,13 +3,6 @@
 class SecureHeader
 {
     /**
-     * Singleton pattern instance.
-     *
-     * @var SecureHeader
-     */
-    private static $instance = null;
-
-    /**
      * Provides Clickjacking protection. Values: deny - no rendering within a frame,
      * sameorigin - no rendering if origin mismatch, allow-from: DOMAIN - allow
      * rendering if framed by frame loaded from DOMAIN.
@@ -61,17 +54,6 @@ class SecureHeader
     private $contentSecurityPolicy = null;
 
     /**
-     * @return SecureHeader
-     */
-    public static function getInstance()
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
-
-    /**
      * Bulk send HTTP response header aiming security purposes. Each one are
      * explained in code.
      *
@@ -79,31 +61,17 @@ class SecureHeader
      */
     public function send()
     {
-        if (!empty($this->contentTypeOptions)) {
-            header('X-Content-Type-Options: ' . $this->contentTypeOptions);
-        }
-
-        if (!empty($this->frameOptions)) {
-            header('X-Frame-Options: ' . $this->frameOptions);
-        }
-
-        if (!empty($this->xssProtection)) {
-            header('X-XSS-Protection: ' . $this->xssProtection);
-        }
-
-        if (!empty($this->strictTransportSecurity)) {
-            header('Strict-Transport-Security: ' . $this->strictTransportSecurity);
-        }
-
-        if (!is_null($this->contentSecurityPolicy)) {
-            $this->contentSecurityPolicy->send();
-        }
+        $this->sendContentOptions();
+        $this->sendFrameOptions();
+        $this->sendXssProtection();
+        $this->sendStrictTransport();
+        $this->sendContentSecurity();
     }
 
     /**
      * @return string
      */
-    public function getFrameOptions()
+    public function getFrameOptions(): string
     {
         return $this->frameOptions;
     }
@@ -111,7 +79,7 @@ class SecureHeader
     /**
      * @param string $frameOptions
      */
-    public function setFrameOptions($frameOptions)
+    public function setFrameOptions(string $frameOptions)
     {
         $this->frameOptions = $frameOptions;
     }
@@ -119,7 +87,7 @@ class SecureHeader
     /**
      * @return string
      */
-    public function getXssProtection()
+    public function getXssProtection(): string
     {
         return $this->xssProtection;
     }
@@ -127,7 +95,7 @@ class SecureHeader
     /**
      * @param string $xssProtection
      */
-    public function setXssProtection($xssProtection)
+    public function setXssProtection(string $xssProtection)
     {
         $this->xssProtection = $xssProtection;
     }
@@ -135,7 +103,7 @@ class SecureHeader
     /**
      * @return string
      */
-    public function getContentTypeOptions()
+    public function getContentTypeOptions(): string
     {
         return $this->contentTypeOptions;
     }
@@ -143,7 +111,7 @@ class SecureHeader
     /**
      * @param string $contentTypeOptions
      */
-    public function setContentTypeOptions($contentTypeOptions)
+    public function setContentTypeOptions(string $contentTypeOptions)
     {
         $this->contentTypeOptions = $contentTypeOptions;
     }
@@ -151,7 +119,7 @@ class SecureHeader
     /**
      * @return string
      */
-    public function getStrictTransportSecurity()
+    public function getStrictTransportSecurity(): string
     {
         return $this->strictTransportSecurity;
     }
@@ -159,7 +127,7 @@ class SecureHeader
     /**
      * @param string $strict
      */
-    public function setStrictTransportSecurity($strict)
+    public function setStrictTransportSecurity(string $strict)
     {
         $this->strictTransportSecurity = $strict;
     }
@@ -167,7 +135,7 @@ class SecureHeader
     /**
      * @return ContentSecurityPolicy
      */
-    public function getContentSecurityPolicy()
+    public function getContentSecurityPolicy(): ?ContentSecurityPolicy
     {
         return $this->contentSecurityPolicy;
     }
@@ -175,15 +143,43 @@ class SecureHeader
     /**
      * @param ContentSecurityPolicy $csp
      */
-    public function setContentSecurityPolicy($csp)
+    public function setContentSecurityPolicy(?ContentSecurityPolicy $csp)
     {
         $this->contentSecurityPolicy = $csp;
     }
 
-    /**
-     * Private SecureHeader constructor for singleton pattern.
-     */
-    private function __construct()
+    private function sendContentOptions()
     {
+        if (!empty($this->contentTypeOptions)) {
+            header('X-Content-Type-Options: ' . $this->contentTypeOptions);
+        }
+    }
+
+    private function sendFrameOptions()
+    {
+        if (!empty($this->frameOptions)) {
+            header('X-Frame-Options: ' . $this->frameOptions);
+        }
+    }
+
+    private function sendXssProtection()
+    {
+        if (!empty($this->xssProtection)) {
+            header('X-XSS-Protection: ' . $this->xssProtection);
+        }
+    }
+
+    private function sendStrictTransport()
+    {
+        if (!empty($this->strictTransportSecurity)) {
+            header('Strict-Transport-Security: ' . $this->strictTransportSecurity);
+        }
+    }
+
+    private function sendContentSecurity()
+    {
+        if (!is_null($this->contentSecurityPolicy)) {
+            $this->contentSecurityPolicy->send();
+        }
     }
 }
