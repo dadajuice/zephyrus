@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Database;
 
+use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\DatabaseException;
 use PDO;
 
@@ -95,5 +96,13 @@ class Database
         } catch (\PDOException $e) {
             throw new DatabaseException("Connection failed to database : " . $e->getMessage());
         }
+    }
+
+    public static function buildFromConfiguration()
+    {
+        $config = Configuration::getDatabaseConfiguration();
+        $dsn = $config['dsn'] ?? "mysql:dbname={$config['database']};
+            host={$config['host']};charset={$config['charset']}";
+        return new Database($dsn);
     }
 }

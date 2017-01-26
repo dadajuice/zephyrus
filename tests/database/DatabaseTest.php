@@ -6,19 +6,22 @@ use Zephyrus\Exceptions\DatabaseException;
 
 class DatabaseTest extends TestCase
 {
-    public static function tearDownAfterClass()
+    /**
+     * @var Database
+     */
+    private static $database;
+
+    public static function setUpBeforeClass()
     {
-        $db = Database::getInstance();
-        $db->query('DROP TABLE heroes;');
+        self::$database = new Database('sqlite::memory:');
     }
 
     public function testLastInsertId()
     {
-        $db = Database::getInstance();
-        $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
-        $res = $db->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
+        self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
+        $res = self::$database->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
         self::assertEquals(1, $res->count());
-        self::assertEquals(1, $db->getLastInsertedId());
+        self::assertEquals(1, self::$database->getLastInsertedId());
     }
 
     /**
@@ -26,9 +29,8 @@ class DatabaseTest extends TestCase
      */
     public function testQueryError()
     {
-        $db = Database::getInstance();
         try {
-            $db->query('CREATE TABL heroes(id NUMERIC PRIMARY KEY, name TEXT);');
+            self::$database->query('CREATE TABL heroes(id NUMERIC PRIMARY KEY, name TEXT);');
         } catch (DatabaseException $e) {
             self::assertEquals('CREATE TABL heroes(id NUMERIC PRIMARY KEY, name TEXT);', $e->getQuery());
         }
@@ -39,9 +41,8 @@ class DatabaseTest extends TestCase
      */
     public function testQueryParameterError()
     {
-        $db = Database::getInstance();
         try {
-            $db->query('CREATE TABLE foes(? NUMERIC PRIMARY KEY, ? TEXT);', ['id']);
+            self::$database->query('CREATE TABLE foes(? NUMERIC PRIMARY KEY, ? TEXT);', ['id']);
         } catch (DatabaseException $e) {
             self::assertEquals('CREATE TABLE foes(? NUMERIC PRIMARY KEY, ? TEXT);', $e->getQuery());
         }
@@ -52,19 +53,18 @@ class DatabaseTest extends TestCase
      */
     public function testTransaction()
     {
-        $db = Database::getInstance();
-        $db->beginTransaction();
-        $db->query("INSERT INTO heroes(id, name) VALUES (2, 'Superman');");
-        $db->commit();
+        self::$database->beginTransaction();
+        self::$database->query("INSERT INTO heroes(id, name) VALUES (2, 'Superman');");
+        self::$database->commit();
 
-        $statement = $db->query('SELECT * FROM heroes');
+        $statement = self::$database->query('SELECT * FROM heroes');
         $statement->next();
         $res = $statement->next();
         self::assertEquals('Superman', $res['name']);
-        $db->beginTransaction();
-        $db->query("INSERT INTO heroes(id, name) VALUES (3, 'Flash');");
-        $db->rollback();
-        $statement = $db->query('SELECT * FROM heroes');
+        self::$database->beginTransaction();
+        self::$database->query("INSERT INTO heroes(id, name) VALUES (3, 'Flash');");
+        self::$database->rollback();
+        $statement = self::$database->query('SELECT * FROM heroes');
         $i = 0;
         while ($statement->next()) {
             ++$i;
@@ -73,22 +73,37 @@ class DatabaseTest extends TestCase
     }
 
     /**
-     * @depends testLastInsertId
      * @expectedException \Zephyrus\Exceptions\DatabaseException
      */
     public function testErrorCommit()
     {
-        $db = Database::getInstance();
+        $db = new Database('sqlite::memory:');
         $db->commit();
     }
 
     /**
-     * @depends testLastInsertId
      * @expectedException \Zephyrus\Exceptions\DatabaseException
      */
     public function testErrorRollback()
     {
-        $db = Database::getInstance();
+        $db = new Database('sqlite::memory:');
         $db->rollback();
+    }
+
+    /**
+     * @expectedException \Zephyrus\Exceptions\DatabaseException
+     */
+    public function testInvalidDsn()
+    {
+        new Database(';lsdklfhjk');
+    }
+
+    public function testBuildFromConfiguration()
+    {
+        $db = Database::buildFromConfiguration();
+        $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
+        $res = $db->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
+        self::assertEquals(1, $res->count());
+        self::assertEquals(1, $db->getLastInsertedId());
     }
 }

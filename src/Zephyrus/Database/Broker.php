@@ -21,10 +21,15 @@ abstract class Broker
     /**
      * Broker constructor called by children. Simply get the database reference
      * for further use.
+     *
+     * @param null|Database $database
      */
-    public function __construct()
+    public function __construct(?Database $database = null)
     {
-        $this->database = Database::getInstance();
+        $this->database = $database;
+        if (is_null($this->database)) {
+            $this->database = Database::buildFromConfiguration();
+        }
     }
 
     /**
@@ -53,6 +58,14 @@ abstract class Broker
     protected function getDatabase()
     {
         return $this->database;
+    }
+
+    /**
+     * @param Database $database
+     */
+    protected function setDatabase(Database $database)
+    {
+        $this->database = $database;
     }
 
     /**

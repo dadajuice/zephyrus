@@ -8,27 +8,23 @@ use Zephyrus\Network\RequestFactory;
 
 class BrokerTest extends TestCase
 {
-    public static function tearDownAfterClass()
-    {
-        $db = Database::getInstance();
-        $db->query('DROP TABLE heroes;');
-    }
-
-    public function testConnection()
-    {
-        $db = Database::getInstance();
-        $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
-        $db->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
-        $db->query("INSERT INTO heroes(id, name) VALUES (2, 'Superman');");
-        $db->query("INSERT INTO heroes(id, name) VALUES (3, '<b>Flash</b>');");
-    }
-
     /**
-     * @depends testConnection
+     * @var Database
      */
+    private static $database;
+
+    public static function setUpBeforeClass()
+    {
+        self::$database = new Database('sqlite::memory:');
+        self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
+        self::$database->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
+        self::$database->query("INSERT INTO heroes(id, name) VALUES (2, 'Superman');");
+        self::$database->query("INSERT INTO heroes(id, name) VALUES (3, '<b>Flash</b>');");
+    }
+
     public function testPager()
     {
-        $class = new class() extends Broker {
+        $class = new class(self::$database) extends Broker {
             public function findAll()
             {
                 return $this->selectAll("SELECT * FROM heroes");
@@ -45,12 +41,23 @@ class BrokerTest extends TestCase
         self::assertEquals(1, count($res));
     }
 
-    /**
-     * @depends testConnection
-     */
-    public function testGetDatabase()
+    public function testSetDatabase()
     {
         $class = new class() extends Broker {
+
+            public function insert()
+            {
+                parent::setDatabase(new Database('sqlite::memory:'));
+                return $this->getDatabase()->getLastInsertedId();
+            }
+        };
+        $id = $class->insert();
+        self::assertEquals(0, $id);
+    }
+
+    public function testGetDatabase()
+    {
+        $class = new class(self::$database) extends Broker {
             public function insert()
             {
                 return $this->getDatabase()->getLastInsertedId();
@@ -60,12 +67,9 @@ class BrokerTest extends TestCase
         self::assertEquals(3, $id);
     }
 
-    /**
-     * @depends testConnection
-     */
     public function testFindById()
     {
-        $class = new class() extends Broker {
+        $class = new class(self::$database) extends Broker {
             public function findById($id)
             {
                 return $this->selectUnique("SELECT * FROM heroes WHERE id = ?", [$id]);
@@ -75,12 +79,9 @@ class BrokerTest extends TestCase
         self::assertEquals('Superman', $row['name']);
     }
 
-    /**
-     * @depends testConnection
-     */
     public function testFindByIdWithHtml()
     {
-        $class = new class() extends Broker {
+        $class = new class(self::$database) extends Broker {
             public function findById($id)
             {
                 return $this->selectUnique("SELECT * FROM heroes WHERE id = ?", [$id], "<b>");
@@ -90,12 +91,9 @@ class BrokerTest extends TestCase
         self::assertEquals('<b>Flash</b>', $row['name']);
     }
 
-    /**
-     * @depends testConnection
-     */
     public function testFindAll()
     {
-        $class = new class() extends Broker {
+        $class = new class(self::$database) extends Broker {
             public function findAll()
             {
                 return $this->selectAll("SELECT * FROM heroes");
@@ -105,12 +103,9 @@ class BrokerTest extends TestCase
         self::assertEquals(3, count($row));
     }
 
-    /**
-     * @depends testConnection
-     */
     public function testFindAllWithHtml()
     {
-        $class = new class() extends Broker {
+        $class = new class(self::$database) extends Broker {
             public function findAll()
             {
                 return $this->selectAll("SELECT * FROM heroes", [], "<b>");
@@ -120,12 +115,9 @@ class BrokerTest extends TestCase
         self::assertEquals('<b>Flash</b>', $row[2]['name']);
     }
 
-    /**
-     * @depends testConnection
-     */
     public function testTransaction()
     {
-        $class = new class() extends Broker {
+        $class = new class(self::$database) extends Broker {
             public function insert()
             {
                 $this->transaction(function () {
@@ -144,12 +136,11 @@ class BrokerTest extends TestCase
     }
 
     /**
-     * @depends testConnection
      * @expectedException \Zephyrus\Exceptions\DatabaseException
      */
     public function testInvalidTransaction()
     {
-        $class = new class() extends Broker {
+        $class = new class(self::$database) extends Broker {
             public function insert()
             {
                 $this->transaction(function ($database, $value) {
@@ -161,12 +152,9 @@ class BrokerTest extends TestCase
         $class->insert();
     }
 
-    /**
-     * @depends testConnection
-     */
     public function testTransactionWithDatabase()
     {
-        $class = new class() extends Broker {
+        $class = new class(self::$database) extends Broker {
             public function insert()
             {
                 return $this->transaction(function (Database $database) {
