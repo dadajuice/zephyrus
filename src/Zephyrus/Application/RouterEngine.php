@@ -43,7 +43,7 @@ abstract class RouterEngine
     {
         $this->request = $request;
         $this->requestedUri = $this->request->getPath();
-        $this->requestedMethod = $this->request->getMethod();
+        $this->requestedMethod = strtoupper($this->request->getMethod());
         $this->requestedRepresentation = $this->request->getAccept();
         $this->verifyRequestMethod();
         $route = $this->findRouteFromRequest();
@@ -53,7 +53,7 @@ abstract class RouterEngine
     /**
      * @return Request
      */
-    final public function getRequest()
+    final public function &getRequest()
     {
         return $this->request;
     }
