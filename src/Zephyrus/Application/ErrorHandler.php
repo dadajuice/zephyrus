@@ -3,11 +3,6 @@
 class ErrorHandler
 {
     /**
-     * @var ErrorHandler Singleton pattern instance.
-     */
-    private static $instance = null;
-
-    /**
      * @var mixed[] Contains exception class name as key and corresponding
      * callback as value.
      */
@@ -20,14 +15,12 @@ class ErrorHandler
     private $registeredErrorCallbacks = [];
 
     /**
-     * @return ErrorHandler
+     * Initialize every handlers (error, fatal and exceptions).
      */
-    public static function getInstance()
+    public function __construct()
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
-        }
-        return self::$instance;
+        set_exception_handler([$this, 'exceptionHandler']);
+        set_error_handler([$this, 'errorHandler']);
     }
 
     /**
@@ -162,47 +155,21 @@ class ErrorHandler
      * registered PHP handler.
      *
      * @param int $type
-     * @param string $message
-     * @param string $file
-     * @param int $line
-     * @param mixed $context
      * @return bool
      * @throws \Exception
      */
-    public function errorHandler($type, $message, $file, $line, $context)
+    public function errorHandler($type, ...$args)
     {
         if (!(error_reporting() & $type)) {
             // This error code is not included in error_reporting
             return true;
         }
-
         if (array_key_exists($type, $this->registeredErrorCallbacks)) {
             $callback = $this->registeredErrorCallbacks[$type];
             $reflection = new \ReflectionFunction($callback);
-            $parameters = $reflection->getParameters();
-            switch (count($parameters)) {
-                case 0:
-                    $args = [];
-                    break;
-                case 1:
-                    $args = [$message];
-                    break;
-                case 2:
-                    $args = [$message, $file];
-                    break;
-                case 3:
-                    $args = [$message, $file, $line];
-                    break;
-                case 4:
-                    $args = [$message, $file, $line, $context];
-                    break;
-                default:
-                    throw new \Exception("Specified callback cannot have more than 4 arguments");
-            }
             $reflection->invokeArgs($args);
             return true;
         }
-
         return false;
     }
 
@@ -223,15 +190,5 @@ class ErrorHandler
             $reflection = $parent;
         }
         return null;
-    }
-
-    /**
-     * Initialize every handlers (error, fatal and exceptions). Singleton
-     * pattern.
-     */
-    private function __construct()
-    {
-        set_exception_handler([$this, 'exceptionHandler']);
-        set_error_handler([$this, 'errorHandler']);
     }
 }
