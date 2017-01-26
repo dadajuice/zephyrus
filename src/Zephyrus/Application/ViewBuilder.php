@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Application;
 
 use Pug\Pug;
+use Zephyrus\Security\ContentSecurityPolicy;
 
 class ViewBuilder
 {
@@ -13,11 +14,6 @@ class ViewBuilder
      * @var Pug
      */
     private $pug;
-
-    /**
-     * @var ViewHelper
-     */
-    private $viewHelper;
 
     /**
      * @return ViewBuilder
@@ -33,11 +29,8 @@ class ViewBuilder
     public function build(string $pageToRender): View
     {
         $path = ROOT_DIR . '/app/views/' . $pageToRender . $this->pug->getExtension();
-        if (!file_exists($path)) {
-            throw new \Exception("The specified view file [$path] does not exists");
-        }
-        if (!is_readable($path)) {
-            throw new \Exception("The specified view file [$path] is not readable");
+        if (!file_exists($path) || !is_readable($path)) {
+            throw new \Exception("The specified view file [$path] is not available (not readable or does not exists)");
         }
         return new View($this->pug, $path);
     }
@@ -73,17 +66,81 @@ class ViewBuilder
 
     private function addPugHelpers()
     {
-        foreach ($this->viewHelper->getKeywords() as $keyword => $action) {
-            $this->pug->addKeyword($keyword, $action);
-        }
-        $this->pug->share($this->viewHelper->getFunctions());
+        $this->initializeDefaultFunctions();
+        $this->addCsrfKeyword();
         $this->pug->share(Flash::readAll());
     }
 
     private function __construct()
     {
         $this->buildPug();
-        $this->viewHelper = new ViewHelper();
         $this->addPugHelpers();
+    }
+
+    private function initializeDefaultFunctions()
+    {
+        $functions = [];
+        $functions['nonce'] = $this->addNonceFunction();
+        $functions['format'] = $this->addFormatFunction();
+        $functions['val'] = $this->addValFunction();
+        $functions['sess'] = $this->addSessionFunction();
+        $this->pug->share($functions);
+    }
+
+    private function addNonceFunction()
+    {
+        return function () {
+            return ContentSecurityPolicy::getRequestNonce();
+        };
+    }
+
+    private function addValFunction()
+    {
+        return function ($fieldId, $defaultValue = "") {
+            return Form::readMemorizedValue($fieldId, $defaultValue);
+        };
+    }
+
+    private function addSessionFunction()
+    {
+        return function ($key) {
+            return Session::getInstance()->read($key);
+        };
+    }
+
+    private function addFormatFunction()
+    {
+        return function ($type, ...$args) {
+            $class = '\Zephyrus\Application\Formatter';
+            switch ($type) {
+                case 'filesize':
+                    return forward_static_call_array([$class, 'formatHumanFileSize'], $args);
+                case 'time':
+                    return forward_static_call_array([$class, 'formatTime'], $args);
+                case 'elapsed':
+                    return forward_static_call_array([$class, 'formatElapsedDateTime'], $args);
+                case 'datetime':
+                    return forward_static_call_array([$class, 'formatDateTime'], $args);
+                case 'date':
+                    return forward_static_call_array([$class, 'formatDate'], $args);
+                case 'percent':
+                    return forward_static_call_array([$class, 'formatPercent'], $args);
+                case 'money':
+                    return forward_static_call_array([$class, 'formatMoney'], $args);
+                case 'decimal':
+                    return forward_static_call_array([$class, 'formatDecimal'], $args);
+            }
+            return 'FORMAT TYPE [' . $type . '] NOT DEFINED !';
+        };
+    }
+
+    private function addCsrfKeyword()
+    {
+        $this->pug->addKeyword('csrf', function () {
+            return [
+                'beginPhp' => 'echo Zephyrus\Security\CsrfGuard::getInstance()->generateHiddenFields()',
+                'endPhp' => ';',
+            ];
+        });
     }
 }
