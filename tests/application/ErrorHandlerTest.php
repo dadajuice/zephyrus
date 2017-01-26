@@ -3,14 +3,13 @@
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\ErrorHandler;
 use Zephyrus\Database\Database;
-use Zephyrus\Exceptions\DatabaseException;
-use Zephyrus\Exceptions\RouteDefinitionException;
 
 class ErrorHandlerTest extends TestCase
 {
-    protected function setUp()
+    protected function tearDown()
     {
         set_exception_handler(null);
+        set_error_handler(null);
     }
 
     /**
@@ -18,7 +17,8 @@ class ErrorHandlerTest extends TestCase
      */
     public function testInvalidArgument()
     {
-        ErrorHandler::getInstance()->exception(function() {});
+        $handler = new ErrorHandler();
+        $handler->exception(function() {});
     }
 
     /**
@@ -26,17 +26,7 @@ class ErrorHandlerTest extends TestCase
      */
     public function testInvalidArgumentType()
     {
-        ErrorHandler::getInstance()->exception(function(Database $e) {});
-    }
-
-    /**
-     * @expectedException \Zephyrus\Exceptions\DatabaseException
-     */
-    public function testDatabaseException()
-    {
-        ErrorHandler::getInstance()->exception(function(DatabaseException $e) {
-            self::assertEquals('SELECT * FROM TEST', $e->getQuery());
-        });
-        throw new DatabaseException("DB error");
+        $handler = new ErrorHandler();
+        $handler->exception(function(Database $e) {});
     }
 }
