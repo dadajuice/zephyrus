@@ -28,7 +28,7 @@ abstract class Controller implements Routable
     public function __construct(Router $router)
     {
         $this->router = $router;
-        $this->request = RequestFactory::read();
+        $this->request = &$router->getRequest();
         $this->response = new Response();
     }
 
@@ -119,7 +119,6 @@ abstract class Controller implements Routable
         echo "retry: " . $retry . PHP_EOL;
         echo "data: " . json_encode($data) . PHP_EOL;
         echo PHP_EOL;
-        ob_flush();
         flush();
     }
 
@@ -144,8 +143,23 @@ abstract class Controller implements Routable
         }
         if (is_array($data)) {
             $xml = new \SimpleXMLElement('<' . $root . '/>');
-            array_walk_recursive($data, array ($xml, 'addChild'));
+            $this->arrayToXml($data, $xml);
             echo $xml->asXML();
+        }
+    }
+
+    private function arrayToXml($data, \SimpleXMLElement &$xml)
+    {
+        foreach ($data as $key => $value) {
+            if (is_numeric($key)) {
+                $key = 'node' . $key;
+            }
+            if (is_array($value)) {
+                $subnode = $xml->addChild($key);
+                $this->arrayToXml($value, $subnode);
+                return;
+            }
+            $xml->addChild("$key", htmlspecialchars("$value"));
         }
     }
 }
