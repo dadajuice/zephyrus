@@ -14,7 +14,8 @@ class Bootstrap
 
     public static function initializeRoutableControllers(Router $router)
     {
-        $controllers = ClassLocator::getClassesInNamespace("Controllers");
+        $classLocator = new ClassLocator("Controller");
+        $controllers = $classLocator->getClasses();
         foreach ($controllers as $controller) {
             $reflection = new \ReflectionClass($controller);
             if ($reflection->implementsInterface('Zephyrus\Network\Routable')) {

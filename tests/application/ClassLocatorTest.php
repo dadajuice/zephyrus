@@ -13,9 +13,11 @@ class ClassLocatorTest extends TestCase
 
     public function testClassNameInNamespace()
     {
-        //$classes = ClassLocator::getClassesInNamespace('Zephyrus\\Application\\');
-        //print_r($classes);
-        //self::assertTrue(key_exists('Zephyrus\\', $classes));
+        $locator = new ClassLocator('Zephyrus\\Application\\');
+        $found = strpos($locator->getDirectory(), '/src/Zephyrus/Application') !== false;
+        self::assertTrue($found);
+        $classes = $locator->getClasses();
+        self::assertTrue(in_array('Zephyrus\Application\ClassLocator', $classes));
     }
 
     /**
@@ -23,6 +25,6 @@ class ClassLocatorTest extends TestCase
      */
     public function testInvalidNamespace()
     {
-        ClassLocator::getClassesInNamespace('test90287349\\');
+        new ClassLocator('test90287349\\');
     }
 }
