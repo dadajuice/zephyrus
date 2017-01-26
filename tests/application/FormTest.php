@@ -30,6 +30,39 @@ class FormTest extends TestCase
         self::assertEquals('bob', $fields['name']);
     }
 
+    public function testBuildObject()
+    {
+        $form = new Form();
+        $form->addFields(['name' => 'bob', 'price' => '10.00']);
+        $class = new class() {
+            private $name;
+            private $price;
+
+            public function getName()
+            {
+                return $this->name;
+            }
+
+            public function setName($name)
+            {
+                $this->name = $name;
+            }
+
+            public function getPrice()
+            {
+                return $this->price;
+            }
+
+            public function setPrice($price)
+            {
+                $this->price = $price;
+            }
+        };
+        $form->buildObject($class);
+        self::assertEquals('bob', $class->getName());
+        self::assertEquals('10.00', $class->getPrice());
+    }
+
     public function testAddErrors()
     {
         $form = new Form();
