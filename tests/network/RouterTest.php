@@ -1,6 +1,9 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Exceptions\RouteMethodUnsupportedException;
+use Zephyrus\Exceptions\RouteNotAcceptedException;
+use Zephyrus\Exceptions\RouteNotFoundException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Router;
@@ -91,6 +94,22 @@ class RouterTest extends TestCase
         $router->run($req);
     }
 
+    public function testRouteNotAcceptedCatch()
+    {
+        try {
+            $server = [];
+            $server['HTTP_ACCEPT'] = ContentType::HTML;
+            $req = new Request('http://test.local/bob', 'GET', [], [], [], $server);
+            $router = new Router();
+            $router->get('/bob', function() {
+
+            }, [ContentType::JSON]);
+            $router->run($req);
+        } catch (RouteNotAcceptedException $e) {
+            self::assertEquals(ContentType::HTML, $e->getAccept());
+        }
+    }
+
     /**
      * @expectedException \Exception
      * @expectedExceptionCode 500
@@ -117,6 +136,17 @@ class RouterTest extends TestCase
         $router->run($req);
     }
 
+    public function testInvalidRouteMethodCatch()
+    {
+        try {
+            $req = new Request('http://test.local/bob/3', 'INV');
+            $router = new Router();
+            $router->run($req);
+        } catch (RouteMethodUnsupportedException $e) {
+            self::assertEquals('INV', $e->getMethod());
+        }
+    }
+
     /**
      * @expectedException \Zephyrus\Exceptions\RouteNotFoundException
      */
@@ -125,6 +155,18 @@ class RouterTest extends TestCase
         $req = new Request('http://test.local/bob/3', 'GET');
         $router = new Router();
         $router->run($req);
+    }
+
+    public function testInvalidRouteCatch()
+    {
+        try {
+            $req = new Request('http://test.local/bob/3', 'GET');
+            $router = new Router();
+            $router->run($req);
+        } catch (RouteNotFoundException $e) {
+            self::assertEquals('GET', $e->getMethod());
+            self::assertEquals('/bob/3', $e->getUri());
+        }
     }
 
     /**
