@@ -1,38 +1,14 @@
 <?php namespace Zephyrus\Database;
 
-use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\DatabaseException;
 use PDO;
 
 class Database
 {
     /**
-     * @var Database
-     */
-    private static $instance = null;
-
-    /**
-     * @var array
-     */
-    private $config = null;
-
-    /**
      * @var TransactionPDO
      */
     private $handle = null;
-
-    /**
-     * Singleton pattern standard instance getter.
-     *
-     * @return Database
-     */
-    public static function getInstance()
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
 
     /**
      * Execute a parametrized SQL query. Parameters must be included as an
@@ -111,33 +87,10 @@ class Database
         return $this->handle->lastInsertId();
     }
 
-    /**
-     * Singleton pattern constructor. Only purpose is to initialize the PDO
-     * connection handler.
-     *
-     * @throws DatabaseException
-     */
-    private function __construct()
+    public function __construct(string $dsn, string $username = "", string $password = "")
     {
-        $this->config = Configuration::getDatabaseConfiguration();
-        $this->initializeConnectionHandle();
-    }
-
-    /**
-     * Helper method which instantiates the connection handle according to the
-     * specified configurations (config.ini). Called internally only by <open>
-     * method. Sets all errors to be thrown as Exception.
-     *
-     * @throws DatabaseException
-     */
-    private function initializeConnectionHandle()
-    {
-        $connectionString = $this->config['dsn']
-            ?? "mysql:dbname={$this->config['database']};
-                host={$this->config['host']};
-                charset={$this->config['charset']}";
         try {
-            $this->handle = new TransactionPDO($connectionString, $this->config['username'], $this->config['password']);
+            $this->handle = new TransactionPDO($dsn, $username, $password);
             $this->handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (\PDOException $e) {
             throw new DatabaseException("Connection failed to database : " . $e->getMessage());
