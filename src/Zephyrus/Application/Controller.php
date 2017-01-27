@@ -58,14 +58,10 @@ abstract class Controller implements Routable
      *
      * @param string $page
      * @param array $args
-     * @param Pager|null $pager
      */
-    protected function render($page, $args = [], Pager $pager = null)
+    protected function render($page, $args = [])
     {
         $view = ViewBuilder::getInstance()->build($page);
-        if (!is_null($pager)) {
-            $view->setPager($pager);
-        }
         echo $view->render($args);
     }
 
