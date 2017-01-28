@@ -26,7 +26,7 @@ class RequestFactory
      *
      * @param Request $request
      */
-    public static function set(Request $request)
+    public static function set(?Request $request)
     {
         self::$httpRequest = $request;
     }
@@ -39,9 +39,7 @@ class RequestFactory
         $server = $_SERVER;
         $uri = $server['REQUEST_URI'];
         $method = strtoupper($server['REQUEST_METHOD']);
-        $server['REMOTE_ADDR'] = (getenv('HTTP_X_FORWARDED_FOR'))
-            ? getenv('HTTP_X_FORWARDED_FOR')
-            : getenv('REMOTE_ADDR');
+        $server['REMOTE_ADDR'] = getenv('HTTP_X_FORWARDED_FOR') ?? getenv('REMOTE_ADDR');
         $parameters = self::getParametersFromMethod($method);
         if (isset($parameters['__method'])) {
             $method = strtoupper($parameters['__method']);
@@ -59,17 +57,13 @@ class RequestFactory
      */
     private static function getParametersFromMethod(string $method): array
     {
-        $parameters = self::getParametersFromGlobal($_GET);
+        $parameters = array_merge(self::getParametersFromGlobal($_GET), self::getParametersFromGlobal($_FILES));
         switch ($method) {
-            case 'GET':
-                return array_merge($parameters, self::getParametersFromGlobal($_FILES));
             case 'POST':
-                return array_merge($parameters, self::getParametersFromGlobal($_POST),
-                    self::getParametersFromGlobal($_FILES));
+                return array_merge($parameters, self::getParametersFromGlobal($_POST));
             case 'PUT':
             case 'DELETE':
                 parse_str(file_get_contents('php://input'), $paramsSource);
-                $parameters = array_merge($parameters, self::getParametersFromGlobal($_FILES));
                 return array_merge($parameters, self::getParametersFromGlobal($paramsSource));
         }
         return $parameters;
