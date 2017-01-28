@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Security;
+<?php namespace Zephyrus\Utilities;
 
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;

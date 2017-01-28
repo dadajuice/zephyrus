@@ -4,6 +4,7 @@ use Expose\FilterCollection;
 use Expose\Manager;
 use Expose\Report;
 use Zephyrus\Application\Configuration;
+use Zephyrus\Utilities\SystemLog;
 
 class IntrusionDetection
 {
