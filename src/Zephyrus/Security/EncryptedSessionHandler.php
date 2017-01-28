@@ -62,11 +62,9 @@ class EncryptedSessionHandler extends \SessionHandler
     public function destroy($sessionId)
     {
         parent::destroy($sessionId);
-        if (empty(session_id())) {
-            if (isset($_COOKIE[$this->cookieKeyName])) {
-                setcookie($this->cookieKeyName, '', 1);
-                unset($_COOKIE[$this->cookieKeyName]);
-            }
+        if (empty(session_id()) && isset($_COOKIE[$this->cookieKeyName])) {
+            setcookie($this->cookieKeyName, '', 1);
+            unset($_COOKIE[$this->cookieKeyName]);
         }
         return true;
     }
@@ -83,9 +81,7 @@ class EncryptedSessionHandler extends \SessionHandler
         setcookie(
             $this->cookieKeyName,
             base64_encode($this->cryptKey) . ':' . base64_encode($this->cryptAuth),
-            ($cookieSettings['lifetime'] > 0)
-                ? time() + $cookieSettings['lifetime']
-                : 0,
+            ($cookieSettings['lifetime'] > 0) ? time() + $cookieSettings['lifetime'] : 0,
             $cookieSettings['path'],
             $cookieSettings['domain'],
             $cookieSettings['secure'],
