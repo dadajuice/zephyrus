@@ -68,12 +68,11 @@ class IntrusionDetection
         $this->manager->run($guard);
         if ($this->manager->getImpact() > 0) {
             $data = $this->getDetectionData($this->manager->getReports());
-            if (!is_null($this->detectionCallback)) {
-                $callback = $this->detectionCallback;
-                $callback($data);
-            } else {
+            if (is_null($this->detectionCallback)) {
                 throw new \Exception("No intrusion detection callback defined");
             }
+            $callback = $this->detectionCallback;
+            $callback($data);
         }
     }
 
@@ -95,7 +94,7 @@ class IntrusionDetection
      *
      * @param int $surveillanceBitwise
      */
-    public function setSurveillance($surveillanceBitwise)
+    public function setSurveillance(int $surveillanceBitwise)
     {
         $this->surveillance = $surveillanceBitwise;
     }
@@ -103,7 +102,7 @@ class IntrusionDetection
     /**
      * @return bool
      */
-    public function isMonitoringRequest()
+    public function isMonitoringRequest(): bool
     {
         return ($this->surveillance & self::REQUEST) > 0;
     }
@@ -111,7 +110,7 @@ class IntrusionDetection
     /**
      * @return bool
      */
-    public function isMonitoringGet()
+    public function isMonitoringGet(): bool
     {
         return ($this->surveillance & self::GET) > 0;
     }
@@ -119,15 +118,15 @@ class IntrusionDetection
     /**
      * @return bool
      */
-    public function isMonitoringPost()
+    public function isMonitoringPost(): bool
     {
         return ($this->surveillance & self::POST) > 0;
     }
 
     /**
-     * @return int
+     * @return bool
      */
-    public function isMonitoringCookie()
+    public function isMonitoringCookie(): bool
     {
         return ($this->surveillance & self::COOKIE) > 0;
     }
@@ -154,7 +153,7 @@ class IntrusionDetection
      *
      * @return mixed[]
      */
-    private function getMonitoringInputs()
+    private function getMonitoringInputs(): array
     {
         $guard = [];
         if ($this->surveillance & self::REQUEST) {
@@ -180,7 +179,7 @@ class IntrusionDetection
      * @param Report[] $reports
      * @return mixed[]
      */
-    private function getDetectionData($reports)
+    private function getDetectionData($reports): array
     {
         $data = [
             'impact' => 0,
