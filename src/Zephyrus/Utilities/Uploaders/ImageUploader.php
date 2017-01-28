@@ -70,7 +70,7 @@ class ImageUploader extends FileUploader
     private function rebuildImage($width, $height)
     {
         $finalImage = imagecreatetruecolor($width, $height);
-        $extension = $this->getUploadFile()->getExtension();
+        $extension = $this->uploadFile->getExtension();
         $tempImage = $this->createImageFromExtension($extension);
         imagealphablending($finalImage, false);
         imagesavealpha($finalImage, true);
