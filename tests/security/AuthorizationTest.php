@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Exceptions\UnauthorizedAccessException;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 use Zephyrus\Security\Authorization;
@@ -129,5 +130,15 @@ class AuthorizationTest extends TestCase
         });
         $auth->protect('/yup', Authorization::ALL, 'public');
         self::assertTrue($auth->isAuthorized('/yup'));
+    }
+
+    public function testException()
+    {
+        try {
+            throw new UnauthorizedAccessException('/test', ['admin']);
+        } catch (UnauthorizedAccessException $e) {
+            self::assertEquals('/test', $e->getUri());
+            self::assertTrue(in_array('admin', $e->getRequirements()));
+        }
     }
 }
