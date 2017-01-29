@@ -3,20 +3,6 @@
 use Zephyrus\Security\ContentSecurityPolicy;
 
 /**
- * Redirect user to specified URL. Throws an HTTP "303 See Other" header
- * instead of the default 301. This indicates, more precisely, that the
- * response if elsewhere.
- *
- * @param string $url
- */
-function redirect($url)
-{
-    header('HTTP/1.1 303 See Other');
-    header('Location: ' . $url);
-    exit();
-}
-
-/**
  * Basic filtering to eliminate any tags and empty leading / trailing
  * characters.
  *
@@ -54,7 +40,7 @@ function recursiveGlob($pattern, $flags = 0)
 {
     $files = glob($pattern, $flags);
     foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
-        $files = array_merge($files, recursiveGlob($dir.'/'.basename($pattern), $flags));
+        $files = array_merge($files, recursiveGlob($dir . '/' . basename($pattern), $flags));
     }
     return $files;
 }

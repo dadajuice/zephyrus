@@ -18,6 +18,14 @@ class ResponseTest extends TestCase
         self::assertTrue(in_array('test:1234', $headers));
     }
 
+    public function testRedirect()
+    {
+        $response = new Response();
+        $response->redirect('/test');
+        $headers = xdebug_get_headers();
+        self::assertTrue(in_array('Location:/test', $headers));
+    }
+
     /**
      * @expectedException \RuntimeException
      */

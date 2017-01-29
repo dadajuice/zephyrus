@@ -31,6 +31,20 @@ class Response
     }
 
     /**
+     * Redirect user to specified URL. Throws an HTTP "303 See Other" header
+     * instead of the default 301. This indicates, more precisely, that the
+     * response if elsewhere.
+     *
+     * @param string $url
+     */
+    public function redirect($url)
+    {
+        $this->sendResponseCode(303);
+        $this->sendHeader('Location', $url);
+        flush();
+    }
+
+    /**
      * @param string $contentType
      * @param string $charset
      */
