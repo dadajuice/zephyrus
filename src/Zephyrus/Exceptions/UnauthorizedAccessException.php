@@ -2,8 +2,8 @@
 
 class UnauthorizedAccessException extends \Exception
 {
-    public $requirements = [];
-    public $uri;
+    private $requirements = [];
+    private $uri;
 
     public function __construct($uri = "", $requirements = [])
     {
