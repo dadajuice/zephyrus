@@ -112,14 +112,11 @@ class SessionFingerprint
      */
     private function setupFingerprintHandler()
     {
-        if (!$this->userAgentFingerprinted && !$this->ipAddressFingerprinted) {
-            if (isset($this->content['__HANDLER_FINGERPRINT'])) {
-                unset($this->content['__HANDLER_FINGERPRINT']);
-            }
-        } else {
-            if (!isset($this->content['__HANDLER_FINGERPRINT'])) {
-                $this->content['__HANDLER_FINGERPRINT'] = $this->createFingerprint();
-            }
+        if (!$this->userAgentFingerprinted && !$this->ipAddressFingerprinted
+            && isset($this->content['__HANDLER_FINGERPRINT'])) {
+            unset($this->content['__HANDLER_FINGERPRINT']);
+        } elseif (!isset($this->content['__HANDLER_FINGERPRINT'])) {
+            $this->content['__HANDLER_FINGERPRINT'] = $this->createFingerprint();
         }
     }
 }
