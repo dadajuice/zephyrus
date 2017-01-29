@@ -32,7 +32,7 @@ class SessionStorage extends BaseSessionStorage
     {
         parent::__construct($config['name'] ?? null);
         $this->encryptionEnabled = $config['encryption_enabled'] ?? false;
-        $this->expiration = new SessionExpiration($config, $this);
+        $this->expiration = new SessionExpiration($config);
         $this->fingerprint = new SessionFingerprint($config, $this);
         $this->decoy = new SessionDecoy($config);
     }
@@ -43,7 +43,7 @@ class SessionStorage extends BaseSessionStorage
             $this->setHandler(new EncryptedSessionHandler());
         }
         parent::start();
-        $this->expiration->start();
+        $this->expiration->start($this);
         $this->fingerprint->start();
 
         if (!isset($_SESSION['__HANDLER_INITIATED'])) {

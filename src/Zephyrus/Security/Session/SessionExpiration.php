@@ -22,22 +22,24 @@ class SessionExpiration
     /**
      * @var array
      */
-    protected $content = [];
+    private $content = [];
 
     /**
      * @param array $config
-     * @param SessionStorage $storage
      */
-    public function __construct(array $config, SessionStorage $storage)
+    public function __construct(array $config)
     {
-        $this->content = &$storage->getContent();
         $this->refreshAfterNthRequests = $config['refresh_after_requests'] ?? null;
         $this->refreshAfterInterval = $config['refresh_after_interval'] ?? null;
-        $this->refreshProbability = $config['refresh_probability'] ?? null;
+        $this->refreshProbability = null;
+        if (isset($config['refresh_probability'])) {
+            $this->setRefreshProbability($config['refresh_probability']);
+        }
     }
 
-    public function start()
+    public function start(SessionStorage $storage)
     {
+        $this->content = &$storage->getContent();
         $this->setupRefreshOnNthRequestsHandler();
         $this->setupRefreshOnIntervalHandler();
     }
@@ -70,7 +72,7 @@ class SessionExpiration
             return true;
         }
         if (isset($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
-            if ($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'] < 1) {
+            if ($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'] <= 1) {
                 return true;
             }
             $this->content['__HANDLER_REQUESTS_BEFORE_REFRESH']--;
@@ -92,14 +94,11 @@ class SessionExpiration
      */
     private function isRefreshNeededByProbability()
     {
-        if ($this->refreshProbability == null) {
+        if (is_null($this->refreshProbability)) {
             return false;
         }
-        if ($this->refreshProbability == 1.0) {
-            return true;
-        }
         $rand = (float)mt_rand() / (float)mt_getrandmax();
-        if ($rand <= $this->refreshProbability) {
+        if ($this->refreshProbability == 1.0 || $rand <= $this->refreshProbability) {
             return true;
         }
         return false;
@@ -132,7 +131,7 @@ class SessionExpiration
     /**
      * @return int
      */
-    public function getRefreshAfterNthRequests(): int
+    public function getRefreshAfterNthRequests(): ?int
     {
         return $this->refreshAfterNthRequests;
     }
@@ -148,7 +147,7 @@ class SessionExpiration
     /**
      * @return int
      */
-    public function getRefreshAfterInterval(): int
+    public function getRefreshAfterInterval(): ?int
     {
         return $this->refreshAfterInterval;
     }
@@ -164,7 +163,7 @@ class SessionExpiration
     /**
      * @return float
      */
-    public function getRefreshProbability(): float
+    public function getRefreshProbability(): ?float
     {
         return $this->refreshProbability;
     }
