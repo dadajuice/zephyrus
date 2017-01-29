@@ -40,4 +40,29 @@ class ViewBuilderTest extends TestCase
         $output = $view->render(['item' => ['name' => 'Bob Lewis', 'price' => 12.30]]);
         self::assertEquals('<p>Example Bob Lewis is 12,300 $</p>', $output);
     }
+
+    public function testAddFunction()
+    {
+        $builder = ViewBuilder::getInstance();
+        $builder->addFunction('test', function($amount) {
+            return $amount * 2;
+        });
+        $view = ViewBuilder::getInstance()->buildFromString('p Example #{test(item.price)}');
+        $output = $view->render(['item' => ['price' => 4]]);
+        self::assertEquals('<p>Example 8</p>', $output);
+    }
+
+    public function testAddKeyword()
+    {
+        $builder = ViewBuilder::getInstance();
+        $builder->addKeyword('batman', function () {
+            return [
+                'beginPhp' => 'echo "Batman"',
+                'endPhp' => ';',
+            ];
+        });
+        $view = ViewBuilder::getInstance()->buildFromString('batman');
+        $output = $view->render();
+        self::assertEquals('Batman', $output);
+    }
 }
