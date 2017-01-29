@@ -72,7 +72,9 @@ class SessionStorage
         if (!is_null($this->handler)) {
             session_set_save_handler($this->handler);
         }
-        session_start();
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
         $this->sessionId = session_id();
         $this->content = &$_SESSION;
         $this->started = true;
