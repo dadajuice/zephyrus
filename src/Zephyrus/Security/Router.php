@@ -6,6 +6,13 @@ use Zephyrus\Network\Router as BaseRouter;
 
 class Router extends BaseRouter
 {
+    private $csrfGuard;
+
+    public function __construct()
+    {
+        $this->csrfGuard = new CsrfGuard();
+    }
+
     /**
      * This method is automatically called when a route has been found before
      * any user defined code. This method sends security headers, runs the
@@ -25,7 +32,7 @@ class Router extends BaseRouter
             IntrusionDetection::getInstance()->run();
         }
         if (Configuration::getSecurityConfiguration('csrf_guard_enabled')) {
-            CsrfGuard::getInstance()->guard();
+            $this->csrfGuard->guard();
             if (Configuration::getSecurityConfiguration('csrf_guard_automatic_html')) {
                 ob_start();
             }
@@ -44,7 +51,7 @@ class Router extends BaseRouter
     {
         if (Configuration::getSecurityConfiguration('csrf_guard_enabled')
             && Configuration::getSecurityConfiguration('csrf_guard_automatic_html')) {
-            echo CsrfGuard::getInstance()->injectForms(ob_get_clean());
+            echo $this->csrfGuard->injectForms(ob_get_clean());
         }
     }
 }

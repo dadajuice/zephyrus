@@ -15,13 +15,6 @@ class CsrfGuard
     const TOKEN_LENGTH = 48;
 
     /**
-     * Singleton pattern instance.
-     *
-     * @var CsrfGuard
-     */
-    private static $instance = null;
-
-    /**
      * @var Request
      */
     private $request;
@@ -62,20 +55,17 @@ class CsrfGuard
      */
     private $deleteSecured = true;
 
-    /**
-     * @return CsrfGuard
-     */
-    public static function getInstance()
+    public function __construct()
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
+        $this->request = RequestFactory::read();
+        $configs = Configuration::getSecurityConfiguration();
+        if (isset($configs['csrf_guard_req'])) {
+            $methodsToFilter = $configs['csrf_guard_req'];
+            $this->setPostSecured(in_array('POST', $methodsToFilter));
+            $this->setPutSecured(in_array('PUT', $methodsToFilter));
+            $this->setDeleteSecured(in_array('DELETE', $methodsToFilter));
+            $this->setGetSecured(in_array('GET', $methodsToFilter));
         }
-        return self::$instance;
-    }
-
-    public static function kill()
-    {
-        self::$instance = null;
     }
 
     /**
@@ -135,15 +125,15 @@ class CsrfGuard
     /**
      * @return boolean
      */
-    public function isGetSecured()
+    public function isGetSecured(): bool
     {
-        return (bool) $this->getSecured;
+        return $this->getSecured;
     }
 
     /**
      * @param boolean $getSecured
      */
-    public function setGetSecured($getSecured)
+    public function setGetSecured(bool $getSecured)
     {
         $this->getSecured = $getSecured;
     }
@@ -151,15 +141,15 @@ class CsrfGuard
     /**
      * @return boolean
      */
-    public function isPostSecured()
+    public function isPostSecured(): bool
     {
-        return (bool) $this->postSecured;
+        return $this->postSecured;
     }
 
     /**
      * @param boolean $postSecured
      */
-    public function setPostSecured($postSecured)
+    public function setPostSecured(bool $postSecured)
     {
         $this->postSecured = $postSecured;
     }
@@ -167,7 +157,7 @@ class CsrfGuard
     /**
      * @return boolean
      */
-    public function isPutSecured()
+    public function isPutSecured(): bool
     {
         return (bool) $this->putSecured;
     }
@@ -175,7 +165,7 @@ class CsrfGuard
     /**
      * @param boolean $putSecured
      */
-    public function setPutSecured($putSecured)
+    public function setPutSecured(bool $putSecured)
     {
         $this->putSecured = $putSecured;
     }
@@ -183,7 +173,7 @@ class CsrfGuard
     /**
      * @return boolean
      */
-    public function isDeleteSecured()
+    public function isDeleteSecured(): bool
     {
         return (bool) $this->deleteSecured;
     }
@@ -191,7 +181,7 @@ class CsrfGuard
     /**
      * @param boolean $deleteSecured
      */
-    public function setDeleteSecured($deleteSecured)
+    public function setDeleteSecured(bool $deleteSecured)
     {
         $this->deleteSecured = $deleteSecured;
     }
@@ -204,7 +194,7 @@ class CsrfGuard
      * @return string
      * @throws \Exception
      */
-    private function generateToken($formName)
+    private function generateToken(string $formName): string
     {
         $token = Cryptography::randomString(self::TOKEN_LENGTH);
         $csrfData = Session::getInstance()->read('__CSRF_TOKEN', []);
@@ -218,7 +208,7 @@ class CsrfGuard
      *
      * @return string
      */
-    private function generateFormName()
+    private function generateFormName(): string
     {
         return "CSRFGuard_" . mt_rand(0, mt_getrandmax());
     }
@@ -232,7 +222,7 @@ class CsrfGuard
      * @param $token
      * @return bool
      */
-    private function validateToken($formName, $token)
+    private function validateToken(string $formName, string $token): bool
     {
         $sortedCsrf = $this->getStoredCsrfToken($formName);
         if (!is_null($sortedCsrf)) {
@@ -251,7 +241,7 @@ class CsrfGuard
      * @param string $formName
      * @return null|string
      */
-    private function getStoredCsrfToken($formName)
+    private function getStoredCsrfToken(string $formName): ?string
     {
         $csrfData = Session::getInstance()->read('__CSRF_TOKEN');
         if (is_null($csrfData)) {
@@ -267,7 +257,7 @@ class CsrfGuard
      *
      * @return null|string
      */
-    private function getProvidedCsrfToken()
+    private function getProvidedCsrfToken(): ?string
     {
         $token = $this->request->getParameter(self::REQUEST_TOKEN_VALUE);
         if (is_null($token)) {
@@ -282,7 +272,7 @@ class CsrfGuard
      *
      * @return null|string
      */
-    private function getProvidedFormName()
+    private function getProvidedFormName(): ?string
     {
         $formName = $this->request->getParameter(self::REQUEST_TOKEN_NAME);
         if (is_null($formName)) {
@@ -297,7 +287,7 @@ class CsrfGuard
      * @param string $method
      * @return bool
      */
-    private function isHttpMethodFiltered($method)
+    private function isHttpMethodFiltered($method): bool
     {
         $method = strtoupper($method);
         if ($this->getSecured && $method == "GET") {
@@ -310,21 +300,5 @@ class CsrfGuard
             return true;
         }
         return false;
-    }
-
-    /**
-     * Private CsrfFilter constructor for singleton pattern.
-     */
-    private function __construct()
-    {
-        $this->request = RequestFactory::read();
-        $configs = Configuration::getSecurityConfiguration();
-        if (isset($configs['csrf_guard_req'])) {
-            $methodsToFilter = $configs['csrf_guard_req'];
-            $this->setPostSecured(in_array('POST', $methodsToFilter));
-            $this->setPutSecured(in_array('PUT', $methodsToFilter));
-            $this->setDeleteSecured(in_array('DELETE', $methodsToFilter));
-            $this->setGetSecured(in_array('GET', $methodsToFilter));
-        }
     }
 }
