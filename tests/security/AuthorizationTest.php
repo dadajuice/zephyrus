@@ -12,7 +12,7 @@ class AuthorizationTest extends TestCase
     {
         $req = new Request('http://test.local', 'POST');
         RequestFactory::set($req);
-        $auth = Authorization::getInstance();
+        $auth = new Authorization();
         self::assertFalse($auth->isAuthorized('/'));
     }
 
@@ -20,7 +20,7 @@ class AuthorizationTest extends TestCase
     {
         $req = new Request('http://test.local', 'GET');
         RequestFactory::set($req);
-        $auth = Authorization::getInstance();
+        $auth = new Authorization();
         $auth->addSessionRequirement('admin', 'level', '777');
         $auth->protect('/users/*', Authorization::GET, 'admin');
         self::assertFalse($auth->isAuthorized('/users/insert'));
@@ -35,7 +35,8 @@ class AuthorizationTest extends TestCase
      */
     public function testSessionRuleAlreadyDefined()
     {
-        $auth = Authorization::getInstance();
+        $auth = new Authorization();
+        $auth->addSessionRequirement('admin', 'level', '777');
         $auth->addSessionRequirement('admin', 'level', '777');
     }
 
@@ -45,7 +46,8 @@ class AuthorizationTest extends TestCase
      */
     public function testSessionRuleAlreadyDefined2()
     {
-        $auth = Authorization::getInstance();
+        $auth = new Authorization();
+        $auth->addSessionRequirement('admin', 'level', '777');
         $auth->addIpAddressRequirement('admin', '10.10.10.10');
     }
 
@@ -55,7 +57,8 @@ class AuthorizationTest extends TestCase
      */
     public function testSessionRuleAlreadyDefined3()
     {
-        $auth = Authorization::getInstance();
+        $auth = new Authorization();
+        $auth->addSessionRequirement('admin', 'level', '777');
         $auth->addRequirement('admin', function () {
             return false;
         });
@@ -67,7 +70,8 @@ class AuthorizationTest extends TestCase
      */
     public function testSessionRuleDefined()
     {
-        $auth = Authorization::getInstance();
+        $auth = new Authorization();
+        $auth->protect('/users/*', Authorization::GET, 'admin');
         $auth->protect('/users/*', Authorization::GET, 'admin');
     }
 
@@ -77,7 +81,7 @@ class AuthorizationTest extends TestCase
      */
     public function testRequirementUndefined()
     {
-        $auth = Authorization::getInstance();
+        $auth = new Authorization();
         $auth->protect('/logs', Authorization::GET, 'invalid');
         $auth->isAuthorized('/logs');
     }
@@ -87,7 +91,7 @@ class AuthorizationTest extends TestCase
      */
     public function testMode()
     {
-        $auth = Authorization::getInstance();
+        $auth = new Authorization();
         self::assertEquals(Authorization::MODE_WHITELIST, $auth->getMode());
         $auth->setMode(Authorization::MODE_BLACKLIST);
         self::assertEquals(Authorization::MODE_BLACKLIST, $auth->getMode());
@@ -99,8 +103,25 @@ class AuthorizationTest extends TestCase
      */
     public function testNotAuthorized()
     {
-        $auth = Authorization::getInstance();
+        $auth = new Authorization();
         self::assertFalse($auth->isAuthorized('/'));
+    }
+
+    public function testHome()
+    {
+        $auth = new Authorization();
+        $auth->addSessionRequirement('admin', 'GOZU');
+        $auth->protect('/', Authorization::ALL, 'admin');
+        self::assertFalse($auth->isAuthorized('/'));
+    }
+
+    public function testNoRules()
+    {
+        $auth = new Authorization();
+        $auth->addSessionRequirement('admin', 'GOZU');
+        $auth->protect('/', Authorization::ALL, 'admin');
+        $auth->protect('/test', Authorization::ALL, 'admin');
+        self::assertFalse($auth->isAuthorized('/bob'));
     }
 
     /**
@@ -108,7 +129,7 @@ class AuthorizationTest extends TestCase
      */
     public function testIpRequirement()
     {
-        $auth = Authorization::getInstance();
+        $auth = new Authorization();
         $auth->addIpAddressRequirement('school', '207.167.241.10');
         $auth->protect('/bob', Authorization::ALL, 'school');
         $server['REMOTE_ADDR'] = '207.167.241.10';
@@ -124,7 +145,7 @@ class AuthorizationTest extends TestCase
      */
     public function testCallbackRequirement()
     {
-        $auth = Authorization::getInstance();
+        $auth = new Authorization();
         $auth->addRequirement('public', function () {
             return true;
         });
