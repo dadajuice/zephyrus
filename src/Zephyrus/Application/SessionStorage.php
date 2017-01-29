@@ -68,7 +68,6 @@ class SessionStorage
 
     public function start()
     {
-        //session_set_cookie_params($this->lifetime, $this->path, $this->domain, $this->secure, $this->httpOnly);
         session_name($this->name);
         if (!is_null($this->handler)) {
             session_set_save_handler($this->handler);
@@ -77,9 +76,6 @@ class SessionStorage
         $this->sessionId = session_id();
         $this->content = &$_SESSION;
         $this->started = true;
-        if (isset($_SESSION['__HANDLER_DESTROYED']) && $_SESSION['__HANDLER_DESTROYED'] < time() - 300) {
-            $this->destroy();
-        }
     }
 
     public function destroy()
@@ -92,10 +88,8 @@ class SessionStorage
 
     public function refresh()
     {
-        $_SESSION['__HANDLER_DESTROYED'] = time();
         session_regenerate_id(true);
         $this->sessionId = session_id();
-        unset($_SESSION['__HANDLER_DESTROYED']);
     }
 
     /**
