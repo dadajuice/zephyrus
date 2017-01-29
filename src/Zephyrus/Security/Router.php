@@ -6,11 +6,50 @@ use Zephyrus\Network\Router as BaseRouter;
 
 class Router extends BaseRouter
 {
+    /**
+     * @var CsrfGuard
+     */
     private $csrfGuard;
+
+    /**
+     * @var SecureHeader
+     */
+    private $secureHeader;
+
+    /**
+     * @var Authorization
+     */
+    private $authorization;
 
     public function __construct()
     {
         $this->csrfGuard = new CsrfGuard();
+        $this->secureHeader = new SecureHeader();
+        $this->authorization = new Authorization();
+    }
+
+    /**
+     * @return CsrfGuard
+     */
+    public function getCsrfGuard(): CsrfGuard
+    {
+        return $this->csrfGuard;
+    }
+
+    /**
+     * @return SecureHeader
+     */
+    public function getSecureHeader(): SecureHeader
+    {
+        return $this->secureHeader;
+    }
+
+    /**
+     * @return Authorization
+     */
+    public function getAuthorization(): Authorization
+    {
+        return $this->authorization;
     }
 
     /**
@@ -25,9 +64,10 @@ class Router extends BaseRouter
     protected function beforeCallback($route)
     {
         $failedRequirements = [];
-        if (!Authorization::getInstance()->isAuthorized($route['uri'], $failedRequirements)) {
+        if (!$this->authorization->isAuthorized($route['uri'], $failedRequirements)) {
             throw new UnauthorizedAccessException($route['uri'], $failedRequirements);
         }
+        $this->secureHeader->send();
         if (Configuration::getSecurityConfiguration('ids_enabled')) {
             IntrusionDetection::getInstance()->run();
         }

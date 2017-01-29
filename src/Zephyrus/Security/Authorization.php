@@ -14,11 +14,6 @@ class Authorization
     const MODE_WHITELIST = 1;
 
     /**
-     * @var Authorization
-     */
-    private static $instance;
-
-    /**
      * @var array
      */
     private $requirements = [];
@@ -32,14 +27,6 @@ class Authorization
      * @var array
      */
     private $rules = [];
-
-    public static function getInstance(): Authorization
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
 
     public function addRequirement(string $name, callable $callback)
     {
@@ -154,9 +141,5 @@ class Authorization
         }
 
         $this->rules[$httpMethod][$pathRegex] = $requirements;
-    }
-
-    private function __construct()
-    {
     }
 }
