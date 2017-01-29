@@ -26,16 +26,16 @@ class SessionFingerprint
      */
     protected $content = [];
 
-    public function __construct(array $config, SessionStorage $storage)
+    public function __construct(array $config)
     {
-        $this->content = &$storage->getContent();
         $this->request = RequestFactory::read();
         $this->userAgentFingerprinted = $config['fingerprint_agent'] ?? false;
         $this->ipAddressFingerprinted = $config['fingerprint_ip'] ?? false;
     }
 
-    public function start()
+    public function start(SessionStorage $storage)
     {
+        $this->content = &$storage->getContent();
         $this->setupFingerprintHandler();
     }
 
