@@ -52,15 +52,13 @@ class ViewBuilder
 
     private function buildPug()
     {
+        $env = Configuration::getApplicationConfiguration('env');
         $options = [
             'basedir' => ROOT_DIR . '/public',
             'expressionLanguage' => 'js',
-            'upToDateCheck' => true
+            'upToDateCheck' => $env != "prod",
+            'cache' => $env == "prod" ? Configuration::getConfiguration('pug', 'cache') : null
         ];
-        if (Configuration::getApplicationConfiguration('env') == "prod") {
-            $options['upToDateCheck'] = false;
-            $options['cache'] = Configuration::getConfiguration('pug', 'cache');
-        }
         $this->pug = new Pug($options);
     }
 
