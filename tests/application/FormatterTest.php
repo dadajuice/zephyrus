@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Application\Configuration;
 use Zephyrus\Application\Formatter;
 
 class FormatterTest extends TestCase
@@ -98,6 +99,14 @@ class FormatterTest extends TestCase
     {
         $result = Formatter::formatElapsedDateTime('2016-01-01 23:16:10', '2016-01-01 23:14:20');
         self::assertEquals('Il y a 1 minute', $result);
+    }
+
+    public function testEnglishElapsedMessage()
+    {
+        Configuration::set(['application' => ['locale' => 'en_CA']]);
+        $result = Formatter::formatElapsedDateTime('2016-01-01 23:16:10', '2016-01-01 23:14:20');
+        self::assertEquals('1 minute ago', $result);
+        Configuration::set(null);
     }
 
     public function testFormatElapsedYesterday()
