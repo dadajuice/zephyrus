@@ -30,6 +30,16 @@ class FormTest extends TestCase
         self::assertEquals('bob', $fields['name']);
     }
 
+    public function testRemoveAllMemorized()
+    {
+        $_SESSION['_FIELDS'] = [
+            'name' => 'bob',
+            'price' => '12.5'
+        ];
+        Form::removeMemorizedValue();
+        self::assertFalse(isset($_SESSION['_FIELDS']));
+    }
+
     public function testBuildObject()
     {
         $form = new Form();
