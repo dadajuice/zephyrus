@@ -54,7 +54,7 @@ class ConfigurationTest extends TestCase
         self::assertEquals('60', $config['refresh_after_interval']);
         Configuration::set(null);
     }
-    
+
     public function testInvalidConfigurationFile()
     {
         rename(ROOT_DIR . '/config.ini', ROOT_DIR . '/config.ini_test');
