@@ -93,7 +93,6 @@ class DatabaseTest extends TestCase
         $statement = self::$database->query('SELECT * FROM heroes');
         $i = 0;
         while ($row = $statement->next()) {
-            var_dump($row['name']);
             ++$i;
         }
         self::assertEquals(2, $i);
