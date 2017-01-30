@@ -7,12 +7,17 @@ class Configuration
      */
     private static $config = null;
 
-    final public static function getConfigurations()
+    public static function getConfigurations()
     {
         if (is_null(self::$config)) {
             self::initializeConfigurations();
         }
         return self::$config;
+    }
+
+    public static function set(?array $config)
+    {
+        self::$config = $config;
     }
 
     public static function getApplicationConfiguration($config = null)
@@ -46,7 +51,6 @@ class Configuration
         if (is_null(self::$config)) {
             self::initializeConfigurations();
         }
-
         self::validateRequiredSection($section);
         if (!is_null($config)) {
             self::validateRequiredConfigurationField($section, $config);
