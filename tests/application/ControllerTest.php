@@ -2,6 +2,8 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Controller;
+use Zephyrus\Application\Session;
+use Zephyrus\Application\SessionStorage;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Router;
 
@@ -28,6 +30,28 @@ class ControllerTest extends TestCase
         $router->run($req);
         $output = ob_get_clean();
         self::assertEquals('test', $output);
+    }
+
+    public function testRender()
+    {
+        $router = new Router();
+        $storage = new SessionStorage('bob');
+        Session::getInstance()->setSessionStorage($storage);
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                parent::render('test', ['item' => ['name' => 'Bob Lewis', 'price' => 12.30]]);
+            }
+        };
+        ob_start();
+        $controller->index();
+        $output = ob_get_clean();
+        self::assertEquals('<p>Example Bob Lewis</p>', $output);
     }
 
     public function testGetRoutingWithParameter()
