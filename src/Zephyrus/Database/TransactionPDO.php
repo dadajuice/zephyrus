@@ -2,7 +2,7 @@
 
 class TransactionPDO extends \PDO
 {
-    private static $savepointEnabled = ["pgsql", "mysql"];
+    private static $savepointEnabled = ["pgsql", "mysql", "sqlite"];
 
     /**
      * @var int
