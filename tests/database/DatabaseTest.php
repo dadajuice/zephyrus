@@ -73,6 +73,33 @@ class DatabaseTest extends TestCase
     }
 
     /**
+     * @depends testTransaction
+     */
+    public function testNestedTransaction()
+    {
+        self::$database->beginTransaction();
+        self::$database->query("INSERT INTO heroes(id, name) VALUES (8, 'Green Arrow');");
+        self::$database->beginTransaction();
+        self::$database->query("INSERT INTO heroes(id, name) VALUES (9, 'Aquaman');");
+        self::$database->commit();
+
+        $statement = self::$database->query('SELECT * FROM heroes');
+        $statement->next();
+        $statement->next();
+        $statement->next();
+        $res = $statement->next();
+        self::assertEquals('Aquaman', $res['name']);
+        self::$database->rollback();
+        $statement = self::$database->query('SELECT * FROM heroes');
+        $i = 0;
+        while ($row = $statement->next()) {
+            var_dump($row['name']);
+            ++$i;
+        }
+        self::assertEquals(2, $i);
+    }
+
+    /**
      * @expectedException \Zephyrus\Exceptions\DatabaseException
      */
     public function testErrorCommit()
