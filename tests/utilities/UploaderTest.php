@@ -29,6 +29,41 @@ class UploaderTest extends TestCase
         self::assertEquals(1, $uploader->count());
     }
 
+    /**
+     * @expectedException \Zephyrus\Exceptions\UploadException
+     */
+    public function testSingleFileError()
+    {
+        $files['upload'] = $this->buildUploadSingleFile();
+        $files['upload']['error'] = UPLOAD_ERR_NO_TMP_DIR;
+        $req = new Request('http://test.local/', 'GET', [], [], $files);
+        RequestFactory::set($req);
+        new Uploader('upload');
+    }
+
+    /**
+     * @expectedException \Zephyrus\Exceptions\UploadException
+     */
+    public function testMultipleFilesError()
+    {
+        $files['upload'] = $this->buildUploadFile();
+        $files['upload']['error'][0] = UPLOAD_ERR_CANT_WRITE;
+        $req = new Request('http://test.local/', 'GET', [], [], $files);
+        RequestFactory::set($req);
+        new Uploader('upload');
+    }
+
+    /**
+     * @expectedException \Exception
+     */
+    public function testNameError()
+    {
+        $files['upload'] = $this->buildUploadSingleFile();
+        $req = new Request('http://test.local/', 'GET', [], [], $files);
+        RequestFactory::set($req);
+        new Uploader('invalid');
+    }
+
     private function buildUploadFile()
     {
         $data = [
