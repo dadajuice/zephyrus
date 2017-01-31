@@ -23,8 +23,6 @@ class SecureSessionStorageTest extends TestCase
         session_commit();
         $content = file_get_contents($path . '/sess_' . $storage->getId());
         self::assertFalse(strpos($content, 'je suis chiffre'));
-        $data = $storage->getContent();
-        self::assertEquals('je suis chiffre', $data['test']);
     }
 
     public function testFingerprint()
