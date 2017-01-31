@@ -29,6 +29,31 @@ class UploaderTest extends TestCase
         self::assertEquals(1, $uploader->count());
     }
 
+    public function testSingleImageFile()
+    {
+        $files['upload'] = $this->buildUploadSingleFile();
+        $files['upload']['type'] = 'image/png';
+        $req = new Request('http://test.local/', 'GET', [], [], $files);
+        RequestFactory::set($req);
+        $uploader = new Uploader('upload');
+        self::assertEquals(1, $uploader->count());
+    }
+
+    public function testMultipleImageFiles()
+    {
+        $files['upload'] = $this->buildUploadFile();
+        $files['upload']['type'][0] = "image/png";
+        $files['upload']['type'][1] = "image/png";
+        $req = new Request('http://test.local/', 'GET', [], [], $files);
+        RequestFactory::set($req);
+        $uploader = new Uploader('upload');
+        $uploader->setFileType(Uploader::TYPE_IMAGE);
+        self::assertEquals(Uploader::TYPE_IMAGE, $uploader->getFileType());
+        self::assertEquals(2, $uploader->count());
+        $uploads = $uploader->getFiles();
+        self::assertEquals(2, count($uploads));
+    }
+
     /**
      * @expectedException \Zephyrus\Exceptions\UploadException
      */
