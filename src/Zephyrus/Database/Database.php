@@ -103,6 +103,8 @@ class Database
         $config = Configuration::getDatabaseConfiguration();
         $dsn = $config['dsn'] ?? "mysql:dbname={$config['database']};
             host={$config['host']};charset={$config['charset']}";
-        return new Database($dsn);
+        $username = $config['username'] ?? "";
+        $password = $config['password'] ?? "";
+        return new Database($dsn, $username, $password);
     }
 }

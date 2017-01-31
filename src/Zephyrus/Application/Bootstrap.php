@@ -14,7 +14,7 @@ class Bootstrap
 
     public static function initializeRoutableControllers(Router $router)
     {
-        $classLocator = new ClassLocator("Controller");
+        $classLocator = new ClassLocator("Controllers");
         $controllers = $classLocator->getClasses();
         foreach ($controllers as $controller) {
             $reflection = new \ReflectionClass($controller);

@@ -53,7 +53,8 @@ class ClassLocator
             $files[] = $fileInfo->getFilename();
         }
         $classes = array_map(function ($file) {
-            return $this->namespace . str_replace('.php', '', $file);
+            $namespace = rtrim($this->namespace, '\\');
+            return $namespace . '\\' . str_replace('.php', '', $file);
         }, $files);
         return $classes;
     }

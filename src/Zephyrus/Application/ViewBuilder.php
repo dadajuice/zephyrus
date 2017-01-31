@@ -28,7 +28,7 @@ class ViewBuilder
 
     public function build(string $pageToRender): View
     {
-        $path = ROOT_DIR . '/app/views/' . $pageToRender . $this->pug->getExtension();
+        $path = ROOT_DIR . '/app/Views/' . $pageToRender . $this->pug->getExtension();
         if (!file_exists($path) || !is_readable($path)) {
             throw new \Exception("The specified view file [$path] is not available (not readable or does not exists)");
         }
