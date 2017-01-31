@@ -24,7 +24,7 @@ class SystemLog
     /**
      * @param string $message
      */
-    public static function addSecurity($message)
+    public static function addSecurity(string $message)
     {
         self::buildSecurityLogger();
         self::$securityLogger->addAlert($message);
@@ -33,7 +33,7 @@ class SystemLog
     /**
      * @param string $message
      */
-    public static function addError($message)
+    public static function addError(string $message)
     {
         self::buildErrorsLogger();
         self::$errorsLogger->addAlert($message);
@@ -42,7 +42,7 @@ class SystemLog
     /**
      * @param string $message
      */
-    public static function addVerbose($message)
+    public static function addVerbose(string $message)
     {
         self::buildVerboseLogger();
         self::$verboseLogger->addInfo($message);
@@ -89,7 +89,7 @@ class SystemLog
 
     private static function buildErrorsLogger()
     {
-        if (is_null(self::$securityLogger)) {
+        if (is_null(self::$errorsLogger)) {
             $output = "[%datetime%] %level_name% : %message%\n";
             $formatter = new LineFormatter($output);
             $errorsStream = new StreamHandler(ROOT_DIR . '/logs/errors.log', Logger::INFO);
@@ -101,7 +101,7 @@ class SystemLog
 
     private static function buildVerboseLogger()
     {
-        if (is_null(self::$securityLogger)) {
+        if (is_null(self::$verboseLogger)) {
             $output = "[%datetime%] %level_name% : %message%\n";
             $formatter = new LineFormatter($output);
             $verboseStream = new StreamHandler(ROOT_DIR . '/logs/verbose.log', Logger::DEBUG);
