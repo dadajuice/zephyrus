@@ -7,10 +7,11 @@ finder:
     - "tests"
     - "vendor"
 
-enabled:
-  - concat_with_spaces
-
 disabled:
+  - blank_line_before_return
   - align_double_arrow
-  - short_array_syntax
+  - blank_line_after_opening_tag
+  - phpdoc_align
+  - simplified_null_return
+  - single_quote
   - concat_without_spaces
