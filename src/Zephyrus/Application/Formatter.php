@@ -89,7 +89,7 @@ class Formatter
     }
 
     /**
-     * http://stackoverflow.com/questions/15188033/human-readable-file-size
+     * http://stackoverflow.com/questions/15188033/human-readable-file-size.
      * @param int $sizeInBytes
      * @return string
      */

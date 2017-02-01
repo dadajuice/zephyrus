@@ -2,7 +2,7 @@
 
 /**
  * REFERENCES
- * http://www.net-security.org/dl/articles/php-file-upload.pdf
+ * http://www.net-security.org/dl/articles/php-file-upload.pdf.
  */
 class ImageUploader extends FileUploader
 {
@@ -22,7 +22,7 @@ class ImageUploader extends FileUploader
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isForcingImageRebuild()
     {
@@ -30,7 +30,7 @@ class ImageUploader extends FileUploader
     }
 
     /**
-     * @param boolean $forcingImageRebuild
+     * @param bool $forcingImageRebuild
      */
     public function setForcingImageRebuild($forcingImageRebuild)
     {
@@ -51,7 +51,7 @@ class ImageUploader extends FileUploader
     }
 
     /**
-     * Validate that the mime type is an actual valid image
+     * Validate that the mime type is an actual valid image.
      *
      * @throws \Exception
      */

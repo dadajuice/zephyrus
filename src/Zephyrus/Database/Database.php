@@ -1,8 +1,8 @@
 <?php namespace Zephyrus\Database;
 
+use PDO;
 use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\DatabaseException;
-use PDO;
 
 class Database
 {
@@ -17,8 +17,8 @@ class Database
      *
      * @param string $query
      * @param array $parameters
-     * @return DatabaseStatement
      * @throws DatabaseException
+     * @return DatabaseStatement
      */
     public function query($query, $parameters = [])
     {
@@ -105,6 +105,6 @@ class Database
             host={$config['host']};charset={$config['charset']}";
         $username = $config['username'] ?? "";
         $password = $config['password'] ?? "";
-        return new Database($dsn, $username, $password);
+        return new self($dsn, $username, $password);
     }
 }

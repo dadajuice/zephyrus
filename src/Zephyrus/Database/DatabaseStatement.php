@@ -2,7 +2,6 @@
 
 use PDO;
 use PDOStatement;
-use Zephyrus\Exceptions\DatabaseException;
 
 class DatabaseStatement
 {
@@ -62,7 +61,7 @@ class DatabaseStatement
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isDirectHtmlTagsAllowed()
     {

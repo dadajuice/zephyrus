@@ -123,7 +123,7 @@ class CsrfGuard
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isGetSecured(): bool
     {
@@ -131,7 +131,7 @@ class CsrfGuard
     }
 
     /**
-     * @param boolean $getSecured
+     * @param bool $getSecured
      */
     public function setGetSecured(bool $getSecured)
     {
@@ -139,7 +139,7 @@ class CsrfGuard
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isPostSecured(): bool
     {
@@ -147,7 +147,7 @@ class CsrfGuard
     }
 
     /**
-     * @param boolean $postSecured
+     * @param bool $postSecured
      */
     public function setPostSecured(bool $postSecured)
     {
@@ -155,7 +155,7 @@ class CsrfGuard
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isPutSecured(): bool
     {
@@ -163,7 +163,7 @@ class CsrfGuard
     }
 
     /**
-     * @param boolean $putSecured
+     * @param bool $putSecured
      */
     public function setPutSecured(bool $putSecured)
     {
@@ -171,7 +171,7 @@ class CsrfGuard
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isDeleteSecured(): bool
     {
@@ -179,7 +179,7 @@ class CsrfGuard
     }
 
     /**
-     * @param boolean $deleteSecured
+     * @param bool $deleteSecured
      */
     public function setDeleteSecured(bool $deleteSecured)
     {
@@ -191,8 +191,8 @@ class CsrfGuard
      * token that shall be validated with the filter method.
      *
      * @param string $formName
-     * @return string
      * @throws \Exception
+     * @return string
      */
     private function generateToken(string $formName): string
     {

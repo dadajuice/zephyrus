@@ -80,7 +80,7 @@ class Pager
     }
 
     /**
-     * Generates anchors to be displayed when max page is over 9
+     * Generates anchors to be displayed when max page is over 9.
      *
      * @return array
      */
@@ -138,10 +138,10 @@ class Pager
         echo '<div class="pager">';
         $this->displayLeftSide();
         for ($i = 0; $i < count($pager); $i++) {
-            print($pager[$i]);
+            echo $pager[$i];
         }
         $this->displayRightSide();
-        print("</div>");
+        echo "</div>";
     }
 
     /**

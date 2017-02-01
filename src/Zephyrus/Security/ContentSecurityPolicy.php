@@ -34,7 +34,7 @@ class ContentSecurityPolicy
 
     /**
      * Define script execution by requiring the presence of the specified nonce
-     * on script elements. Must be used in script tag: <script nonce=...>
+     * on script elements. Must be used in script tag: <script nonce=...>.
      *
      * @var string
      */
@@ -310,7 +310,7 @@ class ContentSecurityPolicy
     }
 
     /**
-     * @param boolean $compatible
+     * @param bool $compatible
      */
     public function setCompatible(bool $compatible)
     {
