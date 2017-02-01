@@ -11,6 +11,7 @@
 [![Travis](https://img.shields.io/travis/dadajuice/zephyrus.svg)]()
 [![Code Climate](https://img.shields.io/codeclimate/github/dadajuice/zephyrus.svg)]()
 [![Code Climate](https://img.shields.io/codeclimate/coverage/github/dadajuice/zephyrus.svg)]()
+[![StyleCI](https://styleci.io/repos/77175312/shield?branch=master)](https://styleci.io/repos/77175312)
 [![GitHub issues](https://img.shields.io/github/issues/dadajuice/zephyrus.svg)]()
 [![license](https://img.shields.io/github/license/dadajuice/zephyrus.svg)]()
 
