@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Security;
+<?php
+
+namespace Zephyrus\Security;
 
 class SecureHeader
 {
@@ -9,7 +11,7 @@ class SecureHeader
      *
      * @var string
      */
-    private $frameOptions = "SAMEORIGIN";
+    private $frameOptions = 'SAMEORIGIN';
 
     /**
      * This header enables the Cross-site scripting (XSS) filter built into most recent
@@ -19,7 +21,7 @@ class SecureHeader
      *
      * @var string
      */
-    private $xssProtection = "1; mode=block";
+    private $xssProtection = '1; mode=block';
 
     /**
      * The only defined value, "nosniff", prevents Internet Explorer and Google Chrome
@@ -30,7 +32,7 @@ class SecureHeader
      *
      * @var string
      */
-    private $contentTypeOptions = "nosniff";
+    private $contentTypeOptions = 'nosniff';
 
     /**
      * HTTP Strict-Transport-Security (HSTS) enforces secure (HTTP over SSL/TLS) connections
@@ -40,7 +42,7 @@ class SecureHeader
      *
      * @var string
      */
-    private $strictTransportSecurity = "max-age=16070400; includeSubDomains";
+    private $strictTransportSecurity = 'max-age=16070400; includeSubDomains';
 
     /**
      * Requires careful tuning and precise definition of the policy. If

@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Exceptions;
+<?php
+
+namespace Zephyrus\Exceptions;
 
 class NetworkException extends \Exception
 {

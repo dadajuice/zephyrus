@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Security;
+<?php
+
+namespace Zephyrus\Security;
 
 use Zephyrus\Application\Configuration;
 use Zephyrus\Application\Session;
@@ -77,6 +79,7 @@ class CsrfGuard
         $token = $this->generateToken($name);
         $html = '<input type="hidden" name="' . self::REQUEST_TOKEN_NAME . '" value="' . $name . '" />';
         $html .= '<input type="hidden" name="' . self::REQUEST_TOKEN_VALUE . '" value="' . $token . '" />';
+
         return $html;
     }
 
@@ -105,25 +108,27 @@ class CsrfGuard
      * HTML. This method is to be used with automatic injection behavior.
      *
      * @param string $html
+     *
      * @return string
      */
     public function injectForms($html)
     {
-        preg_match_all("/<form(.*?)>(.*?)<\\/form>/is", $html, $matches, PREG_SET_ORDER);
+        preg_match_all('/<form(.*?)>(.*?)<\\/form>/is', $html, $matches, PREG_SET_ORDER);
         if (is_array($matches)) {
             foreach ($matches as $match) {
-                if (strpos($match[1], "nocsrf") !== false) {
+                if (strpos($match[1], 'nocsrf') !== false) {
                     continue;
                 }
                 $hiddenFields = self::generateHiddenFields();
                 $html = str_replace($match[0], "<form{$match[1]}>{$hiddenFields}{$match[2]}</form>", $html);
             }
         }
+
         return $html;
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isGetSecured(): bool
     {
@@ -131,7 +136,7 @@ class CsrfGuard
     }
 
     /**
-     * @param boolean $getSecured
+     * @param bool $getSecured
      */
     public function setGetSecured(bool $getSecured)
     {
@@ -139,7 +144,7 @@ class CsrfGuard
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isPostSecured(): bool
     {
@@ -147,7 +152,7 @@ class CsrfGuard
     }
 
     /**
-     * @param boolean $postSecured
+     * @param bool $postSecured
      */
     public function setPostSecured(bool $postSecured)
     {
@@ -155,7 +160,7 @@ class CsrfGuard
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isPutSecured(): bool
     {
@@ -163,7 +168,7 @@ class CsrfGuard
     }
 
     /**
-     * @param boolean $putSecured
+     * @param bool $putSecured
      */
     public function setPutSecured(bool $putSecured)
     {
@@ -171,7 +176,7 @@ class CsrfGuard
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isDeleteSecured(): bool
     {
@@ -179,7 +184,7 @@ class CsrfGuard
     }
 
     /**
-     * @param boolean $deleteSecured
+     * @param bool $deleteSecured
      */
     public function setDeleteSecured(bool $deleteSecured)
     {
@@ -191,8 +196,10 @@ class CsrfGuard
      * token that shall be validated with the filter method.
      *
      * @param string $formName
-     * @return string
+     *
      * @throws \Exception
+     *
+     * @return string
      */
     private function generateToken(string $formName): string
     {
@@ -200,6 +207,7 @@ class CsrfGuard
         $csrfData = Session::getInstance()->read('__CSRF_TOKEN', []);
         $csrfData[$formName] = $token;
         Session::getInstance()->set('__CSRF_TOKEN', $csrfData);
+
         return $token;
     }
 
@@ -210,7 +218,7 @@ class CsrfGuard
      */
     private function generateFormName(): string
     {
-        return "CSRFGuard_" . mt_rand(0, mt_getrandmax());
+        return 'CSRFGuard_' . mt_rand(0, mt_getrandmax());
     }
 
     /**
@@ -220,6 +228,7 @@ class CsrfGuard
      *
      * @param $formName
      * @param $token
+     *
      * @return bool
      */
     private function validateToken(string $formName, string $token): bool
@@ -229,8 +238,10 @@ class CsrfGuard
             $csrfData = Session::getInstance()->read('__CSRF_TOKEN', []);
             $csrfData[$formName] = '';
             Session::getInstance()->set('__CSRF_TOKEN', $csrfData);
+
             return hash_equals($sortedCsrf, $token);
         }
+
         return false;
     }
 
@@ -239,14 +250,16 @@ class CsrfGuard
      * client. Returns null if undefined.
      *
      * @param string $formName
+     *
      * @return null|string
      */
     private function getStoredCsrfToken(string $formName): ?string
     {
         $csrfData = Session::getInstance()->read('__CSRF_TOKEN');
         if (is_null($csrfData)) {
-            return null;
+            return;
         }
+
         return isset($csrfData[$formName]) ? $csrfData[$formName] : null;
     }
 
@@ -263,6 +276,7 @@ class CsrfGuard
         if (is_null($token)) {
             $token = isset($_SERVER[self::HEADER_TOKEN]) ? $_SERVER[self::HEADER_TOKEN] : null;
         }
+
         return $token;
     }
 
@@ -278,6 +292,7 @@ class CsrfGuard
         if (is_null($formName)) {
             $formName = isset($_SERVER[self::HEADER_NAME]) ? $_SERVER[self::HEADER_NAME] : null;
         }
+
         return $formName;
     }
 
@@ -285,20 +300,22 @@ class CsrfGuard
      * Checks if the specified method should be filtered.
      *
      * @param string $method
+     *
      * @return bool
      */
     private function isHttpMethodFiltered($method): bool
     {
         $method = strtoupper($method);
-        if ($this->getSecured && $method == "GET") {
+        if ($this->getSecured && $method == 'GET') {
             return true;
-        } elseif ($this->postSecured && $method == "POST") {
+        } elseif ($this->postSecured && $method == 'POST') {
             return true;
-        } elseif ($this->putSecured && $method == "PUT") {
+        } elseif ($this->putSecured && $method == 'PUT') {
             return true;
-        } elseif ($this->deleteSecured && $method == "DELETE") {
+        } elseif ($this->deleteSecured && $method == 'DELETE') {
             return true;
         }
+
         return false;
     }
 }

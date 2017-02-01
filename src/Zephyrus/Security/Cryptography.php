@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Security;
+<?php
+
+namespace Zephyrus\Security;
 
 use Zephyrus\Application\Configuration;
 
@@ -11,6 +13,7 @@ class Cryptography
      * salt.
      *
      * @param string $string
+     *
      * @return string
      */
     public static function hash(string $string): string
@@ -23,6 +26,7 @@ class Cryptography
      *
      * @param string $string
      * @param string $hash
+     *
      * @return bool
      */
     public static function verifyHash(string $string, string $hash): bool
@@ -35,8 +39,9 @@ class Cryptography
      * algorithm changed or algorithm cost evolved). If this method returns
      * true, calling script would need to rehash and store the new hash.
      *
-     * @param string $hash
+     * @param string        $hash
      * @param string | null $salt
+     *
      * @return bool
      */
     public static function isRehashNeeded(string $hash, string $salt = null): bool
@@ -45,6 +50,7 @@ class Cryptography
         if (!is_null($salt)) {
             $hashOptions['salt'] = $salt;
         }
+
         return password_needs_rehash($hash, PASSWORD_DEFAULT, $hashOptions);
     }
 
@@ -52,13 +58,16 @@ class Cryptography
      * Returns a random hex of desired length.
      *
      * @param int $length
-     * @return string
+     *
      * @throws \Exception
+     *
+     * @return string
      */
     public static function randomHex(int $length = 128): string
     {
         $bytes = ceil($length / 2);
         $hex = bin2hex(self::randomBytes($bytes));
+
         return $hex;
     }
 
@@ -68,8 +77,10 @@ class Cryptography
      *
      * @param int $min
      * @param int $max
-     * @return int
+     *
      * @throws \Exception
+     *
+     * @return int
      */
     public static function randomInt(int $min, int $max): int
     {
@@ -82,12 +93,12 @@ class Cryptography
 
         $difference = $max - $min;
         for ($power = 8; pow(2, $power) < $difference; $power = $power * 2) {
-            ;
         }
         $powerExp = $power / 8;
         do {
             $randDiff = hexdec(bin2hex(self::randomBytes($powerExp)));
         } while ($randDiff > $difference);
+
         return $min + $randDiff;
     }
 
@@ -96,8 +107,9 @@ class Cryptography
      * characters. If none is provided, alphanumeric characters ([0-9a-Z]) are
      * used.
      *
-     * @param int $length
+     * @param int            $length
      * @param string | array $characters
+     *
      * @return string
      */
     public static function randomString(int $length, $characters = null): string
@@ -113,6 +125,7 @@ class Cryptography
         for ($i = 0; $i < $length; ++$i) {
             $result .= $characters[self::randomInt(0, $characterCount - 1)];
         }
+
         return $result;
     }
 
@@ -122,6 +135,7 @@ class Cryptography
      * strong enough by the openssl lib.
      *
      * @param int $length
+     *
      * @throws \Exception
      * @returns string
      */
@@ -138,6 +152,7 @@ class Cryptography
      *
      * @param string $data
      * @param string $key
+     *
      * @return string
      */
     public static function encrypt(string $data, string $key): string
@@ -145,6 +160,7 @@ class Cryptography
         $method = Configuration::getSecurityConfiguration('encryption_algorithm');
         $initializationVector = self::randomBytes(openssl_cipher_iv_length($method));
         $cipher = openssl_encrypt($data, $method, $key, 0, $initializationVector);
+
         return base64_encode($initializationVector) . ':' . base64_encode($cipher);
     }
 
@@ -155,18 +171,21 @@ class Cryptography
      *
      * @param string $cipher
      * @param string $key
-     * @return string
+     *
      * @throws \Exception
+     *
+     * @return string
      */
     public static function decrypt(string $cipher, string $key): string
     {
         if (strpos($cipher, ':') === false) {
-            throw new \Exception("Invalid cipher to decrypt");
+            throw new \Exception('Invalid cipher to decrypt');
         }
         $method = Configuration::getSecurityConfiguration('encryption_algorithm');
         list($initializationVector, $cipher) = explode(':', $cipher);
         $cipher = base64_decode($cipher);
         $initializationVector = base64_decode($initializationVector);
+
         return openssl_decrypt($cipher, $method, $key, 0, $initializationVector);
     }
 

@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Application;
+<?php
+
+namespace Zephyrus\Application;
 
 use DirectoryIterator;
 
@@ -24,7 +26,8 @@ class ClassLocator
     {
         $composerJsonPath = ROOT_DIR . DIRECTORY_SEPARATOR . 'composer.json';
         $composerConfig = json_decode(file_get_contents($composerJsonPath));
-        $psr4 = "psr-4";
+        $psr4 = 'psr-4';
+
         return (array) $composerConfig->autoload->$psr4;
     }
 
@@ -49,13 +52,17 @@ class ClassLocator
     {
         $files = [];
         foreach (new DirectoryIterator($this->directory) as $fileInfo) {
-            if ($fileInfo->isDot()) continue;
+            if ($fileInfo->isDot()) {
+                continue;
+            }
             $files[] = $fileInfo->getFilename();
         }
         $classes = array_map(function ($file) {
             $namespace = rtrim($this->namespace, '\\');
+
             return $namespace . '\\' . str_replace('.php', '', $file);
         }, $files);
+
         return $classes;
     }
 
@@ -63,8 +70,9 @@ class ClassLocator
      * Returns the complete real path for a given namespace based on the given
      * definitions in the composer.json file.
      *
-     * @return string
      * @throws \Exception
+     *
+     * @return string
      */
     private function getNamespaceDirectory(): string
     {

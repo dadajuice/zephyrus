@@ -1,8 +1,9 @@
-<?php namespace Zephyrus\Application;
+<?php
+
+namespace Zephyrus\Application;
 
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
-use Zephyrus\Network\RequestFactory;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Routable;
 use Zephyrus\Network\Router;
@@ -57,7 +58,7 @@ abstract class Controller implements Routable
      * is to be shown in the page, it must be given.
      *
      * @param string $page
-     * @param array $args
+     * @param array  $args
      */
     protected function render($page, $args = [])
     {
@@ -72,6 +73,7 @@ abstract class Controller implements Routable
     {
         $form = new Form();
         $form->addFields($this->request->getParameters());
+
         return $form;
     }
 
@@ -103,8 +105,8 @@ abstract class Controller implements Routable
      * Does a server-sent event response.
      *
      * @param string $data
-     * @param int $eventId
-     * @param int $retry
+     * @param int    $eventId
+     * @param int    $retry
      */
     protected function sse($data, $eventId = 0, $retry = 1000)
     {
@@ -112,8 +114,8 @@ abstract class Controller implements Routable
         $this->response->sendContentType(ContentType::SSE);
         $this->response->sendHeader('Cache-Control', 'no-cache');
         echo "id: $eventId" . PHP_EOL;
-        echo "retry: " . $retry . PHP_EOL;
-        echo "data: " . json_encode($data) . PHP_EOL;
+        echo 'retry: ' . $retry . PHP_EOL;
+        echo 'data: ' . json_encode($data) . PHP_EOL;
         echo PHP_EOL;
         flush();
     }
@@ -124,14 +126,14 @@ abstract class Controller implements Routable
      * element must be explicitly given.
      *
      * @param array | \SimpleXMLElement $data
-     * @param string $root
+     * @param string                    $root
      */
-    protected function xml($data, $root = "")
+    protected function xml($data, $root = '')
     {
         $this->response->sendResponseCode();
         $this->response->sendContentType(ContentType::XML);
         if ((!$data instanceof \SimpleXMLElement) && !is_array($data)) {
-            throw new \RuntimeException("Cannot parse specified data as XML");
+            throw new \RuntimeException('Cannot parse specified data as XML');
         }
 
         if ($data instanceof \SimpleXMLElement) {
@@ -153,6 +155,7 @@ abstract class Controller implements Routable
             if (is_array($value)) {
                 $subnode = $xml->addChild($key);
                 $this->arrayToXml($value, $subnode);
+
                 return;
             }
             $xml->addChild("$key", htmlspecialchars("$value"));

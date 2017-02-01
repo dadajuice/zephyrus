@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Utilities\Validations;
+<?php
+
+namespace Zephyrus\Utilities\Validations;
 
 class NumericValidation extends BaseValidation
 {
@@ -9,7 +11,7 @@ class NumericValidation extends BaseValidation
 
     public static function isInteger($data): bool
     {
-        return self::isRegexValid($data, "[0-9]+");
+        return self::isRegexValid($data, '[0-9]+');
     }
 
     public static function isSignedDecimal($data): bool
@@ -19,6 +21,6 @@ class NumericValidation extends BaseValidation
 
     public static function isSignedInteger($data): bool
     {
-        return self::isRegexValid($data, "-?[0-9]+");
+        return self::isRegexValid($data, '-?[0-9]+');
     }
 }

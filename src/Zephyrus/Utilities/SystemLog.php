@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Utilities;
+<?php
+
+namespace Zephyrus\Utilities;
 
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
@@ -54,6 +56,7 @@ class SystemLog
     public static function getSecurityLogger()
     {
         self::buildSecurityLogger();
+
         return self::$securityLogger;
     }
 
@@ -63,6 +66,7 @@ class SystemLog
     public static function getErrorsLogger()
     {
         self::buildErrorsLogger();
+
         return self::$errorsLogger;
     }
 
@@ -72,6 +76,7 @@ class SystemLog
     public static function getVerboseLogger()
     {
         self::buildVerboseLogger();
+
         return self::$verboseLogger;
     }
 

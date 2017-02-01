@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Application;
+<?php
+
+namespace Zephyrus\Application;
 
 class Flash
 {
@@ -31,12 +33,13 @@ class Flash
     {
         $flash = Session::getInstance()->read('__FLASH');
         $args = [];
-        $args["flash"]["success"] = $flash['SUCCESS'] ?? "";
-        $args["flash"]["warning"] = $flash['WARNING'] ?? "";
-        $args["flash"]["error"] = $flash['ERROR'] ?? "";
-        $args["flash"]["notice"] = $flash['NOTICE'] ?? "";
-        $args["flash"]["info"] = $flash['INFO'] ?? "";
+        $args['flash']['success'] = $flash['SUCCESS'] ?? '';
+        $args['flash']['warning'] = $flash['WARNING'] ?? '';
+        $args['flash']['error'] = $flash['ERROR'] ?? '';
+        $args['flash']['notice'] = $flash['NOTICE'] ?? '';
+        $args['flash']['info'] = $flash['INFO'] ?? '';
         self::clearAll();
+
         return $args;
     }
 

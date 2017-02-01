@@ -1,9 +1,11 @@
-<?php namespace Zephyrus\Application;
+<?php
 
-use Zephyrus\Exceptions\RouteNotFoundException;
+namespace Zephyrus\Application;
+
 use Zephyrus\Exceptions\RouteDefinitionException;
-use Zephyrus\Exceptions\RouteNotAcceptedException;
 use Zephyrus\Exceptions\RouteMethodUnsupportedException;
+use Zephyrus\Exceptions\RouteNotAcceptedException;
+use Zephyrus\Exceptions\RouteNotFoundException;
 use Zephyrus\Network\Request;
 
 abstract class RouterEngine
@@ -63,10 +65,11 @@ abstract class RouterEngine
      * adequate structure with corresponding parameters regex pattern if
      * needed. Cannot be overridden.
      *
-     * @param string $method
-     * @param string $uri
-     * @param callable $callback
+     * @param string                $method
+     * @param string                $uri
+     * @param callable              $callback
      * @param string | array | null $acceptedFormats
+     *
      * @throws RouteDefinitionException
      */
     final protected function addRoute($method, $uri, $callback, $acceptedFormats)
@@ -86,7 +89,7 @@ abstract class RouterEngine
                 : null,
             'params' => $params,
             'callback' => $callback,
-            'acceptedRequestFormats' => $acceptedFormats
+            'acceptedRequestFormats' => $acceptedFormats,
         ];
     }
 
@@ -120,8 +123,9 @@ abstract class RouterEngine
      * request is then return. Hence the need to declare routes in
      * correct order.
      *
-     * @return mixed[]
      * @throws \Exception
+     *
+     * @return mixed[]
      */
     private function findRouteFromRequest()
     {
@@ -133,6 +137,7 @@ abstract class RouterEngine
                 if (!$this->isRequestAcceptedForRoute($route)) {
                     throw new RouteNotAcceptedException($this->requestedRepresentation);
                 }
+
                 return $route;
             }
         }
@@ -145,6 +150,7 @@ abstract class RouterEngine
      * normal).
      *
      * @param mixed[] $route
+     *
      * @return bool
      */
     private function isRequestAcceptedForRoute($route)
@@ -159,8 +165,10 @@ abstract class RouterEngine
                     return true;
                 }
             }
+
             return false;
         }
+
         return strpos($this->requestedRepresentation, $acceptedFormats) !== false;
     }
 
@@ -171,6 +179,7 @@ abstract class RouterEngine
      * callback function (through method loadMissingRequestParameters).
      *
      * @param mixed[] $route
+     *
      * @throws \Exception
      */
     private function prepareResponse($route)
@@ -187,6 +196,7 @@ abstract class RouterEngine
      * Retrieves the specified function arguments.
      *
      * @param \ReflectionFunctionAbstract $reflection
+     *
      * @return array
      */
     private function getFunctionArguments(\ReflectionFunctionAbstract $reflection)
@@ -198,6 +208,7 @@ abstract class RouterEngine
                 $arguments[] = $value;
             }
         }
+
         return $arguments;
     }
 
@@ -205,6 +216,7 @@ abstract class RouterEngine
      * Load parameters located inside the request object.
      *
      * @param mixed[] $route
+     *
      * @throws \Exception
      */
     private function loadRequestParameters($route)
@@ -262,6 +274,7 @@ abstract class RouterEngine
      * order. Accept every characters for parameter except "/".
      *
      * @param string $uri
+     *
      * @return array
      */
     private function getUriParameters($uri)
@@ -273,6 +286,7 @@ abstract class RouterEngine
                 $params[] = $result;
             }
         }
+
         return $params;
     }
 
@@ -282,7 +296,8 @@ abstract class RouterEngine
      * inside braces (e.g. {id}).
      *
      * @param string $uri
-     * @param array $params
+     * @param array  $params
+     *
      * @return string
      */
     private function getUriRegexFromParameters($uri, $params)
@@ -291,6 +306,7 @@ abstract class RouterEngine
         foreach ($params as $param) {
             $regex = str_replace('{' . $param . '}', '([^\/]+)', $regex);
         }
+
         return $regex;
     }
 }

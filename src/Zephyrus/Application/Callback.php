@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Application;
+<?php
+
+namespace Zephyrus\Application;
 
 class Callback
 {
@@ -15,6 +17,7 @@ class Callback
      * Execute the specified callback function or method.
      *
      * @param array $args
+     *
      * @return mixed
      */
     public function execute(...$args)
@@ -24,6 +27,7 @@ class Callback
 
     /**
      * @param array $args
+     *
      * @return mixed
      */
     public function executeArray(array $args)
@@ -49,9 +53,10 @@ class Callback
     }
 
     /**
-     * Execute the specified callback function
+     * Execute the specified callback function.
      *
      * @param array $arguments
+     *
      * @return mixed
      */
     private function executeFunction(array $arguments)
@@ -64,6 +69,7 @@ class Callback
      * or instance method.
      *
      * @param array $arguments
+     *
      * @return mixed
      */
     private function executeMethod(array $arguments)
@@ -74,6 +80,7 @@ class Callback
             return $this->reflection->invokeArgs($this->callback[0], $arguments);
         }
         $instance = new $this->callback[0]();
+
         return $this->reflection->invokeArgs($instance, $arguments);
     }
 }

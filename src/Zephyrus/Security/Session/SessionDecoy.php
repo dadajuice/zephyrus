@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Security\Session;
+<?php
+
+namespace Zephyrus\Security\Session;
 
 use Zephyrus\Security\Cryptography;
 

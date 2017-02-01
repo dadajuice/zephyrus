@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Utilities\Validations;
+<?php
+
+namespace Zephyrus\Utilities\Validations;
 
 class BaseValidation
 {
@@ -17,6 +19,7 @@ class BaseValidation
         $uppercase = preg_match('@[A-Z]@', $data);
         $lowercase = preg_match('@[a-z]@', $data);
         $number = preg_match('@[0-9]@', $data);
+
         return strlen($data) >= 8 && $uppercase && $lowercase && $number;
     }
 
@@ -28,6 +31,7 @@ class BaseValidation
     public static function isDate($data): bool
     {
         $date = \DateTime::createFromFormat('Y-m-d', $data);
+
         return $date && $date->format('Y-m-d') == $data;
     }
 

@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Security;
+<?php
+
+namespace Zephyrus\Security;
 
 class EncryptedSessionHandler extends \SessionHandler
 {
@@ -14,17 +16,19 @@ class EncryptedSessionHandler extends \SessionHandler
 
     /**
      * @var string Cookie name that will store the encryption data (hmac and
-     * symmetric key).
+     *             symmetric key).
      */
     private $cookieKeyName;
 
     /**
-     * Called on session_start, this method create the
+     * Called on session_start, this method create the.
      *
      * @param string $savePath
      * @param string $sessionName
-     * @return bool
+     *
      * @throws \Exception
+     *
+     * @return bool
      */
     public function open($savePath, $sessionName)
     {
@@ -32,23 +36,27 @@ class EncryptedSessionHandler extends \SessionHandler
         $this->cookieKeyName = "key_$sessionName";
         if (empty($_COOKIE[$this->cookieKeyName]) || strpos($_COOKIE[$this->cookieKeyName], ':') === false) {
             $this->createEncryptionCookie();
+
             return true;
         }
         list($this->cryptKey, $this->cryptAuth) = explode(':', $_COOKIE[$this->cookieKeyName]);
         $this->cryptKey = base64_decode($this->cryptKey);
         $this->cryptAuth = base64_decode($this->cryptAuth);
+
         return true;
     }
 
     public function read($sessionId)
     {
         $data = parent::read($sessionId);
-        return (!$data) ? "" : $this->decrypt($data);
+
+        return (!$data) ? '' : $this->decrypt($data);
     }
 
     public function write($sessionId, $data)
     {
         $data = $this->encrypt($data);
+
         return parent::write($sessionId, $data);
     }
 
@@ -57,6 +65,7 @@ class EncryptedSessionHandler extends \SessionHandler
      * is active after deletion.
      *
      * @param string $sessionId
+     *
      * @return bool
      */
     public function destroy($sessionId)
@@ -66,6 +75,7 @@ class EncryptedSessionHandler extends \SessionHandler
             setcookie($this->cookieKeyName, '', 1);
             unset($_COOKIE[$this->cookieKeyName]);
         }
+
         return true;
     }
 
@@ -94,6 +104,7 @@ class EncryptedSessionHandler extends \SessionHandler
      * Hmac authentication hash.
      *
      * @param string $data
+     *
      * @return string
      */
     private function encrypt(string $data): string
@@ -104,6 +115,7 @@ class EncryptedSessionHandler extends \SessionHandler
         $cipher = base64_decode($cipher);
         $content = $initializationVector . Cryptography::getEncryptionAlgorithm() . $cipher;
         $hmac = hash_hmac('sha256', $content, $this->cryptAuth);
+
         return $hmac . ':' . base64_encode($initializationVector) . ':' . base64_encode($cipher);
     }
 
@@ -112,6 +124,7 @@ class EncryptedSessionHandler extends \SessionHandler
      * Hmac authentication hash. Returns false if Hmac validation fails.
      *
      * @param string $data
+     *
      * @return string|bool
      */
     private function decrypt(string $data): string
@@ -125,6 +138,7 @@ class EncryptedSessionHandler extends \SessionHandler
             return false;
         }
         $decrypt = Cryptography::decrypt($initializationVector . ':' . $cipher, $this->cryptKey);
+
         return $decrypt;
     }
 }

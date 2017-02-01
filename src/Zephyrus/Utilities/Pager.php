@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Utilities;
+<?php
+
+namespace Zephyrus\Utilities;
 
 use Zephyrus\Network\RequestFactory;
 
@@ -53,6 +55,7 @@ class Pager
     public function getSqlLimit()
     {
         $offset = $this->maxEntities * ($this->currentPage - 1);
+
         return " LIMIT $offset, $this->maxEntities";
     }
 
@@ -72,15 +75,16 @@ class Pager
     public function __toString()
     {
         if (!is_numeric($this->currentPage) || $this->maxPage < 1) {
-            return "";
+            return '';
         }
         ob_start();
         $this->displayPager();
+
         return ob_get_clean();
     }
 
     /**
-     * Generates anchors to be displayed when max page is over 9
+     * Generates anchors to be displayed when max page is over 9.
      *
      * @return array
      */
@@ -112,6 +116,7 @@ class Pager
             $pager[$page] = $this->buildAnchor($i);
             $page++;
         }
+
         return $pager;
     }
 
@@ -126,6 +131,7 @@ class Pager
         for ($i = 1; $i <= $this->maxPage; $i++) {
             $pager[$i - 1] = $this->buildAnchor($i);
         }
+
         return $pager;
     }
 
@@ -138,10 +144,10 @@ class Pager
         echo '<div class="pager">';
         $this->displayLeftSide();
         for ($i = 0; $i < count($pager); $i++) {
-            print($pager[$i]);
+            echo $pager[$i];
         }
         $this->displayRightSide();
-        print("</div>");
+        echo '</div>';
     }
 
     /**
@@ -172,7 +178,7 @@ class Pager
 
     private function getQueryString($query)
     {
-        return preg_replace("/(&?" . $this->urlParameter . "=[0-9]*&?)/", "", $query);
+        return preg_replace('/(&?' . $this->urlParameter . '=[0-9]*&?)/', '', $query);
     }
 
     private function buildAnchor($pageNumber)
@@ -186,6 +192,7 @@ class Pager
     {
         $page = $this->urlParameter . '=' . $pageNumber;
         $query = (!empty($this->pageQuery)) ? '&' . $this->pageQuery : '';
+
         return $this->pageUrl . '?' . $page . $query;
     }
 

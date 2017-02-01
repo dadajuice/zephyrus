@@ -1,8 +1,9 @@
-<?php namespace Zephyrus\Database;
+<?php
+
+namespace Zephyrus\Database;
 
 use PDO;
 use PDOStatement;
-use Zephyrus\Exceptions\DatabaseException;
 
 class DatabaseStatement
 {
@@ -14,7 +15,7 @@ class DatabaseStatement
     /**
      * @var string
      */
-    private $allowedHtmlTags = "";
+    private $allowedHtmlTags = '';
 
     public function __construct(PDOStatement $statement)
     {
@@ -34,6 +35,7 @@ class DatabaseStatement
         if (is_array($row)) {
             $this->sanitizeOutput($row);
         }
+
         return $row;
     }
 
@@ -62,7 +64,7 @@ class DatabaseStatement
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isDirectHtmlTagsAllowed()
     {
@@ -82,7 +84,7 @@ class DatabaseStatement
      */
     public function disallowDirectHtmlTags()
     {
-        $this->allowedHtmlTags = "";
+        $this->allowedHtmlTags = '';
     }
 
     /**

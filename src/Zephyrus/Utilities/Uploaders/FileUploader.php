@@ -1,10 +1,12 @@
-<?php namespace Zephyrus\Utilities\Uploaders;
+<?php
+
+namespace Zephyrus\Utilities\Uploaders;
 
 use Zephyrus\Exceptions\UploadException;
 
 /**
  * REFERENCES
- * https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#File_uploads
+ * https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#File_uploads.
  */
 class FileUploader
 {
@@ -15,13 +17,13 @@ class FileUploader
 
     /**
      * @var string[] List of all allowed extension (ex. gif) for the current
-     * upload. If empty any extension is considered as valid.
+     *               upload. If empty any extension is considered as valid.
      */
     private $allowedExtensions = [];
 
     /**
      * @var string[] List of all allowed mime types (e.g. image/gif) for the
-     * current upload. If empty any mime type is considered as valid.
+     *               current upload. If empty any mime type is considered as valid.
      */
     private $allowedMimeTypes = [];
 
@@ -42,13 +44,13 @@ class FileUploader
 
     /**
      * @var bool Determines if the destination file should be randomly
-     * calculated while uploading if no filename has been provided.
+     *           calculated while uploading if no filename has been provided.
      */
     private $randomizeFilename = true;
 
     /**
      * @var bool Determines if an existing file in the destination directory
-     * can be overwritten or throw an exception.
+     *           can be overwritten or throw an exception.
      */
     private $overwritePermitted = true;
 
@@ -69,11 +71,12 @@ class FileUploader
         }
         $this->validateUpload();
         $this->uploadFile->upload($destination);
+
         return $destination;
     }
 
     /**
-     * Add an allowed extension for the current upload
+     * Add an allowed extension for the current upload.
      *
      * @param string $extension
      */
@@ -83,7 +86,7 @@ class FileUploader
     }
 
     /**
-     * Add a list of allowed extension for the current upload
+     * Add a list of allowed extension for the current upload.
      *
      * @param string[] $extensions
      */
@@ -101,7 +104,7 @@ class FileUploader
     }
 
     /**
-     * Add an allowed mime type for the current upload
+     * Add an allowed mime type for the current upload.
      *
      * @param string $mimeType
      */
@@ -111,7 +114,7 @@ class FileUploader
     }
 
     /**
-     * Add a list of allowed mime types for the current upload
+     * Add a list of allowed mime types for the current upload.
      *
      * @param string[] $mimeTypes
      */
@@ -258,7 +261,7 @@ class FileUploader
      */
     private function hasValidSize(): bool
     {
-        return (($this->uploadFile->getSize() / 1024 / 1024) <= $this->maxSize);
+        return ($this->uploadFile->getSize() / 1024 / 1024) <= $this->maxSize;
     }
 
     /**
@@ -299,6 +302,7 @@ class FileUploader
     {
         $file = md5(uniqid(rand(0, time()), true));
         $extension = (!empty($this->extension)) ? '.' . $this->extension : '';
+
         return $file . $extension;
     }
 }

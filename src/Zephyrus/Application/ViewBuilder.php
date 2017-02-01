@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Application;
+<?php
+
+namespace Zephyrus\Application;
 
 use Pug\Pug;
 use Zephyrus\Security\ContentSecurityPolicy;
@@ -23,6 +25,7 @@ class ViewBuilder
         if (is_null(self::$instance)) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
@@ -32,6 +35,7 @@ class ViewBuilder
         if (!file_exists($path) || !is_readable($path)) {
             throw new \Exception("The specified view file [$path] is not available (not readable or does not exists)");
         }
+
         return new View($this->pug, $path);
     }
 
@@ -56,8 +60,8 @@ class ViewBuilder
         $options = [
             'basedir' => ROOT_DIR . '/public',
             'expressionLanguage' => 'js',
-            'upToDateCheck' => $env != "prod",
-            'cache' => $env == "prod" ? Configuration::getConfiguration('pug', 'cache') : null
+            'upToDateCheck' => $env != 'prod',
+            'cache' => $env == 'prod' ? Configuration::getConfiguration('pug', 'cache') : null,
         ];
         $this->pug = new Pug($options);
     }
@@ -94,7 +98,7 @@ class ViewBuilder
 
     private function addValFunction()
     {
-        return function ($fieldId, $defaultValue = "") {
+        return function ($fieldId, $defaultValue = '') {
             return Form::readMemorizedValue($fieldId, $defaultValue);
         };
     }
@@ -128,6 +132,7 @@ class ViewBuilder
                 case 'decimal':
                     return forward_static_call_array([$class, 'formatDecimal'], $args);
             }
+
             return 'FORMAT TYPE [' . $type . '] NOT DEFINED !';
         };
     }

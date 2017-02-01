@@ -1,18 +1,20 @@
-<?php namespace Zephyrus\Exceptions;
+<?php
+
+namespace Zephyrus\Exceptions;
 
 class UnauthorizedAccessException extends \Exception
 {
     private $requirements = [];
     private $uri;
 
-    public function __construct($uri = "", $requirements = [])
+    public function __construct($uri = '', $requirements = [])
     {
         $this->uri = $uri;
         $this->requirements = $requirements;
         $data = implode(', ', $requirements);
         parent::__construct((!empty($uri) && !empty($requirements))
             ? "Unauthorized access! Requirement(s) [$data] failed for route [$uri]"
-            : "Unauthorized access!");
+            : 'Unauthorized access!');
     }
 
     public function getRequirements()

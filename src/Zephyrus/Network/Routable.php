@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Network;
+<?php
+
+namespace Zephyrus\Network;
 
 interface Routable
 {

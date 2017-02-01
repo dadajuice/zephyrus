@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Application;
+<?php
+
+namespace Zephyrus\Application;
 
 class Session
 {
@@ -23,6 +25,7 @@ class Session
         if (is_null(self::$instance)) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
@@ -34,6 +37,7 @@ class Session
     public function has($key, $value = null): bool
     {
         $session = &$this->sessionStorage->getContent();
+
         return (is_null($value))
             ? isset($session[$key])
             : isset($session[$key]) && $session[$key] == $value;
@@ -60,6 +64,7 @@ class Session
         if (isset($session[$key])) {
             return $session[$key];
         }
+
         return $defaultValue;
     }
 
@@ -110,10 +115,10 @@ class Session
     private function __construct()
     {
         if (!ini_get('session.use_cookies') || !ini_get('session.use_only_cookies')) {
-            throw new \Exception("Session configurations are not secure.
+            throw new \Exception('Session configurations are not secure.
             Fixation may be possible. Please review your php.ini or local
             settings (eg. .htaccess) for directive session.use_cookies and
-            session.use_only_cookies.");
+            session.use_only_cookies.');
         }
     }
 }

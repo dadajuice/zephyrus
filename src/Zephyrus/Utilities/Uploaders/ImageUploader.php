@@ -1,8 +1,10 @@
-<?php namespace Zephyrus\Utilities\Uploaders;
+<?php
+
+namespace Zephyrus\Utilities\Uploaders;
 
 /**
  * REFERENCES
- * http://www.net-security.org/dl/articles/php-file-upload.pdf
+ * http://www.net-security.org/dl/articles/php-file-upload.pdf.
  */
 class ImageUploader extends FileUploader
 {
@@ -22,7 +24,7 @@ class ImageUploader extends FileUploader
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isForcingImageRebuild()
     {
@@ -30,7 +32,7 @@ class ImageUploader extends FileUploader
     }
 
     /**
-     * @param boolean $forcingImageRebuild
+     * @param bool $forcingImageRebuild
      */
     public function setForcingImageRebuild($forcingImageRebuild)
     {
@@ -42,8 +44,8 @@ class ImageUploader extends FileUploader
         parent::validateUpload();
         $this->validateImageMimeType();
         $info = getimagesize($this->uploadFile->getTemporaryFilename());
-        if (empty($info) || $info[0] == "" || $info[1] == "") {
-            throw new \Exception("Uploaded image appears to be corrupt");
+        if (empty($info) || $info[0] == '' || $info[1] == '') {
+            throw new \Exception('Uploaded image appears to be corrupt');
         }
         if ($this->forcingImageRebuild) {
             $this->rebuildImage($info[0], $info[1]);
@@ -51,7 +53,7 @@ class ImageUploader extends FileUploader
     }
 
     /**
-     * Validate that the mime type is an actual valid image
+     * Validate that the mime type is an actual valid image.
      *
      * @throws \Exception
      */
@@ -59,7 +61,7 @@ class ImageUploader extends FileUploader
     {
         $imageType = exif_imagetype($this->uploadFile->getTemporaryFilename());
         if (!$imageType) {
-            throw new \Exception("Uploaded image appears to be corrupt");
+            throw new \Exception('Uploaded image appears to be corrupt');
         }
         $mime = image_type_to_mime_type($imageType);
         if (!in_array($mime, self::PERMITTED_MIME_TYPES)) {
@@ -94,8 +96,9 @@ class ImageUploader extends FileUploader
                 break;
         }
         if (!$tempImage) {
-            throw new \Exception("Uploaded image appears to be corrupt");
+            throw new \Exception('Uploaded image appears to be corrupt');
         }
+
         return $tempImage;
     }
 

@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Application;
+<?php
+
+namespace Zephyrus\Application;
 
 use Zephyrus\Network\Router;
 use Zephyrus\Security\SessionStorage;
@@ -14,7 +16,7 @@ class Bootstrap
 
     public static function initializeRoutableControllers(Router $router)
     {
-        $classLocator = new ClassLocator("Controllers");
+        $classLocator = new ClassLocator('Controllers');
         $controllers = $classLocator->getClasses();
         foreach ($controllers as $controller) {
             $reflection = new \ReflectionClass($controller);

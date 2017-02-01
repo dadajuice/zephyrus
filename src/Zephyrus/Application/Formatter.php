@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Application;
+<?php
+
+namespace Zephyrus\Application;
 
 class Formatter
 {
@@ -14,6 +16,7 @@ class Formatter
             $now = new \DateTime($now);
         }
         $diff = $dateTime->diff($now);
+
         return self::getElapsedMessage($diff, $dateTime);
     }
 
@@ -22,6 +25,7 @@ class Formatter
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new \DateTime($dateTime);
         }
+
         return strftime(Configuration::getConfiguration('lang', 'date'), $dateTime->getTimestamp());
     }
 
@@ -30,6 +34,7 @@ class Formatter
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new \DateTime($dateTime);
         }
+
         return strftime(Configuration::getConfiguration('lang', 'datetime'), $dateTime->getTimestamp());
     }
 
@@ -38,6 +43,7 @@ class Formatter
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new \DateTime($dateTime);
         }
+
         return strftime(Configuration::getConfiguration('lang', 'time'), $dateTime->getTimestamp());
     }
 
@@ -48,6 +54,7 @@ class Formatter
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
+
         return $result;
     }
 
@@ -58,6 +65,7 @@ class Formatter
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $result = $formatter->formatCurrency($amount, Configuration::getApplicationConfiguration('currency'));
+
         return $result;
     }
 
@@ -68,6 +76,7 @@ class Formatter
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
+
         return $result;
     }
 
@@ -76,28 +85,32 @@ class Formatter
      * getting any question marks in result. Run locale -a on server to see full list of supported locales.
      *
      * @param string $name
+     *
      * @return string
      */
     public static function formatSeoUrl($name)
     {
         $url = mb_strtolower($name);
         $url = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $url);
-        $url = preg_replace("/[^a-z0-9_\s-]/", "", $url);
-        $url = preg_replace("/[\s-]+/", " ", $url);
+        $url = preg_replace("/[^a-z0-9_\s-]/", '', $url);
+        $url = preg_replace("/[\s-]+/", ' ', $url);
         $url = trim($url);
-        return preg_replace("/[\s_]/", "-", $url);
+
+        return preg_replace("/[\s_]/", '-', $url);
     }
 
     /**
-     * http://stackoverflow.com/questions/15188033/human-readable-file-size
+     * http://stackoverflow.com/questions/15188033/human-readable-file-size.
+     *
      * @param int $sizeInBytes
+     *
      * @return string
      */
     public static function formatHumanFileSize($sizeInBytes)
     {
         $terms = [
             'fr' => ['G' => 'go', 'M' => 'mo', 'K' => 'ko', 'B' => 'octets'],
-            'en' => ['G' => 'gb', 'M' => 'mb', 'K' => 'kb', 'B' => 'bytes']
+            'en' => ['G' => 'gb', 'M' => 'mb', 'K' => 'kb', 'B' => 'bytes'],
         ];
         $lang = (self::isFrench()) ? $terms['fr'] : $terms['en'];
         $fileSize = $sizeInBytes;
@@ -112,6 +125,7 @@ class Formatter
             $fileSize = round($sizeInBytes / 1024, 1);
             $unit = $lang['K'];
         }
+
         return self::formatDecimal($fileSize, 0, 2) . ' ' . $unit;
     }
 
@@ -124,14 +138,17 @@ class Formatter
                         ? self::getFrenchElapsedMessage($diff->s, 'seconde')
                         : self::getEnglishElapsedMessage($diff->s, 'second');
                 }
+
                 return (self::isFrench())
                     ? self::getFrenchElapsedMessage($diff->i, 'minute')
                     : self::getEnglishElapsedMessage($diff->i, 'minute');
             }
+
             return ((self::isFrench()) ? 'Aujourd\'hui ' : 'Today ') . self::formatTime($dateTime);
         } elseif ($diff->d == 1 && $diff->h == 0) {
             return ((self::isFrench()) ? 'Hier ' : 'Yesterday ') . self::formatTime($dateTime);
         }
+
         return self::formatDateTime($dateTime);
     }
 

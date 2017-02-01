@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Application;
+<?php
+
+namespace Zephyrus\Application;
 
 use Pug\Pug;
 
@@ -15,7 +17,7 @@ class View
     private $content;
 
     /**
-     * @param Pug $pug
+     * @param Pug    $pug
      * @param string $content can be direct Pug input or path
      */
     public function __construct(Pug $pug, string $content)
@@ -26,12 +28,14 @@ class View
 
     /**
      * @param array $args
+     *
      * @return string
      */
     public function render($args = [])
     {
         $output = $this->pug->render($this->content, $args);
         Form::removeMemorizedValue();
+
         return $output;
     }
 }

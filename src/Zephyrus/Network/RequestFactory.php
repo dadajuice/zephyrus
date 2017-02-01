@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Network;
+<?php
+
+namespace Zephyrus\Network;
 
 class RequestFactory
 {
@@ -17,6 +19,7 @@ class RequestFactory
         if (is_null(self::$httpRequest)) {
             self::captureHttpRequest();
         }
+
         return self::$httpRequest;
     }
 
@@ -53,6 +56,7 @@ class RequestFactory
      * parameters are ignored.
      *
      * @param $method
+     *
      * @return array
      */
     private static function getParametersFromMethod(string $method): array
@@ -64,8 +68,10 @@ class RequestFactory
             case 'PUT':
             case 'DELETE':
                 parse_str(file_get_contents('php://input'), $paramsSource);
+
                 return array_merge($parameters, self::getParametersFromGlobal($paramsSource));
         }
+
         return $parameters;
     }
 
@@ -74,6 +80,7 @@ class RequestFactory
      * super global such as $_GET and $_POST).
      *
      * @param mixed[] $global
+     *
      * @return array
      */
     private static function getParametersFromGlobal(array $global): array
@@ -93,6 +100,7 @@ class RequestFactory
                 $parameters[$name] = $value;
             }
         }
+
         return $parameters;
     }
 }
