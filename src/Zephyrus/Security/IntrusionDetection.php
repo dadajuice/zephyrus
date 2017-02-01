@@ -29,7 +29,7 @@ class IntrusionDetection
     private $surveillance = 0;
 
     /**
-     * @var Callable
+     * @var callable
      */
     private $detectionCallback = null;
 

@@ -77,8 +77,8 @@ abstract class Broker
      * @param string $query
      * @param array $parameters
      * @param string $allowedTags
-     * @return array | false
      * @throws DatabaseException
+     * @return array | false
      */
     protected function selectUnique($query, $parameters = [], $allowedTags = "")
     {
@@ -117,8 +117,8 @@ abstract class Broker
      * handler. Best suited method for INSERT, UPDATE and DELETE queries.
      *
      * @param callable $callback
-     * @return mixed
      * @throws DatabaseException
+     * @return mixed
      */
     protected function transaction(callable $callback)
     {
@@ -146,8 +146,8 @@ abstract class Broker
      *
      * @param string $query
      * @param array $parameters
-     * @return DatabaseStatement
      * @throws DatabaseException
+     * @return DatabaseStatement
      */
     protected function query($query, $parameters = [])
     {

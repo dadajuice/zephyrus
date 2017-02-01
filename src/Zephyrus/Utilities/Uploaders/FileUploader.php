@@ -4,7 +4,7 @@ use Zephyrus\Exceptions\UploadException;
 
 /**
  * REFERENCES
- * https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#File_uploads
+ * https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#File_uploads.
  */
 class FileUploader
 {
@@ -73,7 +73,7 @@ class FileUploader
     }
 
     /**
-     * Add an allowed extension for the current upload
+     * Add an allowed extension for the current upload.
      *
      * @param string $extension
      */
@@ -83,7 +83,7 @@ class FileUploader
     }
 
     /**
-     * Add a list of allowed extension for the current upload
+     * Add a list of allowed extension for the current upload.
      *
      * @param string[] $extensions
      */
@@ -101,7 +101,7 @@ class FileUploader
     }
 
     /**
-     * Add an allowed mime type for the current upload
+     * Add an allowed mime type for the current upload.
      *
      * @param string $mimeType
      */
@@ -111,7 +111,7 @@ class FileUploader
     }
 
     /**
-     * Add a list of allowed mime types for the current upload
+     * Add a list of allowed mime types for the current upload.
      *
      * @param string[] $mimeTypes
      */
@@ -258,7 +258,7 @@ class FileUploader
      */
     private function hasValidSize(): bool
     {
-        return (($this->uploadFile->getSize() / 1024 / 1024) <= $this->maxSize);
+        return ($this->uploadFile->getSize() / 1024 / 1024) <= $this->maxSize;
     }
 
     /**

@@ -97,7 +97,7 @@ class SessionExpiration
         if (is_null($this->refreshProbability)) {
             return false;
         }
-        $rand = (float)mt_rand() / (float)mt_getrandmax();
+        $rand = (float) mt_rand() / (float) mt_getrandmax();
         if ($this->refreshProbability == 1.0 || $rand <= $this->refreshProbability) {
             return true;
         }

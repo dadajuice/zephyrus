@@ -49,7 +49,9 @@ class ClassLocator
     {
         $files = [];
         foreach (new DirectoryIterator($this->directory) as $fileInfo) {
-            if ($fileInfo->isDot()) continue;
+            if ($fileInfo->isDot()) {
+                continue;
+            }
             $files[] = $fileInfo->getFilename();
         }
         $classes = array_map(function ($file) {
@@ -63,8 +65,8 @@ class ClassLocator
      * Returns the complete real path for a given namespace based on the given
      * definitions in the composer.json file.
      *
-     * @return string
      * @throws \Exception
+     * @return string
      */
     private function getNamespaceDirectory(): string
     {

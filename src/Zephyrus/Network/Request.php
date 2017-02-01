@@ -33,7 +33,7 @@ class Request
     private $baseUrl;
 
     /**
-     * @var boolean determines if request is under HTTPS
+     * @var bool determines if request is under HTTPS
      */
     private $isSecure;
 
@@ -318,7 +318,7 @@ class Request
         $this->password = $urlParts['pass'] ?? null;
         $this->path = $urlParts['path'] ?? null;
         $this->query = $urlParts['query'] ?? null;
-        $this->fragment = $urlParts['fragment']?? null;
+        $this->fragment = $urlParts['fragment'] ?? null;
     }
 
     private function initializeBaseUrl()

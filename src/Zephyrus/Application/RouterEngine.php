@@ -1,9 +1,9 @@
 <?php namespace Zephyrus\Application;
 
-use Zephyrus\Exceptions\RouteNotFoundException;
 use Zephyrus\Exceptions\RouteDefinitionException;
-use Zephyrus\Exceptions\RouteNotAcceptedException;
 use Zephyrus\Exceptions\RouteMethodUnsupportedException;
+use Zephyrus\Exceptions\RouteNotAcceptedException;
+use Zephyrus\Exceptions\RouteNotFoundException;
 use Zephyrus\Network\Request;
 
 abstract class RouterEngine
@@ -120,8 +120,8 @@ abstract class RouterEngine
      * request is then return. Hence the need to declare routes in
      * correct order.
      *
-     * @return mixed[]
      * @throws \Exception
+     * @return mixed[]
      */
     private function findRouteFromRequest()
     {

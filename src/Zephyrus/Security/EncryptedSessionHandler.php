@@ -19,12 +19,12 @@ class EncryptedSessionHandler extends \SessionHandler
     private $cookieKeyName;
 
     /**
-     * Called on session_start, this method create the
+     * Called on session_start, this method create the.
      *
      * @param string $savePath
      * @param string $sessionName
-     * @return bool
      * @throws \Exception
+     * @return bool
      */
     public function open($savePath, $sessionName)
     {

@@ -39,7 +39,7 @@ function secureEmail($email)
 function recursiveGlob($pattern, $flags = 0)
 {
     $files = glob($pattern, $flags);
-    foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
+    foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
         $files = array_merge($files, recursiveGlob($dir . '/' . basename($pattern), $flags));
     }
     return $files;
@@ -48,9 +48,9 @@ function recursiveGlob($pattern, $flags = 0)
 /**
  * Sort a collection of objects naturally using a specified getter method.
  *
- * @param Object[] $objects
+ * @param object[] $objects
  * @param string $getterMethod
- * @return Object[]
+ * @return object[]
  */
 function naturalSort(array $objects, string $getterMethod = 'getNumber')
 {

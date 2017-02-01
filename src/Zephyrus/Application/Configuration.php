@@ -43,8 +43,8 @@ class Configuration
     /**
      * @param string $section
      * @param string $config
-     * @return mixed
      * @throws \Exception
+     * @return mixed
      */
     public static function getConfiguration($section, $config = null)
     {

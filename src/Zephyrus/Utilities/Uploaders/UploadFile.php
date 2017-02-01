@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Utilities\Uploaders;
 
-
 use Zephyrus\Exceptions\UploadException;
 
 class UploadFile
@@ -36,7 +35,7 @@ class UploadFile
     private $size;
 
     /**
-     * @var mixed[] Associative array defining the uploaded file basic $_FILES
+     * @var mixed[] Associative array defining the uploaded file basic
      * characteristics (e.g. filename, error, size, ...).
      */
     private $rawData;
