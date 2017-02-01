@@ -49,7 +49,7 @@ class Callback
     }
 
     /**
-     * Execute the specified callback function
+     * Execute the specified callback function.
      *
      * @param array $arguments
      * @return mixed

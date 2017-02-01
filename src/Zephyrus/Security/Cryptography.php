@@ -52,8 +52,8 @@ class Cryptography
      * Returns a random hex of desired length.
      *
      * @param int $length
-     * @return string
      * @throws \Exception
+     * @return string
      */
     public static function randomHex(int $length = 128): string
     {
@@ -68,8 +68,8 @@ class Cryptography
      *
      * @param int $min
      * @param int $max
-     * @return int
      * @throws \Exception
+     * @return int
      */
     public static function randomInt(int $min, int $max): int
     {
@@ -82,7 +82,6 @@ class Cryptography
 
         $difference = $max - $min;
         for ($power = 8; pow(2, $power) < $difference; $power = $power * 2) {
-            ;
         }
         $powerExp = $power / 8;
         do {
@@ -155,8 +154,8 @@ class Cryptography
      *
      * @param string $cipher
      * @param string $key
-     * @return string
      * @throws \Exception
+     * @return string
      */
     public static function decrypt(string $cipher, string $key): string
     {

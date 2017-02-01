@@ -54,7 +54,7 @@ class SessionFingerprint
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isUserAgentFingerprinted(): bool
     {
@@ -62,7 +62,7 @@ class SessionFingerprint
     }
 
     /**
-     * @param boolean $fingerprinted
+     * @param bool $fingerprinted
      * @throws \RuntimeException
      */
     public function setUserAgentFingerprinted(bool $fingerprinted)
@@ -71,7 +71,7 @@ class SessionFingerprint
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isIpAddressFingerprinted(): bool
     {
@@ -79,7 +79,7 @@ class SessionFingerprint
     }
 
     /**
-     * @param boolean $fingerprinted
+     * @param bool $fingerprinted
      * @throws \RuntimeException
      */
     public function setIpAddressFingerprinted(bool $fingerprinted)

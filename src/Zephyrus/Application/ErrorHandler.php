@@ -155,8 +155,8 @@ class ErrorHandler
      * registered PHP handler.
      *
      * @param int $type
-     * @return bool
      * @throws \Exception
+     * @return bool
      */
     public function errorHandler($type, ...$args)
     {
