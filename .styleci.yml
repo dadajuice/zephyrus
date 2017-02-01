@@ -1,4 +1,8 @@
+preset: recommended
+
 finder:
+  name:
+    - "*.php"
   exclude:
     - "tests"
     - "vendor"
