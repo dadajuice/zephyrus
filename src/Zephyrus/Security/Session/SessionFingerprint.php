@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Security\Session;
+<?php
+
+namespace Zephyrus\Security\Session;
 
 use Zephyrus\Application\SessionStorage;
 use Zephyrus\Network\Request;
@@ -50,11 +52,12 @@ class SessionFingerprint
         if (isset($this->content['__HANDLER_FINGERPRINT'])) {
             return $this->content['__HANDLER_FINGERPRINT'] === $this->createFingerprint();
         }
+
         return true;
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isUserAgentFingerprinted(): bool
     {
@@ -62,7 +65,8 @@ class SessionFingerprint
     }
 
     /**
-     * @param boolean $fingerprinted
+     * @param bool $fingerprinted
+     *
      * @throws \RuntimeException
      */
     public function setUserAgentFingerprinted(bool $fingerprinted)
@@ -71,7 +75,7 @@ class SessionFingerprint
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isIpAddressFingerprinted(): bool
     {
@@ -79,7 +83,8 @@ class SessionFingerprint
     }
 
     /**
-     * @param boolean $fingerprinted
+     * @param bool $fingerprinted
+     *
      * @throws \RuntimeException
      */
     public function setIpAddressFingerprinted(bool $fingerprinted)
@@ -102,6 +107,7 @@ class SessionFingerprint
         if ($this->userAgentFingerprinted) {
             $fingerprint .= $this->request->getUserAgent();
         }
+
         return hash('sha256', $fingerprint);
     }
 

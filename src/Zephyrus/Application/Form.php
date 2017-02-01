@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Application;
+<?php
+
+namespace Zephyrus\Application;
 
 class Form
 {
@@ -28,9 +30,10 @@ class Form
      *
      * @param string $fieldId
      * @param string $defaultValue
+     *
      * @return string
      */
-    public static function readMemorizedValue($fieldId, $defaultValue = "")
+    public static function readMemorizedValue($fieldId, $defaultValue = '')
     {
         return (isset($_SESSION['_FIELDS'][$fieldId])) ? $_SESSION['_FIELDS'][$fieldId] : $defaultValue;
     }
@@ -76,6 +79,7 @@ class Form
         foreach ($this->validations as $field => $validations) {
             $this->verifyAllRegisteredFields($field, $validations);
         }
+
         return empty($this->errors);
     }
 
@@ -88,7 +92,7 @@ class Form
         $this->validations[$field][] = [
             'callback' => $validation,
             'message' => $errorMessage,
-            'trigger' => $trigger
+            'trigger' => $trigger,
         ];
     }
 
@@ -104,7 +108,7 @@ class Form
 
     /**
      * @param string $parameterName
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function addField($parameterName, $value)
     {
@@ -140,6 +144,7 @@ class Form
                 $results[] = $message;
             }
         }
+
         return $results;
     }
 
@@ -171,7 +176,8 @@ class Form
 
     /**
      * @param string $field
-     * @param array $validations
+     * @param array  $validations
+     *
      * @throws \Exception
      */
     private function verifyAllRegisteredFields($field, $validations)
@@ -196,14 +202,16 @@ class Form
     }
 
     /**
-     * @param string $field
+     * @param string   $field
      * @param callable $callback
+     *
      * @return mixed
      */
     private function executeRule($field, $callback)
     {
         $callback = new Callback($callback);
         $arguments = $this->getFunctionArguments($callback->getReflection(), $field);
+
         return $callback->executeArray($arguments);
     }
 
@@ -211,7 +219,8 @@ class Form
      * Retrieves the specified function arguments.
      *
      * @param \ReflectionFunctionAbstract $reflection
-     * @param string $field
+     * @param string                      $field
+     *
      * @return array
      */
     private function getFunctionArguments(\ReflectionFunctionAbstract $reflection, $field)
@@ -223,6 +232,7 @@ class Form
             $arguments[] = $this->fields[$field];
             $arguments[] = $this->fields;
         }
+
         return $arguments;
     }
 }

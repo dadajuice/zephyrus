@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Security;
+<?php
+
+namespace Zephyrus\Security;
 
 use Expose\FilterCollection;
 use Expose\Manager;
@@ -29,7 +31,7 @@ class IntrusionDetection
     private $surveillance = 0;
 
     /**
-     * @var Callable
+     * @var callable
      */
     private $detectionCallback = null;
 
@@ -44,6 +46,7 @@ class IntrusionDetection
         if (is_null(self::$instance)) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
@@ -53,6 +56,7 @@ class IntrusionDetection
      * callback.
      *
      * @param callable | null $detectionCallback (optional)
+     *
      * @throws \Exception
      */
     public function run(callable $detectionCallback = null)
@@ -62,15 +66,15 @@ class IntrusionDetection
         }
         $guard = $this->getMonitoringInputs();
         if (empty($guard)) {
-            throw new \Exception("Nothing to monitor ! Either configure the IDS to monitor at least one input or 
-                completely deactivate this feature.");
+            throw new \Exception('Nothing to monitor ! Either configure the IDS to monitor at least one input or 
+                completely deactivate this feature.');
         }
 
         $this->manager->run($guard);
         if ($this->manager->getImpact() > 0) {
             $data = $this->getDetectionData($this->manager->getReports());
             if (is_null($this->detectionCallback)) {
-                throw new \Exception("No intrusion detection callback defined");
+                throw new \Exception('No intrusion detection callback defined');
             }
             $callback = $this->detectionCallback;
             $callback($data);
@@ -169,6 +173,7 @@ class IntrusionDetection
         if ($this->surveillance & self::COOKIE) {
             $guard['COOKIE'] = $_COOKIE;
         }
+
         return $guard;
     }
 
@@ -178,13 +183,14 @@ class IntrusionDetection
      * impact, targeted inputs and detection descriptions.
      *
      * @param Report[] $reports
+     *
      * @return mixed[]
      */
     private function getDetectionData($reports): array
     {
         $data = [
             'impact' => 0,
-            'detections' => []
+            'detections' => [],
         ];
         foreach ($reports as $report) {
             $variableName = $report->getVarName();
@@ -192,17 +198,18 @@ class IntrusionDetection
             if (!isset($data['detections'][$variableName])) {
                 $data['detections'][$variableName] = [
                     'value' => $report->getVarValue(),
-                    'events' => []
+                    'events' => [],
                 ];
             }
             foreach ($filters as $filter) {
                 $data['detections'][$variableName]['events'][] = [
                     'description' => $filter->getDescription(),
-                    'impact' => $filter->getImpact()
+                    'impact' => $filter->getImpact(),
                 ];
                 $data['impact'] += $filter->getImpact();
             }
         }
+
         return $data;
     }
 }

@@ -1,8 +1,10 @@
-<?php namespace Zephyrus\Database;
+<?php
+
+namespace Zephyrus\Database;
 
 class TransactionPDO extends \PDO
 {
-    private static $savepointEnabled = ["pgsql", "mysql", "sqlite"];
+    private static $savepointEnabled = ['pgsql', 'mysql', 'sqlite'];
 
     /**
      * @var int
@@ -21,6 +23,7 @@ class TransactionPDO extends \PDO
             $this->exec("SAVEPOINT LEVEL{$this->currentTransactionLevel}");
         }
         ++$this->currentTransactionLevel;
+
         return true;
     }
 

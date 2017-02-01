@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Network;
+<?php
+
+namespace Zephyrus\Network;
 
 class Request
 {
@@ -33,7 +35,7 @@ class Request
     private $baseUrl;
 
     /**
-     * @var boolean determines if request is under HTTPS
+     * @var bool determines if request is under HTTPS
      */
     private $isSecure;
 
@@ -108,6 +110,7 @@ class Request
     /**
      * @param string $name
      * @param string $default
+     *
      * @return string
      */
     public function getCookieValue($name, $default = null)
@@ -115,11 +118,13 @@ class Request
         if (isset($this->cookies[$name])) {
             return $this->cookies[$name];
         }
+
         return $default;
     }
 
     /**
      * @param string $name
+     *
      * @return bool
      */
     public function hasCookie($name)
@@ -137,6 +142,7 @@ class Request
 
     /**
      * @param $name
+     *
      * @return mixed[]
      */
     public function getFile($name)
@@ -144,7 +150,6 @@ class Request
         if (isset($this->files[$name])) {
             return $this->files[$name];
         }
-        return null;
     }
 
     /**
@@ -250,6 +255,7 @@ class Request
         if (isset($this->parameters[$name])) {
             return $this->parameters[$name];
         }
+
         return $default;
     }
 
@@ -318,7 +324,7 @@ class Request
         $this->password = $urlParts['pass'] ?? null;
         $this->path = $urlParts['path'] ?? null;
         $this->query = $urlParts['query'] ?? null;
-        $this->fragment = $urlParts['fragment']?? null;
+        $this->fragment = $urlParts['fragment'] ?? null;
     }
 
     private function initializeBaseUrl()

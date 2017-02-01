@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Network;
+<?php
+
+namespace Zephyrus\Network;
 
 class Cookie
 {
@@ -32,21 +34,21 @@ class Cookie
 
     /**
      * @var string The path on the server which the cookie will be available
-     * on. If set to '/', the cookie will be available to the entire specified
-     * domain.
+     *             on. If set to '/', the cookie will be available to the entire specified
+     *             domain.
      */
     private $path = '/';
 
     /**
      * @var bool Determines if the cookie should be sent only over HTTPS from
-     * the client side.
+     *           the client side.
      */
     private $secure = false;
 
     /**
      * @var bool Determines if the cookie is made accessible only through the
-     * HTTP protocol and thus making it inaccessible from scripting
-     * language.
+     *           HTTP protocol and thus making it inaccessible from scripting
+     *           language.
      */
     private $httpOnly = true;
 
@@ -86,7 +88,7 @@ class Cookie
             $this->path,
             $this->domain,
             $this->secure,
-            $this->httpOnly
+            $this->httpOnly,
         ];
         $function = (!$this->urlEncodedValue) ? 'setrawcookie' : 'setcookie';
         call_user_func_array($function, $args);

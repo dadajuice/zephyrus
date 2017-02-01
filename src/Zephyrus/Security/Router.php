@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Security;
+<?php
+
+namespace Zephyrus\Security;
 
 use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\UnauthorizedAccessException;
@@ -59,6 +61,7 @@ class Router extends BaseRouter
      * in config).
      *
      * @param array $route
+     *
      * @throws UnauthorizedAccessException
      */
     protected function beforeCallback($route)

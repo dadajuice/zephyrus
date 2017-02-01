@@ -1,8 +1,10 @@
-<?php namespace Zephyrus\Database;
+<?php
 
+namespace Zephyrus\Database;
+
+use PDO;
 use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\DatabaseException;
-use PDO;
 
 class Database
 {
@@ -16,15 +18,18 @@ class Database
      * array compatible with the PDO query preparation.
      *
      * @param string $query
-     * @param array $parameters
-     * @return DatabaseStatement
+     * @param array  $parameters
+     *
      * @throws DatabaseException
+     *
+     * @return DatabaseStatement
      */
     public function query($query, $parameters = [])
     {
         try {
             $statement = $this->handle->prepare($query, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
             $statement->execute($parameters);
+
             return new DatabaseStatement($statement);
         } catch (\PDOException $e) {
             throw new DatabaseException('Error while preparing query « ' . $query . ' » (' .
@@ -40,6 +45,7 @@ class Database
      *
      * @see self::commit()
      * @see self::rollback()
+     *
      * @throws DatabaseException
      */
     public function beginTransaction()
@@ -88,13 +94,13 @@ class Database
         return $this->handle->lastInsertId();
     }
 
-    public function __construct(string $dsn, string $username = "", string $password = "")
+    public function __construct(string $dsn, string $username = '', string $password = '')
     {
         try {
             $this->handle = new TransactionPDO($dsn, $username, $password);
             $this->handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (\PDOException $e) {
-            throw new DatabaseException("Connection failed to database : " . $e->getMessage());
+            throw new DatabaseException('Connection failed to database : ' . $e->getMessage());
         }
     }
 
@@ -103,8 +109,9 @@ class Database
         $config = Configuration::getDatabaseConfiguration();
         $dsn = $config['dsn'] ?? "mysql:dbname={$config['database']};
             host={$config['host']};charset={$config['charset']}";
-        $username = $config['username'] ?? "";
-        $password = $config['password'] ?? "";
-        return new Database($dsn, $username, $password);
+        $username = $config['username'] ?? '';
+        $password = $config['password'] ?? '';
+
+        return new self($dsn, $username, $password);
     }
 }

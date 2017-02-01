@@ -1,12 +1,14 @@
-<?php namespace Zephyrus\Database;
+<?php
+
+namespace Zephyrus\Database;
 
 use Zephyrus\Exceptions\DatabaseException;
 use Zephyrus\Utilities\Pager;
 
 abstract class Broker
 {
-    const SQL_FORMAT_DATE = "Y-m-d";
-    const SQL_FORMAT_DATE_TIME = "Y-m-d H:i:s";
+    const SQL_FORMAT_DATE = 'Y-m-d';
+    const SQL_FORMAT_DATE_TIME = 'Y-m-d H:i:s';
 
     /**
      * @var Database
@@ -33,14 +35,16 @@ abstract class Broker
     }
 
     /**
-     * @param int $count
-     * @param int $limit
+     * @param int    $count
+     * @param int    $limit
      * @param string $urlParameter
+     *
      * @return Pager
      */
     public function buildPager($count, $limit = Pager::PAGE_MAX_ENTITIES, $urlParameter = Pager::URL_PARAMETER)
     {
         $this->pager = new Pager($count, $limit, $urlParameter);
+
         return $this->pager;
     }
 
@@ -75,15 +79,18 @@ abstract class Broker
      * returned, an exception is thrown.
      *
      * @param string $query
-     * @param array $parameters
+     * @param array  $parameters
      * @param string $allowedTags
-     * @return array | false
+     *
      * @throws DatabaseException
+     *
+     * @return array | false
      */
-    protected function selectUnique($query, $parameters = [], $allowedTags = "")
+    protected function selectUnique($query, $parameters = [], $allowedTags = '')
     {
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($allowedTags);
+
         return $statement->next();
     }
 
@@ -92,11 +99,12 @@ abstract class Broker
      * return an empty array if the query did not return any results.
      *
      * @param string $query
-     * @param array $parameters
+     * @param array  $parameters
      * @param string $allowedTags
+     *
      * @return array
      */
-    protected function selectAll($query, $parameters = [], $allowedTags = "")
+    protected function selectAll($query, $parameters = [], $allowedTags = '')
     {
         if (!is_null($this->pager)) {
             $query .= $this->pager->getSqlLimit();
@@ -107,6 +115,7 @@ abstract class Broker
         while ($row = $statement->next()) {
             $results[] = $row;
         }
+
         return $results;
     }
 
@@ -117,8 +126,10 @@ abstract class Broker
      * handler. Best suited method for INSERT, UPDATE and DELETE queries.
      *
      * @param callable $callback
-     * @return mixed
+     *
      * @throws DatabaseException
+     *
+     * @return mixed
      */
     protected function transaction(callable $callback)
     {
@@ -130,9 +141,10 @@ abstract class Broker
             } elseif ($reflect->getNumberOfParameters() == 0) {
                 $result = $callback();
             } else {
-                throw new \InvalidArgumentException("Specified callback must have 0 or 1 argument");
+                throw new \InvalidArgumentException('Specified callback must have 0 or 1 argument');
             }
             $this->database->commit();
+
             return $result;
         } catch (\Exception $e) {
             $this->database->rollback();
@@ -145,9 +157,11 @@ abstract class Broker
      * object ready to be fetched.
      *
      * @param string $query
-     * @param array $parameters
-     * @return DatabaseStatement
+     * @param array  $parameters
+     *
      * @throws DatabaseException
+     *
+     * @return DatabaseStatement
      */
     protected function query($query, $parameters = [])
     {

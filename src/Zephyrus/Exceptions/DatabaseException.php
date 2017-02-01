@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Exceptions;
+<?php
+
+namespace Zephyrus\Exceptions;
 
 class DatabaseException extends \Exception
 {
@@ -7,7 +9,7 @@ class DatabaseException extends \Exception
      */
     private $query;
 
-    public function __construct($message, $query = "")
+    public function __construct($message, $query = '')
     {
         parent::__construct($message);
         $this->query = $query;

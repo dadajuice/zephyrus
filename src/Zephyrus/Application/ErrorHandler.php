@@ -1,16 +1,18 @@
-<?php namespace Zephyrus\Application;
+<?php
+
+namespace Zephyrus\Application;
 
 class ErrorHandler
 {
     /**
      * @var mixed[] Contains exception class name as key and corresponding
-     * callback as value.
+     *              callback as value.
      */
     private $registeredThrowableCallbacks = [];
 
     /**
      * @var mixed[] Contains error type as key and corresponding callback as
-     * value.
+     *              value.
      */
     private $registeredErrorCallbacks = [];
 
@@ -28,6 +30,7 @@ class ErrorHandler
      * E_NOTICE, E_DEPRECATED, E_USER_DEPRECATED).
      *
      * @param callable $callback
+     *
      * @throws \Exception
      */
     public function notice(callable $callback)
@@ -44,6 +47,7 @@ class ErrorHandler
      * E_COMPILE_WARNING).
      *
      * @param callable $callback
+     *
      * @throws \Exception
      */
     public function warning(callable $callback)
@@ -59,6 +63,7 @@ class ErrorHandler
      * occurs.
      *
      * @param callable $callback
+     *
      * @throws \Exception
      */
     public function error(callable $callback)
@@ -71,6 +76,7 @@ class ErrorHandler
      * E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR).
      *
      * @param callable $callback
+     *
      * @throws \Exception
      */
     public function fatal(callable $callback)
@@ -89,6 +95,7 @@ class ErrorHandler
      * the default Exception behavior must be overridden).
      *
      * @param callable $callback
+     *
      * @throws \Exception
      */
     public function exception(callable $callback)
@@ -96,13 +103,13 @@ class ErrorHandler
         $reflection = new \ReflectionFunction($callback);
         $parameters = $reflection->getParameters();
         if (count($parameters) != 1) {
-            throw new \InvalidArgumentException("Specified callback must only have one argument hinted as a 
-                Throwable class");
+            throw new \InvalidArgumentException('Specified callback must only have one argument hinted as a 
+                Throwable class');
         }
         $argumentClass = $parameters[0]->getClass();
         if (!$argumentClass->isSubclassOf('Throwable')) {
-            throw new \InvalidArgumentException("Specified callback argument must be hinted child of a 
-                Throwable class");
+            throw new \InvalidArgumentException('Specified callback argument must be hinted child of a 
+                Throwable class');
         }
         $this->registeredThrowableCallbacks[$argumentClass->getShortName()] = $callback;
     }
@@ -113,8 +120,9 @@ class ErrorHandler
      * required. First provided argument is the message, second is the file
      * path, third is the line number and the fourth is an error context.
      *
-     * @param int $level
+     * @param int      $level
      * @param callable $callback
+     *
      * @throws \Exception
      */
     public function registerError($level, callable $callback)
@@ -122,7 +130,7 @@ class ErrorHandler
         $reflection = new \ReflectionFunction($callback);
         $parameters = $reflection->getParameters();
         if (count($parameters) > 4) {
-            throw new \Exception("Specified callback cannot have more than 4 arguments (message, file, line, context)");
+            throw new \Exception('Specified callback cannot have more than 4 arguments (message, file, line, context)');
         }
         $this->registeredErrorCallbacks[$level] = $callback;
     }
@@ -136,6 +144,7 @@ class ErrorHandler
      * PHP handler.
      *
      * @param \Throwable $error
+     *
      * @throws \Throwable
      */
     public function exceptionHandler(\Throwable $error)
@@ -155,8 +164,10 @@ class ErrorHandler
      * registered PHP handler.
      *
      * @param int $type
-     * @return bool
+     *
      * @throws \Exception
+     *
+     * @return bool
      */
     public function errorHandler($type, ...$args)
     {
@@ -168,13 +179,16 @@ class ErrorHandler
             $callback = $this->registeredErrorCallbacks[$type];
             $reflection = new \ReflectionFunction($callback);
             $reflection->invokeArgs($args);
+
             return true;
         }
+
         return false;
     }
 
     /**
      * @param \ReflectionClass $reflection
+     *
      * @return callable|null
      */
     private function findRegisteredExceptions(\ReflectionClass $reflection)
@@ -189,6 +203,5 @@ class ErrorHandler
             }
             $reflection = $parent;
         }
-        return null;
     }
 }

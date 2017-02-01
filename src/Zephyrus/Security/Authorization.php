@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Security;
+<?php
+
+namespace Zephyrus\Security;
 
 use Zephyrus\Network\RequestFactory;
 
@@ -88,6 +90,7 @@ class Authorization
             }
             $match = true;
         }
+
         return (!$match) ? $this->mode == self::MODE_BLACKLIST : empty($failedRequirements);
     }
 
@@ -127,6 +130,7 @@ class Authorization
                 return (is_array($requirements)) ? $requirements : [$requirements];
             }
         }
+
         return [];
     }
 

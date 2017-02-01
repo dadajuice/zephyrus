@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Security\Session;
+<?php
+
+namespace Zephyrus\Security\Session;
 
 use Zephyrus\Application\SessionStorage;
 
@@ -83,6 +85,7 @@ class SessionExpiration
                 return true;
             }
         }
+
         return false;
     }
 
@@ -97,10 +100,11 @@ class SessionExpiration
         if (is_null($this->refreshProbability)) {
             return false;
         }
-        $rand = (float)mt_rand() / (float)mt_getrandmax();
+        $rand = (float) mt_rand() / (float) mt_getrandmax();
         if ($this->refreshProbability == 1.0 || $rand <= $this->refreshProbability) {
             return true;
         }
+
         return false;
     }
 
@@ -170,12 +174,13 @@ class SessionExpiration
 
     /**
      * @param float $refreshProbability
+     *
      * @throws \RangeException
      */
     public function setRefreshProbability(float $refreshProbability)
     {
         if ($refreshProbability < 0 || $refreshProbability > 1) {
-            throw new \RangeException("Probability must be between 0 and 1");
+            throw new \RangeException('Probability must be between 0 and 1');
         }
         $this->refreshProbability = $refreshProbability;
     }

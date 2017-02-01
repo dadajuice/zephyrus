@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Application;
+<?php
+
+namespace Zephyrus\Application;
 
 class Configuration
 {
@@ -12,6 +14,7 @@ class Configuration
         if (is_null(self::$config)) {
             self::initializeConfigurations();
         }
+
         return self::$config;
     }
 
@@ -43,8 +46,10 @@ class Configuration
     /**
      * @param string $section
      * @param string $config
-     * @return mixed
+     *
      * @throws \Exception
+     *
+     * @return mixed
      */
     public static function getConfiguration($section, $config = null)
     {
@@ -54,8 +59,10 @@ class Configuration
         self::validateRequiredSection($section);
         if (!is_null($config)) {
             self::validateRequiredConfigurationField($section, $config);
+
             return self::$config[$section][$config];
         }
+
         return self::$config[$section];
     }
 
@@ -68,13 +75,14 @@ class Configuration
     private static function initializeConfigurations()
     {
         if (!is_readable(ROOT_DIR . '/config.ini')) {
-            throw new \Exception("Cannot parse configurations file (config.ini)");
+            throw new \Exception('Cannot parse configurations file (config.ini)');
         }
         self::$config = parse_ini_file(ROOT_DIR . '/config.ini', true);
     }
 
     /**
      * @param string $section
+     *
      * @throws \Exception
      */
     private static function validateRequiredSection($section)
@@ -87,6 +95,7 @@ class Configuration
     /**
      * @param string $section
      * @param string $field
+     *
      * @throws \Exception
      */
     private static function validateRequiredConfigurationField($section, $field)

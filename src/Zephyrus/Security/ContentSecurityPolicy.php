@@ -1,14 +1,16 @@
-<?php namespace Zephyrus\Security;
+<?php
+
+namespace Zephyrus\Security;
 
 class ContentSecurityPolicy
 {
     const SELF = "'self'";
     const UNSAFE_INLINE = "'unsafe-inline'";
     const UNSAFE_EVAL = "'unsafe-eval'";
-    const BASE64 = "data:";
+    const BASE64 = 'data:';
     const NONE = "'none'";
-    const ANY = "*";
-    const HTTPS_ONLY = "https:";
+    const ANY = '*';
+    const HTTPS_ONLY = 'https:';
 
     /**
      * Defines the supported source types.
@@ -29,12 +31,12 @@ class ContentSecurityPolicy
         'media-src',
         'object-src',
         'plugin-types',
-        'sandbox'
+        'sandbox',
     ];
 
     /**
      * Define script execution by requiring the presence of the specified nonce
-     * on script elements. Must be used in script tag: <script nonce=...>
+     * on script elements. Must be used in script tag: <script nonce=...>.
      *
      * @var string
      */
@@ -73,7 +75,7 @@ class ContentSecurityPolicy
      *
      * @var string
      */
-    private $reflectedXss = "block";
+    private $reflectedXss = 'block';
 
     /**
      * Specifies a URL where a browser will send reports when a content security
@@ -108,7 +110,7 @@ class ContentSecurityPolicy
     public function send()
     {
         $header = $this->buildCompleteHeader();
-        $reportOnly = ($this->reportOnly) ? "-Report-Only" : "";
+        $reportOnly = ($this->reportOnly) ? '-Report-Only' : '';
         header("Content-Security-Policy$reportOnly: " . $header);
         if ($this->compatible) {
             header("X-Content-Security-Policy$reportOnly: " . $header);
@@ -310,7 +312,7 @@ class ContentSecurityPolicy
     }
 
     /**
-     * @param boolean $compatible
+     * @param bool $compatible
      */
     public function setCompatible(bool $compatible)
     {
@@ -324,7 +326,7 @@ class ContentSecurityPolicy
      */
     private function buildCompleteHeader(): string
     {
-        $header = "";
+        $header = '';
         foreach ($this->headers as $sourceType => $value) {
             $header .= $this->buildHeaderLine($sourceType, $value);
         }
@@ -334,31 +336,34 @@ class ContentSecurityPolicy
         if (!empty($this->reflectedXss)) {
             $header .= 'reflected-xss ' . $this->reflectedXss . ';';
         }
+
         return $header;
     }
 
     /**
      * Retrieve a specific CSP line based on the provided sources.
      *
-     * @param string $name
+     * @param string   $name
      * @param string[] $sources
+     *
      * @return string
      */
     private function buildHeaderLine(string $name, array $sources): string
     {
         $header = '';
         if (!empty($sources)) {
-            $value = "";
+            $value = '';
             foreach ($sources as $source) {
                 if (!empty($value)) {
                     $value .= ' ';
                 }
                 $value .= $source;
             }
-            $header = ($name == "script-src" && !empty(self::$nonce))
+            $header = ($name == 'script-src' && !empty(self::$nonce))
                 ? "$name $value 'nonce-" . self::$nonce . "';"
                 : "$name $value;";
         }
+
         return $header;
     }
 

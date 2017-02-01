@@ -1,7 +1,8 @@
-<?php namespace Zephyrus\Security;
+<?php
+
+namespace Zephyrus\Security;
 
 use Zephyrus\Application\SessionStorage as BaseSessionStorage;
-use Zephyrus\Network\Request;
 use Zephyrus\Security\Session\SessionDecoy;
 use Zephyrus\Security\Session\SessionExpiration;
 use Zephyrus\Security\Session\SessionFingerprint;

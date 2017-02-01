@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Network;
+<?php
+
+namespace Zephyrus\Network;
 
 use Zephyrus\Exceptions\NetworkException;
 
@@ -15,7 +17,7 @@ class Response
     public function sendResponseCode($responseCode = 200)
     {
         if ($this->responseCodeSent) {
-            throw new \RuntimeException("HTTP response status code already sent");
+            throw new \RuntimeException('HTTP response status code already sent');
         }
         http_response_code($responseCode);
         $this->responseCodeSent = true;
@@ -51,7 +53,7 @@ class Response
     public function sendContentType($contentType = ContentType::HTML, $charset = 'UTF-8')
     {
         if ($this->responseContentTypeSent) {
-            throw new \RuntimeException("HTTP Content-Type header already sent");
+            throw new \RuntimeException('HTTP Content-Type header already sent');
         }
         header('Content-Type: ' . $contentType . ';charset=' . $charset);
         $this->responseContentTypeSent = true;
@@ -59,6 +61,7 @@ class Response
 
     /**
      * @param int $httpStatusCode
+     *
      * @throws NetworkException
      */
     public function abort(int $httpStatusCode)

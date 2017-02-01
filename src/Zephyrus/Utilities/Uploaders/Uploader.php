@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Utilities\Uploaders;
+<?php
+
+namespace Zephyrus\Utilities\Uploaders;
 
 use Zephyrus\Exceptions\UploadException;
 use Zephyrus\Network\RequestFactory;
@@ -15,8 +17,8 @@ class Uploader
     private $multipleFiles = false;
 
     /**
-     * @var mixed[] Associative array defining the uploaded file basic $_FILES
-     * characteristics (e.g. filename, error, size, ...).
+     * @var mixed[] Associative array defining the uploaded file basic
+     *              characteristics (e.g. filename, error, size, ...).
      */
     private $rawData = null;
 
@@ -32,6 +34,7 @@ class Uploader
 
     /**
      * @param string $name
+     *
      * @throws UploadException
      * @throws \Exception
      */
@@ -98,7 +101,7 @@ class Uploader
                 'type' => $this->rawData['type'][$i],
                 'name' => $this->rawData['name'][$i],
                 'tmp_name' => $this->rawData['tmp_name'][$i],
-                'size' => $this->rawData['size'][$i]
+                'size' => $this->rawData['size'][$i],
             ]);
             $this->uploadFiles[] = ($this->isImage($this->rawData['type'][$i]))
                 ? new ImageUploader($file)

@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Network;
+<?php
+
+namespace Zephyrus\Network;
 
 use Zephyrus\Application\RouterEngine;
 
@@ -13,8 +15,8 @@ class Router extends RouterEngine
      * E.g. GET /books
      *      GET /book/{id}
      *
-     * @param string $uri
-     * @param callable $callback
+     * @param string                $uri
+     * @param callable              $callback
      * @param string | array | null $acceptedFormats
      */
     public function get($uri, $callback, $acceptedFormats = null)
@@ -29,8 +31,8 @@ class Router extends RouterEngine
      *
      * E.g. POST /books
      *
-     * @param string $uri
-     * @param callable $callback
+     * @param string               $uri
+     * @param callable             $callback
      * @param string| array | null $acceptedFormats
      */
     public function post($uri, $callback, $acceptedFormats = null)
@@ -45,8 +47,8 @@ class Router extends RouterEngine
      *
      * E.g. PUT /book/{id}
      *
-     * @param string $uri
-     * @param callable $callback
+     * @param string                $uri
+     * @param callable              $callback
      * @param string | array | null $acceptedFormats
      */
     public function put($uri, $callback, $acceptedFormats = null)
@@ -62,8 +64,8 @@ class Router extends RouterEngine
      * E.g. DELETE /book/{id}
      *      DELETE /books
      *
-     * @param string $uri
-     * @param callable $callback
+     * @param string                $uri
+     * @param callable              $callback
      * @param string | array | null $acceptedFormats
      */
     public function delete($uri, $callback, $acceptedFormats = null)

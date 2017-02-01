@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Utilities;
+<?php
+
+namespace Zephyrus\Utilities;
 
 interface Validator
 {

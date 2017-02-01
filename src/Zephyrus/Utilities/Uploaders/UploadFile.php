@@ -1,5 +1,6 @@
-<?php namespace Zephyrus\Utilities\Uploaders;
+<?php
 
+namespace Zephyrus\Utilities\Uploaders;
 
 use Zephyrus\Exceptions\UploadException;
 
@@ -36,8 +37,8 @@ class UploadFile
     private $size;
 
     /**
-     * @var mixed[] Associative array defining the uploaded file basic $_FILES
-     * characteristics (e.g. filename, error, size, ...).
+     * @var mixed[] Associative array defining the uploaded file basic
+     *              characteristics (e.g. filename, error, size, ...).
      */
     private $rawData;
 
@@ -58,12 +59,13 @@ class UploadFile
      * will throw an exception otherwise.
      *
      * @param string $destination
+     *
      * @throws \Exception
      */
     final public function upload(string $destination)
     {
         if (!move_uploaded_file($this->temporaryFilename, $destination)) {
-            throw new \Exception("Upload failed");
+            throw new \Exception('Upload failed');
         }
     }
 
@@ -109,6 +111,7 @@ class UploadFile
 
     /**
      * @param array $data
+     *
      * @throws \InvalidArgumentException
      */
     private function initializeRawData(array $data)
@@ -116,8 +119,8 @@ class UploadFile
         $keys = ['error', 'tmp_name', 'type', 'name', 'size'];
         $missingKeys = array_diff_key(array_flip($keys), $data);
         if (!empty($missingKeys)) {
-            throw new \InvalidArgumentException("Argument must be a valid file data [" .
-                print_r($missingKeys, true) . " missing]");
+            throw new \InvalidArgumentException('Argument must be a valid file data [' .
+                print_r($missingKeys, true) . ' missing]');
         }
         $this->rawData = $data;
     }
@@ -145,6 +148,7 @@ class UploadFile
         $info = finfo_open(FILEINFO_MIME_TYPE);
         $mime = finfo_file($info, $this->temporaryFilename);
         finfo_close($info);
+
         return $mime;
     }
 }
