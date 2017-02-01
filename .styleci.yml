@@ -14,4 +14,7 @@ disabled:
   - phpdoc_align
   - simplified_null_return
   - single_quote
+  - phpdoc_annotation_without_dot
+  - trailing_comma_in_multiline_array
+  - phpdoc_separation
   - concat_without_spaces
