@@ -18,7 +18,7 @@ class Bootstrap
         $controllers = $classLocator->getClasses();
         foreach ($controllers as $controller) {
             $reflection = new \ReflectionClass($controller);
-            if ($reflection->implementsInterface('Zephyrus\Network\Routable')) {
+            if ($reflection->implementsInterface('Zephyrus\Network\Routable') && !$reflection->isAbstract()) {
                 $controllerInstance = $reflection->newInstance($router);
                 $controllerInstance->initializeRoutes();
             }
