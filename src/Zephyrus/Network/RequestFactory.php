@@ -37,9 +37,8 @@ class RequestFactory
     private static function captureHttpRequest()
     {
         $server = $_SERVER;
-        $uri = $server['REQUEST_URI'];
+        $uri = self::getCompleteRequestUri($server);
         $method = strtoupper($server['REQUEST_METHOD']);
-        $server['REMOTE_ADDR'] = getenv('HTTP_X_FORWARDED_FOR') ?? getenv('REMOTE_ADDR');
         $parameters = self::getParametersFromMethod($method);
         if (isset($parameters['__method'])) {
             $method = strtoupper($parameters['__method']);
@@ -94,5 +93,18 @@ class RequestFactory
             }
         }
         return $parameters;
+    }
+
+    private static function getCompleteRequestUri(array $server): string
+    {
+        $uri = $server['REQUEST_URI'];
+        $isSecure = !empty($server['HTTPS']) && $server['HTTPS'] == 'on';
+        $serverProtocol = strtolower($server['SERVER_PROTOCOL']);
+        $scheme = substr($serverProtocol, 0, strpos($serverProtocol, '/')) . (( $isSecure ) ? 's' : '');
+        $port = $server['SERVER_PORT'];
+        $port = ((!$isSecure && $port == '80') || ($isSecure && $port == '443')) ? '' : ':' . $port;
+        $host = $server['HTTP_HOST'] ?? null;
+        $host = (isset($host) ? $host : $server['SERVER_NAME']) . $port;
+        return $scheme . '://' . $host . $uri;
     }
 }

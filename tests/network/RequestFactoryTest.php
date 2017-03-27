@@ -10,6 +10,9 @@ class RequestFactoryTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         $_SERVER['REQUEST_URI'] = 'http://test.local/';
+        $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
+        $_SERVER['HTTP_HOST'] = 'test.local';
+        $_SERVER['SERVER_PORT'] = '80';
         $_GET['test'] = 'yeah';
         RequestFactory::set(null);
         $request = RequestFactory::read();
@@ -21,6 +24,9 @@ class RequestFactoryTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         $_SERVER['REQUEST_URI'] = 'http://test.local/';
+        $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
+        $_SERVER['HTTP_HOST'] = 'test.local';
+        $_SERVER['SERVER_PORT'] = '80';
         $_POST['test'] = ["1", "2", "3"];
         $_POST['__method'] = 'put';
         RequestFactory::set(null);
@@ -34,6 +40,9 @@ class RequestFactoryTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'DELETE';
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         $_SERVER['REQUEST_URI'] = 'http://test.local/users/3';
+        $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
+        $_SERVER['HTTP_HOST'] = 'test.local';
+        $_SERVER['SERVER_PORT'] = '80';
         RequestFactory::set(null);
         $request = RequestFactory::read();
         self::assertEquals('DELETE', $request->getMethod());
