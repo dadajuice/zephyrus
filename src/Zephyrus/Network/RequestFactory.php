@@ -100,7 +100,7 @@ class RequestFactory
         $uri = $server['REQUEST_URI'];
         $isSecure = !empty($server['HTTPS']) && $server['HTTPS'] == 'on';
         $serverProtocol = strtolower($server['SERVER_PROTOCOL']);
-        $scheme = substr($serverProtocol, 0, strpos($serverProtocol, '/')) . (( $isSecure ) ? 's' : '');
+        $scheme = substr($serverProtocol, 0, strpos($serverProtocol, '/')) . (($isSecure) ? 's' : '');
         $port = $server['SERVER_PORT'];
         $port = ((!$isSecure && $port == '80') || ($isSecure && $port == '443')) ? '' : ':' . $port;
         $host = $server['HTTP_HOST'] ?? null;
