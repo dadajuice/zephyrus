@@ -67,15 +67,6 @@ class ContentSecurityPolicy
     private $compatible = false;
 
     /**
-     * Instructs a user agent to activate or deactivate any heuristics used to
-     * filter or block reflected cross-site scripting attacks, equivalent to
-     * the effects of the non-standard X-XSS-Protection header.
-     *
-     * @var string
-     */
-    private $reflectedXss = "block";
-
-    /**
      * Specifies a URL where a browser will send reports when a content security
      * policy is violated. This directive cant be used in <meta> tags.
      *
@@ -294,14 +285,6 @@ class ContentSecurityPolicy
     }
 
     /**
-     * @param string $reflectedXss
-     */
-    public function setReflectedXss(string $reflectedXss)
-    {
-        $this->reflectedXss = $reflectedXss;
-    }
-
-    /**
      * @param string $reportUri
      */
     public function setReportUri(string $reportUri)
@@ -330,9 +313,6 @@ class ContentSecurityPolicy
         }
         if (!empty($this->reportUri)) {
             $header .= 'report-uri ' . $this->reportUri . ';';
-        }
-        if (!empty($this->reflectedXss)) {
-            $header .= 'reflected-xss ' . $this->reflectedXss . ';';
         }
         return $header;
     }

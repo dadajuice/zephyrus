@@ -50,6 +50,6 @@ class SecureHeaderTest extends TestCase
         $header->setContentSecurityPolicy($csp);
         self::assertEquals([ContentSecurityPolicy::SELF], $header->getContentSecurityPolicy()->getAllHeader()['default-src']);
         $header->send();
-        self::assertTrue(in_array("Content-Security-Policy: default-src 'self';reflected-xss block;", xdebug_get_headers()));
+        self::assertTrue(in_array("Content-Security-Policy: default-src 'self';", xdebug_get_headers()));
     }
 }
