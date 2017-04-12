@@ -301,6 +301,24 @@ class Request
         return $this->baseUrl;
     }
 
+    /**
+     * @return array
+     */
+    public function getHeaders(): array
+    {
+        return (function_exists('getallheaders')) ? getallheaders() : [];
+    }
+
+    /**
+     * @param string $name
+     * @return string|null
+     */
+    public function getHeader(string $name): ?string
+    {
+        $headers = $this->getHeaders();
+        return isset($headers[$name]) ? $headers[$name] : null;
+    }
+
     private function initializeServer()
     {
         $this->accept = $this->serverVariables['HTTP_ACCEPT'] ?? '';

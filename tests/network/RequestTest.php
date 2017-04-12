@@ -38,6 +38,19 @@ class RequestTest extends TestCase
         self::assertEquals('text/html', $request->getAccept());
     }
 
+    public function testHeader()
+    {
+        $server = [];
+        $uri = 'http://127.0.0.1/test/3?sort=4&filter[]=a&filter[]=b#section';
+        $method = 'GET';
+        $server['REMOTE_ADDR'] = '192.168.2.1';
+        $server['HTTP_ACCEPT'] = 'text/html';
+        $server['HTTP_USER_AGENT'] = 'chrome';
+        $request = new Request($uri, $method, [], [], [], $server);
+        self::assertEquals([], $request->getHeaders());
+        self::assertEquals(null, $request->getHeader('TEST'));
+    }
+
     public function testCookies()
     {
         $uri = 'http://127.0.0.1/test';
