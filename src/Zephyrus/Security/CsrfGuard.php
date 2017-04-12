@@ -227,8 +227,10 @@ class CsrfGuard
         $sortedCsrf = $this->getStoredCsrfToken($formName);
         if (!is_null($sortedCsrf)) {
             $csrfData = Session::getInstance()->read('__CSRF_TOKEN', []);
-            $csrfData[$formName] = '';
-            Session::getInstance()->set('__CSRF_TOKEN', $csrfData);
+            if (is_null($this->request->getHeader('CSRF_KEEP_ALIVE'))) {
+                $csrfData[$formName] = '';
+                Session::getInstance()->set('__CSRF_TOKEN', $csrfData);
+            }
             return hash_equals($sortedCsrf, $token);
         }
         return false;
