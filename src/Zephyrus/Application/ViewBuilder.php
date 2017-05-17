@@ -56,7 +56,7 @@ class ViewBuilder
         $options = [
             'basedir' => ROOT_DIR . '/public',
             'expressionLanguage' => 'js',
-            'upToDateCheck' => $env != "prod",
+            'upToDateCheck' => true,
             'cache' => $env == "prod" ? Configuration::getConfiguration('pug', 'cache') : null
         ];
         $this->pug = new Pug($options);
