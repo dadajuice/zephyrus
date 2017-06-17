@@ -63,6 +63,20 @@ class RouterTest extends TestCase
         $router->run($req);
     }
 
+    public function testMultipleGetRequest()
+    {
+        $req = new Request('http://test.local/bob/3/8', 'GET');
+        $router = new Router();
+        $ref = $this;
+        $router->get('/bob/{id}/{id2}', function($id, $id2) use ($ref, $router) {
+            $ref->assertEquals('3', $id);
+            $ref->assertEquals('8', $id2);
+            $ref->assertEquals('3', $router->getRequest()->getParameter('id'));
+            $ref->assertEquals('8', $router->getRequest()->getParameter('id2'));
+        });
+        $router->run($req);
+    }
+
     /**
      * @expectedException \Exception
      * @expectedExceptionCode 500

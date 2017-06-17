@@ -175,10 +175,11 @@ abstract class RouterEngine
      */
     private function prepareResponse($route)
     {
-        $this->loadRequestParameters($route);
+        $values = $this->retrieveUriParameters($route);
+        $this->loadRequestParameters($route, $values);
         $this->beforeCallback($route);
         $callback = new Callback($route['callback']);
-        $arguments = $this->getFunctionArguments($callback->getReflection());
+        $arguments = $this->getFunctionArguments($callback->getReflection(), $values);
         $callback->executeArray($arguments);
         $this->afterCallback($route);
     }
@@ -189,12 +190,11 @@ abstract class RouterEngine
      * @param \ReflectionFunctionAbstract $reflection
      * @return array
      */
-    private function getFunctionArguments(\ReflectionFunctionAbstract $reflection)
+    private function getFunctionArguments(\ReflectionFunctionAbstract $reflection, $values)
     {
         $arguments = [];
         if (!empty($reflection->getParameters())) {
-            $requestedParameters = $this->request->getParameters();
-            foreach ($requestedParameters as $value) {
+            foreach ($values as $value) {
                 $arguments[] = $value;
             }
         }
@@ -205,26 +205,32 @@ abstract class RouterEngine
      * Load parameters located inside the request object.
      *
      * @param mixed[] $route
+     * @param mixed[] $values
      * @throws \Exception
      */
-    private function loadRequestParameters($route)
+    private function loadRequestParameters($route, $values)
     {
         if (!empty($route['regex'])) {
-            $pattern = '/^' . $route['regex'] . '$/';
-            preg_match_all($pattern, $this->requestedUri, $matches);
-
-            $values = [];
-            $matchCount = count($matches);
-            for ($i = 1; $i < $matchCount; ++$i) {
-                $values[] = /*purify(*/$matches[$i][0]/*)*/;
-            }
-
             $i = 0;
             foreach ($route['params'] as $param) {
                 $this->request->prependParameter($param, $values[$i]);
                 ++$i;
             }
         }
+    }
+
+    private function retrieveUriParameters($route)
+    {
+        $values = [];
+        if (!empty($route['regex'])) {
+            $pattern = '/^' . $route['regex'] . '$/';
+            preg_match_all($pattern, $this->requestedUri, $matches);
+            $matchCount = count($matches);
+            for ($i = 1; $i < $matchCount; ++$i) {
+                $values[] = /*purify(*/$matches[$i][0]/*)*/;
+            }
+        }
+        return $values;
     }
 
     /**
