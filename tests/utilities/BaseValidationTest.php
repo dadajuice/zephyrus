@@ -11,6 +11,15 @@ class BaseValidationTest extends TestCase
         self::assertFalse(BaseValidation::isNotEmpty(''));
     }
 
+    public function testIsAlpha()
+    {
+        self::assertTrue(BaseValidation::isAlpha('test'));
+        self::assertTrue(BaseValidation::isAlpha('marc-antoine'));
+        self::assertTrue(BaseValidation::isAlpha('Émilie'));
+        self::assertFalse(BaseValidation::isAlpha('bob129'));
+        self::assertFalse(BaseValidation::isAlpha('dhhtgerg&@esjhgdkg'));
+    }
+
     public function testIsAlphanumeric()
     {
         self::assertTrue(BaseValidation::isAlphanumeric('test'));
