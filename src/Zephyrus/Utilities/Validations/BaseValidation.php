@@ -6,7 +6,7 @@ class BaseValidation
     {
         return !empty(trim($data));
     }
-    
+
     public static function isAlpha($data): bool
     {
         $accentedChar = "àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇßØøÅåÆæœ";
