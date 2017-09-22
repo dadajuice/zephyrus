@@ -6,6 +6,12 @@ class BaseValidation
     {
         return !empty(trim($data));
     }
+    
+    public static function isAlpha($data): bool
+    {
+        $accentedChar = "àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇßØøÅåÆæœ";
+        return (self::isRegexValid($data, "[a-zA-Z-" . $accentedChar . "]"));
+    }
 
     public static function isAlphanumeric($data): bool
     {
