@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Database;
 
+use PDO;
 use Zephyrus\Exceptions\DatabaseException;
 use Zephyrus\Utilities\Pager;
 
@@ -7,6 +8,7 @@ abstract class Broker
 {
     const SQL_FORMAT_DATE = "Y-m-d";
     const SQL_FORMAT_DATE_TIME = "Y-m-d H:i:s";
+    const DEFAULT_FETCH = PDO::FETCH_BOTH;
 
     /**
      * @var Database
@@ -17,6 +19,11 @@ abstract class Broker
      * @var Pager
      */
     private $pager = null;
+
+    /**
+     * @var int
+     */
+    private $fetchStyle = self::DEFAULT_FETCH;
 
     /**
      * Broker constructor called by children. Simply get the database reference
@@ -53,6 +60,14 @@ abstract class Broker
     }
 
     /**
+     * @param int $fetchStyle
+     */
+    protected function setFetchStyle(int $fetchStyle)
+    {
+        $this->fetchStyle = $fetchStyle;
+    }
+
+    /**
      * @return Database
      */
     protected function getDatabase()
@@ -84,7 +99,7 @@ abstract class Broker
     {
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($allowedTags);
-        return $statement->next();
+        return $statement->next($this->fetchStyle);
     }
 
     /**
@@ -104,7 +119,7 @@ abstract class Broker
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($allowedTags);
         $results = [];
-        while ($row = $statement->next()) {
+        while ($row = $statement->next($this->fetchStyle)) {
             $results[] = $row;
         }
         return $results;
