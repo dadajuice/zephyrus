@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Database;
 
-use PDO;
 use PDOStatement;
 
 class DatabaseStatement
