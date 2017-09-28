@@ -81,6 +81,7 @@ class ClassLocator
             }
             $undefinedFragments[] = array_pop($namespaceFragments);
         }
+
         throw new \Exception("Specified namespace [$this->namespace] has not been defined");
     }
 }
