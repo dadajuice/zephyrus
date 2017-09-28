@@ -27,9 +27,9 @@ class DatabaseStatement
      *
      * @return array
      */
-    public function next()
+    public function next($fetchStyle = \PDO::FETCH_BOTH)
     {
-        $row = $this->statement->fetch(PDO::FETCH_BOTH);
+        $row = $this->statement->fetch($fetchStyle);
         if (is_array($row)) {
             $this->sanitizeOutput($row);
         }
