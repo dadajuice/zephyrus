@@ -73,12 +73,12 @@ class SampleController extends Controller
 
     public function index()
     {
-        $this->render('sample', ['message' => 'Bonjour le monde !']);
+        return $this->render('sample', ['message' => 'Bonjour le monde !']);
     }
     
     public function read($id)
     {
-        $this->render('sample', ['message' => 'ID = ' . $id]);
+        return $this->render('sample', ['message' => 'ID = ' . $id]);
     }
 }  
 ```
@@ -116,12 +116,12 @@ class SampleController extends Controller
 
     public function index()
     {
-        $this->render('sample', ['message' => 'Bonjour le monde !']);
+        return $this->render('sample', ['message' => 'Bonjour le monde !']);
     }
 
     public function read($id)
     {
-        $this->render('sample', ['message' => 'ID = ' . $id]);
+        return $this->render('sample', ['message' => 'ID = ' . $id]);
     }
 
     public function insert()
@@ -135,7 +135,7 @@ class SampleController extends Controller
         if (!$form->verify()) {
             $messages = $form->getErrorMessages();
             Flash::error($messages);
-            $this->response->redirect("/sample");
+            return $this->redirect("/sample");
         }
 
         echo "Bravo !";
