@@ -22,27 +22,47 @@ abstract class Controller implements Routable
     public function __construct(Router $router)
     {
         $this->router = $router;
+        $this->router->setBeforeCallback([$this, 'before']);
+        $this->router->setAfterCallback([$this, 'after']);
         $this->request = &$router->getRequest();
     }
 
-    protected function get($uri, $instanceMethod, $acceptedFormats = null)
+    final protected function get($uri, $instanceMethod, $acceptedFormats = null)
     {
         $this->router->get($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
-    protected function post($uri, $instanceMethod, $acceptedFormats = null)
+    final protected function post($uri, $instanceMethod, $acceptedFormats = null)
     {
         $this->router->post($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
-    protected function put($uri, $instanceMethod, $acceptedFormats = null)
+    final protected function put($uri, $instanceMethod, $acceptedFormats = null)
     {
         $this->router->put($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
-    protected function delete($uri, $instanceMethod, $acceptedFormats = null)
+    final protected function delete($uri, $instanceMethod, $acceptedFormats = null)
     {
         $this->router->delete($uri, [$this, $instanceMethod], $acceptedFormats);
+    }
+
+    /**
+     * Method called immediately before calling the associated route callback
+     * method. The default behavior is to do nothing. This should be overridden
+     * to customize any operation to be made prior the route callback.
+     */
+    public function before()
+    {
+    }
+
+    /**
+     * Method called immediately after calling the associated route callback
+     * method. The default behavior is to do nothing. This should be overridden
+     * to customize any operation to be made right after the route callback.
+     */
+    public function after()
+    {
     }
 
     /**

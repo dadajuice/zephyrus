@@ -35,6 +35,16 @@ abstract class RouterEngine
     private $request;
 
     /**
+     * @var callable
+     */
+    private $before = null;
+
+    /**
+     * @var callable
+     */
+    private $after = null;
+
+    /**
      * Launch the routing process to determine, according to the
      * initiated request, the best route to execute. Cannot be overridden.
      *
@@ -114,6 +124,22 @@ abstract class RouterEngine
     }
 
     /**
+     * @param $before
+     */
+    public function setBeforeCallback($before)
+    {
+        $this->before = $before;
+    }
+
+    /**
+     * @param $after
+     */
+    public function setAfterCallback($after)
+    {
+        $this->after = $after;
+    }
+
+    /**
      * Find a route corresponding to the client request. Matches direct
      * URIs and parametrised URIs. When a match is found, there's a last
      * verification to check if the route is accepted (through method
@@ -180,13 +206,21 @@ abstract class RouterEngine
         $values = $this->retrieveUriParameters($route);
         $this->loadRequestParameters($route, $values);
         $this->beforeCallback($route);
+        if (!is_null($this->before)) {
+            $c = new Callback($this->before);
+            $c->execute();
+        }
         $callback = new Callback($route['callback']);
         $arguments = $this->getFunctionArguments($callback->getReflection(), $values);
         $response = $callback->executeArray($arguments);
-        $this->afterCallback($route);
+        if (!is_null($this->after)) {
+            $c = new Callback($this->after);
+            $c->execute();
+        }
         if ($response instanceof Response) {
             $response->send();
         }
+        $this->afterCallback($route);
     }
 
     /**
