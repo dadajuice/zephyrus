@@ -3,9 +3,9 @@
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
+use Zephyrus\Network\ResponseFactory;
 use Zephyrus\Network\Routable;
 use Zephyrus\Network\Router;
-use Zephyrus\Utilities\Pager;
 
 abstract class Controller implements Routable
 {
@@ -19,16 +19,10 @@ abstract class Controller implements Routable
      */
     protected $request;
 
-    /**
-     * @var Response
-     */
-    protected $response;
-
     public function __construct(Router $router)
     {
         $this->router = $router;
         $this->request = &$router->getRequest();
-        $this->response = new Response();
     }
 
     protected function get($uri, $instanceMethod, $acceptedFormats = null)
@@ -52,19 +46,6 @@ abstract class Controller implements Routable
     }
 
     /**
-     * Renders the specified Pug view with corresponding arguments. If a pager
-     * is to be shown in the page, it must be given.
-     *
-     * @param string $page
-     * @param array $args
-     */
-    protected function render($page, $args = [])
-    {
-        $view = ViewBuilder::getInstance()->build($page);
-        echo $view->render($args);
-    }
-
-    /**
      * @return Form
      */
     protected function buildForm(): Form
@@ -75,46 +56,51 @@ abstract class Controller implements Routable
     }
 
     /**
+     * Renders the specified Pug view with corresponding arguments. If a pager
+     * is to be shown in the page, it must be given.
+     *
+     * @param string $page
+     * @param array $args
+     * @return Response
+     */
+    protected function render($page, $args = []): Response
+    {
+        return ResponseFactory::getInstance()->buildView($page, $args);
+    }
+
+    /**
      * Renders the given data as HTML. Default behavior of any direct input.
      *
      * @param string $data
+     * @return Response
      */
-    protected function html($data)
+    protected function html(string $data): Response
     {
-        $this->response->sendResponseCode();
-        $this->response->sendContentType(ContentType::HTML);
-        echo $data;
+        return ResponseFactory::getInstance()->buildHtml($data);
     }
 
     /**
      * Renders the given data as json string.
      *
-     * @param string $data
+     * @param mixed $data
+     * @return Response
      */
-    protected function json($data)
+    protected function json($data): Response
     {
-        $this->response->sendResponseCode();
-        $this->response->sendContentType(ContentType::JSON);
-        echo json_encode($data);
+        return ResponseFactory::getInstance()->buildJson($data);
     }
 
     /**
      * Does a server-sent event response.
      *
-     * @param string $data
+     * @param mixed $data
      * @param int $eventId
      * @param int $retry
+     * @return Response
      */
-    protected function sse($data, $eventId = 0, $retry = 1000)
+    protected function sse($data, $eventId = 0, $retry = 1000): Response
     {
-        $this->response->sendResponseCode();
-        $this->response->sendContentType(ContentType::SSE);
-        $this->response->sendHeader('Cache-Control', 'no-cache');
-        echo "id: $eventId" . PHP_EOL;
-        echo "retry: " . $retry . PHP_EOL;
-        echo "data: " . json_encode($data) . PHP_EOL;
-        echo PHP_EOL;
-        flush();
+        return ResponseFactory::getInstance()->buildSse($data, $eventId, $retry);
     }
 
     /**
@@ -124,37 +110,72 @@ abstract class Controller implements Routable
      *
      * @param array | \SimpleXMLElement $data
      * @param string $root
+     * @return Response
      */
-    protected function xml($data, $root = "")
+    protected function xml($data, $root = ""): Response
     {
-        $this->response->sendResponseCode();
-        $this->response->sendContentType(ContentType::XML);
-        if ((!$data instanceof \SimpleXMLElement) && !is_array($data)) {
-            throw new \RuntimeException("Cannot parse specified data as XML");
-        }
-
-        if ($data instanceof \SimpleXMLElement) {
-            echo $data->asXML();
-        }
-        if (is_array($data)) {
-            $xml = new \SimpleXMLElement('<' . $root . '/>');
-            $this->arrayToXml($data, $xml);
-            echo $xml->asXML();
-        }
+        return ResponseFactory::getInstance()->buildXml($data, $root);
     }
 
-    private function arrayToXml($data, \SimpleXMLElement &$xml)
+    /**
+     * Redirect user to specified URL. Throws an HTTP "303 See Other" header
+     * instead of the default 301. This indicates, more precisely, that the
+     * response if elsewhere.
+     *
+     * @param string $url
+     * @return Response
+     */
+    public function redirect(string $url): Response
     {
-        foreach ($data as $key => $value) {
-            if (is_numeric($key)) {
-                $key = 'node' . $key;
-            }
-            if (is_array($value)) {
-                $subnode = $xml->addChild($key);
-                $this->arrayToXml($value, $subnode);
-                return;
-            }
-            $xml->addChild("$key", htmlspecialchars("$value"));
-        }
+        return ResponseFactory::getInstance()->buildRedirect($url);
+    }
+
+    /**
+     * @param int $httpStatusCode
+     * @return Response
+     */
+    protected function abort(int $httpStatusCode)
+    {
+        return new Response(ContentType::PLAIN, $httpStatusCode);
+    }
+
+    /**
+     * @return Response
+     */
+    protected function abortNotFound()
+    {
+        return new Response(ContentType::PLAIN, 404);
+    }
+
+    /**
+     * @return Response
+     */
+    protected function abortInternalError()
+    {
+        return new Response(ContentType::PLAIN, 500);
+    }
+
+    /**
+     * @return Response
+     */
+    protected function abortForbidden()
+    {
+        return new Response(ContentType::PLAIN, 403);
+    }
+
+    /**
+     * @return Response
+     */
+    protected function abortMethodNotAllowed()
+    {
+        return new Response(ContentType::PLAIN, 405);
+    }
+
+    /**
+     * @return Response
+     */
+    protected function abortNotAcceptable()
+    {
+        return new Response(ContentType::PLAIN, 406);
     }
 }
