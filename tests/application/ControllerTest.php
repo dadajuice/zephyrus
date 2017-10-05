@@ -55,6 +55,26 @@ class ControllerTest extends TestCase
         self::assertEquals('<p>Example Bob Lewis</p>', $output);
     }
 
+    public function testRenderPhp()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index(): Response
+            {
+                return parent::render('test2', ['a' => 'allo']);
+            }
+        };
+        ob_start();
+        $controller->index()->send();
+        $output = ob_get_clean();
+        self::assertEquals('<h1>allo</h1>', $output);
+    }
+
     public function testGetRoutingWithParameter()
     {
         $router = new Router();
