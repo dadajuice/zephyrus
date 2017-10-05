@@ -1,108 +1,82 @@
 <?php namespace Zephyrus\Network;
 
-use Zephyrus\Exceptions\NetworkException;
-
 class Response
 {
-    private $responseCodeSent = false;
-    private $responseContentTypeSent = false;
+    /**
+     * @var string
+     */
+    private $content;
 
     /**
-     * Send the HTTP response code.
-     *
-     * @param int $responseCode
+     * @var string
      */
-    public function sendResponseCode($responseCode = 200)
+    private $code;
+
+    /**
+     * @var string
+     */
+    private $contentType;
+
+    /**
+     * @var string
+     */
+    private $charset;
+
+    /**
+     * @var array
+     */
+    private $headers = [];
+
+    public function __construct($contentType = ContentType::HTML, $code = 200)
     {
-        if ($this->responseCodeSent) {
-            throw new \RuntimeException("HTTP response status code already sent");
+        $this->contentType = $contentType;
+        $this->code = $code;
+        $this->charset = 'UTF-8';
+    }
+
+    public function send()
+    {
+        http_response_code($this->code);
+        header('Content-Type: ' . $this->contentType . ';charset=' . $this->charset);
+        foreach ($this->headers as $name => $content) {
+            header("$name:$content");
         }
-        http_response_code($responseCode);
-        $this->responseCodeSent = true;
+        echo $this->content;
+    }
+
+    public function addHeader(string $name, string $content)
+    {
+        $this->headers[$name] = $content;
+    }
+
+    public function addHeaders(array $headers)
+    {
+        foreach ($headers as $name => $content) {
+            $this->headers[$name] = $content;
+        }
     }
 
     /**
-     * @param string $name
      * @param string $content
      */
-    public function sendHeader($name, $content)
+    public function setContent(string $content)
     {
-        header("$name:$content");
-    }
-
-    /**
-     * Redirect user to specified URL. Throws an HTTP "303 See Other" header
-     * instead of the default 301. This indicates, more precisely, that the
-     * response if elsewhere.
-     *
-     * @param string $url
-     */
-    public function redirect($url)
-    {
-        $this->sendResponseCode(303);
-        $this->sendHeader('Location', $url);
-        flush();
+        $this->content = $content;
     }
 
     /**
      * @param string $contentType
+     */
+    public function setContentType(string $contentType)
+    {
+        $this->contentType = $contentType;
+    }
+
+    /**
      * @param string $charset
      */
-    public function sendContentType($contentType = ContentType::HTML, $charset = 'UTF-8')
+    public function setCharset(string $charset)
     {
-        if ($this->responseContentTypeSent) {
-            throw new \RuntimeException("HTTP Content-Type header already sent");
-        }
-        header('Content-Type: ' . $contentType . ';charset=' . $charset);
-        $this->responseContentTypeSent = true;
-    }
-
-    /**
-     * @param int $httpStatusCode
-     * @throws NetworkException
-     */
-    public function abort(int $httpStatusCode)
-    {
-        throw new NetworkException($httpStatusCode);
-    }
-
-    /**
-     * @throws NetworkException
-     */
-    public function abortNotFound()
-    {
-        throw new NetworkException(404);
-    }
-
-    /**
-     * @throws NetworkException
-     */
-    public function abortInternalError()
-    {
-        throw new NetworkException(500);
-    }
-
-    /**
-     * @throws NetworkException
-     */
-    public function abortForbidden()
-    {
-        throw new NetworkException(403);
-    }
-
-    /**
-     * @throws NetworkException
-     */
-    public function abortMethodNotAllowed()
-    {
-        throw new NetworkException(405);
-    }
-
-    /**
-     * @throws NetworkException
-     */
-    public function abortNotAcceptable()
-    {
-        throw new NetworkException(406);
+        $this->charset = $charset;
     }
 }
