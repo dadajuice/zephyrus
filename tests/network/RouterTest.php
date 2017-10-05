@@ -6,6 +6,7 @@ use Zephyrus\Exceptions\RouteNotAcceptedException;
 use Zephyrus\Exceptions\RouteNotFoundException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
+use Zephyrus\Network\Response;
 use Zephyrus\Network\Router;
 
 class RouterTest extends TestCase
@@ -23,6 +24,21 @@ class RouterTest extends TestCase
             throw new \Exception('success', 501);
         });
         $router->run($req);
+    }
+
+    public function testSimpleGetResponse()
+    {
+        $req = new Request('http://test.local/', 'GET');
+        $router = new Router();
+        $router->get('/', function() {
+            $response = new Response();
+            $response->setContent('test');
+            return $response;
+        });
+        ob_start();
+        $router->run($req);
+        $output = ob_get_clean();
+        $this->assertEquals('test', $output);
     }
 
     /**
