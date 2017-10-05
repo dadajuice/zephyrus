@@ -5,6 +5,7 @@ use Zephyrus\Exceptions\RouteMethodUnsupportedException;
 use Zephyrus\Exceptions\RouteNotAcceptedException;
 use Zephyrus\Exceptions\RouteNotFoundException;
 use Zephyrus\Network\Request;
+use Zephyrus\Network\Response;
 
 abstract class RouterEngine
 {
@@ -181,8 +182,11 @@ abstract class RouterEngine
         $this->beforeCallback($route);
         $callback = new Callback($route['callback']);
         $arguments = $this->getFunctionArguments($callback->getReflection(), $values);
-        $callback->executeArray($arguments);
+        $response = $callback->executeArray($arguments);
         $this->afterCallback($route);
+        if ($response instanceof Response) {
+            $response->send();
+        }
     }
 
     /**
