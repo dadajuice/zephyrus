@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Network;
 
+use Zephyrus\Application\Form;
 use Zephyrus\Application\ViewBuilder;
 
 class ResponseFactory
@@ -19,6 +20,10 @@ class ResponseFactory
 
     public function buildView($page, $args = []): Response
     {
+        $response = $this->tryToBuildPhpView($page, $args);
+        if (!is_null($response)) {
+            return $response;
+        }
         $response = new Response(ContentType::HTML);
         $view = ViewBuilder::getInstance()->build($page);
         $response->setContent($view->render($args));
@@ -91,5 +96,22 @@ class ResponseFactory
             }
             $xml->addChild("$key", htmlspecialchars("$value"));
         }
+    }
+
+    private function tryToBuildPhpView($page, $args = []): ?Response
+    {
+        $response = new Response(ContentType::HTML);
+        $path = ROOT_DIR . '/app/Views/' . $page . '.php';
+        if (file_exists($path) && is_readable($path)) {
+            ob_start();
+            foreach ($args as $name => $value) {
+                $$name = $value;
+            }
+            include $path;
+            $response->setContent(ob_get_clean());
+            Form::removeMemorizedValue();
+            return $response;
+        }
+        return null;
     }
 }
