@@ -54,7 +54,6 @@ class ResponseFactory
         echo "data: " . json_encode($data) . PHP_EOL;
         echo PHP_EOL;
         $response->setContent(ob_get_clean());
-        flush();
         return $response;
     }
 
@@ -62,7 +61,6 @@ class ResponseFactory
     {
         $response = new Response(ContentType::PLAIN, 303);
         $response->addHeader('Location', $url);
-        flush();
         return $response;
     }
 
