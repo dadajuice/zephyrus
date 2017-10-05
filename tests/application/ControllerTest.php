@@ -5,6 +5,7 @@ use Zephyrus\Application\Controller;
 use Zephyrus\Application\Session;
 use Zephyrus\Application\SessionStorage;
 use Zephyrus\Network\Request;
+use Zephyrus\Network\Response;
 use Zephyrus\Network\Router;
 
 class ControllerTest extends TestCase
@@ -43,13 +44,13 @@ class ControllerTest extends TestCase
             {
             }
 
-            public function index()
+            public function index(): Response
             {
-                parent::render('test', ['item' => ['name' => 'Bob Lewis', 'price' => 12.30]]);
+                return parent::render('test', ['item' => ['name' => 'Bob Lewis', 'price' => 12.30]]);
             }
         };
         ob_start();
-        $controller->index();
+        $controller->index()->send();
         $output = ob_get_clean();
         self::assertEquals('<p>Example Bob Lewis</p>', $output);
     }
@@ -183,11 +184,11 @@ class ControllerTest extends TestCase
 
             public function index()
             {
-                parent::json(['test' => ['a' => 2, 'b' => 'bob']]);
+                return parent::json(['test' => ['a' => 2, 'b' => 'bob']]);
             }
         };
         ob_start();
-        $controller->index();
+        $controller->index()->send();
         $output = ob_get_clean();
         self::assertEquals('{"test":{"a":2,"b":"bob"}}', $output);
     }
@@ -203,11 +204,11 @@ class ControllerTest extends TestCase
 
             public function index()
             {
-                parent::xml(['test' => ['a' => '2', 'b' => 'bob', 3 => 't']], 'root');
+                return parent::xml(['test' => ['a' => '2', 'b' => 'bob', 3 => 't']], 'root');
             }
         };
         ob_start();
-        $controller->index();
+        $controller->index()->send();
         $output = ob_get_clean();
         self::assertTrue(strpos($output, '<root><test><a>2</a><b>bob</b><node3>t</node3></test></root>') !== false);
     }
@@ -226,7 +227,7 @@ class ControllerTest extends TestCase
 
             public function index()
             {
-                parent::xml("sfdg");
+                return parent::xml("sfdg");
             }
         };
         $controller->index();
@@ -245,11 +246,11 @@ class ControllerTest extends TestCase
             {
                 $xmlstr = "<?xml version='1.0' ?><movies><movie><title>The Dark Knight</title><year>2008</year></movie></movies>";
                 $movies = new \SimpleXMLElement($xmlstr);
-                parent::xml($movies);
+                return parent::xml($movies);
             }
         };
         ob_start();
-        $controller->index();
+        $controller->index()->send();
         $output = ob_get_clean();
         self::assertTrue(strpos($output, '<movies><movie><title>The Dark Knight</title><year>2008</year></movie></movies>') !== false);
     }
@@ -265,11 +266,11 @@ class ControllerTest extends TestCase
 
             public function index()
             {
-                parent::html("<html>test</html>");
+                return parent::html("<html>test</html>");
             }
         };
         ob_start();
-        $controller->index();
+        $controller->index()->send();
         $output = ob_get_clean();
         self::assertEquals('<html>test</html>', $output);
     }
@@ -285,12 +286,139 @@ class ControllerTest extends TestCase
 
             public function index()
             {
-                parent::sse("test");
+                return parent::sse("test");
             }
         };
         ob_start();
-        $controller->index();
+        $controller->index()->send();
         $output = ob_get_clean();
         self::assertTrue(strpos($output, 'data: "test"') !== false);
+    }
+
+    public function testRedirect()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                return parent::redirect('/test');
+            }
+        };
+        $controller->index()->send();
+        $headers = xdebug_get_headers();
+        self::assertTrue(in_array('Location:/test', $headers));
+    }
+
+    public function testAbortNotFound()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                return parent::abortNotFound();
+            }
+        };
+        $controller->index()->send();
+        self::assertEquals(404, http_response_code());
+    }
+
+    public function testInternalError()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                return parent::abortInternalError();
+            }
+        };
+        $controller->index()->send();
+        self::assertEquals(500, http_response_code());
+    }
+
+    public function testForbidden()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                return parent::abortForbidden();
+            }
+        };
+        $controller->index()->send();
+        self::assertEquals(403, http_response_code());
+    }
+
+    public function testMethodNotAllowed()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                return parent::abortMethodNotAllowed();
+            }
+        };
+        $controller->index()->send();
+        self::assertEquals(405, http_response_code());
+    }
+
+    public function testNotAcceptable()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                return parent::abortNotAcceptable();
+            }
+        };
+        $controller->index()->send();
+        self::assertEquals(406, http_response_code());
+    }
+
+    public function testAbort()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                return parent::abort(600);
+            }
+        };
+        $controller->index()->send();
+        self::assertEquals(600, http_response_code());
     }
 }
