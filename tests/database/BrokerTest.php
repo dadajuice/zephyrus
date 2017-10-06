@@ -27,7 +27,7 @@ class BrokerTest extends TestCase
         $class = new class(self::$database) extends Broker {
             public function findAll()
             {
-                return $this->selectAll("SELECT * FROM heroes");
+                return $this->select("SELECT * FROM heroes");
             }
         };
         $req = new Request('http://test.local/3', 'GET', ['id' => '3']);
@@ -72,7 +72,7 @@ class BrokerTest extends TestCase
         $class = new class(self::$database) extends Broker {
             public function findById($id)
             {
-                return $this->selectUnique("SELECT * FROM heroes WHERE id = ?", [$id]);
+                return $this->selectSingle("SELECT * FROM heroes WHERE id = ?", [$id]);
             }
         };
         $row = $class->findById(2);
@@ -84,7 +84,7 @@ class BrokerTest extends TestCase
         $class = new class(self::$database) extends Broker {
             public function findById($id)
             {
-                return $this->selectUnique("SELECT * FROM heroes WHERE id = ?", [$id], "<b>");
+                return $this->selectSingle("SELECT * FROM heroes WHERE id = ?", [$id], "<b>");
             }
         };
         $row = $class->findById(3);
@@ -96,7 +96,7 @@ class BrokerTest extends TestCase
         $class = new class(self::$database) extends Broker {
             public function findAll()
             {
-                return $this->selectAll("SELECT * FROM heroes");
+                return $this->select("SELECT * FROM heroes");
             }
         };
         $row = $class->findAll();
@@ -108,7 +108,7 @@ class BrokerTest extends TestCase
         $class = new class(self::$database) extends Broker {
             public function findAll()
             {
-                return $this->selectAll("SELECT * FROM heroes", [], "<b>");
+                return $this->select("SELECT * FROM heroes", [], "<b>");
             }
         };
         $row = $class->findAll();
@@ -127,7 +127,7 @@ class BrokerTest extends TestCase
 
             public function findAll()
             {
-                return $this->selectAll("SELECT * FROM heroes");
+                return $this->select("SELECT * FROM heroes");
             }
         };
         $class->insert();

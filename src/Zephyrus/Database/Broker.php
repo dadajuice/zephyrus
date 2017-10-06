@@ -95,7 +95,7 @@ abstract class Broker
      * @throws DatabaseException
      * @return array | false
      */
-    protected function selectUnique($query, $parameters = [], $allowedTags = "")
+    protected function selectSingle($query, $parameters = [], $allowedTags = "")
     {
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($allowedTags);
@@ -111,7 +111,7 @@ abstract class Broker
      * @param string $allowedTags
      * @return array
      */
-    protected function selectAll($query, $parameters = [], $allowedTags = "")
+    protected function select($query, $parameters = [], $allowedTags = "")
     {
         if (!is_null($this->pager)) {
             $query .= $this->pager->getSqlLimit();

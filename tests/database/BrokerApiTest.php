@@ -27,7 +27,7 @@ class BrokerApiTest extends TestCase
         $class = new class(self::$database) extends BrokerApi {
             public function findById($id)
             {
-                return $this->selectUnique("SELECT * FROM heroes WHERE id = ?", [$id]);
+                return $this->selectSingle("SELECT * FROM heroes WHERE id = ?", [$id]);
             }
         };
         $result = $class->findById(2);
@@ -39,7 +39,7 @@ class BrokerApiTest extends TestCase
         $class = new class(self::$database) extends BrokerApi {
             public function findAll()
             {
-                return $this->selectAll("SELECT * FROM heroes");
+                return $this->select("SELECT * FROM heroes");
             }
         };
         $results = $class->findAll();
