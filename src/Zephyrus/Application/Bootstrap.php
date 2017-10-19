@@ -14,11 +14,11 @@ class Bootstrap
 
     public static function initializeRoutableControllers(Router $router)
     {
-        $classLocator = new ClassLocator("Controllers");
-        $controllers = $classLocator->getClasses();
-        foreach ($controllers as $controller) {
-            $reflection = new \ReflectionClass($controller);
-            if ($reflection->implementsInterface('Zephyrus\Network\Routable') && !$reflection->isAbstract()) {
+        foreach (recursiveGlob(ROOT_DIR . '/app/Controllers/*.php') as $file) {
+            $reflection = self::fileToReflectionClass($file);
+            if (!is_null($reflection)
+                && $reflection->implementsInterface('Zephyrus\Network\Routable')
+                && !$reflection->isAbstract()) {
                 $controllerInstance = $reflection->newInstance($router);
                 $controllerInstance->initializeRoutes();
             }
@@ -54,5 +54,17 @@ class Bootstrap
         setlocale(LC_MESSAGES, $locale);
         setlocale(LC_TIME, $locale);
         setlocale(LC_CTYPE, $locale);
+    }
+
+    private static function fileToReflectionClass(string $file): ?\ReflectionClass
+    {
+        $appPosition = strpos($file, '/app/');
+        if ($appPosition !== false) {
+            $file = substr($file,$appPosition + 5);
+            $file = str_replace(DIRECTORY_SEPARATOR, '\\', $file);
+            $file = str_replace('.php', '', $file);
+            return new \ReflectionClass($file);
+        }
+        return null;
     }
 }
