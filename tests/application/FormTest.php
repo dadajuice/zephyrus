@@ -14,7 +14,7 @@ class FormTest extends TestCase
         $form->addFields([
             'username' => 'blewis'
         ]);
-        $form->rule('username', RuleFactory::notEmpty('username not empty'));
+        $form->rule('username', Rule::notEmpty('username not empty'));
         self::assertTrue($form->verify());
     }
 
@@ -24,7 +24,7 @@ class FormTest extends TestCase
         $form->addFields([
             'username' => ''
         ]);
-        $form->rule('username', RuleFactory::notEmpty('username not empty'));
+        $form->rule('username', Rule::notEmpty('username not empty'));
         $form->addError('name', 'err-1');
         self::assertFalse($form->verify());
         self::assertTrue(key_exists('username', $form->getErrors()));
@@ -68,7 +68,7 @@ class FormTest extends TestCase
         $form->addFields([
             'username' => ''
         ]);
-        $form->rule('username', RuleFactory::notEmpty('username not empty'));
+        $form->rule('username', Rule::notEmpty('username not empty'));
         self::assertFalse($form->verify());
         self::assertEquals('username not empty', $form->getErrorMessages()[0]);
     }
