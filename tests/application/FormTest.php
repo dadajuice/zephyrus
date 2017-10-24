@@ -2,32 +2,113 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Form;
+use Zephyrus\Application\Rule;
+use Zephyrus\Application\RuleFactory;
 use Zephyrus\Utilities\Validator;
 
 class FormTest extends TestCase
 {
+    public function testValidForm()
+    {
+        $form = new Form();
+        $form->addFields([
+            'username' => 'blewis'
+        ]);
+        $form->rule('username', RuleFactory::notEmpty('username not empty'));
+        self::assertTrue($form->verify());
+    }
+
     public function testErrors()
     {
         $form = new Form();
+        $form->addFields([
+            'username' => ''
+        ]);
+        $form->rule('username', RuleFactory::notEmpty('username not empty'));
+        $form->addError('name', 'err-1');
+        self::assertFalse($form->verify());
+        self::assertTrue(key_exists('username', $form->getErrors()));
+        self::assertTrue(key_exists('name', $form->getErrors()));
+        self::assertEquals('username not empty', $form->getErrors()['username'][0]);
+        self::assertEquals('err-1', $form->getErrors()['name'][0]);
+    }
+
+    public function testErrorTrigger()
+    {
+        $form = new Form();
         $form->addField('name', '');
+        $form->addField('name2', 'bob*');
         $form->addField('price', '12.50e');
-        $form->addRule('name', Validator::NOT_EMPTY, 'err_1');
-        $form->addRule('name', Validator::ALPHANUMERIC, 'err_2', Form::TRIGGER_FIELD_NO_ERROR);
-        $form->addRule('price', Validator::NOT_EMPTY, 'err_3');
-        $form->addRule('price', Validator::DECIMAL, 'err_4');
+        $form->rule('name', new Rule(Validator::NOT_EMPTY, 'err_1'));
+        $form->ruleIfSafeField('name', new Rule(Validator::ALPHANUMERIC, 'err_2'));
+        $form->rule('name2', new Rule(Validator::NOT_EMPTY, 'err_11'));
+        $form->ruleIfSafeField('name2', new Rule(Validator::ALPHANUMERIC, 'err_22'));
+        $form->rule('price', new Rule(Validator::NOT_EMPTY, 'err_3'));
+        $form->ruleIfNoError('price', new Rule(Validator::DECIMAL, 'err_4'));
         $form->verify();
         $errors = $form->getErrorMessages();
         self::assertEquals('err_1', $errors[0]);
-        self::assertEquals('err_4', $errors[1]);
+        self::assertEquals('err_22', $errors[1]);
     }
 
-    public function testAddFields()
+    public function testReadValues()
     {
         $form = new Form();
-        $form->addFields(['name' => 'bob', 'price' => '10.00']);
-        self::assertEquals('bob', $form->getValue('name'));
-        $fields = $form->getFields();
-        self::assertEquals('bob', $fields['name']);
+        $form->addFields([
+            'username' => 'blewis',
+            'firstname' => 'bob'
+        ]);
+        self::assertEquals('blewis', $form->getValue('username'));
+        self::assertEquals('bob', $form->getFields()['firstname']);
+    }
+
+    public function testInvalidForm()
+    {
+        $form = new Form();
+        $form->addFields([
+            'username' => ''
+        ]);
+        $form->rule('username', RuleFactory::notEmpty('username not empty'));
+        self::assertFalse($form->verify());
+        self::assertEquals('username not empty', $form->getErrorMessages()[0]);
+    }
+
+    public function testInvalidCallbackForm()
+    {
+        $form = new Form();
+        $form->addFields([
+            'username' => 'blewis'
+        ]);
+        $form->rule('username', new Rule(function ($value) {
+            return $value == 'bob';
+        }, 'username not valid'));
+        self::assertFalse($form->verify());
+        self::assertEquals('username not valid', $form->getErrorMessages()[0]);
+    }
+
+    public function testConfirmationCallbackForm()
+    {
+        $form = new Form();
+        $form->addFields([
+            'password' => 'omega123',
+            'password-confirm' => 'omega'
+        ]);
+        $form->rule('password', new Rule(function ($value, $fields) {
+            return $value == $fields['password-confirm'];
+        }, 'password not valid'));
+        self::assertFalse($form->verify());
+        self::assertEquals('password not valid', $form->getErrorMessages()[0]);
+    }
+
+    public function testMemorization()
+    {
+        Form::removeMemorizedValue();
+        $form = new Form();
+        $form->addField('name', 'bob');
+        $form->rule('name', new Rule(Validator::NOT_EMPTY, 'err_1'));
+        $form->verify();
+        self::assertEquals('bob', Form::readMemorizedValue('name'));
+        self::assertEquals('lewis', Form::readMemorizedValue('gfdfg', 'lewis'));
     }
 
     public function testRemoveAllMemorized()
@@ -73,64 +154,6 @@ class FormTest extends TestCase
         self::assertEquals('10.00', $class->getPrice());
     }
 
-    public function testAddErrors()
-    {
-        $form = new Form();
-        $form->addError('name', 'err_1');
-        $errors = $form->getErrors();
-        self::assertEquals('err_1', $errors['name'][0]);
-    }
-
-    public function testMemorization()
-    {
-        $form = new Form();
-        $form->addField('name', 'bob');
-        $form->addRule('name', Validator::NOT_EMPTY, 'err_1');
-        $form->verify();
-        self::assertEquals('bob', Form::readMemorizedValue('name'));
-        self::assertEquals('lewis', Form::readMemorizedValue('gfdfg', 'lewis'));
-    }
-
-
-    public function testErrorTrigger()
-    {
-        $form = new Form();
-        $form->addField('name', 'bob');
-        $form->addField('price', '12.50e');
-        $form->addRule('name', Validator::NOT_EMPTY, 'err_1');
-        $form->addRule('name', Validator::ALPHANUMERIC, 'err_2', Form::TRIGGER_FIELD_NO_ERROR);
-        $form->addRule('price', Validator::NOT_EMPTY, 'err_3');
-        $form->addRule('price', Validator::DECIMAL, 'err_4', Form::TRIGGER_NO_ERROR);
-        $form->verify();
-        $errors = $form->getErrorMessages();
-        self::assertEquals('err_4', $errors[0]);
-    }
-
-    public function testValidationFunction()
-    {
-        $form = new Form();
-        $form->addField('name', 'bob');
-        $form->addField('price', '8.00');
-        $form->addRule('price', function($value) {
-            return $value > 10;
-        }, 'err_1');
-        $form->verify();
-        $errors = $form->getErrorMessages();
-        self::assertEquals('err_1', $errors[0]);
-    }
-
-    public function testValidationCallback()
-    {
-        $form = new Form();
-        $form->addField('name', 'bob');
-        $form->addField('price', '12.00');
-        $form->addRule('price', function($value, $data) {
-            return $value > 10 && $data['name'] == 'bob';
-        }, 'err_1');
-        $result = $form->verify();
-        self::assertTrue($result);
-    }
-
     /**
      * @expectedException \InvalidArgumentException
      */
@@ -138,6 +161,6 @@ class FormTest extends TestCase
     {
         $form = new Form();
         $form->addField('name', '');
-        $form->addRule('bob', Validator::ALPHANUMERIC, "err_1");
+        $form->rule('bob', new Rule(Validator::ALPHANUMERIC, "err_1"));
     }
 }
