@@ -3,7 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Form;
 use Zephyrus\Application\Rule;
-use Zephyrus\Application\RuleFactory;
 use Zephyrus\Utilities\Validator;
 
 class FormTest extends TestCase
