@@ -94,43 +94,6 @@ class Form
         return empty($this->errors);
     }
 
-    private function verifyAllRules(string $field, array $validations)
-    {
-        foreach ($validations as $validation) {
-            if ($validation->trigger > self::TRIGGER_ALWAYS) {
-                if ($validation->trigger == self::TRIGGER_NO_ERROR) {
-                    if (!empty($this->errors)) {
-                        continue;
-                    }
-                } elseif ($validation->trigger == self::TRIGGER_FIELD_NO_ERROR) {
-                    if (isset($this->errors[$field])) {
-                        continue;
-                    }
-                }
-            }
-
-            $result = $validation->rule->isValid($this->fields[$field], $this->fields);
-            if (!$result) {
-                $this->errors[$field][] = $validation->rule->getErrorMessage();
-                self::removeMemorizedValue($field);
-            }
-        }
-    }
-
-    private function addRule(string $field, Rule $rule, int $trigger)
-    {
-        if (!array_key_exists($field, $this->fields)) {
-            throw new \InvalidArgumentException("Specified field [$field] has not been registered in this form");
-        }
-        $validation = new \stdClass();
-        $validation->rule = $rule;
-        $validation->trigger = $trigger;
-        $this->rules[$field][] = $validation;
-    }
-
-    /**
-     * @param string[] $parameters
-     */
     public function addFields(array $parameters)
     {
         foreach ($parameters as $parameterName => $value) {
@@ -138,37 +101,31 @@ class Form
         }
     }
 
-    /**
-     * @param string $parameterName
-     * @param mixed $value
-     */
-    public function addField($parameterName, $value)
+    public function addField(string $parameterName, $value)
     {
         $this->fields[$parameterName] = $value;
         self::memorizeValue($parameterName, $value);
     }
 
-    /**
-     * @param string $field
-     * @param string $message
-     */
-    public function addError($field, $message)
+    public function addError(string $field, string $message)
     {
         $this->errors[$field][] = $message;
     }
 
-    /**
-     * @return array
-     */
-    public function getErrors()
+    public function hasError(?string $field = null): bool
+    {
+        if (is_null($field)) {
+            return !empty($this->errors);
+        }
+        return isset($this->errors[$field]);
+    }
+
+    public function getErrors(): array
     {
         return $this->errors;
     }
 
-    /**
-     * @return string[]
-     */
-    public function getErrorMessages()
+    public function getErrorMessages(): array
     {
         $results = [];
         foreach ($this->errors as $errors) {
@@ -179,12 +136,12 @@ class Form
         return $results;
     }
 
-    public function getValue($field)
+    public function getValue(string $field)
     {
         return $this->fields[$field];
     }
 
-    public function getFields()
+    public function getFields(): array
     {
         return $this->fields;
     }
@@ -203,5 +160,37 @@ class Form
                 $obj->{$method}($value);
             }
         }
+    }
+
+    private function verifyAllRules(string $field, array $validations)
+    {
+        foreach ($validations as $validation) {
+            if ($this->isValidationTriggered($field, $validation)) {
+                $result = $validation->rule->isValid($this->fields[$field], $this->fields);
+                if (!$result) {
+                    $this->errors[$field][] = $validation->rule->getErrorMessage();
+                    self::removeMemorizedValue($field);
+                }
+            }
+        }
+    }
+
+    private function isValidationTriggered(string $field, $validation): bool
+    {
+        if ($validation->trigger > self::TRIGGER_ALWAYS) {
+            return !$this->hasError(($validation->trigger == self::TRIGGER_FIELD_NO_ERROR) ? $field : null);
+        }
+        return true;
+    }
+
+    private function addRule(string $field, Rule $rule, int $trigger)
+    {
+        if (!array_key_exists($field, $this->fields)) {
+            throw new \InvalidArgumentException("Specified field [$field] has not been registered in this form");
+        }
+        $validation = new \stdClass();
+        $validation->rule = $rule;
+        $validation->trigger = $trigger;
+        $this->rules[$field][] = $validation;
     }
 }
