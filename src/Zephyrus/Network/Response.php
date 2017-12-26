@@ -41,6 +41,11 @@ class Response
         foreach ($this->headers as $name => $content) {
             header("$name:$content");
         }
+        $this->sendContent();
+    }
+
+    public function sendContent()
+    {
         echo $this->content;
     }
 
