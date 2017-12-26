@@ -3,6 +3,7 @@
 use Expose\FilterCollection;
 use Expose\Manager;
 use Expose\Report;
+use Psr\Log\LoggerInterface;
 use Zephyrus\Application\Configuration;
 use Zephyrus\Utilities\SystemLog;
 
@@ -12,11 +13,6 @@ class IntrusionDetection
     const GET = 2;
     const POST = 4;
     const COOKIE = 8;
-
-    /**
-     * @var IntrusionDetection
-     */
-    private static $instance = null;
 
     /**
      * @var Manager
@@ -34,17 +30,20 @@ class IntrusionDetection
     private $detectionCallback = null;
 
     /**
-     * Obtain the single allowed instance for IntrusionDetection through
-     * singleton pattern method.
-     *
-     * @return IntrusionDetection
+     * Constructor which initiates the configuration of the PHPIDS framework
+     * and prepare the monitor component.
      */
-    public static function getInstance()
+    public function __construct(LoggerInterface $logger)
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
+        $config = Configuration::getSecurityConfiguration();
+        $filters = new FilterCollection();
+        $filters->load();
+
+        $this->manager = new Manager($filters, $logger);
+        if (isset($config['ids_exceptions'])) {
+            $this->manager->setException($config['ids_exceptions']);
         }
-        return self::$instance;
+        $this->surveillance = self::GET | self::POST;
     }
 
     /**
@@ -130,22 +129,6 @@ class IntrusionDetection
     public function isMonitoringCookie(): bool
     {
         return ($this->surveillance & self::COOKIE) > 0;
-    }
-
-    /**
-     * Private constructor which initiates the configuration of the PHPIDS
-     * framework and prepare the monitor component.
-     */
-    private function __construct()
-    {
-        $config = Configuration::getSecurityConfiguration();
-        $filters = new FilterCollection();
-        $filters->load();
-        $this->manager = new Manager($filters, SystemLog::getSecurityLogger());
-        if (isset($config['ids_exceptions'])) {
-            $this->manager->setException($config['ids_exceptions']);
-        }
-        $this->surveillance = self::GET | self::POST;
     }
 
     /**
