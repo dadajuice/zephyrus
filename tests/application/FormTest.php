@@ -13,7 +13,7 @@ class FormTest extends TestCase
         $form->addFields([
             'username' => 'blewis'
         ]);
-        $form->rule('username', Rule::notEmpty('username not empty'));
+        $form->validate('username', Rule::notEmpty('username not empty'));
         self::assertTrue($form->verify());
     }
 
@@ -23,7 +23,7 @@ class FormTest extends TestCase
         $form->addFields([
             'username' => ''
         ]);
-        $form->rule('username', Rule::notEmpty('username not empty'));
+        $form->validate('username', Rule::notEmpty('username not empty'));
         $form->addError('name', 'err-1');
         self::assertFalse($form->verify());
         self::assertTrue(key_exists('username', $form->getErrors()));
@@ -38,12 +38,12 @@ class FormTest extends TestCase
         $form->addField('name', '');
         $form->addField('name2', 'bob*');
         $form->addField('price', '12.50e');
-        $form->rule('name', new Rule(Validator::NOT_EMPTY, 'err_1'));
-        $form->ruleIfSafeField('name', new Rule(Validator::ALPHANUMERIC, 'err_2'));
-        $form->rule('name2', new Rule(Validator::NOT_EMPTY, 'err_11'));
-        $form->ruleIfSafeField('name2', new Rule(Validator::ALPHANUMERIC, 'err_22'));
-        $form->rule('price', new Rule(Validator::NOT_EMPTY, 'err_3'));
-        $form->ruleIfNoError('price', new Rule(Validator::DECIMAL, 'err_4'));
+        $form->validate('name', new Rule(Validator::NOT_EMPTY, 'err_1'));
+        $form->validateWhenFieldHasNoError('name', new Rule(Validator::ALPHANUMERIC, 'err_2'));
+        $form->validate('name2', new Rule(Validator::NOT_EMPTY, 'err_11'));
+        $form->validateWhenFieldHasNoError('name2', new Rule(Validator::ALPHANUMERIC, 'err_22'));
+        $form->validate('price', new Rule(Validator::NOT_EMPTY, 'err_3'));
+        $form->validateWhenFormHasNoError('price', new Rule(Validator::DECIMAL, 'err_4'));
         $form->verify();
         $errors = $form->getErrorMessages();
         self::assertEquals('err_1', $errors[0]);
@@ -67,7 +67,7 @@ class FormTest extends TestCase
         $form->addFields([
             'username' => ''
         ]);
-        $form->rule('username', Rule::notEmpty('username not empty'));
+        $form->validate('username', Rule::notEmpty('username not empty'));
         self::assertFalse($form->verify());
         self::assertEquals('username not empty', $form->getErrorMessages()[0]);
     }
@@ -78,7 +78,7 @@ class FormTest extends TestCase
         $form->addFields([
             'username' => 'blewis'
         ]);
-        $form->rule('username', new Rule(function ($value) {
+        $form->validate('username', new Rule(function ($value) {
             return $value == 'bob';
         }, 'username not valid'));
         self::assertFalse($form->verify());
@@ -92,7 +92,7 @@ class FormTest extends TestCase
             'password' => 'omega123',
             'password-confirm' => 'omega'
         ]);
-        $form->rule('password', new Rule(function ($value, $fields) {
+        $form->validate('password', new Rule(function ($value, $fields) {
             return $value == $fields['password-confirm'];
         }, 'password not valid'));
         self::assertFalse($form->verify());
@@ -104,7 +104,7 @@ class FormTest extends TestCase
         Form::removeMemorizedValue();
         $form = new Form();
         $form->addField('name', 'bob');
-        $form->rule('name', new Rule(Validator::NOT_EMPTY, 'err_1'));
+        $form->validate('name', new Rule(Validator::NOT_EMPTY, 'err_1'));
         $form->verify();
         self::assertEquals('bob', Form::readMemorizedValue('name'));
         self::assertEquals('lewis', Form::readMemorizedValue('gfdfg', 'lewis'));
@@ -160,6 +160,6 @@ class FormTest extends TestCase
     {
         $form = new Form();
         $form->addField('name', '');
-        $form->rule('bob', new Rule(Validator::ALPHANUMERIC, "err_1"));
+        $form->validate('bob', new Rule(Validator::ALPHANUMERIC, "err_1"));
     }
 }

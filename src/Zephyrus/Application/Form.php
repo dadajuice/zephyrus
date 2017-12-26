@@ -68,17 +68,17 @@ class Form
         }
     }
 
-    public function rule(string $field, Rule $rule)
+    public function validate(string $field, Rule $rule)
     {
         $this->addRule($field, $rule, self::TRIGGER_ALWAYS);
     }
 
-    public function ruleIfSafeField(string $field, Rule $rule)
+    public function validateWhenFieldHasNoError(string $field, Rule $rule)
     {
         $this->addRule($field, $rule, self::TRIGGER_FIELD_NO_ERROR);
     }
 
-    public function ruleIfNoError(string $field, Rule $rule)
+    public function validateWhenFormHasNoError(string $field, Rule $rule)
     {
         $this->addRule($field, $rule, self::TRIGGER_NO_ERROR);
     }
