@@ -111,16 +111,31 @@ abstract class Controller implements Routable
     }
 
     /**
-     * Does a server-sent event response.
+     * Does a simple server-sent event response which will do a simple polling.
      *
      * @param mixed $data
-     * @param int $eventId
+     * @param string $eventName
      * @param int $retry
      * @return Response
      */
-    protected function sse($data, $eventId = 0, $retry = 1000): Response
+    protected function ssePolling($data, $eventName = 'stream', $retry = 1000): Response
     {
-        return ResponseFactory::getInstance()->buildSse($data, $eventId, $retry);
+        return ResponseFactory::getInstance()->buildPollingSse($data, $eventName, $retry);
+    }
+
+    /**
+     * Does a streaming server-sent event response which will loop and execute
+     * the specified callback indefinitely and update the client only when
+     * needed.
+     *
+     * @param $callback
+     * @param string $eventName
+     * @param int $retry
+     * @return Response
+     */
+    protected function sseStreaming($callback, $eventName = 'stream', $sleep = 1): Response
+    {
+        return ResponseFactory::getInstance()->buildStreamingSse($callback, $eventName, $sleep);
     }
 
     /**
