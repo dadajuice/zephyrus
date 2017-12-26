@@ -295,7 +295,7 @@ class ControllerTest extends TestCase
         self::assertEquals('<html>test</html>', $output);
     }
 
-    public function testSse()
+    public function testPollingSse()
     {
         $router = new Router();
         $controller = new class($router) extends Controller {
@@ -306,7 +306,7 @@ class ControllerTest extends TestCase
 
             public function index()
             {
-                return parent::sse("test");
+                return parent::ssePolling("test");
             }
         };
         ob_start();
@@ -314,6 +314,31 @@ class ControllerTest extends TestCase
         $output = ob_get_clean();
         self::assertTrue(strpos($output, 'data: "test"') !== false);
     }
+
+    // Needs to find a way to execute and cut response after one loop tick
+    /*public function testStreamingSse()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                return parent::sseStreaming(function () {
+                    return "works";
+                }, "test");
+            }
+        };
+        ob_start();
+        $controller->index()->send();
+
+        $output = ob_get_clean();
+        var_dump($output);
+        //self::assertTrue(strpos($output, 'data: "test"') !== false);
+    }*/
 
     public function testRedirect()
     {
