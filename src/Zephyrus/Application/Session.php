@@ -18,7 +18,7 @@ class Session
      *
      * @return Session
      */
-    public static function getInstance(): Session
+    public static function getInstance(): self
     {
         if (is_null(self::$instance)) {
             self::$instance = new self();
