@@ -7,12 +7,12 @@
 
 ---
 
-[![GitHub release](https://img.shields.io/github/release/dadajuice/zephyrus.svg)]()
+[![Maintainability](https://api.codeclimate.com/v1/badges/6981c700b82a43834672/maintainability)](https://codeclimate.com/github/dadajuice/zephyrus/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/6981c700b82a43834672/test_coverage)](https://codeclimate.com/github/dadajuice/zephyrus/test_coverage)
 [![Travis](https://img.shields.io/travis/dadajuice/zephyrus.svg)]()
-[![Code Climate](https://img.shields.io/codeclimate/github/dadajuice/zephyrus.svg)]()
-[![Code Climate](https://img.shields.io/codeclimate/coverage/github/dadajuice/zephyrus.svg)]()
 [![StyleCI](https://styleci.io/repos/77175312/shield?branch=master)](https://styleci.io/repos/77175312)
 [![GitHub issues](https://img.shields.io/github/issues/dadajuice/zephyrus.svg)]()
+[![GitHub release](https://img.shields.io/github/release/dadajuice/zephyrus.svg)]()
 [![license](https://img.shields.io/github/license/dadajuice/zephyrus.svg)]()
 
 # Fonctionnalités
