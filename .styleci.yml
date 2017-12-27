@@ -8,7 +8,7 @@ finder:
     - "vendor"
 
 disabled:
-  - blank_line_after_namespace
+  - blank_line_after_opening_tag
   - post_increment
   - blank_line_before_return
   - align_double_arrow
