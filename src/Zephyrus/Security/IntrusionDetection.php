@@ -5,7 +5,6 @@ use Expose\Manager;
 use Expose\Report;
 use Psr\Log\LoggerInterface;
 use Zephyrus\Application\Configuration;
-use Zephyrus\Utilities\SystemLog;
 
 class IntrusionDetection
 {
