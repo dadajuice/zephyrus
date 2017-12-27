@@ -52,7 +52,7 @@ class ControllerTest extends TestCase
         ob_start();
         $controller->index()->send();
         $output = ob_get_clean();
-        self::assertEquals('<p>Example Bob Lewis</p>', $output);
+        self::assertEquals('<p>Bob Lewis</p>', $output);
     }
 
     public function testRenderPhp()

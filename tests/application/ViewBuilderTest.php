@@ -7,16 +7,16 @@ class ViewBuilderTest extends TestCase
 {
     public function testViewRenderFromString()
     {
-        $view = ViewBuilder::getInstance()->buildFromString('p Example #{item.name}');
+        $view = ViewBuilder::getInstance()->buildFromString('p=item.name');
         $output = $view->render(['item' => ['name' => 'Bob Lewis', 'price' => 12.30]]);
-        self::assertEquals('<p>Example Bob Lewis</p>', $output);
+        self::assertEquals('<p>Bob Lewis</p>', $output);
     }
 
     public function testViewRenderFromFile()
     {
         $view = ViewBuilder::getInstance()->build('test');
         $output = $view->render(['item' => ['name' => 'Bob Lewis', 'price' => 12.30]]);
-        self::assertEquals('<p>Example Bob Lewis</p>', $output);
+        self::assertEquals('<p>Bob Lewis</p>', $output);
     }
 
     /**
@@ -31,14 +31,14 @@ class ViewBuilderTest extends TestCase
     {
         $view = ViewBuilder::getInstance()->buildFromString('p Example #{item.name} is #{format(\'money\', item.price)}');
         $output = $view->render(['item' => ['name' => 'Bob Lewis', 'price' => 12.30]]);
-        self::assertEquals('<p>Example Bob Lewis is 12,30 $</p>', $output);
+        self::assertEquals('<p>Example Bob Lewis is 12,30 $' . PHP_EOL . '</p>', $output);
     }
 
     public function testViewRenderWithMoneyFormatArgs()
     {
         $view = ViewBuilder::getInstance()->buildFromString('p Example #{item.name} is #{format(\'money\', item.price, 3)}');
         $output = $view->render(['item' => ['name' => 'Bob Lewis', 'price' => 12.30]]);
-        self::assertEquals('<p>Example Bob Lewis is 12,300 $</p>', $output);
+        self::assertEquals('<p>Example Bob Lewis is 12,300 $' . PHP_EOL . '</p>', $output);
     }
 
     public function testAddFunction()
@@ -49,20 +49,6 @@ class ViewBuilderTest extends TestCase
         });
         $view = ViewBuilder::getInstance()->buildFromString('p Example #{test(item.price)}');
         $output = $view->render(['item' => ['price' => 4]]);
-        self::assertEquals('<p>Example 8</p>', $output);
-    }
-
-    public function testAddKeyword()
-    {
-        $builder = ViewBuilder::getInstance();
-        $builder->addKeyword('batman', function () {
-            return [
-                'beginPhp' => 'echo "Batman"',
-                'endPhp' => ';',
-            ];
-        });
-        $view = ViewBuilder::getInstance()->buildFromString('batman');
-        $output = $view->render();
-        self::assertEquals('Batman', $output);
+        self::assertEquals('<p>Example 8' . PHP_EOL . '</p>', $output);
     }
 }

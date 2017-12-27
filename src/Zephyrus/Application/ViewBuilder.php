@@ -28,7 +28,7 @@ class ViewBuilder
 
     public function build(string $pageToRender): View
     {
-        $path = ROOT_DIR . '/app/Views/' . $pageToRender . $this->pug->getExtension();
+        $path = ROOT_DIR . '/app/Views/' . $pageToRender . '.pug';
         if (!file_exists($path) || !is_readable($path)) {
             throw new \Exception("The specified view file [$path] is not available (not readable or does not exists)");
         }
@@ -38,11 +38,6 @@ class ViewBuilder
     public function buildFromString(string $pugCode): View
     {
         return new View($this->pug, $pugCode);
-    }
-
-    public function addKeyword($keyword, $action)
-    {
-        $this->pug->addKeyword($keyword, $action);
     }
 
     public function addFunction($name, $action)
@@ -65,7 +60,6 @@ class ViewBuilder
     private function addPugHelpers()
     {
         $this->initializeDefaultFunctions();
-        $this->addCsrfKeyword();
         $this->pug->share(Flash::readAll());
     }
 
@@ -130,15 +124,5 @@ class ViewBuilder
             }
             return 'FORMAT TYPE [' . $type . '] NOT DEFINED !';
         };
-    }
-
-    private function addCsrfKeyword()
-    {
-        $this->pug->addKeyword('csrf', function () {
-            return [
-                'beginPhp' => 'echo Zephyrus\Security\CsrfGuard::getInstance()->generateHiddenFields()',
-                'endPhp' => ';',
-            ];
-        });
     }
 }
