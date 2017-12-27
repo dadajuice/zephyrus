@@ -16,52 +16,52 @@ class Rule
 
     public static function notEmpty(string $errorMessage = "")
     {
-        return new Rule(Validator::NOT_EMPTY, $errorMessage);
+        return new self(Validator::NOT_EMPTY, $errorMessage);
     }
 
     public static function passwordCompliant(string $errorMessage = "")
     {
-        return new Rule(Validator::PASSWORD_COMPLIANT, $errorMessage);
+        return new self(Validator::PASSWORD_COMPLIANT, $errorMessage);
     }
 
     public static function decimal(string $errorMessage = "", $allowSigned = false)
     {
-        return new Rule((!$allowSigned) ? Validator::DECIMAL : Validator::DECIMAL_SIGNED, $errorMessage);
+        return new self((!$allowSigned) ? Validator::DECIMAL : Validator::DECIMAL_SIGNED, $errorMessage);
     }
 
     public static function integer(string $errorMessage = "", $allowSigned = false)
     {
-        return new Rule((!$allowSigned) ? Validator::INTEGER : Validator::INTEGER_SIGNED, $errorMessage);
+        return new self((!$allowSigned) ? Validator::INTEGER : Validator::INTEGER_SIGNED, $errorMessage);
     }
 
     public static function email(string $errorMessage = "")
     {
-        return new Rule(Validator::EMAIL, $errorMessage);
+        return new self(Validator::EMAIL, $errorMessage);
     }
 
     public static function date(string $errorMessage = "")
     {
-        return new Rule(Validator::DATE_ISO, $errorMessage);
+        return new self(Validator::DATE_ISO, $errorMessage);
     }
 
     public static function alpha(string $errorMessage = "")
     {
-        return new Rule(Validator::ALPHA, $errorMessage);
+        return new self(Validator::ALPHA, $errorMessage);
     }
 
     public static function alphanumeric(string $errorMessage = "")
     {
-        return new Rule(Validator::ALPHANUMERIC, $errorMessage);
+        return new self(Validator::ALPHANUMERIC, $errorMessage);
     }
 
     public static function url(string $errorMessage = "")
     {
-        return new Rule(Validator::URL, $errorMessage);
+        return new self(Validator::URL, $errorMessage);
     }
 
     public static function phone(string $errorMessage = "")
     {
-        return new Rule(Validator::PHONE, $errorMessage);
+        return new self(Validator::PHONE, $errorMessage);
     }
 
     public function __construct($validation, string $errorMessage = "")

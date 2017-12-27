@@ -11,7 +11,7 @@ class ResponseFactory
      */
     private static $instance = null;
 
-    public static function getInstance(): ResponseFactory
+    public static function getInstance(): self
     {
         if (is_null(self::$instance)) {
             self::$instance = new self();
@@ -68,7 +68,7 @@ class ResponseFactory
         header('Cache-Control: no-cache');
         header("Connection: keep-alive");
 
-        set_time_limit( 0 );
+        set_time_limit(0);
         ignore_user_abort(true);
         ini_set('auto_detect_line_endings', 1);
         ini_set('max_execution_time', '0');

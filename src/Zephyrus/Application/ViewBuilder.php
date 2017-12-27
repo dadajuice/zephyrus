@@ -18,7 +18,7 @@ class ViewBuilder
     /**
      * @return ViewBuilder
      */
-    public static function getInstance(): ViewBuilder
+    public static function getInstance(): self
     {
         if (is_null(self::$instance)) {
             self::$instance = new self();
