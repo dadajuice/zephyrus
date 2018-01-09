@@ -49,6 +49,7 @@ abstract class RouterEngine
      * initiated request, the best route to execute. Cannot be overridden.
      *
      * @param Request $request
+     * @throws \Exception
      */
     final public function run(Request $request)
     {
@@ -206,21 +207,52 @@ abstract class RouterEngine
         $values = $this->retrieveUriParameters($route);
         $this->loadRequestParameters($route, $values);
         $this->beforeCallback($route);
-        if (!is_null($this->before)) {
-            $c = new Callback($this->before);
-            $c->execute();
+        $responseBefore = $this->executeBefore();
+        if ($responseBefore instanceof Response) {
+            $response = $responseBefore;
+        } else {
+            $callback = new Callback($route['callback']);
+            $arguments = $this->getFunctionArguments($callback->getReflection(), $values);
+            $response = $callback->executeArray($arguments);
         }
-        $callback = new Callback($route['callback']);
-        $arguments = $this->getFunctionArguments($callback->getReflection(), $values);
-        $response = $callback->executeArray($arguments);
-        if (!is_null($this->after)) {
-            $c = new Callback($this->after);
-            $c->execute();
+        $responseAfter = $this->executeAfter($response);
+        if ($responseAfter instanceof Response) {
+            $response = $responseAfter;
         }
         if ($response instanceof Response) {
             $response->send();
         }
         $this->afterCallback($route);
+    }
+
+    /**
+     * Executes the user specified before callback.
+     *
+     * @return mixed | null
+     */
+    private function executeBefore()
+    {
+        if (!is_null($this->before)) {
+            $c = new Callback($this->before);
+            return $c->execute();
+        }
+        return null;
+    }
+
+    /**
+     * Executes the user specified after callback which receives the previous
+     * obtained response wither from the before callback or natural execution.
+     *
+     * @param null | Response $response
+     * @return mixed | null
+     */
+    private function executeAfter(?Response $response)
+    {
+        if (!is_null($this->after)) {
+            $c = new Callback($this->after);
+            return $c->execute($response);
+        }
+        return null;
     }
 
     /**
