@@ -21,7 +21,7 @@ class Authorization
     /**
      * @var int
      */
-    private $mode = self::MODE_WHITELIST;
+    private $mode = self::MODE_BLACKLIST;
 
     /**
      * @var array

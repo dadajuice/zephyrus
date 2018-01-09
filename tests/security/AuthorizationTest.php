@@ -13,6 +13,7 @@ class AuthorizationTest extends TestCase
         $req = new Request('http://test.local', 'POST');
         RequestFactory::set($req);
         $auth = new Authorization();
+        $auth->setMode(Authorization::MODE_WHITELIST);
         self::assertFalse($auth->isAuthorized('/'));
     }
 
@@ -92,6 +93,7 @@ class AuthorizationTest extends TestCase
     public function testMode()
     {
         $auth = new Authorization();
+        $auth->setMode(Authorization::MODE_WHITELIST);
         self::assertEquals(Authorization::MODE_WHITELIST, $auth->getMode());
         $auth->setMode(Authorization::MODE_BLACKLIST);
         self::assertEquals(Authorization::MODE_BLACKLIST, $auth->getMode());
@@ -104,6 +106,7 @@ class AuthorizationTest extends TestCase
     public function testNotAuthorized()
     {
         $auth = new Authorization();
+        $auth->setMode(Authorization::MODE_WHITELIST);
         self::assertFalse($auth->isAuthorized('/'));
     }
 
@@ -118,6 +121,7 @@ class AuthorizationTest extends TestCase
     public function testNoRules()
     {
         $auth = new Authorization();
+        $auth->setMode(Authorization::MODE_WHITELIST);
         $auth->addSessionRequirement('admin', 'GOZU');
         $auth->protect('/', Authorization::ALL, 'admin');
         $auth->protect('/test', Authorization::ALL, 'admin');
