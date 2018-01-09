@@ -60,8 +60,12 @@ abstract class Controller implements Routable
      * Method called immediately after calling the associated route callback
      * method. The default behavior is to do nothing. This should be overridden
      * to customize any operation to be made right after the route callback.
+     * This callback receives the previous obtained response from either the
+     * before callback or the natural execution.
+     *
+     * @param Response $response
      */
-    public function after()
+    public function after(?Response $response)
     {
     }
 
