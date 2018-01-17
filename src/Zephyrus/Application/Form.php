@@ -27,8 +27,8 @@ class Form
      * remembered data in forms.
      *
      * @param string $fieldId
-     * @param string $defaultValue
-     * @return string
+     * @param mixed $defaultValue
+     * @return mixed
      */
     public static function readMemorizedValue($fieldId, $defaultValue = "")
     {
@@ -40,7 +40,7 @@ class Form
      * the readMemorizedValue() function afterward.
      *
      * @param string $fieldId
-     * @param string $value
+     * @param mixed $value
      */
     public static function memorizeValue($fieldId, $value)
     {
