@@ -9,7 +9,6 @@ class Bootstrap
     {
         self::initializeErrorReporting();
         self::initializeLocale();
-        self::initializeSession();
     }
 
     public static function initializeRoutableControllers(Router $router)
@@ -36,14 +35,6 @@ class Bootstrap
         ini_set('display_startup_errors', $dev);
         ini_set('display_errors', $dev);
         ini_set('error_log', ROOT_DIR . '/logs/errors.log');
-    }
-
-    private static function initializeSession()
-    {
-        $session = Session::getInstance();
-        $storage = new SessionStorage(Configuration::getSessionConfiguration());
-        $session->setSessionStorage($storage);
-        Session::getInstance()->start();
     }
 
     private static function initializeLocale()
