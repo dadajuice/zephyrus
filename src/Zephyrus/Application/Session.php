@@ -43,7 +43,7 @@ class Session
      *
      * @return Session
      */
-    final public static function getInstance(?array $configurations = null): Session
+    final public static function getInstance(?array $configurations = null): self
     {
         if (is_null(self::$instance)) {
             self::$instance = new self($configurations);
