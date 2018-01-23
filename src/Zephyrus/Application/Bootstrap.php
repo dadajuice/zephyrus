@@ -51,6 +51,7 @@ class Bootstrap
         $appPosition = strpos($file, '/app/');
         if ($appPosition !== false) {
             $file = substr($file, $appPosition + 5);
+            $file = str_replace('../app/', '', $file);
             $file = str_replace(DIRECTORY_SEPARATOR, '\\', $file);
             $file = str_replace('.php', '', $file);
             return new \ReflectionClass($file);
