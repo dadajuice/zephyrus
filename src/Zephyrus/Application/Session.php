@@ -43,7 +43,7 @@ class Session
      *
      * @return Session
      */
-    public final static function getInstance(?array $configurations = null): Session
+    final public static function getInstance(?array $configurations = null): Session
     {
         if (is_null(self::$instance)) {
             self::$instance = new self($configurations);
@@ -51,7 +51,7 @@ class Session
         return self::$instance;
     }
 
-    public final static function kill()
+    final public static function kill()
     {
         self::$instance = null;
     }
@@ -59,7 +59,7 @@ class Session
     /**
      * @return string
      */
-    public final static function getSavePath()
+    final public static function getSavePath()
     {
         return (!empty(session_save_path())) ? session_save_path() : sys_get_temp_dir();
     }
