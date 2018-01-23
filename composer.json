@@ -11,7 +11,7 @@
   "license": "MIT",
   "require": {
     "php": ">=7.1",
-    "pug-php/pug": "2.*",
+    "pug-php/pug": "2.7.2",
     "enygma/expose": "^3.0",
     "php-http/curl-client": "^1.6",
     "guzzlehttp/psr7": "^1.3"
