@@ -2,7 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Session;
-use Zephyrus\Application\SessionStorage;
 
 class SessionTest extends TestCase
 {
@@ -13,9 +12,7 @@ class SessionTest extends TestCase
     {
         ini_set('session.use_cookies', 0);
         ini_set('session.use_only_cookies', 0);
-        Session::kill();
         $session = Session::getInstance();
-        $session->setSessionStorage(new SessionStorage('bob'));
         $session->start();
         $session->destroy();
     }
@@ -28,7 +25,6 @@ class SessionTest extends TestCase
         ini_set('session.use_cookies', 1);
         ini_set('session.use_only_cookies', 1);
         $session = Session::getInstance();
-        $session->setSessionStorage(new SessionStorage('bob'));
         $session->start();
         $_SESSION['test'] = '1234';
         self::assertEquals(true, $session->has('test'));
@@ -43,7 +39,6 @@ class SessionTest extends TestCase
         ini_set('session.use_cookies', 1);
         ini_set('session.use_only_cookies', 1);
         $session = Session::getInstance();
-        $session->setSessionStorage(new SessionStorage('bob'));
         $session->start();
         $session->set('val', '4567');
         self::assertEquals('4567', $_SESSION['val']);
@@ -58,7 +53,6 @@ class SessionTest extends TestCase
         ini_set('session.use_cookies', 1);
         ini_set('session.use_only_cookies', 1);
         $session = Session::getInstance();
-        $session->setSessionStorage(new SessionStorage('bob'));
         $session->start();
         $session->set('val', '4567');
         self::assertEquals('4567', $session->read('val'));
@@ -74,7 +68,6 @@ class SessionTest extends TestCase
         ini_set('session.use_cookies', 1);
         ini_set('session.use_only_cookies', 1);
         $session = Session::getInstance();
-        $session->setSessionStorage(new SessionStorage('bob'));
         $session->start();
         $session->set('val', '4567');
         self::assertEquals('4567', $_SESSION['val']);
@@ -92,7 +85,6 @@ class SessionTest extends TestCase
         ini_set('session.use_cookies', 1);
         ini_set('session.use_only_cookies', 1);
         $session = Session::getInstance();
-        $session->setSessionStorage(new SessionStorage('bob'));
         $session->start();
         $id = session_id();
         $session->refresh();
@@ -108,7 +100,6 @@ class SessionTest extends TestCase
         ini_set('session.use_cookies', 1);
         ini_set('session.use_only_cookies', 1);
         $session = Session::getInstance();
-        $session->setSessionStorage(new SessionStorage('bob'));
         $session->start();
         $_SESSION['test'] = '123';
         $session->restart();

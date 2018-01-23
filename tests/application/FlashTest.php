@@ -3,15 +3,12 @@
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Flash;
 use Zephyrus\Application\Session;
-use Zephyrus\Application\SessionStorage;
 
 class FlashTest extends TestCase
 {
     public static function setUpBeforeClass()
     {
         $session = Session::getInstance();
-        $sessionStorage = new SessionStorage('TEST');
-        $session->setSessionStorage($sessionStorage);
         $session->start();
     }
 
@@ -19,7 +16,6 @@ class FlashTest extends TestCase
     {
         $session = Session::getInstance();
         $session->destroy();
-        $session->setSessionStorage(null);
         Session::kill();
     }
 

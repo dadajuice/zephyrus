@@ -1,9 +1,9 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Application\Session;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
-use Zephyrus\Security\SessionStorage;
 
 class SecureSessionStorageTest extends TestCase
 {
@@ -13,23 +13,29 @@ class SecureSessionStorageTest extends TestCase
             'name' => 'bob',
             'encryption_enabled' => true
         ];
-        $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        $storage = new SessionStorage($config, $req);
-        $storage->start();
-        self::assertTrue($storage->isEncryptionEnabled());
-        $path = SessionStorage::getSavePath();
+        Session::kill();
+        Session::getInstance($config)->start();
         $_SESSION['test'] = 'je suis chiffre';
-        session_commit();
-        $content = file_get_contents($path . '/sess_' . $storage->getId());
-        self::assertFalse(strpos($content, 'je suis chiffre'));
+        $content = $this->getSessionFileContent();
+        self::assertTrue(strpos($content, 'je suis chiffre') === false);
+    }
+
+    public function testNonEncryption()
+    {
+        $config = [
+            'name' => 'bob'
+        ];
+        Session::kill();
+        Session::getInstance($config)->start();
+        $_SESSION['test'] = 'je suis chiffre';
+        $content = $this->getSessionFileContent();
+        self::assertTrue(strpos($content, 'je suis chiffre') !== false);
     }
 
     public function testFingerprint()
     {
         $config = [
             'name' => 'bob',
-            'encryption_enabled' => false,
             'fingerprint_agent' => true,
             'fingerprint_ip' => true
         ];
@@ -37,12 +43,11 @@ class SecureSessionStorageTest extends TestCase
         $server['HTTP_USER_AGENT'] = 'chrome';
         $req = new Request('http://test.local', 'GET', [], [], [], $server);
         RequestFactory::set($req);
-        $storage = new SessionStorage($config, $req);
-        $storage->getFingerprint()->setIpAddressFingerprinted(true);
-        $storage->getFingerprint()->setUserAgentFingerprinted(true);
+
+        Session::kill();
+        $storage = Session::getInstance($config);
         $storage->start();
-        self::assertTrue($storage->getFingerprint()->isIpAddressFingerprinted());
-        self::assertTrue($storage->getFingerprint()->isUserAgentFingerprinted());
+        self::assertTrue(key_exists('__HANDLER_FINGERPRINT', $_SESSION));
         $storage->destroy();
     }
 
@@ -53,14 +58,10 @@ class SecureSessionStorageTest extends TestCase
             'encryption_enabled' => false,
             'refresh_after_interval' => 2
         ];
-        $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        $storage = new SessionStorage($config, $req);
-        $storage->getExpiration()->setRefreshAfterInterval(2);
-        $storage->start();
-        self::assertEquals(2, $storage->getExpiration()->getRefreshAfterInterval());
+        Session::kill();
+        Session::getInstance($config)->start();
         self::assertTrue(key_exists('__HANDLER_SECONDS_BEFORE_REFRESH', $_SESSION));
-        $storage->destroy();
+        Session::getInstance()->destroy();
     }
 
     public function testRequestExpiration()
@@ -70,14 +71,10 @@ class SecureSessionStorageTest extends TestCase
             'encryption_enabled' => false,
             'refresh_after_requests' => 3
         ];
-        $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        $storage = new SessionStorage($config, $req);
-        $storage->getExpiration()->setRefreshAfterNthRequests(3);
-        $storage->start();
-        self::assertEquals(3, $storage->getExpiration()->getRefreshAfterNthRequests());
+        Session::kill();
+        Session::getInstance($config)->start();
         self::assertTrue(key_exists('__HANDLER_REQUESTS_BEFORE_REFRESH', $_SESSION));
-        $storage->destroy();
+        Session::getInstance()->destroy();
     }
 
     public function testProbabilityExpiration()
@@ -87,12 +84,9 @@ class SecureSessionStorageTest extends TestCase
             'encryption_enabled' => false,
             'refresh_probability' => 0.5
         ];
-        $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        $storage = new SessionStorage($config, $req);
-        $storage->getExpiration()->setRefreshProbability(0.5);
+        Session::kill();
+        $storage = Session::getInstance($config);
         $storage->start();
-        self::assertEquals(0.5, $storage->getExpiration()->getRefreshProbability());
         $storage->destroy();
     }
 
@@ -101,19 +95,20 @@ class SecureSessionStorageTest extends TestCase
         $config = [
             'name' => 'bob',
             'encryption_enabled' => false,
-            'refresh_after_requests' => 3,
-            'refresh_after_interval' => 2
+            'refresh_after_requests' => 3
         ];
-        $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        $storage = new SessionStorage($config, $req);
+        Session::kill();
+        $storage = Session::getInstance($config);
         $storage->start();
         self::assertTrue(key_exists('__HANDLER_REQUESTS_BEFORE_REFRESH', $_SESSION));
+        $storage->destroy();
+
         $config = [
             'name' => 'bob',
             'encryption_enabled' => false
         ];
-        $storage = new SessionStorage($config, $req);
+        Session::kill();
+        $storage = Session::getInstance($config);
         $storage->start();
         self::assertFalse(key_exists('__HANDLER_REQUESTS_BEFORE_REFRESH', $_SESSION));
         $storage->destroy();
@@ -126,11 +121,11 @@ class SecureSessionStorageTest extends TestCase
             'encryption_enabled' => false,
             'refresh_probability' => 1
         ];
-        $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        $storage = new SessionStorage($config, $req);
+        Session::kill();
+        $storage = Session::getInstance($config);
         $storage->start();
         $oldId = $storage->getId();
+
         $storage->start();
         $newId = $storage->getId();
         self::assertNotEquals($newId, $oldId);
@@ -142,20 +137,17 @@ class SecureSessionStorageTest extends TestCase
         $config = [
             'name' => 'bob',
             'encryption_enabled' => false,
-            'refresh_after_requests' => 2,
-            'refresh_probability' => 0.0
+            'refresh_after_requests' => 2
         ];
-        $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        $storage = new SessionStorage($config, $req);
+        Session::kill();
+        $storage = Session::getInstance($config);
         $storage->start();
         $oldId = $storage->getId();
+
         $storage->start();
         $newId = $storage->getId();
         self::assertEquals($newId, $oldId);
-        $storage->start();
-        $newId = $storage->getId();
-        self::assertNotEquals($newId, $oldId);
+
         $storage->destroy();
     }
 
@@ -166,14 +158,14 @@ class SecureSessionStorageTest extends TestCase
             'encryption_enabled' => false,
             'refresh_after_interval' => 1
         ];
-        $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        $storage = new SessionStorage($config, $req);
+        Session::kill();
+        $storage = Session::getInstance($config);
         $storage->start();
-        $oldId = $storage->getId();
+        $oldId = session_id();
         sleep(1);
+
         $storage->start();
-        $newId = $storage->getId();
+        $newId = session_id();
         self::assertNotEquals($newId, $oldId);
         $storage->destroy();
     }
@@ -188,23 +180,19 @@ class SecureSessionStorageTest extends TestCase
             'encryption_enabled' => false,
             'refresh_probability' => 3
         ];
-        $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        new SessionStorage($config, $req);
+        Session::kill();
+        Session::getInstance($config)->start();
     }
 
     public function testDecoy()
     {
         $config = [
             'name' => 'bob',
-            'encryption_enabled' => false,
             'decoys' => 10
         ];
-        $server['REMOTE_ADDR'] = '127.0.0.1';
-        $server['HTTP_USER_AGENT'] = 'chrome';
-        $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        $storage = new SessionStorage($config, $req);
+        $_COOKIE = [];
+        Session::kill();
+        $storage = Session::getInstance($config);
         $storage->start();
         self::assertEquals(10, count($_COOKIE));
         $storage->destroy();
@@ -214,17 +202,20 @@ class SecureSessionStorageTest extends TestCase
     {
         $config = [
             'name' => 'bob',
-            'encryption_enabled' => false,
             'decoys' => ['bob', 'lewis', 'carol']
         ];
-        $server['REMOTE_ADDR'] = '127.0.0.1';
-        $server['HTTP_USER_AGENT'] = 'chrome';
-        $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        $storage = new SessionStorage($config, $req);
+        $_COOKIE = [];
+        Session::kill();
+        $storage = Session::getInstance($config);
         $storage->start();
         self::assertEquals(3, count($_COOKIE));
         self::assertTrue(isset($_COOKIE['bob']));
         $storage->destroy();
+    }
+
+    private function getSessionFileContent()
+    {
+        session_commit();
+        return file_get_contents(Session::getSavePath() . '/sess_' . session_id());
     }
 }

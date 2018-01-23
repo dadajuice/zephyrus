@@ -3,8 +3,8 @@
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Controller;
 use Zephyrus\Application\Session;
-use Zephyrus\Application\SessionStorage;
 use Zephyrus\Network\Request;
+use Zephyrus\Network\RequestFactory;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router;
 
@@ -35,9 +35,12 @@ class ControllerTest extends TestCase
 
     public function testRender()
     {
+        $server['REMOTE_ADDR'] = '127.0.0.1';
+        $server['HTTP_USER_AGENT'] = 'chrome';
+        $req = new Request('http://test.local', 'GET', [], [], [], $server);
+        RequestFactory::set($req);
+
         $router = new Router();
-        $storage = new SessionStorage('bob');
-        Session::getInstance()->setSessionStorage($storage);
         $controller = new class($router) extends Controller {
 
             public function initializeRoutes()

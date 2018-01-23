@@ -1,16 +1,41 @@
 <?php namespace Zephyrus\Application;
 
+use Zephyrus\Security\EncryptedSessionHandler;
+use Zephyrus\Security\SecuritySession;
+
 class Session
 {
+    const DEFAULT_SESSION_NAME = 'PHPSESSID';
+
     /**
      * @var Session unique class instance (singleton)
      */
     private static $instance = null;
 
     /**
-     * @var SessionStorage
+     * @var string
      */
-    private $sessionStorage;
+    private $name;
+
+    /**
+     * @var string
+     */
+    private $sessionId;
+
+    /**
+     * @var \SessionHandler
+     */
+    private $handler = null;
+
+    /**
+     * @var array
+     */
+    private $configurations;
+
+    /**
+     * @var SecuritySession
+     */
+    private $security = null;
 
     /**
      * Obtain the single allowed instance for Session through singleton pattern
@@ -18,85 +43,137 @@ class Session
      *
      * @return Session
      */
-    public static function getInstance(): self
+    public final static function getInstance(?array $configurations = null): Session
     {
         if (is_null(self::$instance)) {
-            self::$instance = new self();
+            self::$instance = new self($configurations);
         }
         return self::$instance;
     }
 
-    public static function kill()
+    public final static function kill()
     {
         self::$instance = null;
     }
 
-    public function has($key, $value = null): bool
+    /**
+     * @return string
+     */
+    public final static function getSavePath()
     {
-        $session = &$this->sessionStorage->getContent();
-        return (is_null($value))
-            ? isset($session[$key])
-            : isset($session[$key]) && $session[$key] == $value;
+        return (!empty(session_save_path())) ? session_save_path() : sys_get_temp_dir();
     }
 
-    public function set($key, $value)
+    /**
+     * Determines if the specified key exists in the current session. Optionally,
+     * if the value argument is used, it also validates that the value is exactly
+     * the one provided.
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return bool
+     */
+    public function has(string $key, $value = null): bool
     {
-        $session = &$this->sessionStorage->getContent();
-        $session[$key] = $value;
+        return is_null($value)
+            ? isset($_SESSION[$key])
+            : isset($_SESSION[$key]) && $_SESSION[$key] == $value;
     }
 
-    public function remove($key)
+    /**
+     * Adds or modifies a session value by providing the desired key and
+     * corresponding value.
+     *
+     * @param string $key
+     * @param mixed $value
+     */
+    public function set(string $key, $value)
     {
-        $session = &$this->sessionStorage->getContent();
-        if (isset($session[$key])) {
-            $session[$key] = '';
-            unset($session[$key]);
+        $_SESSION[$key] = $value;
+    }
+
+    /**
+     * Removes the session data associated with the provided key.
+     * @param string $key
+     */
+    public function remove(string $key)
+    {
+        if (isset($_SESSION[$key])) {
+            $_SESSION[$key] = '';
+            unset($_SESSION[$key]);
         }
     }
 
-    public function read($key, $defaultValue = null)
+    /**
+     * Obtains the session value associated with the provided key. If the key
+     * doesn't exists in the current session, the default value is thus
+     * returned (which is null if not defined by the user).
+     *
+     * @param string $key
+     * @param mixed $defaultValue
+     * @return mixed
+     */
+    public function read(string $key, $defaultValue = null)
     {
-        $session = &$this->sessionStorage->getContent();
-        if (isset($session[$key])) {
-            return $session[$key];
-        }
-        return $defaultValue;
+        return isset($_SESSION[$key]) ? $_SESSION[$key] : $defaultValue;
     }
 
     /**
      * Start session according to configuration. To manipulate session data,
-     * use normal $_SESSION variable. Throws exception if fingerprint doesn't
-     * match.
-     *
-     * @throws \Exception
+     * use normal $_SESSION variable.
      */
     public function start()
     {
-        $this->sessionStorage->start();
-    }
-
-    public function destroy()
-    {
-        $this->sessionStorage->destroy();
-    }
-
-    public function refresh()
-    {
-        $this->sessionStorage->refresh();
+        session_name($this->name);
+        session_set_save_handler(is_null($this->handler)
+            ? new \SessionHandler()
+            : $this->handler, true);
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        $this->sessionId = session_id();
+        if ($this->security->start()) {
+            $this->refresh();
+        }
     }
 
     /**
-     * Restart the entire session by regenerating the identifier, deleting all
-     * data and initiating handlers.
+     * Properly delete the entire session (cookie expiration and session data).
+     */
+    public function destroy()
+    {
+        $_SESSION = [];
+        setcookie(session_name(), '', 1);
+        unset($_COOKIE[session_name()]);
+        session_destroy();
+    }
+
+    /**
+     * Regenerates a session identifier for the current user session and
+     * deletes old session file.
+     */
+    public function refresh()
+    {
+        session_regenerate_id(true);
+        $this->sessionId = session_id();
+    }
+
+    /**
+     * Restart the entire session by regenerating the identifier and deleting
+     * all data.
      */
     public function restart()
     {
-        $this->sessionStorage->restart();
+        $this->destroy();
+        $this->start();
     }
 
-    public function setSessionStorage(?SessionStorage $sessionStorage)
+    /**
+     * @return string
+     */
+    public function getId(): string
     {
-        $this->sessionStorage = $sessionStorage;
+        return $this->sessionId;
     }
 
     /**
@@ -107,13 +184,47 @@ class Session
      *
      * @throws \Exception
      */
-    private function __construct()
+    private function __construct(?array $configurations = null)
     {
         if (!ini_get('session.use_cookies') || !ini_get('session.use_only_cookies')) {
             throw new \Exception("Session configurations are not secure.
             Fixation may be possible. Please review your php.ini or local
             settings (eg. .htaccess) for directive session.use_cookies and
             session.use_only_cookies.");
+        }
+        $this->configurations = $configurations ?? Configuration::getSessionConfiguration();
+        $this->initialize();
+    }
+
+    /**
+     * Initializes all data required from various setting to implement the
+     * session class. Can be overwritten by children class to add new
+     * features.
+     */
+    private function initialize()
+    {
+        $this->name = (isset($this->configurations['name']))
+            ? $this->configurations['name']
+            : self::DEFAULT_SESSION_NAME;
+        $this->assignSessionLifetime();
+        if (isset($this->configurations['encryption_enabled'])
+            && $this->configurations['encryption_enabled']) {
+            $this->handler = new EncryptedSessionHandler();
+        }
+        $this->security = new SecuritySession($this->configurations);
+    }
+
+    /**
+     * Registers a different session lifetime if configured. Assigns the
+     * gc_maxlifetime with a little more time to make sure the client cookie
+     * expires before the server garbage collector.
+     */
+    private function assignSessionLifetime()
+    {
+        if (isset($this->configurations['lifetime'])) {
+            $lifetime = $this->configurations['lifetime'];
+            ini_set('session.gc_maxlifetime', $lifetime * 1.2);
+            session_set_cookie_params($lifetime);
         }
     }
 }

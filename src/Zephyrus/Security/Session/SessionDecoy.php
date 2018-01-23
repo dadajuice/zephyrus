@@ -9,15 +9,13 @@ class SessionDecoy
      */
     private $decoys = [];
 
-    public function __construct(array $config)
+    public function __construct($decoys)
     {
-        if (isset($config['decoys'])) {
-            if (is_numeric($config['decoys'])) {
-                $this->addRandomDecoys($config['decoys']);
-            } elseif (is_array($config['decoys'])) {
-                foreach ($config['decoys'] as $decoyName) {
-                    $this->addDecoy($decoyName);
-                }
+        if (is_numeric($decoys)) {
+            $this->addRandomDecoys($decoys);
+        } elseif (is_array($decoys)) {
+            foreach ($decoys as $decoyName) {
+                $this->addDecoy($decoyName);
             }
         }
     }

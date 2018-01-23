@@ -1,7 +1,5 @@
 <?php namespace Zephyrus\Security\Session;
 
-use Zephyrus\Application\SessionStorage;
-
 class SessionExpiration
 {
     /**
@@ -19,27 +17,18 @@ class SessionExpiration
      */
     private $refreshProbability;
 
-    /**
-     * @var array
-     */
-    private $content = [];
-
-    /**
-     * @param array $config
-     */
-    public function __construct(array $config)
+    public function __construct($refreshAfterNthRequests, $refreshAfterInterval, $refreshProbability)
     {
-        $this->refreshAfterNthRequests = $config['refresh_after_requests'] ?? null;
-        $this->refreshAfterInterval = $config['refresh_after_interval'] ?? null;
+        $this->refreshAfterNthRequests = $refreshAfterNthRequests ?? null;
+        $this->refreshAfterInterval = $refreshAfterInterval ?? null;
         $this->refreshProbability = null;
-        if (isset($config['refresh_probability'])) {
-            $this->setRefreshProbability($config['refresh_probability']);
+        if ($refreshProbability) {
+            $this->setRefreshProbability($refreshProbability);
         }
     }
 
-    public function start(SessionStorage $storage)
+    public function start()
     {
-        $this->content = &$storage->getContent();
         $this->setupRefreshOnNthRequestsHandler();
         $this->setupRefreshOnIntervalHandler();
     }
@@ -51,11 +40,11 @@ class SessionExpiration
     public function initiateExpiration()
     {
         if (!empty($this->refreshAfterNthRequests)) {
-            $this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'] = $this->refreshAfterNthRequests;
+            $_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'] = $this->refreshAfterNthRequests;
         }
         if (!empty($this->refreshAfterInterval)) {
-            $this->content['__HANDLER_SECONDS_BEFORE_REFRESH'] = $this->refreshAfterInterval;
-            $this->content['__HANDLER_LAST_ACTIVITY_TIMESTAMP'] = time();
+            $_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH'] = $this->refreshAfterInterval;
+            $_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP'] = time();
         }
     }
 
@@ -71,15 +60,15 @@ class SessionExpiration
         if ($this->refreshAfterNthRequests == 1 || $this->isRefreshNeededByProbability()) {
             return true;
         }
-        if (isset($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
-            if ($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'] <= 1) {
+        if (isset($_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
+            if ($_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'] <= 1) {
                 return true;
             }
-            $this->content['__HANDLER_REQUESTS_BEFORE_REFRESH']--;
+            $_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH']--;
         }
-        if (isset($this->content['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
-            $timeDifference = time() - $this->content['__HANDLER_LAST_ACTIVITY_TIMESTAMP'];
-            if ($timeDifference >= $this->content['__HANDLER_SECONDS_BEFORE_REFRESH']) {
+        if (isset($_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
+            $timeDifference = time() - $_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP'];
+            if ($timeDifference >= $_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH']) {
                 return true;
             }
         }
@@ -106,25 +95,25 @@ class SessionExpiration
 
     private function setupRefreshOnNthRequestsHandler()
     {
-        if (empty($this->refreshAfterNthRequests) && isset($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
-            unset($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH']);
+        if (empty($this->refreshAfterNthRequests) && isset($_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
+            unset($_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH']);
         } elseif (!isset($this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
-            $this->content['__HANDLER_REQUESTS_BEFORE_REFRESH'] = $this->refreshAfterNthRequests;
+            $_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'] = $this->refreshAfterNthRequests;
         }
     }
 
     private function setupRefreshOnIntervalHandler()
     {
         if (empty($this->refreshAfterInterval)) {
-            if (isset($this->content['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
-                unset($this->content['__HANDLER_SECONDS_BEFORE_REFRESH']);
+            if (isset($_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
+                unset($_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH']);
             }
-            if (isset($this->content['__HANDLER_LAST_ACTIVITY_TIMESTAMP'])) {
-                unset($this->content['__HANDLER_LAST_ACTIVITY_TIMESTAMP']);
+            if (isset($_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP'])) {
+                unset($_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP']);
             }
-        } elseif (!isset($this->content['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
-            $this->content['__HANDLER_SECONDS_BEFORE_REFRESH'] = $this->refreshAfterInterval;
-            $this->content['__HANDLER_LAST_ACTIVITY_TIMESTAMP'] = time();
+        } elseif (!isset($_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH'])) {
+            $_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH'] = $this->refreshAfterInterval;
+            $_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP'] = time();
         }
     }
 

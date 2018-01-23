@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Security\Session;
 
-use Zephyrus\Application\SessionStorage;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 
@@ -21,21 +20,15 @@ class SessionFingerprint
      */
     private $request;
 
-    /**
-     * @var array
-     */
-    protected $content = [];
-
-    public function __construct(array $config)
+    public function __construct(bool $userAgentFingerprinted, bool $ipAddressFingerprinted)
     {
         $this->request = RequestFactory::read();
-        $this->userAgentFingerprinted = $config['fingerprint_agent'] ?? false;
-        $this->ipAddressFingerprinted = $config['fingerprint_ip'] ?? false;
+        $this->userAgentFingerprinted = $userAgentFingerprinted;
+        $this->ipAddressFingerprinted = $ipAddressFingerprinted;
     }
 
-    public function start(SessionStorage $storage)
+    public function start()
     {
-        $this->content = &$storage->getContent();
         $this->setupFingerprintHandler();
     }
 
@@ -47,8 +40,8 @@ class SessionFingerprint
      */
     public function hasValidFingerprint()
     {
-        if (isset($this->content['__HANDLER_FINGERPRINT'])) {
-            return $this->content['__HANDLER_FINGERPRINT'] === $this->createFingerprint();
+        if (isset($_SESSION['__HANDLER_FINGERPRINT'])) {
+            return $_SESSION['__HANDLER_FINGERPRINT'] === $this->createFingerprint();
         }
         return true;
     }
@@ -113,10 +106,10 @@ class SessionFingerprint
     private function setupFingerprintHandler()
     {
         if (!$this->userAgentFingerprinted && !$this->ipAddressFingerprinted
-            && isset($this->content['__HANDLER_FINGERPRINT'])) {
-            unset($this->content['__HANDLER_FINGERPRINT']);
-        } elseif (!isset($this->content['__HANDLER_FINGERPRINT'])) {
-            $this->content['__HANDLER_FINGERPRINT'] = $this->createFingerprint();
+            && isset($_SESSION['__HANDLER_FINGERPRINT'])) {
+            unset($_SESSION['__HANDLER_FINGERPRINT']);
+        } elseif (!isset($_SESSION['__HANDLER_FINGERPRINT'])) {
+            $_SESSION['__HANDLER_FINGERPRINT'] = $this->createFingerprint();
         }
     }
 }
