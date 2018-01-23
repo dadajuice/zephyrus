@@ -29,20 +29,16 @@ class IntrusionDetection
     private $detectionCallback = null;
 
     /**
-     * Constructor which initiates the configuration of the PHPIDS framework
-     * and prepare the monitor component.
+     * @var IntrusionDetection
      */
-    public function __construct(LoggerInterface $logger)
-    {
-        $config = Configuration::getSecurityConfiguration();
-        $filters = new FilterCollection();
-        $filters->load();
+    private static $instance = null;
 
-        $this->manager = new Manager($filters, $logger);
-        if (isset($config['ids_exceptions'])) {
-            $this->manager->setException($config['ids_exceptions']);
+    public static function getInstance(?LoggerInterface $logger = null): self
+    {
+        if (is_null(self::$instance)) {
+            self::$instance = new self($logger);
         }
-        $this->surveillance = self::GET | self::POST;
+        return self::$instance;
     }
 
     /**
@@ -186,5 +182,22 @@ class IntrusionDetection
             }
         }
         return $data;
+    }
+
+    /**
+     * Constructor which initiates the configuration of the PHPIDS framework
+     * and prepare the monitor component.
+     */
+    private function __construct(LoggerInterface $logger)
+    {
+        $config = Configuration::getSecurityConfiguration();
+        $filters = new FilterCollection();
+        $filters->load();
+
+        $this->manager = new Manager($filters, $logger);
+        if (isset($config['ids_exceptions'])) {
+            $this->manager->setException($config['ids_exceptions']);
+        }
+        $this->surveillance = self::GET | self::POST;
     }
 }

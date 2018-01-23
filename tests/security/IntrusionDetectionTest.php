@@ -10,7 +10,7 @@ class IntrusionDetectionTest extends TestCase
      */
     public function testNoCallbackException()
     {
-        $ids = new IntrusionDetection(new class extends \Psr\Log\AbstractLogger {
+        $ids = IntrusionDetection::getInstance(new class extends \Psr\Log\AbstractLogger {
             public function log($level, $message, array $context = array())
             {
                 throw new \Exception("detected");
@@ -23,7 +23,7 @@ class IntrusionDetectionTest extends TestCase
 
     public function testMonitoring()
     {
-        $ids = new IntrusionDetection(new class extends \Psr\Log\AbstractLogger {
+        $ids = IntrusionDetection::getInstance(new class extends \Psr\Log\AbstractLogger {
             public function log($level, $message, array $context = array())
             {
                 throw new \Exception("detected");
@@ -42,7 +42,7 @@ class IntrusionDetectionTest extends TestCase
      */
     public function testDetection()
     {
-        $ids = new IntrusionDetection(new class extends \Psr\Log\AbstractLogger {
+        $ids = IntrusionDetection::getInstance(new class extends \Psr\Log\AbstractLogger {
             public function log($level, $message, array $context = array())
             {
                 throw new \Exception("detected");
@@ -60,7 +60,7 @@ class IntrusionDetectionTest extends TestCase
      */
     public function testNothingToMonitorException()
     {
-        $ids = new IntrusionDetection(new class extends \Psr\Log\AbstractLogger {
+        $ids = IntrusionDetection::getInstance(new class extends \Psr\Log\AbstractLogger {
             public function log($level, $message, array $context = array())
             {
                 throw new \Exception("detected");
