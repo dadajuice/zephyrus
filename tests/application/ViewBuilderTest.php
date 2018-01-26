@@ -31,14 +31,14 @@ class ViewBuilderTest extends TestCase
     {
         $view = ViewBuilder::getInstance()->buildFromString('p Example #{item.name} is #{format(\'money\', item.price)}');
         $output = $view->render(['item' => ['name' => 'Bob Lewis', 'price' => 12.30]]);
-        self::assertEquals('<p>Example Bob Lewis is 12,30 $' . PHP_EOL . '</p>', $output);
+        self::assertEquals('<p>Example Bob Lewis is 12,30 $</p>', $output);
     }
 
     public function testViewRenderWithMoneyFormatArgs()
     {
         $view = ViewBuilder::getInstance()->buildFromString('p Example #{item.name} is #{format(\'money\', item.price, 3)}');
         $output = $view->render(['item' => ['name' => 'Bob Lewis', 'price' => 12.30]]);
-        self::assertEquals('<p>Example Bob Lewis is 12,300 $' . PHP_EOL . '</p>', $output);
+        self::assertEquals('<p>Example Bob Lewis is 12,300 $</p>', $output);
     }
 
     public function testAddFunction()
@@ -49,6 +49,6 @@ class ViewBuilderTest extends TestCase
         });
         $view = ViewBuilder::getInstance()->buildFromString('p Example #{test(item.price)}');
         $output = $view->render(['item' => ['price' => 4]]);
-        self::assertEquals('<p>Example 8' . PHP_EOL . '</p>', $output);
+        self::assertEquals('<p>Example 8</p>', $output);
     }
 }
