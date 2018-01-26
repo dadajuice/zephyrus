@@ -319,8 +319,9 @@ class ControllerTest extends TestCase
     }
 
     // Needs to find a way to execute and cut response after one loop tick
-    /*public function testStreamingSse()
+    public function testStreamingSse()
     {
+        Session::kill();
         $router = new Router();
         $controller = new class($router) extends Controller {
 
@@ -330,18 +331,21 @@ class ControllerTest extends TestCase
 
             public function index()
             {
-                return parent::sseStreaming(function () {
+                $i = 0;
+                return parent::sseStreaming(function () use(&$i) {
+                    if ($i >= 1000) { // to test memory leak mitigation
+                        return false;
+                    }
+                    ++$i;
                     return "works";
-                }, "test");
+                }, 'test', 0.1);
             }
         };
         ob_start();
         $controller->index()->send();
-
         $output = ob_get_clean();
-        var_dump($output);
-        //self::assertTrue(strpos($output, 'data: "test"') !== false);
-    }*/
+        self::assertTrue(strpos($output, 'data: "works"') !== false);
+    }
 
     public function testRedirect()
     {

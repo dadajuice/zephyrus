@@ -1,12 +1,14 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Application\Session;
 use Zephyrus\Security\EncryptedSessionHandler;
 
 class EncryptedSessionHandlerTest extends TestCase
 {
     public function testAll()
     {
+        Session::kill();
         $handler = new EncryptedSessionHandler();
         session_set_save_handler($handler);
         session_name('phpsessid');
