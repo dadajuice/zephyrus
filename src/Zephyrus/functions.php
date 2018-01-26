@@ -91,7 +91,7 @@ function format(string $type, ...$args)
         'money' => 'formatMoney',
         'decimal' => 'formatDecimal'
     ];
-    return (key_exists($type, $typeMapping))
+    return (array_key_exists($type, $typeMapping))
         ? forward_static_call_array([$class, $typeMapping[$type]], $args)
         : 'FORMAT TYPE [' . $type . '] NOT DEFINED !';
 }
