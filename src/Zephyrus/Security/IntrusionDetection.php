@@ -35,7 +35,7 @@ class IntrusionDetection
 
     public static function getInstance(?LoggerInterface $logger = null): self
     {
-        if (is_null(self::$instance)) {
+        if (is_null(self::$instance) || !is_null($logger)) {
             self::$instance = new self($logger);
         }
         return self::$instance;
