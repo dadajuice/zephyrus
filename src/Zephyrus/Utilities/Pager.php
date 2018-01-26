@@ -45,8 +45,8 @@ class Pager
         $this->maxEntities = $maxEntities;
         $this->currentPage = (is_null($page)) ? 1 : $page;
         $this->maxPage = ceil($recordCount / $maxEntities);
-        $this->pageUrl = $request->getPath();
-        $this->pageQuery = $this->getQueryString($request->getQuery());
+        $this->pageUrl = $request->getUri()->getPath();
+        $this->pageQuery = $this->getQueryString($request->getUri()->getQuery());
         $this->validate();
     }
 

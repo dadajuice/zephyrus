@@ -137,7 +137,9 @@ class AuthorizationTest extends TestCase
         $auth->addIpAddressRequirement('school', '207.167.241.10');
         $auth->protect('/bob', Authorization::ALL, 'school');
         $server['REMOTE_ADDR'] = '207.167.241.10';
-        $req = new Request('http://test.local', 'GET', [], [], [], $server);
+        $req = new Request('http://test.local', 'GET', [
+            'server' => $server
+        ]);
         RequestFactory::set($req);
         self::assertTrue($auth->isAuthorized('/bob'));
         $req = new Request('http://test.local', 'GET');

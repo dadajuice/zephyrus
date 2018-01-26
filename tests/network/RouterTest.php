@@ -101,7 +101,9 @@ class RouterTest extends TestCase
     {
         $server = [];
         $server['HTTP_ACCEPT'] = ContentType::JSON;
-        $req = new Request('http://test.local/bob', 'GET', [], [], [], $server);
+        $req = new Request('http://test.local/bob', 'GET', [
+            'server' => $server
+        ]);
         $router = new Router();
         $router->get('/bob', function() {
             throw new \Exception('success', 500);
@@ -116,7 +118,9 @@ class RouterTest extends TestCase
     {
         $server = [];
         $server['HTTP_ACCEPT'] = ContentType::HTML;
-        $req = new Request('http://test.local/bob', 'GET', [], [], [], $server);
+        $req = new Request('http://test.local/bob', 'GET', [
+            'server' => $server
+        ]);
         $router = new Router();
         $router->get('/bob', function() {
 
@@ -129,7 +133,9 @@ class RouterTest extends TestCase
         try {
             $server = [];
             $server['HTTP_ACCEPT'] = ContentType::HTML;
-            $req = new Request('http://test.local/bob', 'GET', [], [], [], $server);
+            $req = new Request('http://test.local/bob', 'GET', [
+                'server' => $server
+            ]);
             $router = new Router();
             $router->get('/bob', function() {
 
@@ -148,7 +154,9 @@ class RouterTest extends TestCase
     {
         $server = [];
         $server['HTTP_ACCEPT'] = ContentType::HTML;
-        $req = new Request('http://test.local/bob', 'GET', [], [], [], $server);
+        $req = new Request('http://test.local/bob', 'GET', [
+            'server' => $server
+        ]);
         $router = new Router();
         $router->get('/bob', function() {
             throw new \Exception('success', 500);

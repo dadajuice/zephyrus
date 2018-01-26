@@ -37,7 +37,9 @@ class ControllerTest extends TestCase
     {
         $server['REMOTE_ADDR'] = '127.0.0.1';
         $server['HTTP_USER_AGENT'] = 'chrome';
-        $req = new Request('http://test.local', 'GET', [], [], [], $server);
+        $req = new Request('http://test.local', 'GET', [
+            'server' => $server
+        ]);
         RequestFactory::set($req);
 
         $router = new Router();
@@ -164,7 +166,7 @@ class ControllerTest extends TestCase
             }
         };
         $controller->initializeRoutes();
-        $req = new Request('http://test.local/delete', 'delete', ['t' => '4']);
+        $req = new Request('http://test.local/delete', 'delete', ['parameters' => ['t' => '4']]);
         ob_start();
         $router->run($req);
         $output = ob_get_clean();
@@ -189,7 +191,9 @@ class ControllerTest extends TestCase
             }
         };
         $controller->initializeRoutes();
-        $req = new Request('http://test.local/delete', 'delete', ['t' => '4']);
+        $req = new Request('http://test.local/delete', 'delete', [
+            'parameters' => ['t' => '4']
+        ]);
         ob_start();
         $router->run($req);
         $output = ob_get_clean();

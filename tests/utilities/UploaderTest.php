@@ -10,7 +10,9 @@ class UploaderTest extends TestCase
     public function testMultipleFiles()
     {
         $files['upload'] = $this->buildUploadFile();
-        $req = new Request('http://test.local/', 'GET', [], [], $files);
+        $req = new Request('http://test.local/', 'GET', [
+            'files' => $files
+        ]);
         RequestFactory::set($req);
         $uploader = new Uploader('upload');
         $uploader->setFileType(Uploader::TYPE_FILE);
@@ -23,7 +25,9 @@ class UploaderTest extends TestCase
     public function testSingleFile()
     {
         $files['upload'] = $this->buildUploadSingleFile();
-        $req = new Request('http://test.local/', 'GET', [], [], $files);
+        $req = new Request('http://test.local/', 'GET', [
+            'files' => $files
+        ]);
         RequestFactory::set($req);
         $uploader = new Uploader('upload');
         self::assertEquals(1, $uploader->count());
@@ -33,7 +37,9 @@ class UploaderTest extends TestCase
     {
         $files['upload'] = $this->buildUploadSingleFile();
         $files['upload']['type'] = 'image/png';
-        $req = new Request('http://test.local/', 'GET', [], [], $files);
+        $req = new Request('http://test.local/', 'GET', [
+            'files' => $files
+        ]);
         RequestFactory::set($req);
         $uploader = new Uploader('upload');
         self::assertEquals(1, $uploader->count());
@@ -44,7 +50,9 @@ class UploaderTest extends TestCase
         $files['upload'] = $this->buildUploadFile();
         $files['upload']['type'][0] = "image/png";
         $files['upload']['type'][1] = "image/png";
-        $req = new Request('http://test.local/', 'GET', [], [], $files);
+        $req = new Request('http://test.local/', 'GET', [
+            'files' => $files
+        ]);
         RequestFactory::set($req);
         $uploader = new Uploader('upload');
         $uploader->setFileType(Uploader::TYPE_IMAGE);
@@ -61,7 +69,9 @@ class UploaderTest extends TestCase
     {
         $files['upload'] = $this->buildUploadSingleFile();
         $files['upload']['error'] = UPLOAD_ERR_NO_TMP_DIR;
-        $req = new Request('http://test.local/', 'GET', [], [], $files);
+        $req = new Request('http://test.local/', 'GET', [
+            'files' => $files
+        ]);
         RequestFactory::set($req);
         new Uploader('upload');
     }
@@ -73,7 +83,9 @@ class UploaderTest extends TestCase
     {
         $files['upload'] = $this->buildUploadFile();
         $files['upload']['error'][0] = UPLOAD_ERR_CANT_WRITE;
-        $req = new Request('http://test.local/', 'GET', [], [], $files);
+        $req = new Request('http://test.local/', 'GET', [
+            'files' => $files
+        ]);
         RequestFactory::set($req);
         new Uploader('upload');
     }
@@ -84,7 +96,9 @@ class UploaderTest extends TestCase
     public function testNameError()
     {
         $files['upload'] = $this->buildUploadSingleFile();
-        $req = new Request('http://test.local/', 'GET', [], [], $files);
+        $req = new Request('http://test.local/', 'GET', [
+            'files' => $files
+        ]);
         RequestFactory::set($req);
         new Uploader('invalid');
     }

@@ -43,7 +43,12 @@ class RequestFactory
         if (isset($parameters['__method'])) {
             $method = strtoupper($parameters['__method']);
         }
-        self::$httpRequest = new Request($uri, $method, $parameters, $_COOKIE, $_FILES, $server);
+        self::$httpRequest = new Request($uri, $method, [
+            'parameters' => $parameters,
+            'cookies' => $_COOKIE,
+            'files' => $_FILES,
+            'server' => $server
+        ]);
     }
 
     /**

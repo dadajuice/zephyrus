@@ -9,7 +9,7 @@ class PagerTest extends TestCase
 {
     public function testLimit()
     {
-        $req = new Request('http://test.local/3?page=5', 'GET', ['id' => '3', 'page' => 5]);
+        $req = new Request('http://test.local/3?page=5', 'GET', ['parameters' => ['id' => '3', 'page' => 5]]);
         RequestFactory::set($req);
         $pager = new Pager(1000);
         $max = $pager->getMaxEntitiesPerPage();
@@ -20,7 +20,7 @@ class PagerTest extends TestCase
 
     public function testSimpleDisplay()
     {
-        $req = new Request('http://test.local/3', 'GET', ['id' => '3']);
+        $req = new Request('http://test.local/3', 'GET', ['parameters' => ['id' => '3']]);
         RequestFactory::set($req);
         $pager = new Pager(100);
         $expected = '<div class="pager"><span>1</span><a href="/3?page=2">2</a><a href="/3?page=2">&gt;</a></div>';
@@ -32,7 +32,7 @@ class PagerTest extends TestCase
 
     public function testEmptyPager()
     {
-        $req = new Request('http://test.local/3', 'GET', ['id' => '3']);
+        $req = new Request('http://test.local/3', 'GET', ['parameters' => ['id' => '3']]);
         RequestFactory::set($req);
         $pager = new Pager(0);
         ob_start();
@@ -43,7 +43,7 @@ class PagerTest extends TestCase
 
     public function testValidation()
     {
-        $req = new Request('http://test.local/3?page=-1', 'GET', ['id' => '3', 'page' => -1]);
+        $req = new Request('http://test.local/3?page=-1', 'GET', ['parameters' => ['id' => '3', 'page' => -1]]);
         RequestFactory::set($req);
         $pager = new Pager(1000);
         $limit = $pager->getSqlLimit();
@@ -52,7 +52,7 @@ class PagerTest extends TestCase
 
     public function testDisplay()
     {
-        $req = new Request('http://test.local/3?page=12', 'GET', ['id' => '3', 'page' => '12']);
+        $req = new Request('http://test.local/3?page=12', 'GET', ['parameters' => ['id' => '3', 'page' => '12']]);
         RequestFactory::set($req);
         $pager = new Pager(1000);
         $expected = '<div class="pager"><a href="/3?page=1">«</a><a href="/3?page=11">&lt;</a><a href="/3?page=8">8</a><a href="/3?page=9">9</a><a href="/3?page=10">10</a><a href="/3?page=11">11</a><span>12</span><a href="/3?page=13">13</a><a href="/3?page=14">14</a><a href="/3?page=15">15</a><a href="/3?page=16">16</a><a href="/3?page=13">&gt;</a><a href="/3?page=20">»</a></div>';

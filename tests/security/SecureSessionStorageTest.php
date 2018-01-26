@@ -41,7 +41,9 @@ class SecureSessionStorageTest extends TestCase
         ];
         $server['REMOTE_ADDR'] = '127.0.0.1';
         $server['HTTP_USER_AGENT'] = 'chrome';
-        $req = new Request('http://test.local', 'GET', [], [], [], $server);
+        $req = new Request('http://test.local', 'GET', [
+            'server' => $server
+        ]);
         RequestFactory::set($req);
 
         Session::kill();

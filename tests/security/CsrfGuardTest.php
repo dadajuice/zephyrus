@@ -30,7 +30,7 @@ class CsrfGuardTest extends TestCase
         $name = $fields[1];
         $value = $fields[2];
 
-        $req = new Request('http://test.local/test', 'DELETE', ['CSRFName' => $name, 'CSRFToken' => $value]);
+        $req = new Request('http://test.local/test', 'DELETE', ['parameters' => ['CSRFName' => $name, 'CSRFToken' => $value]]);
         RequestFactory::set($req);
         $csrf = new CsrfGuard();
         $csrf->setDeleteSecured(true);
@@ -87,7 +87,7 @@ class CsrfGuardTest extends TestCase
      */
     public function testInvalidToken()
     {
-        $req = new Request('http://test.local/test', 'PUT', ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']);
+        $req = new Request('http://test.local/test', 'PUT', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
         RequestFactory::set($req);
         $csrf = new CsrfGuard();
         $csrf->guard();
@@ -98,7 +98,7 @@ class CsrfGuardTest extends TestCase
      */
     public function testInvalidGuard()
     {
-        $req = new Request('http://test.local/test', 'POST', ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']);
+        $req = new Request('http://test.local/test', 'POST', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
         RequestFactory::set($req);
         $csrf = new CsrfGuard();
         $csrf->guard();
@@ -131,7 +131,7 @@ class CsrfGuardTest extends TestCase
         $name = $fields[1];
         $value = $fields[2];
 
-        $req = new Request('http://test.local/test', 'DELETE', ['CSRFName' => $name, 'CSRFToken' => $value]);
+        $req = new Request('http://test.local/test', 'DELETE', ['parameters' => ['CSRFName' => $name, 'CSRFToken' => $value]]);
         RequestFactory::set($req);
         $csrf = new CsrfGuard();
         $csrf->setDeleteSecured(true);

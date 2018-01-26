@@ -23,54 +23,19 @@ class Request
     private $accept;
 
     /**
-     * @var string destined uri of the request
+     * @var Uri destined uri of the request
      */
     private $uri;
+
+    /**
+     * @var string requested uri as it was received (e.g /users/1)
+     */
+    private $requestedUri;
 
     /**
      * @var string destined full url of request
      */
     private $baseUrl;
-
-    /**
-     * @var bool determines if request is under HTTPS
-     */
-    private $isSecure;
-
-    /**
-     * @var string scheme (protocol) of requested uri (e.g http)
-     */
-    private $scheme;
-
-    /**
-     * @var string hostname (domain or ip address) of requested uri (e.g example.com)
-     */
-    private $host;
-
-    /**
-     * @var string specified username of requested uri
-     */
-    private $username;
-
-    /**
-     * @var string specified password of requested uri
-     */
-    private $password;
-
-    /**
-     * @var string complete resource path of requested uri (e.g /example/foo)
-     */
-    private $path;
-
-    /**
-     * @var string query string of requested uri (e.g ?id=34&foo=1)
-     */
-    private $query;
-
-    /**
-     * @var string specified anchor of requested uri (e.g #example)
-     */
-    private $fragment;
 
     /**
      * @var string specified user agent (e.g Chrome)
@@ -92,37 +57,46 @@ class Request
      */
     private $files;
 
-    public function __construct($uri = '', $method = '', $parameters = [], $cookies = [], $files = [], $server = [])
+    /**
+     * Request constructor which need the option array data to populate the
+     * request. E.g.
+     *
+     * 'parameters' => ['t' => 1, 'z' => 5],
+     * 'cookies' => $_COOKIE,
+     * 'files' => $_FILES,
+     * 'server' => $_SERVER
+     *
+     * @param string $uri
+     * @param array $options
+     */
+    public function __construct(string $uri = '', string $method, array $options = [])
     {
-        $this->uri = $uri;
+        $this->uri = new Uri($uri);
+        $this->requestedUri = $uri;
         $this->method = $method;
-        $this->parameters = $parameters;
-        $this->serverVariables = $server;
-        $this->cookies = $cookies;
-        $this->files = $files;
+        $this->parameters = $options['parameters'] ?? [];
+        $this->serverVariables = $options['server'] ?? [];
+        $this->cookies = $options['cookies'] ?? [];
+        $this->files = $options['files'] ?? [];
         $this->initializeServer();
-        $this->initializeUriParts();
         $this->initializeBaseUrl();
     }
 
     /**
      * @param string $name
-     * @param string $default
+     * @param string $defaultValue
      * @return string
      */
-    public function getCookieValue($name, $default = null)
+    public function getCookieValue(string $name, ?string $defaultValue = null): ?string
     {
-        if (isset($this->cookies[$name])) {
-            return $this->cookies[$name];
-        }
-        return $default;
+        return (isset($this->cookies[$name])) ? $this->cookies[$name] : $defaultValue;
     }
 
     /**
      * @param string $name
      * @return bool
      */
-    public function hasCookie($name)
+    public function hasCookie(string $name): bool
     {
         return isset($this->cookies[$name]);
     }
@@ -161,62 +135,6 @@ class Request
     public function getClientIp()
     {
         return $this->clientIp;
-    }
-
-    /**
-     * @return string
-     */
-    public function getQuery()
-    {
-        return $this->query;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPath()
-    {
-        return $this->path;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isSecure()
-    {
-        return $this->isSecure;
-    }
-
-    /**
-     * @return string
-     */
-    public function getScheme()
-    {
-        return $this->scheme;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUsername()
-    {
-        return $this->username;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFragment()
-    {
-        return $this->fragment;
     }
 
     /**
@@ -270,7 +188,7 @@ class Request
     }
 
     /**
-     * @return string
+     * @return Uri
      */
     public function getUri()
     {
@@ -288,17 +206,17 @@ class Request
     /**
      * @return string
      */
-    public function getHost()
+    public function getBaseUrl()
     {
-        return $this->host;
+        return $this->baseUrl;
     }
 
     /**
      * @return string
      */
-    public function getBaseUrl()
+    public function getRequestedUri(): string
     {
-        return $this->baseUrl;
+        return $this->requestedUri;
     }
 
     /**
@@ -326,22 +244,9 @@ class Request
         $this->clientIp = $this->serverVariables['REMOTE_ADDR'] ?? '';
     }
 
-    private function initializeUriParts()
-    {
-        $urlParts = parse_url($this->uri);
-        $this->host = $urlParts['host'] ?? null;
-        $this->scheme = $urlParts['scheme'] ?? null;
-        $this->isSecure = $this->scheme == 'https';
-        $this->username = $urlParts['user'] ?? null;
-        $this->password = $urlParts['pass'] ?? null;
-        $this->path = $urlParts['path'] ?? null;
-        $this->query = $urlParts['query'] ?? null;
-        $this->fragment = $urlParts['fragment'] ?? null;
-    }
-
     private function initializeBaseUrl()
     {
-        $this->baseUrl = ($this->isSecure) ? 'https://' : 'http://';
-        $this->baseUrl .= $this->host;
+        $this->baseUrl = ($this->uri->isSecure()) ? 'https://' : 'http://';
+        $this->baseUrl .= $this->uri->getHost();
     }
 }
