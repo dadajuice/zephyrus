@@ -69,7 +69,7 @@ class Request
      * @param string $uri
      * @param array $options
      */
-    public function __construct(string $uri = '', string $method, array $options = [])
+    public function __construct(string $uri, string $method, array $options = [])
     {
         $this->uri = new Uri($uri);
         $this->requestedUri = $uri;
