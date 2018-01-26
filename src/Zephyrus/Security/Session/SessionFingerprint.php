@@ -47,40 +47,6 @@ class SessionFingerprint
     }
 
     /**
-     * @return bool
-     */
-    public function isUserAgentFingerprinted(): bool
-    {
-        return $this->userAgentFingerprinted;
-    }
-
-    /**
-     * @param bool $fingerprinted
-     * @throws \RuntimeException
-     */
-    public function setUserAgentFingerprinted(bool $fingerprinted)
-    {
-        $this->userAgentFingerprinted = $fingerprinted;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isIpAddressFingerprinted(): bool
-    {
-        return $this->ipAddressFingerprinted;
-    }
-
-    /**
-     * @param bool $fingerprinted
-     * @throws \RuntimeException
-     */
-    public function setIpAddressFingerprinted(bool $fingerprinted)
-    {
-        $this->ipAddressFingerprinted = $fingerprinted;
-    }
-
-    /**
      * Creates an hashed fingerprint based on the defined session configuration
      * which might include client's ip address and/or client's user agent.
      *
@@ -105,10 +71,8 @@ class SessionFingerprint
      */
     private function setupFingerprintHandler()
     {
-        if (!$this->userAgentFingerprinted && !$this->ipAddressFingerprinted
-            && isset($_SESSION['__HANDLER_FINGERPRINT'])) {
-            unset($_SESSION['__HANDLER_FINGERPRINT']);
-        } elseif (!isset($_SESSION['__HANDLER_FINGERPRINT'])) {
+        if ($this->userAgentFingerprinted || $this->ipAddressFingerprinted
+            && !isset($_SESSION['__HANDLER_FINGERPRINT'])) {
             $_SESSION['__HANDLER_FINGERPRINT'] = $this->createFingerprint();
         }
     }

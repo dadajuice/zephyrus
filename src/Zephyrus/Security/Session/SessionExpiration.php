@@ -27,25 +27,14 @@ class SessionExpiration
         }
     }
 
-    public function start()
-    {
-        $this->setupRefreshOnNthRequestsHandler();
-        $this->setupRefreshOnIntervalHandler();
-    }
-
     /**
      * Initiates expiration policies for the current session based on automated
      * refreshes after nth requests and/or after a certain time interval.
      */
-    public function initiateExpiration()
+    public function start()
     {
-        if (!empty($this->refreshAfterNthRequests)) {
-            $_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'] = $this->refreshAfterNthRequests;
-        }
-        if (!empty($this->refreshAfterInterval)) {
-            $_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH'] = $this->refreshAfterInterval;
-            $_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP'] = time();
-        }
+        $this->setupRefreshOnNthRequestsHandler();
+        $this->setupRefreshOnIntervalHandler();
     }
 
     /**
@@ -115,46 +104,6 @@ class SessionExpiration
             $_SESSION['__HANDLER_SECONDS_BEFORE_REFRESH'] = $this->refreshAfterInterval;
             $_SESSION['__HANDLER_LAST_ACTIVITY_TIMESTAMP'] = time();
         }
-    }
-
-    /**
-     * @return int
-     */
-    public function getRefreshAfterNthRequests(): ?int
-    {
-        return $this->refreshAfterNthRequests;
-    }
-
-    /**
-     * @param int $nthRequests
-     */
-    public function setRefreshAfterNthRequests(int $nthRequests)
-    {
-        $this->refreshAfterNthRequests = $nthRequests;
-    }
-
-    /**
-     * @return int
-     */
-    public function getRefreshAfterInterval(): ?int
-    {
-        return $this->refreshAfterInterval;
-    }
-
-    /**
-     * @param int $refreshAfterInterval
-     */
-    public function setRefreshAfterInterval(int $refreshAfterInterval)
-    {
-        $this->refreshAfterInterval = $refreshAfterInterval;
-    }
-
-    /**
-     * @return float
-     */
-    public function getRefreshProbability(): ?float
-    {
-        return $this->refreshProbability;
     }
 
     /**
