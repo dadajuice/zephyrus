@@ -60,41 +60,19 @@ class ResponseFactory
 
     public function buildStreamingSse($callback, $eventName, $sleep = 1): Response
     {
-        // Make session readonly to prevent hang from other pages
-        // session_start(); is optional since its always starting from kernel
-        session_write_close();
-
-        header('Content-Type: text/event-stream');
-        header('Cache-Control: no-cache');
-        header("Connection: keep-alive");
-
-        set_time_limit(0);
-        ignore_user_abort(true);
-        ini_set('auto_detect_line_endings', 1);
-        ini_set('max_execution_time', '0');
-        ob_end_clean();
-        gc_enable();
-
+        $this->initializeStreaming();
         $callbackExecutionCounter = 1;
         $call = new Callback($callback);
-
-        while (true) {
-            if (connection_status() != CONNECTION_NORMAL || connection_aborted()) {
+        while (connection_status() == CONNECTION_NORMAL && !connection_aborted()) {
+            $data = $call->execute();
+            if ($data === false) {
                 break;
             }
-
-            $data = $call->execute();
             if (!empty($data)) {
                 $this->buildPollingSse($data, $eventName, $sleep * 1000)->sendContent();
             }
 
-            if (@ob_get_level() > 0) {
-                for ($i = 0; $i < @ob_get_level(); $i++) {
-                    @ob_flush();
-                }
-            }
             @flush();
-
             sleep($sleep);
             $callbackExecutionCounter++;
 
@@ -105,14 +83,6 @@ class ResponseFactory
                 $callbackExecutionCounter = 1;
             }
         }
-
-        if (@ob_get_level() > 0) {
-            for ($i = 0; $i < @ob_get_level(); $i++) {
-                @ob_flush();
-            }
-            @ob_end_clean();
-        }
-
         return new Response(ContentType::SSE);
     }
 
@@ -170,5 +140,20 @@ class ResponseFactory
             return $response;
         }
         return null;
+    }
+
+    private function initializeStreaming()
+    {
+        // Make session readonly to prevent hang from other pages
+        // session_start(); is optional since its always starting from kernel
+        session_write_close();
+        header('Content-Type: text/event-stream');
+        header('Cache-Control: no-cache');
+        header("Connection: keep-alive");
+        set_time_limit(0);
+        ignore_user_abort(true);
+        ini_set('auto_detect_line_endings', 1);
+        ini_set('max_execution_time', '0');
+        gc_enable();
     }
 }
