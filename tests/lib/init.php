@@ -5,3 +5,4 @@ if (!@require __DIR__ . '/../../vendor/autoload.php') {
 }
 
 define('ROOT_DIR', __DIR__ . '/..');
+require_once ROOT_DIR . '/../src/Zephyrus/functions.php';
