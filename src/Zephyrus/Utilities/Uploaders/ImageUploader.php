@@ -37,6 +37,9 @@ class ImageUploader extends FileUploader
         $this->forcingImageRebuild = $forcingImageRebuild;
     }
 
+    /**
+     * @throws \Exception
+     */
     protected function validateUpload()
     {
         parent::validateUpload();
@@ -62,7 +65,7 @@ class ImageUploader extends FileUploader
             throw new \Exception("Uploaded image appears to be corrupt");
         }
         $mime = image_type_to_mime_type($imageType);
-        if (!in_array($mime, self::PERMITTED_MIME_TYPES)) {
+        if (!in_array($mime, parent::getAllowedMimeTypes())) {
             throw new \Exception("Mime type ($mime) not allowed");
         }
     }
