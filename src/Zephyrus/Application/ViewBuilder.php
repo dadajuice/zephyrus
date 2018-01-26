@@ -1,7 +1,6 @@
 <?php namespace Zephyrus\Application;
 
 use Pug\Pug;
-use Zephyrus\Security\ContentSecurityPolicy;
 
 class ViewBuilder
 {
@@ -57,72 +56,9 @@ class ViewBuilder
         $this->pug = new Pug($options);
     }
 
-    private function addPugHelpers()
-    {
-        $this->initializeDefaultFunctions();
-        $this->pug->share(Flash::readAll());
-    }
-
     private function __construct()
     {
         $this->buildPug();
-        $this->addPugHelpers();
-    }
-
-    private function initializeDefaultFunctions()
-    {
-        $functions = [];
-        $functions['nonce'] = $this->addNonceFunction();
-        $functions['format'] = $this->addFormatFunction();
-        $functions['val'] = $this->addValFunction();
-        $functions['sess'] = $this->addSessionFunction();
-        $this->pug->share($functions);
-    }
-
-    private function addNonceFunction()
-    {
-        return function () {
-            return ContentSecurityPolicy::getRequestNonce();
-        };
-    }
-
-    private function addValFunction()
-    {
-        return function ($fieldId, $defaultValue = "") {
-            return Form::readMemorizedValue($fieldId, $defaultValue);
-        };
-    }
-
-    private function addSessionFunction()
-    {
-        return function ($key) {
-            return Session::getInstance()->read($key);
-        };
-    }
-
-    private function addFormatFunction()
-    {
-        return function ($type, ...$args) {
-            $class = '\Zephyrus\Application\Formatter';
-            switch ($type) {
-                case 'filesize':
-                    return forward_static_call_array([$class, 'formatHumanFileSize'], $args);
-                case 'time':
-                    return forward_static_call_array([$class, 'formatTime'], $args);
-                case 'elapsed':
-                    return forward_static_call_array([$class, 'formatElapsedDateTime'], $args);
-                case 'datetime':
-                    return forward_static_call_array([$class, 'formatDateTime'], $args);
-                case 'date':
-                    return forward_static_call_array([$class, 'formatDate'], $args);
-                case 'percent':
-                    return forward_static_call_array([$class, 'formatPercent'], $args);
-                case 'money':
-                    return forward_static_call_array([$class, 'formatMoney'], $args);
-                case 'decimal':
-                    return forward_static_call_array([$class, 'formatDecimal'], $args);
-            }
-            return 'FORMAT TYPE [' . $type . '] NOT DEFINED !';
-        };
+        $this->pug->share(Flash::readAll());
     }
 }
