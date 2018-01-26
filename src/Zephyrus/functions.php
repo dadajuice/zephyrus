@@ -1,5 +1,7 @@
 <?php
 
+use Zephyrus\Application\Form;
+use Zephyrus\Application\Session;
 use Zephyrus\Security\ContentSecurityPolicy;
 
 /**
@@ -65,4 +67,68 @@ function naturalSort(array $objects, string $getterMethod = 'getNumber')
         $orderedResults[] = $objects[$index];
     }
     return $orderedResults;
+}
+
+/**
+ * Simple alias function to simplify formatting usage inside view files. Use the
+ * following types : filesize, time, elapsed, datetime, date, percent, money and
+ * decimal.
+ *
+ * @param string $type
+ * @param array ...$args
+ * @return string
+ */
+function format(string $type, ...$args)
+{
+    $class = '\Zephyrus\Application\Formatter';
+    $typeMapping = [
+        'filesize' => 'formatHumanFileSize',
+        'time' => 'formatTime',
+        'elapsed' => 'formatElapsedDateTime',
+        'datetime' => 'formatDateTime',
+        'date' => 'formatDate',
+        'percent' => 'formatPercent',
+        'money' => 'formatMoney',
+        'decimal' => 'formatDecimal'
+    ];
+    return (key_exists($type, $typeMapping))
+        ? forward_static_call_array([$class, $typeMapping[$type]], $args)
+        : 'FORMAT TYPE [' . $type . '] NOT DEFINED !';
+}
+
+/**
+ * Simple alias function to directly read a data from the session to simplify
+ * usage inside view files.
+ *
+ * @param string $key
+ * @param mixed $defaultValue
+ * @return mixed
+ */
+function sess(string $key, $defaultValue = null)
+{
+    return Session::getInstance()->read($key, $defaultValue);
+}
+
+/**
+ * Simple alias function to read a memorized form value to simplify usage
+ * inside view files.
+ *
+ * @param string $fieldId
+ * @param mixed $defaultValue
+ * @return mixed
+ */
+function val(string $fieldId, $defaultValue = "")
+{
+    return Form::readMemorizedValue($fieldId, $defaultValue);
+}
+
+/**
+ * Simple alias function to quickly retrieve the CSP nonce to be used for
+ * inline JavaScript.
+ *
+ * @return string
+ */
+function nonce(): string
+{
+    return ContentSecurityPolicy::getRequestNonce();
 }
