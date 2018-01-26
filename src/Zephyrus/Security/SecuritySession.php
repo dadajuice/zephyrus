@@ -61,6 +61,13 @@ class SecuritySession
         }
     }
 
+    public function destroy()
+    {
+        if (!is_null($this->decoy)) {
+            $this->decoy->destroyDecoys();
+        }
+    }
+
     /**
      * Launches the first session start process which initialize the decoys if
      * configured and register __HANDLER_INITIATED session key.

@@ -142,6 +142,7 @@ class Session
      */
     public function destroy()
     {
+        $this->security->destroy();
         $_SESSION = [];
         setcookie(session_name(), '', 1);
         unset($_COOKIE[session_name()]);
@@ -174,6 +175,11 @@ class Session
     public function getId(): string
     {
         return $this->sessionId;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     /**
