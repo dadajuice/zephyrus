@@ -43,6 +43,14 @@ class SecureHeader
     private $strictTransportSecurity = "max-age=16070400; includeSubDomains";
 
     /**
+     * Access-Control-Allow-Origin response header indicates whether the response can be shared
+     * with resources with the given origin.
+     *
+     * @var string
+     */
+    private $accessControlAllowOrigin = "";
+
+    /**
      * Requires careful tuning and precise definition of the policy. If
      * enabled, CSP has significant impact on the way browser renders
      * pages (e.g., inline JavaScript disabled by default and must be
@@ -65,6 +73,7 @@ class SecureHeader
         $this->sendFrameOptions();
         $this->sendXssProtection();
         $this->sendStrictTransport();
+        $this->sendAccessControlAllowOrigin();
         $this->sendContentSecurity();
     }
 
@@ -133,6 +142,22 @@ class SecureHeader
     }
 
     /**
+     * @return string
+     */
+    public function getAccessControlAllowOrigin(): string
+    {
+        return $this->accessControlAllowOrigin;
+    }
+
+    /**
+     * @param string $accessControlAllowOrigin
+     */
+    public function setAccessControlAllowOrigin(string $accessControlAllowOrigin): void
+    {
+        $this->accessControlAllowOrigin = $accessControlAllowOrigin;
+    }
+
+    /**
      * @return ContentSecurityPolicy
      */
     public function getContentSecurityPolicy(): ?ContentSecurityPolicy
@@ -173,6 +198,13 @@ class SecureHeader
     {
         if (!empty($this->strictTransportSecurity)) {
             header('Strict-Transport-Security: ' . $this->strictTransportSecurity);
+        }
+    }
+
+    private function sendAccessControlAllowOrigin()
+    {
+        if (!empty($this->accessControlAllowOrigin)) {
+            header('Access-Control-Allow-Origin: ' . $this->accessControlAllowOrigin);
         }
     }
 
