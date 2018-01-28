@@ -118,13 +118,13 @@ abstract class Controller implements Routable
      * Does a simple server-sent event response which will do a simple polling.
      *
      * @param mixed $data
-     * @param string $eventName
+     * @param string $eventId
      * @param int $retry
      * @return Response
      */
-    protected function ssePolling($data, $eventName = 'stream', $retry = 1000): Response
+    protected function ssePolling($data, $eventId = 'stream', $retry = 1000): Response
     {
-        return ResponseFactory::getInstance()->buildPollingSse($data, $eventName, $retry);
+        return ResponseFactory::getInstance()->buildPollingSse($data, $eventId, $retry);
     }
 
     /**
@@ -133,13 +133,26 @@ abstract class Controller implements Routable
      * needed.
      *
      * @param $callback
-     * @param string $eventName
+     * @param string $eventId
      * @param int $retry
      * @return Response
      */
-    protected function sseStreaming($callback, $eventName = 'stream', $sleep = 1): Response
+    protected function sseStreaming($callback, $eventId = 'stream', $sleep = 1): Response
     {
-        return ResponseFactory::getInstance()->buildStreamingSse($callback, $eventName, $sleep);
+        return ResponseFactory::getInstance()->buildStreamingSse($callback, $eventId, $sleep);
+    }
+
+    /**
+     * Used to implement a manual SSE flow (e.g. progressbar). Requires a callback
+     * which receives a specific function destined to be used when sending an SSE
+     * message to the client side.
+     *
+     * @param $callback
+     * @return Response
+     */
+    protected function sseFlow($callback): Response
+    {
+        return ResponseFactory::getInstance()->buildFlowSse($callback);
     }
 
     /**
