@@ -78,6 +78,22 @@ class Response
     }
 
     /**
+     * @return string
+     */
+    public function getContent(): string
+    {
+        return $this->content;
+    }
+
+    /**
+     * @return string
+     */
+    public function getContentType(): string
+    {
+        return $this->contentType;
+    }
+
+    /**
      * @param string $charset
      */
     public function setCharset(string $charset)
