@@ -10,6 +10,8 @@ interface Validator
     const INTEGER_SIGNED = ['Zephyrus\Utilities\Validations\NumericValidation', 'isSignedInteger'];
     const EMAIL = ['Zephyrus\Utilities\Validations\BaseValidation', 'isEmail'];
     const DATE_ISO = ['Zephyrus\Utilities\Validations\BaseValidation', 'isDate'];
+    const TIME_12HOURS = ['Zephyrus\Utilities\Validations\BaseValidation', 'isTime12Hours'];
+    const TIME_24HOURS = ['Zephyrus\Utilities\Validations\BaseValidation', 'isTime24Hours'];
     const ALPHA = ['Zephyrus\Utilities\Validations\BaseValidation', 'isAlpha'];
     const NAME = ['Zephyrus\Utilities\Validations\BaseValidation', 'isName'];
     const ALPHANUMERIC = ['Zephyrus\Utilities\Validations\BaseValidation', 'isAlphanumeric'];

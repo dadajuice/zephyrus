@@ -49,6 +49,16 @@ class Rule
         return new self(Validator::DATE_ISO, $errorMessage);
     }
 
+    public static function time12Hours(string $errorMessage = "")
+    {
+        return new self(Validator::TIME_12HOURS, $errorMessage);
+    }
+
+    public static function time24Hours(string $errorMessage = "")
+    {
+        return new self(Validator::TIME_24HOURS, $errorMessage);
+    }
+
     public static function alpha(string $errorMessage = "")
     {
         return new self(Validator::ALPHA, $errorMessage);

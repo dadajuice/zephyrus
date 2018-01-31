@@ -44,6 +44,28 @@ class BaseValidation
     }
 
     /**
+     * Validates format HH:MM which ranges 00:00 - 11:59
+     *
+     * @param $data
+     * @return bool
+     */
+    public static function isTime12Hours($data): bool
+    {
+        return preg_match("/^(1[012]|0[0-9]):([0-5][0-9])$/", $data);
+    }
+
+    /**
+     * Validates format HH:MM which ranges 00:00 - 23:59
+     *
+     * @param $data
+     * @return bool
+     */
+    public static function isTime24Hours($data): bool
+    {
+        return preg_match("/^(2[0-3]|[01][1-9]|10|00):([0-5][0-9])$/", $data);
+    }
+
+    /**
      * Based on the North American Numbering Plan (NAPN).
      *
      * @see https://en.wikipedia.org/wiki/North_American_Numbering_Plan#Numbering_system

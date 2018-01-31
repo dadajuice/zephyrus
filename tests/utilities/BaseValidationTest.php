@@ -50,6 +50,24 @@ class BaseValidationTest extends TestCase
         self::assertFalse(BaseValidation::isDate('2016'));
     }
 
+    public function testIsTime12Hours()
+    {
+        self::assertTrue(BaseValidation::isTime12Hours('01:56'));
+        self::assertFalse(BaseValidation::isTime12Hours('23:45'));
+        self::assertFalse(BaseValidation::isTime12Hours('-08:00'));
+        self::assertFalse(BaseValidation::isTime12Hours('er'));
+        self::assertFalse(BaseValidation::isTime12Hours('05:89'));
+    }
+
+    public function testIsTime24Hours()
+    {
+        self::assertTrue(BaseValidation::isTime24Hours('22:56'));
+        self::assertFalse(BaseValidation::isTime24Hours('26:45'));
+        self::assertFalse(BaseValidation::isTime24Hours('-08:00'));
+        self::assertFalse(BaseValidation::isTime24Hours('er'));
+        self::assertFalse(BaseValidation::isTime24Hours('05:89'));
+    }
+
     public function testIsEmail()
     {
         self::assertTrue(BaseValidation::isEmail('davidt2003@msn.com'));
