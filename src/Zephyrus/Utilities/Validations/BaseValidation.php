@@ -10,7 +10,13 @@ class BaseValidation
     public static function isAlpha($data): bool
     {
         $accentedChar = "àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇßØøÅåÆæœ";
-        return self::isRegexValid($data, "[a-zA-Z-" . $accentedChar . "]+");
+        return self::isRegexValid($data, "[a-zA-Z" . $accentedChar . "]+");
+    }
+
+    public static function isName($data): bool
+    {
+        $accentedChar = "àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇßØøÅåÆæœ";
+        return self::isRegexValid($data, "[a-zA-Z- " . $accentedChar . "]+");
     }
 
     public static function isAlphanumeric($data): bool

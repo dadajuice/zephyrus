@@ -76,6 +76,13 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid("450-666-6666"));
     }
 
+    public function testIsName()
+    {
+        $rule = Rule::name("err");
+        self::assertTrue($rule->isValid("Émilie Bornard"));
+        self::assertFalse($rule->isValid("450-666-6666"));
+    }
+
     public function testIsAlphanumeric()
     {
         $rule = Rule::alphanumeric("err");

@@ -19,6 +19,11 @@ class Rule
         return new self(Validator::NOT_EMPTY, $errorMessage);
     }
 
+    public static function name(string $errorMessage = "")
+    {
+        return new self(Validator::NAME, $errorMessage);
+    }
+
     public static function passwordCompliant(string $errorMessage = "")
     {
         return new self(Validator::PASSWORD_COMPLIANT, $errorMessage);
