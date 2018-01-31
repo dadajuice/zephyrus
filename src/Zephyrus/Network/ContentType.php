@@ -13,4 +13,5 @@ interface ContentType
     const PDF = 'application/pdf'; /* RFC 3778 */
     const GZIP = 'application/gzip'; /* RFC 6713 */
     const SSE = 'text/event-stream';
+    const APPLICATION = 'application/octet-stream';
 }
