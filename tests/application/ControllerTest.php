@@ -302,6 +302,28 @@ class ControllerTest extends TestCase
         self::assertEquals('<html>test</html>', $output);
     }
 
+    public function testDownload()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                return parent::download(ROOT_DIR . '/config.ini');
+            }
+        };
+        ob_start();
+        $controller->index()->send();
+        $output = ob_get_clean();
+        $headers = xdebug_get_headers();
+        self::assertTrue(strpos($output, "[application]") !== false);
+        self::assertTrue(in_array('Content-Disposition:attachment; filename="config.ini"', $headers));
+    }
+
     public function testPollingSse()
     {
         $router = new Router();

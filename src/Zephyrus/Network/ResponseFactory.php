@@ -45,6 +45,28 @@ class ResponseFactory
         return $response;
     }
 
+    public function buildFile(string $filePath, ?string $filename = null): Response
+    {
+        if (is_null($filename)) {
+            $filename = basename($filePath);
+        }
+        $contentLength = filesize($filePath);
+        $response = new Response(ContentType::APPLICATION);
+        $response->addHeader("Pragma", "public");
+        $response->addHeader("Expires", "0");
+        $response->addHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+        $response->addHeader("Cache-Control", "public");
+        $response->addHeader("Content-Description", "File Transfer");
+        $response->addHeader("Content-Disposition", 'attachment; filename="' . $filename . '"');
+        $response->addHeader("Content-Transfer-Encoding", "binary");
+        $response->addHeader("Content-Length", $contentLength);
+        ob_start();
+        @readfile($filePath);
+        $content = ob_get_clean();
+        $response->setContent($content);
+        return $response;
+    }
+
     public function buildPollingSse($data, $eventId = 'stream', $retry = 1000): Response
     {
         $response = new Response(ContentType::SSE);

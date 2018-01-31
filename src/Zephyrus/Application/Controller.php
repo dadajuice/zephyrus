@@ -115,6 +115,20 @@ abstract class Controller implements Routable
     }
 
     /**
+     * Renders a given file as a downloadable content with application/octet-stream
+     * content type. If no filename is given, it will automatically use the actual
+     * file basename.
+     *
+     * @param string $filePath
+     * @param null|string $filename
+     * @return Response
+     */
+    protected function download(string $filePath, ?string $filename = null): Response
+    {
+        return ResponseFactory::getInstance()->buildFile($filePath, $filename);
+    }
+
+    /**
      * Does a simple server-sent event response which will do a simple polling.
      *
      * @param mixed $data
