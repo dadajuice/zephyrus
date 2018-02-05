@@ -44,7 +44,7 @@ class BaseValidation
     }
 
     /**
-     * Validates format HH:MM which ranges 00:00 - 11:59
+     * Validates format HH:MM which ranges 00:00 - 11:59.
      *
      * @param $data
      * @return bool
@@ -55,7 +55,7 @@ class BaseValidation
     }
 
     /**
-     * Validates format HH:MM which ranges 00:00 - 23:59
+     * Validates format HH:MM which ranges 00:00 - 23:59.
      *
      * @param $data
      * @return bool
