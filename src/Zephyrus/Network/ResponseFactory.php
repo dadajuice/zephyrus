@@ -74,7 +74,7 @@ class ResponseFactory
         ob_start();
         echo "id: $eventId" . PHP_EOL;
         echo "retry: " . $retry . PHP_EOL;
-        echo "data: " . json_encode($data, JSON_FORCE_OBJECT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) . PHP_EOL;
+        echo "data: " . json_encode($data, JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) . PHP_EOL;
         echo PHP_EOL;
         $response->setContent(ob_get_clean());
         return $response;
