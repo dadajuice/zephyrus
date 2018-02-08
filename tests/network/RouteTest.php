@@ -9,6 +9,7 @@ class RouteTest extends TestCase
     {
         $route = new Route("/dummy/{id}");
         $args = $route->getArguments("/dummy/4");
+        self::assertEquals('/dummy/{id}', $route->getUri());
         self::assertEquals(['id' => "4"], $args);
     }
 
