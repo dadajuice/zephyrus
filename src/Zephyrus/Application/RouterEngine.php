@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Application;
 
-use Zephyrus\Exceptions\RouteDefinitionException;
 use Zephyrus\Exceptions\RouteMethodUnsupportedException;
 use Zephyrus\Exceptions\RouteNotAcceptedException;
 use Zephyrus\Exceptions\RouteNotFoundException;
@@ -69,24 +68,11 @@ abstract class RouterEngine
      * @param string $uri
      * @param callable $callback
      * @param string | array | null $acceptedFormats
-     * @throws RouteDefinitionException
      */
     final protected function addRoute($method, $uri, $callback, $acceptedFormats)
     {
-        if ($uri != '/') {
-            $uri = rtrim($uri, '/');
-        }
-        $params = $this->getUriParameters($uri);
-        if (!empty($params) && count($params) != count(array_unique($params))) {
-            throw new RouteDefinitionException($uri);
-        }
-
         $this->routes[$method][] = [
-            'uri' => $uri,
-            'regex' => (!empty($params))
-                ? $this->getUriRegexFromParameters($uri, $params)
-                : null,
-            'params' => $params,
+            'route' => new Route($uri),
             'callback' => $callback,
             'acceptedRequestFormats' => $acceptedFormats
         ];
@@ -129,16 +115,13 @@ abstract class RouterEngine
     {
         $routes = $this->routes[$this->requestedMethod];
         foreach ($routes as $route) {
-            $pattern = '/^' . $route['regex'] . '$/';
-            $match = !empty($route['regex']) && preg_match($pattern, $this->requestedUri);
-            if ($route['uri'] == $this->requestedUri || $match) {
+            if ($route['route']->match($this->requestedUri)) {
                 if (!$this->isRequestAcceptedForRoute($route)) {
                     throw new RouteNotAcceptedException($this->requestedRepresentation);
                 }
                 return $route;
             }
         }
-
         throw new RouteNotFoundException($this->requestedUri, $this->requestedMethod);
     }
 
@@ -204,10 +187,10 @@ abstract class RouterEngine
             }
         }
 
-        $values = $this->retrieveUriParameters($route);
-        $this->loadRequestParameters($route, $values);
+        $values = $route['route']->getArguments($this->requestedUri);
+        $this->loadRequestParameters($values);
         $callback = new Callback($route['callback']);
-        $arguments = $this->getFunctionArguments($callback->getReflection(), $values);
+        $arguments = $this->getFunctionArguments($callback->getReflection(), array_values($values));
         $response = $callback->executeArray($arguments);
 
         if (!is_null($controller)) {
@@ -250,33 +233,14 @@ abstract class RouterEngine
     /**
      * Load parameters located inside the request object.
      *
-     * @param mixed[] $route
      * @param mixed[] $values
      * @throws \Exception
      */
-    private function loadRequestParameters($route, $values)
+    private function loadRequestParameters($values)
     {
-        if (!empty($route['regex'])) {
-            $i = 0;
-            foreach ($route['params'] as $param) {
-                $this->request->prependParameter($param, $values[$i]);
-                ++$i;
-            }
+        foreach ($values as $param => $value) {
+            $this->request->prependParameter($param, $value);
         }
-    }
-
-    private function retrieveUriParameters($route)
-    {
-        $values = [];
-        if (!empty($route['regex'])) {
-            $pattern = '/^' . $route['regex'] . '$/';
-            preg_match_all($pattern, $this->requestedUri, $matches);
-            $matchCount = count($matches);
-            for ($i = 1; $i < $matchCount; ++$i) {
-                $values[] = /*purify(*/$matches[$i][0]/*)*/;
-            }
-        }
-        return $values;
     }
 
     /**
@@ -306,43 +270,5 @@ abstract class RouterEngine
     private function isRequestedMethodHasDefinitions()
     {
         return array_key_exists($this->requestedMethod, $this->routes);
-    }
-
-    /**
-     * Retrieve all parameters from the specified $uri. A valid parameter
-     * is defined inside braces (e.g. {id}). Keeps the parameters ordinal
-     * order. Accept every characters for parameter except "/".
-     *
-     * @param string $uri
-     * @return array
-     */
-    private function getUriParameters($uri)
-    {
-        $params = [];
-        $pattern = '/\{([^\/]+)\}/';
-        if (preg_match_all($pattern, $uri, $results) > 0) {
-            foreach ($results[1] as $result) {
-                $params[] = $result;
-            }
-        }
-        return $params;
-    }
-
-    /**
-     * Retrieve a regex pattern matching each parameter specified in
-     * $params inside the provided $uri. A valid parameter is defined
-     * inside braces (e.g. {id}).
-     *
-     * @param string $uri
-     * @param array $params
-     * @return string
-     */
-    private function getUriRegexFromParameters($uri, $params)
-    {
-        $regex = str_replace('/', '\/', $uri);
-        foreach ($params as $param) {
-            $regex = str_replace('{' . $param . '}', '([^\/]+)', $regex);
-        }
-        return $regex;
     }
 }

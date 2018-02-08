@@ -208,7 +208,7 @@ class RouterTest extends TestCase
     }
 
     /**
-     * @expectedException \Zephyrus\Exceptions\RouteDefinitionException
+     * @expectedException \InvalidArgumentException
      */
     public function testInvalidRouteDefinition()
     {
