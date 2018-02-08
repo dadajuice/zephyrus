@@ -33,95 +33,12 @@ class ResponseTest extends TestCase
         self::assertTrue(in_array('test2:12345', $headers));
     }
 
-    /*
-    public function testRedirect()
+    public function testContent()
     {
         $response = new Response();
-        $response->redirect('/test');
-        $headers = xdebug_get_headers();
-        self::assertTrue(in_array('Location:/test', $headers));
-    }*/
-
-    /**
-     * @expectedException \RuntimeException
-     */
-    /*
-    public function testAlreadySent()
-    {
-        $response = new OldResponse();
-        $response->sendResponseCode();
-        $response->sendResponseCode();
-    }*/
-
-    /**
-     * @expectedException \RuntimeException
-     */
-    /*
-    public function testAlreadySent2()
-    {
-        $response = new OldResponse();
-        $response->sendContentType();
-        $response->sendContentType();
+        $response->setContentType(ContentType::HTML);
+        $response->setContent("test");
+        self::assertEquals(ContentType::HTML, $response->getContentType());
+        self::assertEquals("test", $response->getContent());
     }
-
-    public function testAbortNotFound()
-    {
-        $response = new OldResponse();
-        try {
-            $response->abortNotFound();
-        } catch (NetworkException $e) {
-            self::assertTrue($e->isNotFound());
-            self::assertEquals(404, $e->getHttpStatusCode());
-        }
-    }
-
-    public function testAbortInternalError()
-    {
-        $response = new OldResponse();
-        try {
-            $response->abortInternalError();
-        } catch (NetworkException $e) {
-            self::assertTrue($e->isInternalError());
-        }
-    }
-
-    public function testAbortForbidden()
-    {
-        $response = new OldResponse();
-        try {
-            $response->abortForbidden();
-        } catch (NetworkException $e) {
-            self::assertTrue($e->isForbidden());
-        }
-    }
-
-    public function testAbortMethodNotAllowed()
-    {
-        $response = new OldResponse();
-        try {
-            $response->abortMethodNotAllowed();
-        } catch (NetworkException $e) {
-            self::assertTrue($e->isMethodNotAllowed());
-        }
-    }
-
-    public function testAbortNotAcceptable()
-    {
-        $response = new OldResponse();
-        try {
-            $response->abortNotAcceptable();
-        } catch (NetworkException $e) {
-            self::assertTrue($e->isNotAcceptable());
-        }
-    }
-
-    public function testAbort()
-    {
-        $response = new OldResponse();
-        try {
-            $response->abort(407);
-        } catch (NetworkException $e) {
-            self::assertEquals(407, $e->getHttpStatusCode());
-        }
-    }*/
 }
