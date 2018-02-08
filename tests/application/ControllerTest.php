@@ -6,6 +6,7 @@ use Zephyrus\Application\Session;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 use Zephyrus\Network\Response;
+use Zephyrus\Network\ResponseFactory;
 use Zephyrus\Network\Router;
 
 class ControllerTest extends TestCase
@@ -22,7 +23,7 @@ class ControllerTest extends TestCase
 
             public function index()
             {
-                echo 'test';
+                return $this->html('test');
             }
         };
         $controller->initializeRoutes();
@@ -31,6 +32,62 @@ class ControllerTest extends TestCase
         $router->run($req);
         $output = ob_get_clean();
         self::assertEquals('test', $output);
+    }
+
+    public function testBeforeMiddleware()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+                parent::get('/', 'index');
+            }
+
+            public function before()
+            {
+                return ResponseFactory::getInstance()->buildJson(['test' => 'success']);
+            }
+
+            public function index()
+            {
+                return $this->html('test html');
+            }
+        };
+        $controller->initializeRoutes();
+        $req = new Request('http://test.local/', 'get');
+        ob_start();
+        $router->run($req);
+        $output = ob_get_clean();
+        self::assertEquals('{"test":"success"}', $output);
+    }
+
+    public function testAfterMiddleware()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+                parent::get('/', 'index');
+            }
+
+            public function after(?Response $response)
+            {
+                return ResponseFactory::getInstance()->buildJson(['test' => 'success']);
+            }
+
+            public function index()
+            {
+                return $this->html('test html');
+            }
+        };
+        $controller->initializeRoutes();
+        $req = new Request('http://test.local/', 'get');
+        ob_start();
+        $router->run($req);
+        $output = ob_get_clean();
+        self::assertEquals('{"test":"success"}', $output);
     }
 
     public function testRender()
