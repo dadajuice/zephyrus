@@ -122,6 +122,7 @@ abstract class RouterEngine
                 return $route;
             }
         }
+
         throw new RouteNotFoundException($this->requestedUri, $this->requestedMethod);
     }
 
@@ -174,8 +175,8 @@ abstract class RouterEngine
      * methods if they are available.
      *
      * @param $route
-     * @return Response | null
      * @throws \Exception
+     * @return Response | null
      */
     private function createResponse($route): ?Response
     {
