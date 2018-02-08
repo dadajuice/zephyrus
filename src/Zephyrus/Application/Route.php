@@ -77,6 +77,11 @@ class Route
         return [];
     }
 
+    public function getUri(): string
+    {
+        return $this->uri;
+    }
+
     /**
      * Retrieves all parameters from the specified $uri. A valid parameter
      * is defined inside braces (e.g. {id}). Keeps the parameters ordinal
