@@ -153,13 +153,11 @@ class FormTest extends TestCase
         self::assertEquals('10.00', $class->getPrice());
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testInvalidRuleField()
     {
         $form = new Form();
         $form->addField('name', '');
         $form->validate('bob', new Rule(Validator::ALPHANUMERIC, "err_1"));
+        self::assertFalse($form->verify());
     }
 }

@@ -166,7 +166,7 @@ class Form
     {
         foreach ($validations as $validation) {
             if ($this->isValidationTriggered($field, $validation)) {
-                $result = $validation->rule->isValid($this->fields[$field], $this->fields);
+                $result = $validation->rule->isValid($this->fields[$field] ?? null, $this->fields);
                 if (!$result) {
                     $this->errors[$field][] = $validation->rule->getErrorMessage();
                     self::removeMemorizedValue($field);
@@ -185,9 +185,6 @@ class Form
 
     private function addRule(string $field, Rule $rule, int $trigger)
     {
-        if (!array_key_exists($field, $this->fields)) {
-            throw new \InvalidArgumentException("Specified field [$field] has not been registered in this form");
-        }
         $validation = new \stdClass();
         $validation->rule = $rule;
         $validation->trigger = $trigger;
