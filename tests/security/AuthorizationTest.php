@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Application\Session;
 use Zephyrus\Exceptions\UnauthorizedAccessException;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
@@ -8,7 +9,7 @@ use Zephyrus\Security\Authorization;
 
 class AuthorizationTest extends TestCase
 {
-    public function testAuthorizeMethodNotDefined()
+    public function testModeWhitelist()
     {
         $req = new Request('http://test.local', 'POST');
         RequestFactory::set($req);
@@ -17,16 +18,40 @@ class AuthorizationTest extends TestCase
         self::assertFalse($auth->isAuthorized('/'));
     }
 
+    public function testModeBlacklist()
+    {
+        $req = new Request('http://test.local', 'POST');
+        RequestFactory::set($req);
+        $auth = new Authorization();
+        $auth->setMode(Authorization::MODE_BLACKLIST);
+        self::assertTrue($auth->isAuthorized('/'));
+    }
+
+    public function testUrlArgument()
+    {
+        $req = new Request('http://test.local', 'GET');
+        RequestFactory::set($req);
+        $auth = new Authorization();
+        $auth->addRule('cook', function ($id) {
+            return $id < 100;
+        });
+        $auth->protect('/product/{id}', Authorization::ALL, 'cook');
+        self::assertFalse($auth->isAuthorized('/product/666'));
+        self::assertTrue($auth->isAuthorized('/product/69'));
+    }
+
     public function testSessionRule()
     {
         $req = new Request('http://test.local', 'GET');
         RequestFactory::set($req);
         $auth = new Authorization();
-        $auth->addSessionRequirement('admin', 'level', '777');
-        $auth->protect('/users/*', Authorization::GET, 'admin');
+        $auth->setMode(Authorization::MODE_WHITELIST);
+        $auth->addSessionRule('admin', 'level', '777');
+        $auth->protect('/users/{subpath}', Authorization::GET, 'admin');
         self::assertFalse($auth->isAuthorized('/users/insert'));
         $_SESSION['level'] = '777';
-        self::assertTrue($auth->isAuthorized('/users/insert'));
+        //self::assertTrue($auth->isAuthorized('/users/4'));
+        $auth->isAuthorized('/users/4');
         $_SESSION = [];
     }
 
@@ -37,8 +62,8 @@ class AuthorizationTest extends TestCase
     public function testSessionRuleAlreadyDefined()
     {
         $auth = new Authorization();
-        $auth->addSessionRequirement('admin', 'level', '777');
-        $auth->addSessionRequirement('admin', 'level', '777');
+        $auth->addSessionRule('admin', 'level', '777');
+        $auth->addSessionRule('admin', 'level', '777');
     }
 
     /**
@@ -48,8 +73,8 @@ class AuthorizationTest extends TestCase
     public function testSessionRuleAlreadyDefined2()
     {
         $auth = new Authorization();
-        $auth->addSessionRequirement('admin', 'level', '777');
-        $auth->addIpAddressRequirement('admin', '10.10.10.10');
+        $auth->addSessionRule('admin', 'level', '777');
+        $auth->addIpAddressRule('admin', '10.10.10.10');
     }
 
     /**
@@ -59,8 +84,8 @@ class AuthorizationTest extends TestCase
     public function testSessionRuleAlreadyDefined3()
     {
         $auth = new Authorization();
-        $auth->addSessionRequirement('admin', 'level', '777');
-        $auth->addRequirement('admin', function () {
+        $auth->addSessionRule('admin', 'level', '777');
+        $auth->addRule('admin', function () {
             return false;
         });
     }
@@ -113,7 +138,7 @@ class AuthorizationTest extends TestCase
     public function testHome()
     {
         $auth = new Authorization();
-        $auth->addSessionRequirement('admin', 'GOZU');
+        $auth->addSessionRule('admin', 'GOZU');
         $auth->protect('/', Authorization::ALL, 'admin');
         self::assertFalse($auth->isAuthorized('/'));
     }
@@ -122,7 +147,7 @@ class AuthorizationTest extends TestCase
     {
         $auth = new Authorization();
         $auth->setMode(Authorization::MODE_WHITELIST);
-        $auth->addSessionRequirement('admin', 'GOZU');
+        $auth->addSessionRule('admin', 'GOZU');
         $auth->protect('/', Authorization::ALL, 'admin');
         $auth->protect('/test', Authorization::ALL, 'admin');
         self::assertFalse($auth->isAuthorized('/bob'));
@@ -134,7 +159,7 @@ class AuthorizationTest extends TestCase
     public function testIpRequirement()
     {
         $auth = new Authorization();
-        $auth->addIpAddressRequirement('school', '207.167.241.10');
+        $auth->addIpAddressRule('school', '207.167.241.10');
         $auth->protect('/bob', Authorization::ALL, 'school');
         $server['REMOTE_ADDR'] = '207.167.241.10';
         $req = new Request('http://test.local', 'GET', [
@@ -152,7 +177,7 @@ class AuthorizationTest extends TestCase
     public function testCallbackRequirement()
     {
         $auth = new Authorization();
-        $auth->addRequirement('public', function () {
+        $auth->addRule('public', function () {
             return true;
         });
         $auth->protect('/yup', Authorization::ALL, 'public');

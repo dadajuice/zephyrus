@@ -1,5 +1,7 @@
 <?php namespace Zephyrus\Security;
 
+use Zephyrus\Application\Callback;
+use Zephyrus\Application\Route;
 use Zephyrus\Network\RequestFactory;
 
 class Authorization
@@ -16,7 +18,7 @@ class Authorization
     /**
      * @var array
      */
-    private $requirements = [];
+    private $rules = [];
 
     /**
      * @var int
@@ -26,69 +28,52 @@ class Authorization
     /**
      * @var array
      */
-    private $rules = [];
+    private $protections = [];
 
-    public function addRequirement(string $name, callable $callback)
+    public function addRule(string $name, callable $callback)
     {
-        if (isset($this->requirements[$name])) {
-            throw new \Exception("Requirement $name is already defined");
+        if (isset($this->rules[$name])) {
+            throw new \InvalidArgumentException("Requirement $name is already defined");
         }
-        $this->requirements[$name] = $callback;
+        $this->rules[$name] = $callback;
     }
 
-    public function addSessionRequirement(string $name, string $key, $value = null)
+    public function addSessionRule(string $name, string $key, $value = null)
     {
-        if (isset($this->requirements[$name])) {
-            throw new \Exception("Requirement $name is already defined");
+        if (isset($this->rules[$name])) {
+            throw new \InvalidArgumentException("Requirement $name is already defined");
         }
-        $this->requirements[$name] = function () use ($key, $value) {
+        $this->rules[$name] = function () use ($key, $value) {
             return isset($_SESSION[$key]) && (is_null($value) || $_SESSION[$key] == $value);
         };
     }
 
-    public function addIpAddressRequirement(string $name, string $idAddress)
+    public function addIpAddressRule(string $name, string $idAddress)
     {
-        if (isset($this->requirements[$name])) {
-            throw new \Exception("Requirement $name is already defined");
+        if (isset($this->rules[$name])) {
+            throw new \InvalidArgumentException("Requirement $name is already defined");
         }
-        $this->requirements[$name] = function () use ($idAddress) {
+        $this->rules[$name] = function () use ($idAddress) {
             return RequestFactory::read()->getClientIp() == $idAddress;
         };
     }
 
-    public function protect(string $pathRegex, int $httpMethod, $requirements)
+    public function protect(string $pathRegex, int $httpMethod, $rules)
     {
-        $methods = [];
-        if ($httpMethod & self::GET) {
-            $methods[] = 'GET';
-        }
-        if ($httpMethod & self::POST) {
-            $methods[] = 'POST';
-        }
-        if ($httpMethod & self::PUT) {
-            $methods[] = 'PUT';
-        }
-        if ($httpMethod & self::DELETE) {
-            $methods[] = 'DELETE';
-        }
-        foreach ($methods as $method) {
-            $this->addRule($method, $pathRegex, $requirements);
+        foreach ($this->getProtectedMethods($httpMethod) as $method) {
+            $this->addProtection($method, $pathRegex, $rules);
         }
     }
 
-    public function isAuthorized(string $uri, array &$failedRequirements = []): bool
+    public function isAuthorized(string $uri, array &$failedRules = []): bool
     {
-        $match = false;
-        foreach ($this->findRule($uri) as $requirement) {
-            if (!isset($this->requirements[$requirement])) {
-                throw new \Exception("The specified requirement [$requirement] has not been defined");
+        $results = $this->getCorrespondingRuleResults($uri);
+        foreach ($results as $rule => $result) {
+            if (!$result) {
+                $failedRules[] = $rule;
             }
-            if (!$this->requirements[$requirement]()) {
-                $failedRequirements[] = $requirement;
-            }
-            $match = true;
         }
-        return (!$match) ? $this->mode == self::MODE_BLACKLIST : empty($failedRequirements);
+        return (empty($results)) ? $this->mode == self::MODE_BLACKLIST : empty($failedRules);
     }
 
     /**
@@ -107,39 +92,79 @@ class Authorization
         $this->mode = $mode;
     }
 
-    private function findRule(string $uri): array
+    private function getCorrespondingRuleResults(string $uri): array
     {
         $method = RequestFactory::read()->getMethod();
-        if (!isset($this->rules[$method])) {
+        if (!isset($this->protections[$method])) {
             return [];
         }
-        $rulesForMethod = $this->rules[$method];
-        if ($uri == '/') {
-            if (isset($rulesForMethod['/'])) {
-                return (is_array($rulesForMethod['/'])) ? $rulesForMethod['/'] : [$rulesForMethod['/']];
+        $protectionsForMethod = $this->protections[$method];
+        $results = [];
+        foreach ($protectionsForMethod as $pathRegex => $protection) {
+            if ($protection['route']->match($uri)) {
+                foreach ($protection['rules'] as $rule) {
+                    if (!isset($this->rules[$rule])) {
+                        throw new \RuntimeException("The specified rule [$rule] has not been defined");
+                    }
+                    $callback = new Callback($this->rules[$rule]);
+                    $values = $protection['route']->getArguments($uri);
+                    $arguments = $this->getFunctionArguments($callback->getReflection(), array_values($values));
+                    $result = $callback->executeArray($arguments);
+                    $results[$rule] = $result;
+                }
             }
         }
-        foreach ($rulesForMethod as $path => $requirements) {
-            if ($path == '/') {
-                continue;
-            }
-            if (preg_match('/' . str_replace('/', '\/', $path) . '/', $uri)) {
-                return (is_array($requirements)) ? $requirements : [$requirements];
-            }
-        }
-        return [];
+        return $results;
     }
 
-    private function addRule(string $httpMethod, string $pathRegex, $requirements)
+    private function addProtection(string $httpMethod, string $pathRegex, $rules)
     {
-        if (!isset($this->rules[$httpMethod])) {
-            $this->rules[$httpMethod] = [];
+        if (!isset($this->protections[$httpMethod])) {
+            $this->protections[$httpMethod] = [];
         }
 
-        if (isset($this->rules[$httpMethod][$pathRegex])) {
-            throw new \Exception("Rule already exists for $httpMethod $pathRegex");
+        if (isset($this->protections[$httpMethod][$pathRegex])) {
+            throw new \InvalidArgumentException("Rule already exists for $httpMethod $pathRegex");
         }
 
-        $this->rules[$httpMethod][$pathRegex] = $requirements;
+        $this->protections[$httpMethod][$pathRegex] = [
+            'route' => new Route($pathRegex),
+            'rules' => (is_array($rules)) ? $rules : [$rules]
+        ];
+    }
+
+    private function getProtectedMethods(int $httpMethod)
+    {
+        $methods = [];
+        if ($httpMethod & self::GET) {
+            $methods[] = 'GET';
+        }
+        if ($httpMethod & self::POST) {
+            $methods[] = 'POST';
+        }
+        if ($httpMethod & self::PUT) {
+            $methods[] = 'PUT';
+        }
+        if ($httpMethod & self::DELETE) {
+            $methods[] = 'DELETE';
+        }
+        return $methods;
+    }
+
+    /**
+     * Retrieves the specified function arguments.
+     *
+     * @param \ReflectionFunctionAbstract $reflection
+     * @return array
+     */
+    private function getFunctionArguments(\ReflectionFunctionAbstract $reflection, $values)
+    {
+        $arguments = [];
+        if (!empty($reflection->getParameters())) {
+            foreach ($values as $value) {
+                $arguments[] = $value;
+            }
+        }
+        return $arguments;
     }
 }
