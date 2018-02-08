@@ -17,6 +17,20 @@ class FormTest extends TestCase
         self::assertTrue($form->verify());
     }
 
+    public function testUnregistered()
+    {
+        $form = new Form();
+        $form->addFields([
+            'username' => 'blewis'
+        ]);
+        // simulate unchecked checkbox
+        $form->validate('understand', Rule::notEmpty('you need to understand'));
+        self::assertFalse($form->isRegistered('understand'));
+        self::assertTrue($form->isRegistered('username'));
+        $form->verify();
+        self::assertEquals('you need to understand', $form->getErrors()['understand'][0]);
+    }
+
     public function testErrors()
     {
         $form = new Form();

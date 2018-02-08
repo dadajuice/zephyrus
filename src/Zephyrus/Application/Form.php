@@ -138,12 +138,17 @@ class Form
 
     public function getValue(string $field)
     {
-        return $this->fields[$field];
+        return $this->fields[$field] ?? null;
     }
 
     public function getFields(): array
     {
         return $this->fields;
+    }
+
+    public function isRegistered(string $field): bool
+    {
+        return isset($this->fields[$field]);
     }
 
     /**
