@@ -35,16 +35,6 @@ abstract class RouterEngine
     private $request;
 
     /**
-     * @var callable
-     */
-    private $before = null;
-
-    /**
-     * @var callable
-     */
-    private $after = null;
-
-    /**
      * Launch the routing process to determine, according to the
      * initiated request, the best route to execute. Cannot be overridden.
      *
@@ -125,22 +115,6 @@ abstract class RouterEngine
     }
 
     /**
-     * @param $before
-     */
-    public function setBeforeCallback($before)
-    {
-        $this->before = $before;
-    }
-
-    /**
-     * @param $after
-     */
-    public function setAfterCallback($after)
-    {
-        $this->after = $after;
-    }
-
-    /**
      * Find a route corresponding to the client request. Matches direct
      * URIs and parametrised URIs. When a match is found, there's a last
      * verification to check if the route is accepted (through method
@@ -204,55 +178,56 @@ abstract class RouterEngine
      */
     private function prepareResponse($route)
     {
-        $values = $this->retrieveUriParameters($route);
-        $this->loadRequestParameters($route, $values);
         $this->beforeCallback($route);
-        $responseBefore = $this->executeBefore();
-        if ($responseBefore instanceof Response) {
-            $response = $responseBefore;
-        } else {
-            $callback = new Callback($route['callback']);
-            $arguments = $this->getFunctionArguments($callback->getReflection(), $values);
-            $response = $callback->executeArray($arguments);
-        }
-        $responseAfter = $this->executeAfter($response);
-        if ($responseAfter instanceof Response) {
-            $response = $responseAfter;
-        }
-        if ($response instanceof Response) {
+        $response = $this->createResponse($route);
+        if (!is_null($response)) {
             $response->send();
         }
         $this->afterCallback($route);
     }
 
     /**
-     * Executes the user specified before callback.
+     * Creates the response to return while executing the before and after
+     * methods if they are available.
      *
-     * @return mixed | null
+     * @param $route
+     * @return Response | null
+     * @throws \Exception
      */
-    private function executeBefore()
+    private function createResponse($route): ?Response
     {
-        if (!is_null($this->before)) {
-            $c = new Callback($this->before);
-            return $c->execute();
+        $controller = $this->getRouteControllerInstance($route);
+        if (!is_null($controller)) {
+            $responseBefore = $controller->before();
+            if ($responseBefore instanceof Response) {
+                return $responseBefore;
+            }
         }
-        return null;
+
+        $values = $this->retrieveUriParameters($route);
+        $this->loadRequestParameters($route, $values);
+        $callback = new Callback($route['callback']);
+        $arguments = $this->getFunctionArguments($callback->getReflection(), $values);
+        $response = $callback->executeArray($arguments);
+
+        if (!is_null($controller)) {
+            $responseAfter = $controller->after($response);
+            if ($responseAfter instanceof Response) {
+                return $responseAfter;
+            }
+        }
+        return $response;
     }
 
     /**
-     * Executes the user specified after callback which receives the previous
-     * obtained response wither from the before callback or natural execution.
+     * Retrieves the controller instance provided as the route action.
      *
-     * @param null | Response $response
-     * @return mixed | null
+     * @param $route
+     * @return Controller | null
      */
-    private function executeAfter(?Response $response)
+    private function getRouteControllerInstance($route): ?Controller
     {
-        if (!is_null($this->after)) {
-            $c = new Callback($this->after);
-            return $c->execute($response);
-        }
-        return null;
+        return (is_array($route['callback'])) ? $route['callback'][0] : null;
     }
 
     /**

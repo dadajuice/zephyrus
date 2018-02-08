@@ -22,8 +22,6 @@ abstract class Controller implements Routable
     public function __construct(Router $router)
     {
         $this->router = $router;
-        $this->router->setBeforeCallback([$this, 'before']);
-        $this->router->setAfterCallback([$this, 'after']);
         $this->request = &$router->getRequest();
     }
 
