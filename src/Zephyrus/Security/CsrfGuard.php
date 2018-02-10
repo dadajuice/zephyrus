@@ -228,7 +228,7 @@ class CsrfGuard
         if (!is_null($sortedCsrf)) {
             $csrfData = Session::getInstance()->read('__CSRF_TOKEN', []);
             if (is_null($this->request->getHeader('CSRF_KEEP_ALIVE'))
-                || is_null($this->request->getParameter('CSRF_KEEP_ALIVE'))) {
+                && is_null($this->request->getParameter('CSRF_KEEP_ALIVE'))) {
                 $csrfData[$formName] = '';
                 Session::getInstance()->set('__CSRF_TOKEN', $csrfData);
             }
