@@ -193,7 +193,7 @@ class IntrusionDetection
         $filters = new FilterCollection();
         $filters->load();
 
-        $this->manager = new Manager($filters, new class extends \Psr\Log\AbstractLogger {
+        $this->manager = new Manager($filters, new class() extends \Psr\Log\AbstractLogger {
             public function log($level, $message, array $context = [])
             {
             }
