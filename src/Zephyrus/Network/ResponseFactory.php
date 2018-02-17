@@ -93,17 +93,11 @@ class ResponseFactory
                 if (!empty($data)) {
                     $that->buildPollingSse($data, $eventId, $sleep * 1000)->sendContent();
                 }
-                /*if (@ob_get_level() > 0) {
-                    for ($i = 0; $i < @ob_get_level(); $i++) {
-                        @ob_flush();
-                    }
-                }*/
                 @flush();
                 sleep($sleep);
                 $callbackExecutionCounter++;
 
                 // Reduce potential memory leaks
-                // @see https://stackoverflow.com/questions/29480791/while-loops-for-server-sent-events-are-causing-page-to-freeze
                 if ($callbackExecutionCounter % 1000 == 0) {
                     gc_collect_cycles();
                     $callbackExecutionCounter = 1;
@@ -122,7 +116,6 @@ class ResponseFactory
             $call = new Callback($callback);
             $call->execute(function ($id, $data) use ($that) {
                 $that->outputSseMessage($id, $data);
-                //@ob_flush();
                 @flush();
             });
         });
@@ -197,7 +190,13 @@ class ResponseFactory
         ignore_user_abort(true);
         ini_set('auto_detect_line_endings', 1);
         ini_set('max_execution_time', '0');
-        //ob_end_clean();
+        // @codeCoverageIgnoreStart
+        // ob_get_level should always be at 1 when using SSE, this if is for
+        // test coverage to allow PHPUnit to output buffer results.
+        if (ob_get_level() < 2) {
+            ob_end_clean();
+        }
+        // @codeCoverageIgnoreEnd
         gc_enable();
     }
 

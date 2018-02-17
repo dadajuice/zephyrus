@@ -401,35 +401,6 @@ class ControllerTest extends TestCase
         self::assertTrue(strpos($output, 'data: "test"') !== false);
     }
 
-    // Test is working if we remove the ob_clean calls
-    /*public function testStreamingSse()
-    {
-        Session::kill();
-        $router = new Router();
-        $controller = new class($router) extends Controller {
-
-            public function initializeRoutes()
-            {
-            }
-
-            public function index()
-            {
-                $i = 0;
-                return parent::sseStreaming(function () use(&$i) {
-                    if ($i >= 1000) { // to test memory leak mitigation
-                        return false;
-                    }
-                    ++$i;
-                    return "works";
-                }, 'test', 0.1);
-            }
-        };
-        ob_start();
-        $controller->index()->send();
-        $output = ob_get_clean();
-        self::assertTrue(strpos($output, 'data: "works"') !== false);
-    }*/
-
     public function testStreamingSse()
     {
         Session::kill();
