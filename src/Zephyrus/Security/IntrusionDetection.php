@@ -3,7 +3,6 @@
 use Expose\FilterCollection;
 use Expose\Manager;
 use Expose\Report;
-use Psr\Log\LoggerInterface;
 use Zephyrus\Application\Configuration;
 
 class IntrusionDetection
@@ -33,10 +32,10 @@ class IntrusionDetection
      */
     private static $instance = null;
 
-    public static function getInstance(?LoggerInterface $logger = null): self
+    public static function getInstance(): self
     {
-        if (is_null(self::$instance) || !is_null($logger)) {
-            self::$instance = new self($logger);
+        if (is_null(self::$instance)) {
+            self::$instance = new self();
         }
         return self::$instance;
     }
@@ -188,13 +187,15 @@ class IntrusionDetection
      * Constructor which initiates the configuration of the PHPIDS framework
      * and prepare the monitor component.
      */
-    private function __construct(LoggerInterface $logger)
+    private function __construct()
     {
         $config = Configuration::getSecurityConfiguration();
         $filters = new FilterCollection();
         $filters->load();
 
-        $this->manager = new Manager($filters, $logger);
+        $this->manager = new Manager($filters, new class extends \Psr\Log\AbstractLogger {
+            public function log($level, $message, array $context = array()) {}
+        });
         if (isset($config['ids_exceptions'])) {
             $this->manager->setException($config['ids_exceptions']);
         }
