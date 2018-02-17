@@ -52,4 +52,13 @@ class SecureHeaderTest extends TestCase
         $header->send();
         self::assertTrue(in_array("Content-Security-Policy: default-src 'self';", xdebug_get_headers()));
     }
+
+    public function testAccessControl()
+    {
+        $header = new SecureHeader();
+        $header->setAccessControlAllowOrigin("dummy@domain.com");
+        self::assertEquals("dummy@domain.com", $header->getAccessControlAllowOrigin());
+        $header->send();
+        self::assertTrue(in_array('Access-Control-Allow-Origin: dummy@domain.com', xdebug_get_headers()));
+    }
 }
