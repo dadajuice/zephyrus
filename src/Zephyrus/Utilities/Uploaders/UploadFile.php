@@ -50,11 +50,14 @@ class UploadFile
     }
 
     /**
+     * @codeCoverageIgnore
+     *
      * Upload the current file to the specified destination as the defined
      * filename. If the filename has not been previously set with
      * setDestinationFilename, user can set it directly with this method. Will
      * produce the same result. Returns the complete upload path on success and
-     * will throw an exception otherwise.
+     * will throw an exception otherwise. Cannot be tested since upload are not
+     * compatible with move_uploaded_file function.
      *
      * @param string $destination
      * @throws \Exception

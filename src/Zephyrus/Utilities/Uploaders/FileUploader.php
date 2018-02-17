@@ -69,7 +69,7 @@ class FileUploader
         }
         $this->validateUpload();
         $this->uploadFile->upload($destination);
-        return $destination;
+        return $destination; // @codeCoverageIgnore
     }
 
     /**
