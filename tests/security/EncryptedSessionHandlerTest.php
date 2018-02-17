@@ -41,4 +41,32 @@ class EncryptedSessionHandlerTest extends TestCase
         session_destroy();
         unset($_COOKIE['key_phpsessid']);
     }
+
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testInvalidKey()
+    {
+        Session::kill();
+        $handler = new EncryptedSessionHandler();
+        session_set_save_handler($handler);
+        session_name('phpsessid');
+        session_start();
+        $handler->open('/tmp', 'phpsessid');
+        $_COOKIE['key_phpsessid'] = "wrong";
+
+        $id = session_id();
+        $handler->write($id, 'secret');
+        $result = $handler->read($id);
+        self::assertEquals('secret', $result);
+
+        $handler->close();
+        $handler->open('/tmp', 'phpsessid');
+        $result = $handler->read($id);
+        self::assertEquals('secret', $result);
+
+        $handler->destroy($id);
+        session_destroy();
+        unset($_COOKIE['key_phpsessid']);
+    }
 }
