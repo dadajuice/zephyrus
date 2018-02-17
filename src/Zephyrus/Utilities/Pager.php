@@ -91,11 +91,11 @@ class Pager
         $tmp = $this->currentPage;
         $pager = [];
         while (($pageEnd - $tmp) < 4) {
-            $tmp--;
+            $tmp--; // @codeCoverageIgnore
         }
 
         if ($tmp != $this->currentPage) {
-            $pageStart = 1 + ($tmp - 5);
+            $pageStart = 1 + ($tmp - 5); // @codeCoverageIgnore
         }
 
         if ($this->currentPage > 5 && $this->currentPage == $tmp) {
