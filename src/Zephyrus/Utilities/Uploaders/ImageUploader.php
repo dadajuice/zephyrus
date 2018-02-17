@@ -61,12 +61,9 @@ class ImageUploader extends FileUploader
     private function validateImageMimeType()
     {
         $imageType = exif_imagetype($this->uploadFile->getTemporaryFilename());
-        if (!$imageType) {
-            throw new \Exception("Uploaded image appears to be corrupt");
-        }
         $mime = image_type_to_mime_type($imageType);
-        if (!in_array($mime, parent::getAllowedMimeTypes())) {
-            throw new \Exception("Mime type ($mime) not allowed");
+        if (!$imageType || !in_array($mime, parent::getAllowedMimeTypes())) {
+            throw new \Exception("Uploaded image appears to be corrupt"); // @codeCoverageIgnore
         }
     }
 
@@ -97,7 +94,7 @@ class ImageUploader extends FileUploader
                 break;
         }
         if (!$tempImage) {
-            throw new \Exception("Uploaded image appears to be corrupt");
+            throw new \Exception("Uploaded image appears to be corrupt"); // @codeCoverageIgnore
         }
         return $tempImage;
     }
@@ -109,11 +106,9 @@ class ImageUploader extends FileUploader
             case 'jpeg':
                 imagejpeg($finalImage, $this->uploadFile->getTemporaryFilename(), 100);
                 break;
-
             case 'gif':
                 imagegif($finalImage, $this->uploadFile->getTemporaryFilename());
                 break;
-
             case 'png':
                 imagepng($finalImage, $this->uploadFile->getTemporaryFilename());
                 break;

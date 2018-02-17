@@ -17,9 +17,37 @@ class ImageUploaderTest extends TestCase
         self::assertTrue($uploader->isForcingImageRebuild());
     }
 
-    public function testValidImage()
+    public function testValidPngImage()
     {
         $file = $this->buildWorkingUploadFile();
+        $uploader = new ImageUploader($file);
+        $uploader->setForcingImageRebuild(true);
+        $uploader->setDestinationDirectory(ROOT_DIR . '/lib');
+        try {
+            $uploader->upload();
+            self::assertEquals("1", "2");
+        } catch (\Exception $e) {
+            self::assertEquals("Upload failed", $e->getMessage());
+        }
+    }
+
+    public function testValidJpegImage()
+    {
+        $file = $this->buildWorkingUploadJpegFile();
+        $uploader = new ImageUploader($file);
+        $uploader->setForcingImageRebuild(true);
+        $uploader->setDestinationDirectory(ROOT_DIR . '/lib');
+        try {
+            $uploader->upload();
+            self::assertEquals("1", "2");
+        } catch (\Exception $e) {
+            self::assertEquals("Upload failed", $e->getMessage());
+        }
+    }
+
+    public function testValidGifImage()
+    {
+        $file = $this->buildWorkingUploadGifFile();
         $uploader = new ImageUploader($file);
         $uploader->setForcingImageRebuild(true);
         $uploader->setDestinationDirectory(ROOT_DIR . '/lib');
@@ -54,6 +82,18 @@ class ImageUploaderTest extends TestCase
         return new UploadFile($data);
     }
 
+    private function buildWorkingUploadJpegFile()
+    {
+        $data = [
+            'error' => UPLOAD_ERR_OK,
+            'type' => 'image/jpeg',
+            'name' => 'batlike.jpg',
+            'tmp_name' => ROOT_DIR . '/lib/images/batlike.jpg',
+            'size' => 1300000
+        ];
+        return new UploadFile($data);
+    }
+
     private function buildInvalidUploadFile()
     {
         $data = [
@@ -61,6 +101,18 @@ class ImageUploaderTest extends TestCase
             'type' => 'image/png',
             'name' => 'invalid.png',
             'tmp_name' => ROOT_DIR . '/lib/images/invalid.png',
+            'size' => 1300000
+        ];
+        return new UploadFile($data);
+    }
+
+    private function buildWorkingUploadGifFile()
+    {
+        $data = [
+            'error' => UPLOAD_ERR_OK,
+            'type' => 'image/gif',
+            'name' => 'Injection.gif',
+            'tmp_name' => ROOT_DIR . '/lib/images/dance.gif',
             'size' => 1300000
         ];
         return new UploadFile($data);
