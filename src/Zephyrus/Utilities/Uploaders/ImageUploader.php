@@ -46,7 +46,7 @@ class ImageUploader extends FileUploader
         $this->validateImageMimeType();
         $info = getimagesize($this->uploadFile->getTemporaryFilename());
         if (empty($info) || $info[0] == "" || $info[1] == "") {
-            throw new \Exception("Uploaded image appears to be corrupt");
+            throw new \Exception("Uploaded image appears to be corrupt"); // @codeCoverageIgnore
         }
         if ($this->forcingImageRebuild) {
             $this->rebuildImage($info[0], $info[1]);
