@@ -112,8 +112,8 @@ class EncryptedSessionHandler extends \SessionHandler
      * Hmac authentication hash. Returns false if Hmac validation fails.
      *
      * @param string $data
-     * @return string
      * @throws \Exception
+     * @return string
      */
     private function decrypt(string $data): string
     {
