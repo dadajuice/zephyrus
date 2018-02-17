@@ -58,10 +58,10 @@ class Authorization
         };
     }
 
-    public function protect(string $pathRegex, int $httpMethod, $rules)
+    public function protect(string $route, int $httpMethod, $rules)
     {
         foreach ($this->getProtectedMethods($httpMethod) as $method) {
-            $this->addProtection($method, $pathRegex, $rules);
+            $this->addProtection($method, $route, $rules);
         }
     }
 
