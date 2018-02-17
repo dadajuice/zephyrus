@@ -17,6 +17,14 @@ class ConfigurationTest extends TestCase
         Configuration::set(null);
     }
 
+    public function testFile()
+    {
+        Configuration::set(null);
+        self::assertNull(Configuration::getFile());
+        Configuration::getConfiguration('database');
+        self::assertEquals('localhost', Configuration::getFile()->read('database', 'host'));
+    }
+
     public function testReadSingleConfiguration()
     {
         Configuration::set(['application' => ['env' => 'dev']]);
@@ -60,28 +68,25 @@ class ConfigurationTest extends TestCase
         rename(ROOT_DIR . '/config.ini', ROOT_DIR . '/config.ini_test');
         $catch = false;
         try {
+            Configuration::set(null);
             Configuration::getConfiguration('session');
-        } catch (\Exception $e) {
-            self::assertEquals('Cannot parse configurations file (config.ini)', $e->getMessage());
+        } catch (\RuntimeException $e) {
             $catch = true;
+        } finally {
+            rename(ROOT_DIR . '/config.ini_test', ROOT_DIR . '/config.ini');
         }
-        rename(ROOT_DIR . '/config.ini_test', ROOT_DIR . '/config.ini');
         self::assertTrue($catch);
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testInvalidSection()
     {
-        Configuration::getConfiguration('invalid');
+        $result = Configuration::getConfiguration('invalid');
+        self::assertNull($result);
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testInvalidSectionField()
     {
-        Configuration::getApplicationConfiguration('invalid');
+        $result = Configuration::getApplicationConfiguration('invalid');
+        self::assertNull($result);
     }
 }
