@@ -57,4 +57,28 @@ abstract class Controller extends \Zephyrus\Application\Controller
         }
         return $response;
     }
+
+    /**
+     * @return CsrfGuard
+     */
+    public function getCsrfGuard(): CsrfGuard
+    {
+        return $this->csrfGuard;
+    }
+
+    /**
+     * @return Authorization
+     */
+    public function getAuthorization(): Authorization
+    {
+        return $this->authorization;
+    }
+
+    /**
+     * @return SecureHeader
+     */
+    public function getSecureHeader(): SecureHeader
+    {
+        return $this->secureHeader;
+    }
 }
