@@ -1,5 +1,7 @@
 <?php namespace Zephyrus\Network;
 
+use Zephyrus\Application\Callback;
+
 class Response
 {
     /**
@@ -27,6 +29,11 @@ class Response
      */
     private $headers = [];
 
+    /**
+     * @var callable
+     */
+    private $contentCallback = null;
+
     public function __construct($contentType = ContentType::HTML, $code = 200)
     {
         $this->contentType = $contentType;
@@ -46,7 +53,16 @@ class Response
 
     public function sendContent()
     {
+        if (!is_null($this->contentCallback)) {
+            $callback = new Callback($this->contentCallback);
+            $callback->execute();
+        }
         echo $this->content;
+    }
+
+    public function setContentCallback($contentCallback)
+    {
+        $this->contentCallback = $contentCallback;
     }
 
     public function addHeader(string $name, string $content)

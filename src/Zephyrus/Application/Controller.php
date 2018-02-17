@@ -123,7 +123,7 @@ abstract class Controller implements Routable
      */
     protected function download(string $filePath, ?string $filename = null): Response
     {
-        return ResponseFactory::getInstance()->buildFile($filePath, $filename);
+        return ResponseFactory::getInstance()->buildDownload($filePath, $filename);
     }
 
     /**

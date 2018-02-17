@@ -45,7 +45,7 @@ class ResponseFactory
         return $response;
     }
 
-    public function buildFile(string $filePath, ?string $filename = null): Response
+    public function buildDownload(string $filePath, ?string $filename = null): Response
     {
         if (is_null($filename)) {
             $filename = basename($filePath);
@@ -72,64 +72,61 @@ class ResponseFactory
         $response = new Response(ContentType::SSE);
         $response->addHeader('Cache-Control', 'no-cache');
         ob_start();
-        echo "id: $eventId" . PHP_EOL;
-        echo "retry: " . $retry . PHP_EOL;
-        echo "data: " . json_encode($data, JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) . PHP_EOL;
-        echo PHP_EOL;
+        $this->outputSseMessage($eventId, $data, $retry);
         $response->setContent(ob_get_clean());
         return $response;
     }
 
     public function buildStreamingSse($callback, $eventId, $sleep = 1): Response
     {
-        $this->initializeStreaming();
-        $callbackExecutionCounter = 1;
-        $call = new Callback($callback);
-        while (connection_status() == CONNECTION_NORMAL && !connection_aborted()) {
-            $data = $call->execute();
-            if ($data === false) {
-                break;
-            }
-            if (!empty($data)) {
-                $this->buildPollingSse($data, $eventId, $sleep * 1000)->sendContent();
-            }
-            if (@ob_get_level() > 0) {
-                for ($i = 0; $i < @ob_get_level(); $i++) {
-                    @ob_flush();
+        $response = new Response(ContentType::SSE);
+        $that = $this;
+        $response->setContentCallback(function () use ($callback, $eventId, $sleep, $that) {
+            $that->initializeStreaming();
+            $callbackExecutionCounter = 1;
+            $call = new Callback($callback);
+            while (connection_status() == CONNECTION_NORMAL && !connection_aborted()) {
+                $data = $call->execute();
+                if ($data === false) {
+                    break;
+                }
+                if (!empty($data)) {
+                    $that->buildPollingSse($data, $eventId, $sleep * 1000)->sendContent();
+                }
+                /*if (@ob_get_level() > 0) {
+                    for ($i = 0; $i < @ob_get_level(); $i++) {
+                        @ob_flush();
+                    }
+                }*/
+                @flush();
+                sleep($sleep);
+                $callbackExecutionCounter++;
+
+                // Reduce potential memory leaks
+                // @see https://stackoverflow.com/questions/29480791/while-loops-for-server-sent-events-are-causing-page-to-freeze
+                if ($callbackExecutionCounter % 1000 == 0) {
+                    gc_collect_cycles();
+                    $callbackExecutionCounter = 1;
                 }
             }
-            @flush();
-            sleep($sleep);
-            $callbackExecutionCounter++;
-
-            // Reduce potential memory leaks
-            // @see https://stackoverflow.com/questions/29480791/while-loops-for-server-sent-events-are-causing-page-to-freeze
-            if ($callbackExecutionCounter % 1000 == 0) {
-                gc_collect_cycles();
-                $callbackExecutionCounter = 1;
-            }
-        }
-        if (@ob_get_level() > 0) {
-            for ($i = 0; $i < @ob_get_level(); $i++) {
-                @ob_flush();
-            }
-            @ob_end_clean();
-        }
-        return new Response(ContentType::SSE);
+        });
+        return $response;
     }
 
     public function buildFlowSse($callback)
     {
-        $this->initializeStreaming();
-        $call = new Callback($callback);
-        $call->execute(function ($id, $data) {
-            echo "id: $id" . PHP_EOL;
-            echo "data: " . json_encode($data, JSON_FORCE_OBJECT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) . PHP_EOL;
-            echo PHP_EOL;
-            @ob_flush();
-            @flush();
+        $response = new Response(ContentType::SSE);
+        $that = $this;
+        $response->setContentCallback(function () use ($callback, $that) {
+            $that->initializeStreaming();
+            $call = new Callback($callback);
+            $call->execute(function ($id, $data) use ($that) {
+                $that->outputSseMessage($id, $data);
+                //@ob_flush();
+                @flush();
+            });
         });
-        return new Response(ContentType::SSE);
+        return $response;
     }
 
     public function buildRedirect(string $url): Response
@@ -200,7 +197,18 @@ class ResponseFactory
         ignore_user_abort(true);
         ini_set('auto_detect_line_endings', 1);
         ini_set('max_execution_time', '0');
-        ob_end_clean();
+        //ob_end_clean();
         gc_enable();
+    }
+
+    private function outputSseMessage($eventId, $data, $retry = null)
+    {
+        $encodeOptions = JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS;
+        echo "id: $eventId" . PHP_EOL;
+        if (!is_null($retry)) {
+            echo "retry: " . $retry . PHP_EOL;
+        }
+        echo "data: " . json_encode($data, $encodeOptions) . PHP_EOL;
+        echo PHP_EOL;
     }
 }
