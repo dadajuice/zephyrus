@@ -26,7 +26,7 @@
                 <file>./src/Zephyrus/Network/ContentType.php</file>
                 <file>./src/Zephyrus/Utilities/Validator.php</file>
                 <file>./src/Zephyrus/Application/Bootstrap.php</file>
-                <file>./src/Zephyrus/Security/Router.php</file>
+                <file>./src/Zephyrus/Security/Controller.php</file>
                 <file>./src/Zephyrus/Application/ErrorHandler.php</file>
                 <file>./src/Zephyrus/Network/Routable.php</file>
             </exclude>
