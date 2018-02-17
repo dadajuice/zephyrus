@@ -91,7 +91,7 @@ class SecuritySession
     private function laterSessionStart()
     {
         if (!is_null($this->fingerprint) && !$this->fingerprint->hasValidFingerprint()) {
-            throw new \Exception("Session fingerprint doesn't match");
+            throw new \Exception("Session fingerprint doesn't match"); // @codeCoverageIgnore
         }
         if (!is_null($this->expiration) && $this->expiration->isObsolete()) {
             return true;
