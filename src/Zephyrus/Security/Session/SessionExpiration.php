@@ -51,7 +51,7 @@ class SessionExpiration
         }
         if (isset($_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'])) {
             if ($_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH'] <= 1) {
-                return true;
+                return true; // @codeCoverageIgnore
             }
             $_SESSION['__HANDLER_REQUESTS_BEFORE_REFRESH']--;
         }
@@ -79,7 +79,7 @@ class SessionExpiration
         if ($this->refreshProbability == 1.0 || $rand <= $this->refreshProbability) {
             return true;
         }
-        return false;
+        return false; // @codeCoverageIgnore
     }
 
     private function setupRefreshOnNthRequestsHandler()
