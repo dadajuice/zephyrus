@@ -40,10 +40,8 @@ class SessionFingerprint
      */
     public function hasValidFingerprint()
     {
-        if (isset($_SESSION['__HANDLER_FINGERPRINT'])) {
-            return $_SESSION['__HANDLER_FINGERPRINT'] === $this->createFingerprint();
-        }
-        return true;
+        return isset($_SESSION['__HANDLER_FINGERPRINT'])
+            && $_SESSION['__HANDLER_FINGERPRINT'] === $this->createFingerprint();
     }
 
     /**
