@@ -112,7 +112,8 @@ class EncryptedSessionHandler extends \SessionHandler
      * Hmac authentication hash. Returns false if Hmac validation fails.
      *
      * @param string $data
-     * @return string|bool
+     * @return string
+     * @throws \Exception
      */
     private function decrypt(string $data): string
     {
@@ -122,7 +123,7 @@ class EncryptedSessionHandler extends \SessionHandler
         $validHash = $ivReal . Cryptography::getEncryptionAlgorithm() . $cipherReal;
         $newHmac = hash_hmac('sha256', $validHash, $this->cryptAuth);
         if ($hmac !== $newHmac) {
-            return false;
+            throw new \RuntimeException("Invalid decryption key");
         }
         $decrypt = Cryptography::decrypt($initializationVector . ':' . $cipher, $this->cryptKey);
         return $decrypt;
