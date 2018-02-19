@@ -34,8 +34,8 @@ abstract class Controller extends \Zephyrus\Application\Controller
     public function before()
     {
         $failedRequirements = [];
-        if (!$this->authorization->isAuthorized($this->request->getRequestedUri(), $failedRequirements)) {
-            throw new UnauthorizedAccessException($this->request->getRequestedUri(), $failedRequirements);
+        if (!$this->authorization->isAuthorized($this->request->getUri()->getPath(), $failedRequirements)) {
+            throw new UnauthorizedAccessException($this->request->getUri()->getPath(), $failedRequirements);
         }
         $this->secureHeader->send();
         if (Configuration::getSecurityConfiguration('ids_enabled')) {
