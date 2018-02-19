@@ -4,7 +4,7 @@ class BaseValidation
 {
     public static function isNotEmpty($data): bool
     {
-        return !empty(trim($data));
+        return !empty(is_string($data) ? trim($data) : $data);
     }
 
     public static function isAlpha($data): bool
