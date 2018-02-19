@@ -155,14 +155,17 @@ class Form
      * Tries to set values to the specified object using available setter
      * methods.
      *
-     * @param object $obj
+     * @param object $instance
      */
-    public function buildObject($obj)
+    public function buildObject($instance = null)
     {
+        if (is_null($instance)) {
+            return (object) $this->fields;
+        }
         foreach ($this->fields as $property => $value) {
             $method = 'set' . ucwords($property);
-            if (is_callable([$obj, $method])) {
-                $obj->{$method}($value);
+            if (is_callable([$instance, $method])) {
+                $instance->{$method}($value);
             }
         }
     }

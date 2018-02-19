@@ -167,6 +167,15 @@ class FormTest extends TestCase
         self::assertEquals('10.00', $class->getPrice());
     }
 
+    public function testBuildStdClass()
+    {
+        $form = new Form();
+        $form->addFields(['name' => 'bob', 'price' => '10.00']);
+        $class = $form->buildObject();
+        self::assertEquals('bob', $class->name);
+        self::assertEquals('10.00', $class->price);
+    }
+
     public function testInvalidRuleField()
     {
         $form = new Form();
