@@ -1,14 +1,30 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Exceptions\IntrusionDetectionException;
 use Zephyrus\Security\IntrusionDetection;
 
 class IntrusionDetectionTest extends TestCase
 {
+    public function testWorking()
+    {
+        $ids = IntrusionDetection::getInstance();
+        $ids->setSurveillance(IntrusionDetection::GET | IntrusionDetection::POST | IntrusionDetection::REQUEST
+            | IntrusionDetection::COOKIE);
+
+        $_GET['test'] = "5";
+        try {
+            $ids->run();
+        } catch (IntrusionDetectionException $exception) {
+            throw $exception;
+        }
+        self::assertEquals("5", $_GET['test']);
+    }
+
     /**
-     * @expectedException \Exception
+     * @expectedException \Zephyrus\Exceptions\IntrusionDetectionException
      */
-    public function testNoCallbackException()
+    public function testDetectionInjection()
     {
         $ids = IntrusionDetection::getInstance();
         $ids->setSurveillance(IntrusionDetection::GET);
@@ -27,19 +43,21 @@ class IntrusionDetectionTest extends TestCase
         self::assertTrue($ids->isMonitoringRequest());
     }
 
+    /**
+     * @expectedException \Zephyrus\Exceptions\IntrusionDetectionException
+     */
     public function testDetection()
     {
         $ids = IntrusionDetection::getInstance();
         $ids->setSurveillance(IntrusionDetection::GET | IntrusionDetection::POST | IntrusionDetection::REQUEST
             | IntrusionDetection::COOKIE);
-        $ids->onDetection(function ($data) {
-            echo "works";
-        });
         $_GET['test'] = "<script>document.cookie;</script>";
-        ob_start();
-        $ids->run();
-        $test = ob_get_clean();
-        self::assertTrue(strpos($test, "works") !== false);
+        try {
+            $ids->run();
+        } catch (IntrusionDetectionException $exception) {
+            self::assertFalse(empty($exception->getIntrusionData()));
+            throw $exception;
+        }
     }
 
     /**
@@ -50,6 +68,6 @@ class IntrusionDetectionTest extends TestCase
         $ids = IntrusionDetection::getInstance();
         $ids->setSurveillance(0);
         $_GET['test'] = "' AND 1=1#";
-        $ids->run(function ($data) {});
+        $ids->run();
     }
 }

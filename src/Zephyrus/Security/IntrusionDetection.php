@@ -4,6 +4,7 @@ use Expose\FilterCollection;
 use Expose\Manager;
 use Expose\Report;
 use Zephyrus\Application\Configuration;
+use Zephyrus\Exceptions\IntrusionDetectionException;
 
 class IntrusionDetection
 {
@@ -23,11 +24,6 @@ class IntrusionDetection
     private $surveillance = 0;
 
     /**
-     * @var callable
-     */
-    private $detectionCallback = null;
-
-    /**
      * @var IntrusionDetection
      */
     private static $instance = null;
@@ -45,40 +41,20 @@ class IntrusionDetection
      * inputs. If an intrusion is detected, the method will launch the detection
      * callback.
      *
-     * @param callable | null $detectionCallback (optional)
-     * @throws \Exception
+     * @throws IntrusionDetectionException
      */
-    public function run(callable $detectionCallback = null)
+    public function run()
     {
-        if (!is_null($detectionCallback)) {
-            $this->detectionCallback = $detectionCallback;
-        }
         $guard = $this->getMonitoringInputs();
         if (empty($guard)) {
-            throw new \Exception("Nothing to monitor ! Either configure the IDS to monitor at least one input or 
+            throw new \RuntimeException("Nothing to monitor ! Either configure the IDS to monitor at least one input or 
                 completely deactivate this feature.");
         }
-
         $this->manager->run($guard);
         if ($this->manager->getImpact() > 0) {
             $data = $this->getDetectionData($this->manager->getReports());
-            if (is_null($this->detectionCallback)) {
-                throw new \Exception("No intrusion detection callback defined");
-            }
-            $callback = $this->detectionCallback;
-            $callback($data);
+            throw new IntrusionDetectionException($data);
         }
-    }
-
-    /**
-     * Applies the method to launch when an instruction has been detected by
-     * PHPIDS. Will pass the detection result to the callback.
-     *
-     * @param callable $callback
-     */
-    public function onDetection(callable $callback)
-    {
-        $this->detectionCallback = $callback;
     }
 
     /**

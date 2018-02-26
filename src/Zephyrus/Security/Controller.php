@@ -1,6 +1,8 @@
 <?php namespace Zephyrus\Security;
 
 use Zephyrus\Application\Configuration;
+use Zephyrus\Exceptions\IntrusionDetectionException;
+use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Exceptions\UnauthorizedAccessException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Response;
@@ -31,6 +33,11 @@ abstract class Controller extends \Zephyrus\Application\Controller
         $this->authorization = new Authorization();
     }
 
+    /**
+     * @throws UnauthorizedAccessException
+     * @throws InvalidCsrfException
+     * @throws IntrusionDetectionException
+     */
     public function before()
     {
         $failedRequirements = [];
