@@ -53,6 +53,7 @@ class IntrusionDetection
         $this->manager->run($guard);
         if ($this->manager->getImpact() > 0) {
             $data = $this->getDetectionData($this->manager->getReports());
+
             throw new IntrusionDetectionException($data);
         }
     }
