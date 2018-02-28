@@ -70,9 +70,9 @@ class ConfigurationFile
 
     private function formatConfigurationData($data)
     {
-        return ((is_bool($data))
+        return (is_bool($data))
             ? var_export($data, true)
-            : ((is_numeric($data) || ctype_upper($data)) ? $data : '"' . $data . '"'));
+            : ((is_numeric($data) || ctype_upper($data)) ? $data : '"' . $data . '"');
     }
 
     private function buildConfigurationProperty(array &$data, array $sectionValue)
