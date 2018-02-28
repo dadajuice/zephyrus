@@ -50,6 +50,7 @@ class ConfigurationFileTest extends TestCase
                     'a' => 'b',
                     'b' => 'd'
                 ],
+                'testBoolean' => true
             ],
             'test2' => 3
         ]);

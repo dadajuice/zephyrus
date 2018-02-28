@@ -16,7 +16,7 @@ class ConfigurationFile
     {
         $this->path = $filePath;
         if (is_readable($this->path)) {
-            $this->content = parse_ini_file($this->path, true);
+            $this->content = parse_ini_file($this->path, true, INI_SCANNER_TYPED);
         }
     }
 
@@ -70,7 +70,9 @@ class ConfigurationFile
 
     private function formatConfigurationData($data)
     {
-        return (is_numeric($data)) ? $data : (ctype_upper($data) ? $data : '"' . $data . '"');
+        return ((is_bool($data))
+            ? var_export($data, true)
+            : ((is_numeric($data) || ctype_upper($data)) ? $data : '"' . $data . '"'));
     }
 
     private function buildConfigurationProperty(array &$data, array $sectionValue)
