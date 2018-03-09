@@ -80,9 +80,9 @@ class ConfigurationFile
         foreach ($sectionValue as $key => $value) {
             if (is_array($value)) {
                 foreach ($value as $propertyName => $propertyValue) {
-                    $data[] = $key . (is_numeric($propertyName))
-                        ? $propertyName. '[] = ' . $this->formatConfigurationData($propertyValue)
-                        : '[' . $propertyName . '] = ' . $this->formatConfigurationData($propertyValue);
+                    $data[] = $key . ((is_numeric($propertyName))
+                        ? '[] = ' . $this->formatConfigurationData($propertyValue)
+                        : '[' . $propertyName . '] = ' . $this->formatConfigurationData($propertyValue));
                 }
             } else {
                 $data[] = $key . ' = ' . $this->formatConfigurationData($value);
