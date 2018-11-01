@@ -45,6 +45,13 @@ class ResponseFactory
         return $response;
     }
 
+    public function buildPlain($data): Response
+    {
+        $response = new Response(ContentType::PLAIN);
+        $response->setContent($data);
+        return $response;
+    }
+
     public function buildDownload(string $filePath, ?string $filename = null): Response
     {
         if (is_null($filename)) {

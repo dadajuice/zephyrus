@@ -113,6 +113,17 @@ abstract class Controller implements Routable
     }
 
     /**
+     * Renders the given data as plain string.
+     *
+     * @param mixed $data
+     * @return Response
+     */
+    protected function plain($data): Response
+    {
+        return ResponseFactory::getInstance()->buildPlain($data);
+    }
+
+    /**
      * Renders a given file as a downloadable content with application/octet-stream
      * content type. If no filename is given, it will automatically use the actual
      * file basename.

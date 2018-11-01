@@ -359,6 +359,28 @@ class ControllerTest extends TestCase
         self::assertEquals('<html>test</html>', $output);
     }
 
+    public function testPlain()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                return parent::plain("test plain");
+            }
+        };
+        ob_start();
+        $controller->index()->send();
+        $headers = xdebug_get_headers();
+        $output = ob_get_clean();
+        self::assertEquals('test plain', $output);
+        self::assertTrue(in_array('Content-Type: text/plain;charset=UTF-8', $headers));
+    }
+
     public function testDownload()
     {
         $router = new Router();
