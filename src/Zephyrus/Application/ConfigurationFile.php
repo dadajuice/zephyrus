@@ -72,7 +72,7 @@ class ConfigurationFile
     {
         return (is_bool($data))
             ? var_export($data, true)
-            : ((is_numeric($data) || ctype_upper($data)) ? $data : '"' . $data . '"');
+            : ((ctype_upper($data)) ? $data : '"' . $data . '"');
     }
 
     private function buildConfigurationProperty(array &$data, array $sectionValue)
@@ -80,9 +80,9 @@ class ConfigurationFile
         foreach ($sectionValue as $key => $value) {
             if (is_array($value)) {
                 foreach ($value as $propertyName => $propertyValue) {
-                    $data[] = $key . (is_numeric($propertyName))
-                        ? $propertyName. '[] = ' . $this->formatConfigurationData($propertyValue)
-                        : '[' . $propertyName . '] = ' . $this->formatConfigurationData($propertyValue);
+                    $data[] = $key . ((is_numeric($propertyName))
+                        ? '[] = ' . $this->formatConfigurationData($propertyValue)
+                        : '[' . $propertyName . '] = ' . $this->formatConfigurationData($propertyValue));
                 }
             } else {
                 $data[] = $key . ' = ' . $this->formatConfigurationData($value);
