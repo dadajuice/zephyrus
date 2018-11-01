@@ -45,11 +45,11 @@ abstract class Controller extends \Zephyrus\Application\Controller
             throw new UnauthorizedAccessException($this->request->getUri()->getPath(), $failedRequirements);
         }
         $this->secureHeader->send();
-        if (Configuration::getSecurityConfiguration('ids_enabled')) {
-            IntrusionDetection::getInstance()->run();
-        }
         if (Configuration::getSecurityConfiguration('csrf_guard_enabled')) {
             $this->csrfGuard->guard();
+        }
+        if (Configuration::getSecurityConfiguration('ids_enabled')) {
+            IntrusionDetection::getInstance()->run();
         }
     }
 
