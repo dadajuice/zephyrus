@@ -19,7 +19,8 @@
     "ext-apache": "*",
     "ext-json": "*",
     "ext-simplexml": "*",
-    "ext-intl": "*"
+    "ext-intl": "*",
+    "ext-iconv": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "5.5.*",
