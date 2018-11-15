@@ -37,12 +37,13 @@ class RequestFactoryTest extends TestCase
 
     public function testCaptureDelete()
     {
-        $_SERVER['REQUEST_METHOD'] = 'DELETE';
+        $_SERVER['REQUEST_METHOD'] = 'POST';
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         $_SERVER['REQUEST_URI'] = 'http://test.local/users/3';
         $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
         $_SERVER['HTTP_HOST'] = 'test.local';
         $_SERVER['SERVER_PORT'] = '80';
+        $_POST['__method'] = 'delete';
         RequestFactory::set(null);
         $request = RequestFactory::read();
         self::assertEquals('DELETE', $request->getMethod());
