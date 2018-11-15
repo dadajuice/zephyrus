@@ -108,8 +108,8 @@ class Database
     /**
      * Constructs a database instance from the defined configurations.
      *
-     * @return Database
      * @throws DatabaseException
+     * @return Database
      */
     public static function buildFromConfiguration()
     {
