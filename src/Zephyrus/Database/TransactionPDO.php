@@ -53,7 +53,7 @@ class TransactionPDO extends \PDO
     }
 
     /**
-     * Verifies if the current PDO driver supports savepoints.
+     * Verifies if the current PDO driver supports save points.
      *
      * @return bool
      */

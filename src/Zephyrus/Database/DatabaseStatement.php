@@ -20,10 +20,11 @@ class DatabaseStatement
     }
 
     /**
-     * Return the next row from the current resultset obtained from the last
+     * Return the next row from the current result set obtained from the last
      * executed query. Automatically strip slashes that would have been stored
      * in database as escaping.
      *
+     * @param int $fetchStyle
      * @return array
      */
     public function next($fetchStyle = \PDO::FETCH_BOTH)
