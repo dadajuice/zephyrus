@@ -40,7 +40,6 @@ class Database
      *
      * @see self::commit()
      * @see self::rollback()
-     * @throws DatabaseException
      */
     public function beginTransaction()
     {
@@ -88,6 +87,14 @@ class Database
         return $this->handle->lastInsertId();
     }
 
+    /**
+     * Manual database instance constructor.
+     *
+     * @param string $dsn
+     * @param string $username
+     * @param string $password
+     * @throws DatabaseException
+     */
     public function __construct(string $dsn, string $username = "", string $password = "")
     {
         try {
@@ -98,6 +105,12 @@ class Database
         }
     }
 
+    /**
+     * Constructs a database instance from the defined configurations.
+     *
+     * @return Database
+     * @throws DatabaseException
+     */
     public static function buildFromConfiguration()
     {
         $config = Configuration::getDatabaseConfiguration();
