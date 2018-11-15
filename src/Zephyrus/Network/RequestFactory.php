@@ -39,7 +39,7 @@ class RequestFactory
         $server = $_SERVER;
         $uri = self::getCompleteRequestUri($server);
         $method = strtoupper($server['REQUEST_METHOD']);
-        $parameters = self::getParametersFromMethod($method);
+        $parameters = self::getParametersFromContentType($server['CONTENT_TYPE'] ?? ContentType::PLAIN);
         if (isset($parameters['__method'])) {
             $method = strtoupper($parameters['__method']);
         }
@@ -52,25 +52,32 @@ class RequestFactory
     }
 
     /**
-     * Load every request parameters depending on the request method
-     * used (currently supported : GET, POST, PUT and DELETE). Other method
-     * parameters are ignored.
+     * Load every request parameters depending on the request content type and
+     * ensure to properly convert raw data to array parameters.
      *
-     * @param $method
      * @return array
      */
-    private static function getParametersFromMethod(string $method): array
+    private static function getParametersFromContentType(string $contentType): array
     {
-        $parameters = array_merge(self::getParametersFromGlobal($_GET), self::getParametersFromGlobal($_FILES));
-        switch ($method) {
-            case 'POST':
-                return array_merge($parameters, self::getParametersFromGlobal($_POST));
-            case 'PUT':
-            case 'DELETE':
-                parse_str(file_get_contents('php://input'), $paramsSource);
-                return array_merge($parameters, self::getParametersFromGlobal($paramsSource));
+        $parameters = array_merge(
+            self::getParametersFromGlobal($_GET),
+            self::getParametersFromGlobal($_POST),
+            self::getParametersFromGlobal($_FILES));
+        $paramsSource = [];
+        $rawInput = file_get_contents('php://input');
+        switch ($contentType) {
+            case ContentType::JSON:
+                $paramsSource = (array) json_decode($rawInput);
+                break;
+            case ContentType::XML:
+            case ContentType::XML_APP:
+                $xml = new \SimpleXMLElement($rawInput);
+                $paramsSource = (array) $xml;
+                break;
+            default:
+                parse_str($rawInput, $paramsSource);
         }
-        return $parameters;
+        return array_merge($parameters, self::getParametersFromGlobal($paramsSource));
     }
 
     /**
