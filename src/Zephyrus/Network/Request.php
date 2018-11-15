@@ -67,6 +67,7 @@ class Request
      * 'server' => $_SERVER
      *
      * @param string $uri
+     * @param string $method
      * @param array $options
      */
     public function __construct(string $uri, string $method, array $options = [])
