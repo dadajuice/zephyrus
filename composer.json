@@ -18,7 +18,8 @@
     "ext-pdo": "*",
     "ext-apache": "*",
     "ext-json": "*",
-    "ext-simplexml": "*"
+    "ext-simplexml": "*",
+    "ext-intl": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "5.5.*",
