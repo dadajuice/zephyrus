@@ -1,8 +1,10 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Application\Feedback;
 use Zephyrus\Application\Form;
 use Zephyrus\Application\Rule;
+use Zephyrus\Application\Session;
 use Zephyrus\Utilities\Validator;
 
 class FormTest extends TestCase
@@ -44,6 +46,22 @@ class FormTest extends TestCase
         self::assertTrue(key_exists('name', $form->getErrors()));
         self::assertEquals('username not empty', $form->getErrors()['username'][0]);
         self::assertEquals('err-1', $form->getErrors()['name'][0]);
+    }
+
+    public function testFeedback()
+    {
+        Session::getInstance()->start();
+        $form = new Form();
+        $form->addFields([
+            'username' => ''
+        ]);
+        $form->validate('username', Rule::notEmpty('username not empty'));
+        self::assertFalse($form->verify());
+        $form->registerFeedback();
+        $feedback = Feedback::readAll()["feedback"]["error"];
+        self::assertTrue(key_exists('username', $feedback));
+        self::assertEquals('username not empty', $feedback['username'][0]);
+        Session::kill();
     }
 
     public function testErrorTrigger()

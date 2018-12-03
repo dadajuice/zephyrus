@@ -136,6 +136,11 @@ class Form
         return $results;
     }
 
+    public function registerFeedback()
+    {
+        Feedback::error($this->getErrors());
+    }
+
     public function getValue(string $field)
     {
         return $this->fields[$field] ?? null;
