@@ -1,6 +1,7 @@
 <?php
 
 use Zephyrus\Application\Form;
+use Zephyrus\Application\Localization;
 use Zephyrus\Application\Session;
 use Zephyrus\Security\ContentSecurityPolicy;
 
@@ -131,4 +132,30 @@ function val(string $fieldId, $defaultValue = "")
 function nonce(): string
 {
     return ContentSecurityPolicy::getRequestNonce();
+}
+
+/**
+ * Simple alias function to get the localize string corresponding to the
+ * desired key (e.g. messages.success.add_user).
+ *
+ * @param string $key
+ * @param mixed ...$args
+ * @return string
+ */
+function localize($key, ...$args): string
+{
+    return Localization::getInstance()->localize($key, $args);
+}
+
+/**
+ * Simple alias function to sprintf parameters into the defined message.
+ *
+ * @param string $message
+ * @param mixed ...$args
+ * @return string
+ */
+function __(string $message, ...$args): string
+{
+    $parameters = array_merge([$message], $args);
+    return call_user_func_array('sprintf', $parameters);
 }

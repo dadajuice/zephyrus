@@ -1,0 +1,6 @@
+{
+  "defaults": {
+    "proceed": "Sauvegarder",
+    "cancel": "Annuler"
+  }
+}

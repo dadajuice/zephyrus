@@ -1,0 +1,11 @@
+{
+  "messages": {
+    "errors": {
+      "invalid_email": "Le courriel est invalide",
+      "invalid_password": "Le mot de passe ne respecte pas les contraintes"
+    },
+    "success": {
+      "add_user": "L'utilisateur [%s] a été ajouté avec succès"
+    }
+  }
+}

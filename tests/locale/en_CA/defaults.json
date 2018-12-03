@@ -1,0 +1,6 @@
+{
+  "defaults": {
+    "proceed": "Save",
+    "cancel": "Cancel"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "messages": {
+    "errors": {
+      "invalid_email": "Email is invalid",
+      "invalid_password": "Password does not respect established constraints"
+    },
+    "success": {
+      "add_user": "The user [%s] has been successfully added"
+    }
+  }
+}
