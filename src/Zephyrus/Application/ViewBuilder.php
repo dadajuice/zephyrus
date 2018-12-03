@@ -60,5 +60,6 @@ class ViewBuilder
     {
         $this->buildPug();
         $this->pug->share(Flash::readAll());
+        $this->pug->share(Feedback::readAll());
     }
 }
