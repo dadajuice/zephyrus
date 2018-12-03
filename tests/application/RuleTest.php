@@ -99,6 +99,13 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid("450-666-6666"));
     }
 
+    public function testIsZipCode()
+    {
+        $rule = Rule::zipcode("err");
+        self::assertTrue($rule->isValid("35801"));
+        self::assertFalse($rule->isValid("35801-0847984729847274"));
+    }
+
     public function testIsAlphanumeric()
     {
         $rule = Rule::alphanumeric("err");

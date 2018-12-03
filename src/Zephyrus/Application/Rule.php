@@ -79,6 +79,14 @@ class Rule
         return new self(Validator::PHONE, $errorMessage);
     }
 
+    public static function zipcode(string $errorMessage = "")
+    {
+        return new self(Validator::ZIPCODE, $errorMessage);
+    }
+
+    // postal code and zipcode
+    // Exemple de custom Rule
+
     public function __construct($validation, string $errorMessage = "")
     {
         $this->validation = $validation;

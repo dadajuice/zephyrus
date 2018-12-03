@@ -85,6 +85,16 @@ class BaseValidation
         return self::isRegexValid($data, "((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?");
     }
 
+    /**
+     * Validates United States postal code five-digit and nine-digit (called ZIP+4) formats.
+     *
+     * @see https://www.oreilly.com/library/view/regular-expressions-cookbook/9781449327453/ch04s14.html
+     */
+    public static function isZipCode($data): bool
+    {
+        return self::isRegexValid($data, "[0-9]{5}(?:-[0-9]{4})?");
+    }
+
     public static function isRegexValid($data, $regex): bool
     {
         return preg_match('/^' . $regex . '$/', $data);

@@ -99,6 +99,15 @@ class BaseValidationTest extends TestCase
         self::assertFalse(BaseValidation::isUrl('bob.com'));
     }
 
+    public function testIsZipCode()
+    {
+        self::assertTrue(BaseValidation::isZipCode('12345'));
+        self::assertTrue(BaseValidation::isZipCode('12345-6789'));
+        self::assertFalse(BaseValidation::isZipCode('1234'));
+        self::assertFalse(BaseValidation::isZipCode('123456'));
+        self::assertFalse(BaseValidation::isZipCode('1234-56789'));
+    }
+
     public function testIsYouTubeUrl()
     {
         self::assertTrue(BaseValidation::isYoutubeUrl('www.youtube.com/watch?v=DFYRQ_zQ-gk'));
