@@ -1,6 +1,8 @@
 <?php namespace Zephyrus\Network;
 
 use Zephyrus\Application\Callback;
+use Zephyrus\Application\Feedback;
+use Zephyrus\Application\Flash;
 use Zephyrus\Application\Form;
 use Zephyrus\Application\ViewBuilder;
 
@@ -180,6 +182,8 @@ class ResponseFactory
             foreach ($args as $name => $value) {
                 $$name = $value;
             }
+            $flash = Flash::readAll()["flash"];
+            $feedback = Feedback::readAll()["feedback"];
             include $path;
             $response->setContent(ob_get_clean());
             Form::removeMemorizedValue();
