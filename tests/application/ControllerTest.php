@@ -2,6 +2,8 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Controller;
+use Zephyrus\Application\Feedback;
+use Zephyrus\Application\Flash;
 use Zephyrus\Application\Session;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
@@ -135,6 +137,28 @@ class ControllerTest extends TestCase
         $controller->index()->send();
         $output = ob_get_clean();
         self::assertEquals('<h1>allo</h1>', $output);
+    }
+
+    public function testRenderPhpWithFlashAndFeedback()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index(): Response
+            {
+                Flash::error("invalid");
+                Feedback::error(["email" => ["test"]]);
+                return parent::render('test3');
+            }
+        };
+        ob_start();
+        $controller->index()->send();
+        $output = ob_get_clean();
+        self::assertEquals('<h1>invalid</h1><h1>test</h1>', $output);
     }
 
     public function testGetRoutingWithParameter()
