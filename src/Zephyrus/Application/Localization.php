@@ -15,7 +15,7 @@ class Localization
      */
     private $appLocale;
 
-    public static function getInstance(): Localization
+    public static function getInstance(): self
     {
         if (is_null(self::$instance)) {
             self::$instance = new self();
@@ -53,7 +53,7 @@ class Localization
     {
         if ($this->prepareCache() || $this->isCacheOutdated()) {
             $globalArray = $this->buildGlobalArrayFromJsonFiles();
-            list ($constants, $methods) = $this->buildClassFile($globalArray);
+            list($constants, $methods) = $this->buildClassFile($globalArray);
             if (!empty($methods)) {
                 $className = self::GENERATED_CLASS_NAME;
                 $class = $this->createLocalizeClass($className, $constants, $methods);
@@ -61,7 +61,7 @@ class Localization
             }
         }
         if (!class_exists("Localize")) {
-            require(ROOT_DIR . "/locale/cache/{$this->appLocale}/Localize.php");
+            require ROOT_DIR . "/locale/cache/{$this->appLocale}/Localize.php";
         }
     }
 
@@ -71,7 +71,7 @@ class Localization
         $methods = [];
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                list ($returnedConstants, $returnedMethods) = $this->buildClassFile($value);
+                list($returnedConstants, $returnedMethods) = $this->buildClassFile($value);
                 $className = $this->generateClassName($key) . "Localize";
                 $class = $this->createLocalizeClass($className, $returnedConstants, $returnedMethods);
                 file_put_contents(ROOT_DIR . "/locale/cache/{$this->appLocale}/$className.php", $class);
@@ -107,16 +107,19 @@ class Localization
         return $output;
     }
 
-    private function addConstant($name, $value) {
+    private function addConstant($name, $value)
+    {
         return "\tpublic const $name = \"$value\";" . PHP_EOL;
     }
 
-    private function addMethod($name) {
+    private function addMethod($name)
+    {
         $className = $this->generateClassName($name) . 'Localize';
         return "\tpublic static function $name(): $className" . PHP_EOL . "\t{" . PHP_EOL . "\t\treturn $className::getInstance();" . PHP_EOL . "\t}" . PHP_EOL;
     }
 
-    private function addRequire($name) {
+    private function addRequire($name)
+    {
         $className = $this->generateClassName($name) . 'Localize';
         return "require \"$className.php\";" . PHP_EOL;
     }
