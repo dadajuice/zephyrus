@@ -28,6 +28,8 @@ class PagerTest extends TestCase
         $pager->display();
         $result = ob_get_clean();
         self::assertEquals($expected, $result);
+        self::assertEquals(1, $pager->getCurrentPage());
+        self::assertEquals(2, $pager->getMaxPage());
     }
 
     public function testEmptyPager()

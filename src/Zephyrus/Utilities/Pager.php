@@ -64,6 +64,22 @@ class Pager
         return $this->maxEntities;
     }
 
+    /**
+     * @return int
+     */
+    public function getCurrentPage(): int
+    {
+        return $this->currentPage;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxPage(): int
+    {
+        return $this->maxPage;
+    }
+
     public function display()
     {
         echo $this;
