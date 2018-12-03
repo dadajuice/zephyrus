@@ -95,6 +95,18 @@ class BaseValidation
         return self::isRegexValid($data, "[0-9]{5}(?:-[0-9]{4})?");
     }
 
+    /**
+     * Validates Canadian postal code format (insensitive). The characters are arranged in the
+     * form ‘ANA NAN’, where ‘A’ represents an alphabetic character and ‘N’ represents a numeric
+     * character (e.g., K1A 0T6). The postal code uses 18 alphabetic characters and 10 numeric
+     * characters. Postal codes do not include the letters D, F, I, O, Q or U, and the first
+     * position also does not make use of the letters W or Z.
+     */
+    public static function isPostalCode($data): bool
+    {
+        return self::isRegexValid(strtoupper($data), "[ABCEGHJ-NPRSTVXY][0-9][ABCEGHJ-NPRSTV-Z] ?[0-9][ABCEGHJ-NPRSTV-Z][0-9]");
+    }
+
     public static function isRegexValid($data, $regex): bool
     {
         return preg_match('/^' . $regex . '$/', $data);

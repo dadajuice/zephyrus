@@ -108,6 +108,13 @@ class BaseValidationTest extends TestCase
         self::assertFalse(BaseValidation::isZipCode('1234-56789'));
     }
 
+    public function testIsPostalCode()
+    {
+        self::assertTrue(BaseValidation::isPostalCode('J3R3L9'));
+        self::assertTrue(BaseValidation::isPostalCode('j3P 2g2'));
+        self::assertFalse(BaseValidation::isPostalCode('3J4 429'));
+    }
+
     public function testIsYouTubeUrl()
     {
         self::assertTrue(BaseValidation::isYoutubeUrl('www.youtube.com/watch?v=DFYRQ_zQ-gk'));

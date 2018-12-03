@@ -19,5 +19,6 @@ interface Validator
     const URL_STRICT = ['Zephyrus\Utilities\Validations\BaseValidation', 'isStrictUrl'];
     const URL_YOUTUBE = ['Zephyrus\Utilities\Validations\BaseValidation', 'isYoutubeUrl'];
     const PHONE = ['Zephyrus\Utilities\Validations\BaseValidation', 'isPhone'];
-    const ZIPCODE = ['Zephyrus\Utilities\Validations\BaseValidation', 'isZipCode'];
+    const ZIP_CODE = ['Zephyrus\Utilities\Validations\BaseValidation', 'isZipCode'];
+    const POSTAL_CODE = ['Zephyrus\Utilities\Validations\BaseValidation', 'isPostalCode'];
 }
