@@ -20,6 +20,24 @@ class RouteTest extends TestCase
         self::assertEquals(['id' => "4", 'fish' => "goldfish"], $args);
     }
 
+    public function testRegex()
+    {
+        $route = new Route("/dummy/.+");
+        self::assertEquals(true, $route->match("/dummy/3"));
+        self::assertEquals(true, $route->match("/dummy/3/info"));
+        self::assertEquals(true, $route->match("/dummy/toto"));
+        self::assertEquals(false, $route->match("/dummy"));
+    }
+
+    public function testRegexComplex()
+    {
+        $route = new Route("/dummy/.+/insert");
+        self::assertEquals(false, $route->match("/dummy/3"));
+        self::assertEquals(true, $route->match("/dummy/3/insert"));
+        self::assertEquals(true, $route->match("/dummy/toto/insert"));
+        self::assertEquals(false, $route->match("/dummy"));
+    }
+
     public function testGetArgumentCallback()
     {
         $route = new Route("/dummy/{id}");

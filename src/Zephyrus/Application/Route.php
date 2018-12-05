@@ -29,7 +29,7 @@ class Route
                                                  have a unique identifier.");
         }
         $this->uri = $uri;
-        $this->regex = (!empty($this->parameters)) ? $this->getUriRegexFromParameters($uri, $this->parameters) : null;
+        $this->regex = $this->getUriRegexFromParameters($uri, $this->parameters);
     }
 
     /**
