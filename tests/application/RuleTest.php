@@ -126,4 +126,19 @@ class RuleTest extends TestCase
         self::assertTrue($rule->isValid("http://www.google.ca"));
         self::assertFalse($rule->isValid("allo.com"));
     }
+
+    public function testIsInRange()
+    {
+        $rule = Rule::range(0, 6,"err");
+        self::assertTrue($rule->isValid(4));
+        self::assertFalse($rule->isValid(-5));
+        self::assertFalse($rule->isValid(7));
+    }
+
+    public function testIsInArray()
+    {
+        $rule = Rule::inArray(["a", "b", "c"], "err");
+        self::assertTrue($rule->isValid("b"));
+        self::assertFalse($rule->isValid("e"));
+    }
 }

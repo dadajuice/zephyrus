@@ -89,6 +89,20 @@ class Rule
         return new self(Validator::POSTAL_CODE, $errorMessage);
     }
 
+    public static function range($min, $max, string $errorMessage = "")
+    {
+        return new Rule(function($data) use($min, $max) {
+            return ($min <= $data) && ($data <= $max);
+        }, $errorMessage);
+    }
+
+    public static function inArray(array $array, string $errorMessage = "")
+    {
+        return new Rule(function($data) use($array) {
+            return in_array($data, $array);
+        }, $errorMessage);
+    }
+
     public function __construct($validation, string $errorMessage = "")
     {
         $this->validation = $validation;
