@@ -79,6 +79,18 @@ class RouterTest extends TestCase
         $router->run($req);
     }
 
+    public function testGetRequestWithLeadingSlash()
+    {
+        $req = new Request('http://test.local/bob/3/', 'GET');
+        $router = new Router();
+        $ref = $this;
+        $router->get('/bob/{id}', function($id) use ($ref, $router) {
+            $ref->assertEquals('3', $id);
+            $ref->assertEquals('3', $router->getRequest()->getParameter('id'));
+        });
+        $router->run($req);
+    }
+
     public function testMultipleGetRequest()
     {
         $req = new Request('http://test.local/bob/3/8', 'GET');

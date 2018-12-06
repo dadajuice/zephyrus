@@ -43,7 +43,8 @@ abstract class RouterEngine
     final public function run(Request $request)
     {
         $this->request = $request;
-        $this->requestedUri = $this->request->getUri()->getPath();
+        $path = $this->request->getUri()->getPath();
+        $this->requestedUri = ($path != "/") ? rtrim($path, "/") : "/";
         $this->requestedMethod = strtoupper($this->request->getMethod());
         $this->requestedRepresentation = $this->request->getAccept();
         $this->verifyRequestMethod();
