@@ -91,14 +91,14 @@ class Rule
 
     public static function range($min, $max, string $errorMessage = "")
     {
-        return new self(function($data) use($min, $max) {
+        return new self(function ($data) use($min, $max) {
             return ($min <= $data) && ($data <= $max);
         }, $errorMessage);
     }
 
     public static function inArray(array $array, string $errorMessage = "")
     {
-        return new self(function($data) use($array) {
+        return new self(function ($data) use($array) {
             return in_array($data, $array);
         }, $errorMessage);
     }
