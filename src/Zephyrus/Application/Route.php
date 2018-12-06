@@ -56,25 +56,22 @@ class Route
      */
     public function getArguments(string $uri, $callback = null): array
     {
-        if (!empty($this->regex)) {
-            $values = [];
-            $pattern = '/^' . $this->regex . '$/';
-            preg_match_all($pattern, $uri, $matches);
-            $matchCount = count($matches);
-            for ($i = 1; $i < $matchCount; ++$i) {
-                $values[] = (!is_null($callback))
-                    ? (new Callback($callback))->execute($matches[$i][0])
-                    : $matches[$i][0];
-            }
-            $arguments = [];
-            $i = 0;
-            foreach ($this->parameters as $parameter) {
-                $arguments[$parameter] = $values[$i];
-                ++$i;
-            }
-            return $arguments;
+        $values = [];
+        $pattern = '/^' . $this->regex . '$/';
+        preg_match_all($pattern, $uri, $matches);
+        $matchCount = count($matches);
+        for ($i = 1; $i < $matchCount; ++$i) {
+            $values[] = (!is_null($callback))
+                ? (new Callback($callback))->execute($matches[$i][0])
+                : $matches[$i][0];
         }
-        return [];
+        $arguments = [];
+        $i = 0;
+        foreach ($this->parameters as $parameter) {
+            $arguments[$parameter] = $values[$i];
+            ++$i;
+        }
+        return $arguments;
     }
 
     public function getUri(): string
