@@ -141,4 +141,12 @@ class RuleTest extends TestCase
         self::assertTrue($rule->isValid("b"));
         self::assertFalse($rule->isValid("e"));
     }
+
+    public function testIsSameAs()
+    {
+        $rule = Rule::sameAs("password", "err");
+        self::assertTrue($rule->isValid("1234", ["password" => "1234", "username" => "blewis"]));
+        self::assertFalse($rule->isValid("1234", ["password" => "5678", "username" => "blewis"]));
+        self::assertFalse($rule->isValid("1234", ["username" => "blewis"]));
+    }
 }

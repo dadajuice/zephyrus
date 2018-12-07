@@ -103,6 +103,13 @@ class Rule
         }, $errorMessage);
     }
 
+    public static function sameAs(string $comparedFieldName, string $errorMessage = "")
+    {
+        return new self(function ($data, $values) use ($comparedFieldName) {
+            return isset($values[$comparedFieldName]) && $data == $values[$comparedFieldName];
+        }, $errorMessage);
+    }
+
     public function __construct($validation, string $errorMessage = "")
     {
         $this->validation = $validation;
