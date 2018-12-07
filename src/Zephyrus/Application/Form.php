@@ -68,19 +68,19 @@ class Form
         }
     }
 
-    public function validate(string $field, Rule $rule)
+    public function validate(string $field, Rule $rule, bool $optional = false)
     {
-        $this->addRule($field, $rule, self::TRIGGER_ALWAYS);
+        $this->addRule($field, $rule, self::TRIGGER_ALWAYS, $optional);
     }
 
-    public function validateWhenFieldHasNoError(string $field, Rule $rule)
+    public function validateWhenFieldHasNoError(string $field, Rule $rule, bool $optional = false)
     {
-        $this->addRule($field, $rule, self::TRIGGER_FIELD_NO_ERROR);
+        $this->addRule($field, $rule, self::TRIGGER_FIELD_NO_ERROR, $optional);
     }
 
-    public function validateWhenFormHasNoError(string $field, Rule $rule)
+    public function validateWhenFormHasNoError(string $field, Rule $rule, bool $optional = false)
     {
-        $this->addRule($field, $rule, self::TRIGGER_NO_ERROR);
+        $this->addRule($field, $rule, self::TRIGGER_NO_ERROR, $optional);
     }
 
     /**
@@ -193,14 +193,15 @@ class Form
         if ($validation->trigger > self::TRIGGER_ALWAYS) {
             return !$this->hasError(($validation->trigger == self::TRIGGER_FIELD_NO_ERROR) ? $field : null);
         }
-        return true;
+        return !$validation->optional || ($validation->optional && !empty($this->fields[$field]));
     }
 
-    private function addRule(string $field, Rule $rule, int $trigger)
+    private function addRule(string $field, Rule $rule, int $trigger, bool $optional)
     {
         $validation = new \stdClass();
         $validation->rule = $rule;
         $validation->trigger = $trigger;
+        $validation->optional = $optional;
         $this->rules[$field][] = $validation;
     }
 }

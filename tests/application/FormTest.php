@@ -104,6 +104,16 @@ class FormTest extends TestCase
         self::assertEquals('username not empty', $form->getErrorMessages()[0]);
     }
 
+    public function testOptionalField()
+    {
+        $form = new Form();
+        $form->addFields([
+            'email' => ''
+        ]);
+        $form->validate('email', Rule::email('email not valid'), true);
+        self::assertTrue($form->verify());
+    }
+
     public function testInvalidCallbackForm()
     {
         $form = new Form();
