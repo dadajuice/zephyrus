@@ -13,7 +13,7 @@ abstract class ListableBroker extends Broker
     /**
      * Retrieves the total number of available rows for the corresponding
      * findAll method while applying the filters (sort, order and
-     * search). The filteredSelectSingle method should be used. E.g.:
+     * search). The filteredSelectSingle method should be used. E.g.:.
      *
      *     return $this->filteredSelectSingle("SELECT COUNT(*) as n FROM user")->n;
      *
@@ -23,7 +23,7 @@ abstract class ListableBroker extends Broker
 
     /**
      * Retrieves all the rows while applying the filters (sort, order and
-     * search). The filteredSelect method should be used. E.g.:
+     * search). The filteredSelect method should be used. E.g.:.
      *
      *     return $this->filteredSelect("SELECT * FROM user");
      *
@@ -33,7 +33,7 @@ abstract class ListableBroker extends Broker
 
     /**
      * Must provide the search query respecting the established convention by
-     * using « :search » to identify search values. E.g.:
+     * using « :search » to identify search values. E.g.:.
      *
      *     return "(username LIKE :search OR email LIKE :search OR CONCAT(firstname, ' ', lastname) LIKE :search)";
      *
@@ -49,7 +49,7 @@ abstract class ListableBroker extends Broker
      * table header links) and database columns. If the sort label and column
      * are the same, its not necessary to include them in the resulting array.
      * Only the different ones must be identified (key = sort label,
-     * value = sort column). E.g.:
+     * value = sort column). E.g.:.
      *
      *     return [
      *         'name' => 'firstname $order, lastname',
@@ -63,7 +63,7 @@ abstract class ListableBroker extends Broker
      * @param string $order
      * @return string[]
      */
-    abstract function sort(string $order): array;
+    abstract protected function sort(string $order): array;
 
     /**
      * @return null | Filter
@@ -154,7 +154,7 @@ abstract class ListableBroker extends Broker
         if (!empty($sort)) {
             $order = $this->filter->getOrder();
             $convertedSorts = $this->sort($order);
-            $orderBy = (key_exists($sort, $convertedSorts)) ? $convertedSorts[$sort] : $sort;
+            $orderBy = (array_key_exists($sort, $convertedSorts)) ? $convertedSorts[$sort] : $sort;
             return " ORDER BY $orderBy $order";
         }
         return "";
