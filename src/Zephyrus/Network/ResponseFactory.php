@@ -124,9 +124,11 @@ class ResponseFactory
             $that->initializeStreaming();
             $call = new Callback($callback);
             $call->execute(function ($id, $data) use ($that) {
+                // @codeCoverageIgnoreStart
                 if (connection_aborted()) {
                     exit;
                 }
+                // @codeCoverageIgnoreEnd
                 $that->outputSseMessage($id, $data);
                 @flush();
             });
