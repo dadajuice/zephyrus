@@ -41,4 +41,12 @@ class ResponseTest extends TestCase
         self::assertEquals(ContentType::HTML, $response->getContentType());
         self::assertEquals("test", $response->getContent());
     }
+
+    public function testTrueHtmlContent()
+    {
+        $response = new Response();
+        $response->setContentType(ContentType::HTML);
+        $response->setContent("<html>test</html>");
+        self::assertTrue($response->hasHtmlContent());
+    }
 }
