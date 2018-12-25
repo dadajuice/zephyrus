@@ -38,6 +38,12 @@ class FilterTest extends TestCase
         self::assertEquals(1, $filter->getPage());
     }
 
+    public function testInvalidOrder()
+    {
+        $filter = new Filter(new Request('http://test.local', 'GET', ['parameters' => ['order' => "error"]]));
+        self::assertEquals("asc", $filter->getOrder());
+    }
+
     private function getRequest()
     {
         return new Request('http://test.local', 'GET', ['parameters' => ['page' => 5, 'search' => 'test', 'order' => 'asc', 'sort' => 'username']]);
