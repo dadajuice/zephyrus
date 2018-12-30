@@ -98,7 +98,8 @@ abstract class Broker
     {
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($allowedTags);
-        return $statement->next($this->fetchStyle);
+        $result = $statement->next($this->fetchStyle);
+        return ($result) ? $result : null;
     }
 
     /**
@@ -161,7 +162,6 @@ abstract class Broker
      *
      * @param string $query
      * @param array $parameters
-     * @throws DatabaseException
      * @return DatabaseStatement
      */
     protected function query(string $query, array $parameters = [])
