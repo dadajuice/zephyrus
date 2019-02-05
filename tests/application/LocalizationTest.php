@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Localization;
 use Zephyrus\Application\Session;
+use Zephyrus\Exceptions\LocalizationException;
 
 class LocalizationTest extends TestCase
 {
@@ -15,8 +16,38 @@ class LocalizationTest extends TestCase
         self::assertEquals("Le courriel est invalide", Localization::getInstance()->localize("messages.errors.invalid_email"));
         self::assertEquals("L'utilisateur [bob] a été ajouté avec succès", Localization::getInstance()->localize("messages.success.add_user", ["bob"]));
         self::assertEquals("not.found", Localization::getInstance()->localize("not.found"));
+        self::assertEquals("routes.login", Localization::getInstance()->localize("routes.login")); // available next reload
         unlink(ROOT_DIR . '/locale/fr_CA/routes.json');
         $this->removeDirectory(ROOT_DIR . '/locale/cache');
+        Session::kill();
+    }
+
+    public function testErrorInJson()
+    {
+        Session::getInstance()->start();
+        copy(ROOT_DIR . '/locale/broken.json', ROOT_DIR . '/locale/fr_CA/broken.json');
+        try {
+            Localization::getInstance()->generate(true);
+            self::assertTrue(false); // should not reach this point
+        } catch (LocalizationException $e) {
+            self::assertEquals(JSON_ERROR_SYNTAX, $e->getCode());
+            self::assertEquals("broken.json", basename($e->getJsonFile()));
+        }
+        unlink(ROOT_DIR . '/locale/fr_CA/broken.json');
+        Session::kill();
+    }
+
+    public function testError2InJson()
+    {
+        Session::getInstance()->start();
+        copy(ROOT_DIR . '/locale/broken2.json', ROOT_DIR . '/locale/fr_CA/broken2.json');
+        try {
+            Localization::getInstance()->generate(true);
+            self::assertTrue(false); // should not reach this point
+        } catch (LocalizationException $e) {
+            self::assertEquals(JSON_ERROR_SYNTAX, $e->getCode());
+        }
+        unlink(ROOT_DIR . '/locale/fr_CA/broken2.json');
         Session::kill();
     }
 

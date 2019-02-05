@@ -1,5 +1,7 @@
 <?php namespace Zephyrus\Application;
 
+use Zephyrus\Exceptions\LocalizationException;
+
 class Localization
 {
     public const GENERATED_CLASS_NAME = "Localize";
@@ -49,9 +51,12 @@ class Localization
         Session::getInstance()->set(self::SESSION_LANGUAGE_KEY, $locale);
     }
 
-    public function generate()
+    /**
+     * @throws LocalizationException
+     */
+    public function generate(bool $force = false)
     {
-        if ($this->prepareCache() || $this->isCacheOutdated()) {
+        if ($force || $this->prepareCache() || $this->isCacheOutdated()) {
             $globalArray = $this->buildGlobalArrayFromJsonFiles();
             list($constants, $methods) = $this->buildClassFile($globalArray);
             if (!empty($methods)) {
@@ -168,12 +173,21 @@ class Localization
         return $newlyCreated;
     }
 
+    /**
+     * @return array
+     * @throws LocalizationException
+     */
     private function buildGlobalArrayFromJsonFiles()
     {
         $globalArray = [];
         foreach (recursiveGlob(ROOT_DIR . "/locale/{$this->appLocale}/*.json") as $file) {
             $string = file_get_contents($file);
-            $globalArray = array_merge($globalArray, json_decode($string, true));
+            $jsonAssociativeArray = json_decode($string, true);
+            $jsonLastError = json_last_error();
+            if ($jsonLastError > JSON_ERROR_NONE) {
+                throw new LocalizationException($jsonLastError, $file);
+            }
+            $globalArray = array_merge($globalArray, $jsonAssociativeArray);
         }
         return $globalArray;
     }
