@@ -16,6 +16,7 @@ class LocalizationTest extends TestCase
         self::assertEquals("Le courriel est invalide", Localization::getInstance()->localize("messages.errors.invalid_email"));
         self::assertEquals("L'utilisateur [bob] a été ajouté avec succès", Localization::getInstance()->localize("messages.success.add_user", ["bob"]));
         self::assertEquals("not.found", Localization::getInstance()->localize("not.found"));
+        self::assertEquals("messages.success.bob", Localization::getInstance()->localize("messages.success.bob"));
         self::assertEquals("routes.login", Localization::getInstance()->localize("routes.login")); // available next reload
         unlink(ROOT_DIR . '/locale/fr_CA/routes.json');
         $this->removeDirectory(ROOT_DIR . '/locale/cache');
