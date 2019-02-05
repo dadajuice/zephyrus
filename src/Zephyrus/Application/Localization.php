@@ -31,6 +31,7 @@ class Localization
         $segments = explode(".", $key);
         $lastConstant = array_pop($segments);
         $object = null;
+
         try {
             foreach ($segments as $segment) {
                 $object = (is_null($object)) ? \Localize::{$segment}() : $object::{$segment}();
