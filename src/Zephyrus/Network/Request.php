@@ -28,6 +28,11 @@ class Request
     private $uri;
 
     /**
+     * @var string Uri of where the client initiated the current request
+     */
+    private $referer;
+
+    /**
      * @var string requested uri as it was received (e.g /users/1)
      */
     private $requestedUri;
@@ -221,6 +226,32 @@ class Request
     }
 
     /**
+     * @return string
+     */
+    public function getReferer(): string
+    {
+        return $this->referer;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getServerVariables(): array
+    {
+        return $this->serverVariables;
+    }
+
+    /**
+     * @param string $name
+     * @param null|string $defaultValue
+     * @return null|string
+     */
+    public function getServerVariable(string $name, ?string $defaultValue = null): ?string
+    {
+        return $this->serverVariables[$name] ?? $defaultValue;
+    }
+
+    /**
      * @return array
      */
     public function getHeaders(): array
@@ -243,6 +274,7 @@ class Request
         $this->accept = $this->serverVariables['HTTP_ACCEPT'] ?? '';
         $this->userAgent = $this->serverVariables['HTTP_USER_AGENT'] ?? '';
         $this->clientIp = $this->serverVariables['REMOTE_ADDR'] ?? '';
+        $this->referer = $this->serverVariables['HTTP_REFERER'] ?? '';
     }
 
     private function initializeBaseUrl()

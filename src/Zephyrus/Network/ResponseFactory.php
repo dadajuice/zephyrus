@@ -69,10 +69,9 @@ class ResponseFactory
         $response->addHeader("Content-Disposition", 'attachment; filename="' . $filename . '"');
         $response->addHeader("Content-Transfer-Encoding", "binary");
         $response->addHeader("Content-Length", $contentLength);
-        ob_start();
-        @readfile($filePath);
-        $content = ob_get_clean();
-        $response->setContent($content);
+        $response->setContentCallback(function () use ($filePath) {
+            @readfile($filePath);
+        });
         return $response;
     }
 
@@ -124,9 +123,11 @@ class ResponseFactory
             $that->initializeStreaming();
             $call = new Callback($callback);
             $call->execute(function ($id, $data) use ($that) {
+                // @codeCoverageIgnoreStart
                 if (connection_aborted()) {
                     exit;
                 }
+                // @codeCoverageIgnoreEnd
                 $that->outputSseMessage($id, $data);
                 @flush();
             });

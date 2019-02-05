@@ -22,7 +22,7 @@ class SecuritySession
      */
     private $fingerprint = null;
 
-    public function __construct(array $configurations)
+    public function __construct(?array $configurations)
     {
         $fingerprintAgentEnabled = $configurations['fingerprint_agent'] ?? false;
         $fingerprintAddressEnabled = $configurations['fingerprint_ip'] ?? false;

@@ -8,7 +8,7 @@ abstract class Broker
 {
     const SQL_FORMAT_DATE = "Y-m-d";
     const SQL_FORMAT_DATE_TIME = "Y-m-d H:i:s";
-    const DEFAULT_FETCH = PDO::FETCH_BOTH;
+    const DEFAULT_FETCH = PDO::FETCH_OBJ;
 
     /**
      * @var Database
@@ -92,14 +92,14 @@ abstract class Broker
      * @param string $query
      * @param array $parameters
      * @param string $allowedTags
-     * @throws DatabaseException
-     * @return array | false
+     * @return \stdClass
      */
-    protected function selectSingle($query, $parameters = [], $allowedTags = "")
+    protected function selectSingle(string $query, array $parameters = [], string $allowedTags = "")
     {
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($allowedTags);
-        return $statement->next($this->fetchStyle);
+        $result = $statement->next($this->fetchStyle);
+        return ($result) ? $result : null;
     }
 
     /**
@@ -109,9 +109,9 @@ abstract class Broker
      * @param string $query
      * @param array $parameters
      * @param string $allowedTags
-     * @return array
+     * @return \stdClass[]
      */
-    protected function select($query, $parameters = [], $allowedTags = "")
+    protected function select(string $query, array $parameters = [], string $allowedTags = ""): array
     {
         if (!is_null($this->pager)) {
             $query .= $this->pager->getSqlLimit();
@@ -162,10 +162,9 @@ abstract class Broker
      *
      * @param string $query
      * @param array $parameters
-     * @throws DatabaseException
      * @return DatabaseStatement
      */
-    protected function query($query, $parameters = [])
+    protected function query(string $query, array $parameters = [])
     {
         return $this->database->query($query, $parameters);
     }

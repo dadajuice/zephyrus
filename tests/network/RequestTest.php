@@ -57,6 +57,24 @@ class RequestTest extends TestCase
         self::assertEquals(null, $request->getHeader('TEST'));
     }
 
+    public function testReferer()
+    {
+        $server = [];
+        $uri = 'http://127.0.0.1/test/3';
+        $method = 'GET';
+        $server['REMOTE_ADDR'] = '192.168.2.1';
+        $server['HTTP_ACCEPT'] = 'text/html';
+        $server['HTTP_USER_AGENT'] = 'chrome';
+        $server['HTTP_REFERER'] = "http://127.0.0.1/test/2";
+        $request = new Request($uri, $method, [
+            'server' => $server
+        ]);
+        self::assertEquals(4, $request->getServerVariable('INVALID', '4'));
+        self::assertEquals(4, count($request->getServerVariables()));
+        self::assertEquals("chrome", $request->getServerVariable('HTTP_USER_AGENT'));
+        self::assertEquals("http://127.0.0.1/test/2", $request->getReferer());
+    }
+
     public function testCookies()
     {
         $uri = 'http://127.0.0.1/test';

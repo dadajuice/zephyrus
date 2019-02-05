@@ -76,6 +76,26 @@ class BrokerTest extends TestCase
             }
         };
         $row = $class->findById(2);
+        self::assertEquals('Superman', $row->name);
+    }
+
+    public function testFetchStyle()
+    {
+        $class = new class(self::$database) extends Broker {
+
+            public function __construct(?Database $database = null)
+            {
+                parent::__construct($database);
+                $this->setFetchStyle(\PDO::FETCH_BOTH);
+            }
+
+            public function findById($id)
+            {
+                return $this->selectSingle("SELECT * FROM heroes WHERE id = ?", [$id]);
+            }
+        };
+
+        $row = $class->findById(2);
         self::assertEquals('Superman', $row['name']);
     }
 
@@ -88,7 +108,7 @@ class BrokerTest extends TestCase
             }
         };
         $row = $class->findById(3);
-        self::assertEquals('<b>Flash</b>', $row['name']);
+        self::assertEquals('<b>Flash</b>', $row->name);
     }
 
     public function testFindAll()
@@ -99,8 +119,9 @@ class BrokerTest extends TestCase
                 return $this->select("SELECT * FROM heroes");
             }
         };
-        $row = $class->findAll();
-        self::assertEquals(3, count($row));
+        $rows = $class->findAll();
+        self::assertEquals(3, count($rows));
+        self::assertEquals('Batman', $rows[0]->name);
     }
 
     public function testFindAllWithHtml()
@@ -111,8 +132,8 @@ class BrokerTest extends TestCase
                 return $this->select("SELECT * FROM heroes", [], "<b>");
             }
         };
-        $row = $class->findAll();
-        self::assertEquals('<b>Flash</b>', $row[2]['name']);
+        $rows = $class->findAll();
+        self::assertEquals('<b>Flash</b>', $rows[2]->name);
     }
 
     public function testTransaction()
@@ -131,8 +152,8 @@ class BrokerTest extends TestCase
             }
         };
         $class->insert();
-        $row = $class->findAll();
-        self::assertEquals(4, count($row));
+        $rows = $class->findAll();
+        self::assertEquals(4, count($rows));
     }
 
     /**

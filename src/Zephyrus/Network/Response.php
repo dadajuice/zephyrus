@@ -34,6 +34,16 @@ class Response
      */
     private $contentCallback = null;
 
+    /**
+     * Builds a response with the given content type and response code (defaults
+     * text/html 200 OK). Charset is by default UTF-8. Can be modified with the
+     * setContentType() method prior calling the send() method. Standard response
+     * types should be constructed from the ResponseFactory class for easier and
+     * best results.
+     *
+     * @param string $contentType
+     * @param int $code
+     */
     public function __construct($contentType = ContentType::HTML, $code = 200)
     {
         $this->contentType = $contentType;
@@ -41,6 +51,10 @@ class Response
         $this->charset = 'UTF-8';
     }
 
+    /**
+     * Sends the complete response to the client (headers and content). From
+     * that point it should have no more data sent (e.g. echoes).
+     */
     public function send()
     {
         http_response_code($this->code);
@@ -51,6 +65,10 @@ class Response
         $this->sendContent();
     }
 
+    /**
+     * Sends only the content to the client (useful for SSE streaming). Headers
+     * must be manually sent before calling this method.
+     */
     public function sendContent()
     {
         if (!is_null($this->contentCallback)) {
@@ -60,21 +78,52 @@ class Response
         echo $this->content;
     }
 
-    public function setContentCallback($contentCallback)
-    {
-        $this->contentCallback = $contentCallback;
-    }
-
+    /**
+     * Inserts a single header to the response. Can also overrides existing
+     * header having the same name.
+     *
+     * @param string $name
+     * @param string $content
+     */
     public function addHeader(string $name, string $content)
     {
         $this->headers[$name] = $content;
     }
 
+    /**
+     * Inserts an associative array of headers (name => content) to the
+     * response. Can also overrides existing header having the same
+     * name.
+     *
+     * @param array $headers
+     */
     public function addHeaders(array $headers)
     {
         foreach ($headers as $name => $content) {
             $this->headers[$name] = $content;
         }
+    }
+
+    /**
+     * Makes sure the response's content type is text/html and that the content
+     * contains at least the <html> tag.
+     *
+     * @return bool
+     */
+    public function hasHtmlContent(): bool
+    {
+        return $this->contentType == ContentType::HTML && (strpos($this->content, "<html>") !== false);
+    }
+
+    /**
+     * Applies a given callback to be executed for preparing content (useful
+     * for SSE streaming).
+     *
+     * @param callable $contentCallback
+     */
+    public function setContentCallback($contentCallback)
+    {
+        $this->contentCallback = $contentCallback;
     }
 
     /**
