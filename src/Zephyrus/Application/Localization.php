@@ -174,8 +174,8 @@ class Localization
     }
 
     /**
-     * @return array
      * @throws LocalizationException
+     * @return array
      */
     private function buildGlobalArrayFromJsonFiles()
     {
