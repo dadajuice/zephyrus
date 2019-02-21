@@ -35,10 +35,10 @@ class Filter
      */
     private $page;
 
-    public function __construct(Request $request, ?string $defaultSort = null)
+    public function __construct(Request $request, ?string $defaultSort = null, ?string $defaultOrder = null)
     {
         $this->request = $request;
-        $this->initializeQueryStrings($defaultSort);
+        $this->initializeQueryStrings($defaultSort, $defaultOrder);
     }
 
     /**
@@ -81,10 +81,10 @@ class Filter
         return $this->page;
     }
 
-    private function initializeQueryStrings(?string $defaultSort = null)
+    private function initializeQueryStrings(?string $defaultSort = null, ?string $defaultOrder = null)
     {
         $this->initializeSort($defaultSort ?? "");
-        $this->initializeOrder();
+        $this->initializeOrder($defaultOrder ?? "asc");
         $this->initializeSearch();
         $this->initializePage();
     }
@@ -94,9 +94,9 @@ class Filter
         $this->sort = $this->request->getParameter(self::SORT_PARAMETER_NAME) ?? $defaultSort;
     }
 
-    private function initializeOrder()
+    private function initializeOrder(string $defaultOrder)
     {
-        $order = $this->request->getParameter(self::ORDER_PARAMETER_NAME) ?? "asc";
+        $order = $this->request->getParameter(self::ORDER_PARAMETER_NAME) ?? $defaultOrder;
         if ($order != "asc" && $order != "desc") {
             $order = "asc";
         }

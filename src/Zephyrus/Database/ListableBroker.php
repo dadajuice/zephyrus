@@ -1,9 +1,10 @@
 <?php namespace Zephyrus\Database;
 
+use Models\Brokers\Listable;
 use Zephyrus\Network\RequestFactory;
 use Zephyrus\Utilities\Filter;
 
-abstract class ListableBroker extends Broker
+abstract class ListableBroker extends Broker implements Listable
 {
     /**
      * @var Filter
@@ -27,7 +28,7 @@ abstract class ListableBroker extends Broker
      *
      *     return $this->filteredSelect("SELECT * FROM user");
      *
-     * @return int
+     * @return array
      */
     abstract public function findAll(): array;
 
@@ -77,10 +78,11 @@ abstract class ListableBroker extends Broker
      * Creates the filter according to the request.
      *
      * @param string $defaultSort
+     * @param string $defaultOrder
      */
-    public function applyFilter(string $defaultSort = "")
+    public function applyFilter(string $defaultSort = "", string $defaultOrder = "")
     {
-        $this->filter = new Filter(RequestFactory::read(), $defaultSort);
+        $this->filter = new Filter(RequestFactory::read(), $defaultSort, $defaultOrder);
     }
 
     public function removeFilter()
