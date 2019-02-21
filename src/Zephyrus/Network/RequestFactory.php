@@ -94,7 +94,7 @@ class RequestFactory
             if (is_string($value)) {
                 $parameters[$name] = trim($value);
             } elseif (is_array($value)) {
-                $paramKey = rtrim($name, "[]") . "[]";
+                $paramKey = rtrim($name, "[]");
                 if (!isset($parameters[$name])) {
                     $parameters[$paramKey] = [];
                 }

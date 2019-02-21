@@ -74,8 +74,8 @@ class RequestFactoryTest extends TestCase
         RequestFactory::set(null);
         $request = RequestFactory::read();
         self::assertEquals('PUT', $request->getMethod());
-        self::assertEquals('2', $request->getParameter('test[]')[1]);
-        self::assertEquals('5', $request->getParameter('test2[]')[1]);
+        self::assertEquals('2', $request->getParameter('test')[1]);
+        self::assertEquals('5', $request->getParameter('test2')[1]);
     }
 
     public function testCaptureDelete()
