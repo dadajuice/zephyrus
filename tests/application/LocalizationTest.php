@@ -19,7 +19,7 @@ class LocalizationTest extends TestCase
         self::assertEquals("messages.success.bob", Localization::getInstance()->localize("messages.success.bob"));
         self::assertEquals("routes.login", Localization::getInstance()->localize("routes.login")); // available next reload
         unlink(ROOT_DIR . '/locale/fr_CA/routes.json');
-        $this->removeDirectory(ROOT_DIR . '/locale/cache');
+        //$this->removeDirectory(ROOT_DIR . '/locale/cache');
         Session::kill();
     }
 

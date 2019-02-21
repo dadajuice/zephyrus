@@ -60,6 +60,7 @@ class Localization
     public function generate(bool $force = false)
     {
         if ($force || $this->prepareCache() || $this->isCacheOutdated()) {
+            $this->clearCacheDirectory();
             $globalArray = $this->buildGlobalArrayFromJsonFiles();
             list($constants, $methods, $classes) = $this->buildClassFile($globalArray);
             if (!empty($methods)) {
@@ -216,5 +217,15 @@ class Localization
         $this->appLocale = Session::getInstance()->read(self::SESSION_LANGUAGE_KEY,
             Configuration::getApplicationConfiguration('locale'));
         $this->initializeLocale();
+    }
+
+    private function clearCacheDirectory()
+    {
+        $files = glob(ROOT_DIR . "/locale/cache/{$this->appLocale}");
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
     }
 }
