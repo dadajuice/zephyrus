@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Database;
 
-use Models\Brokers\Listable;
 use Zephyrus\Network\RequestFactory;
 use Zephyrus\Utilities\Filter;
 

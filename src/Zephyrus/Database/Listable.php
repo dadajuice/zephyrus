@@ -1,4 +1,4 @@
-<?php namespace Models\Brokers;
+<?php namespace Zephyrus\Database;
 
 use Zephyrus\Utilities\Filter;
 use Zephyrus\Utilities\Pager;
