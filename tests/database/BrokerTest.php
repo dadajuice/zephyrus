@@ -111,6 +111,18 @@ class BrokerTest extends TestCase
         self::assertEquals('<b>Flash</b>', $row->name);
     }
 
+    public function testFindByIdWithoutHtml()
+    {
+        $class = new class(self::$database) extends Broker {
+            public function findById($id)
+            {
+                return $this->selectSingle("SELECT * FROM heroes WHERE id = ?", [$id]);
+            }
+        };
+        $row = $class->findById(3);
+        self::assertEquals('Flash', $row->name);
+    }
+
     public function testFindAll()
     {
         $class = new class(self::$database) extends Broker {

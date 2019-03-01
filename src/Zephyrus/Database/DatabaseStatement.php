@@ -30,9 +30,7 @@ class DatabaseStatement
     public function next($fetchStyle = \PDO::FETCH_BOTH)
     {
         $row = $this->statement->fetch($fetchStyle);
-        if (is_array($row)) {
-            $this->sanitizeOutput($row);
-        }
+        $this->sanitizeOutput($row);
         return $row;
     }
 
@@ -84,13 +82,32 @@ class DatabaseStatement
         $this->allowedHtmlTags = "";
     }
 
-    /**
-     * @param array $row
-     */
     private function sanitizeOutput(&$row)
     {
-        foreach ($row as &$value) {
-            $value = strip_tags($value, $this->allowedHtmlTags);
+        if (is_array($row)) {
+            $this->sanitizeArrayOutput($row);
         }
+        if (is_object($row)) {
+            $this->sanitizeObjectOutput($row);
+        }
+    }
+
+    private function sanitizeObjectOutput(&$row)
+    {
+        $properties = get_object_vars($row);
+        $this->sanitizeArrayOutput($properties);
+        $row = (object) $properties;
+    }
+
+    private function sanitizeArrayOutput(&$row)
+    {
+        foreach ($row as &$value) {
+            $value = $this->sanitize($value);
+        }
+    }
+
+    private function sanitize($value)
+    {
+        return strip_tags($value, $this->allowedHtmlTags);
     }
 }
