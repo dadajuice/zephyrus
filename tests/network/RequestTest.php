@@ -11,7 +11,7 @@ class RequestTest extends TestCase
         $method = 'GET';
         $parameters = ['id' => '3', 'sort' => '4', 'filter' => ['a', 'b']];
         $request = new Request($uri, $method, [
-            'parameters' =>$parameters
+            'parameters' => $parameters
         ]);
 
         self::assertEquals('4', $request->getParameter('sort'));

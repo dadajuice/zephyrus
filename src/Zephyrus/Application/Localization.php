@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Application;
 
 use Zephyrus\Exceptions\LocalizationException;
+use Zephyrus\Security\Cryptography;
 
 class Localization
 {
@@ -27,18 +28,19 @@ class Localization
 
     public function localize($key, array $args = []): string
     {
-        $parameters = [];
-        $allSegments = explode(".", $key);
-        $trim = [];
-        foreach ($allSegments as $i => $segment) {
-            if ($i >= count($allSegments) - 2) {
-                $trim[] = $segment;
+        $segments = explode(".", $key);
+        $lastConstant = array_pop($segments);
+        $object = null;
+
+        try {
+            foreach ($segments as $segment) {
+                $object = (is_null($object)) ? \Localize::{$segment}() : $object::{$segment}();
             }
+        } catch (\Error $e) {
+            return $key;
         }
-        $trim[0] = $this->generateClassName($trim[0]);
-        $constant = "{$trim[0]}Localize::{$trim[1]}";
+        $constant = sprintf('%s::%s', get_class($object), $lastConstant);
         if (!defined($constant)) {
-            //throw new \RuntimeException("Specified localize message [$key] has not been defined");
             return $key;
         }
         $parameters[0] = constant($constant);
@@ -52,20 +54,22 @@ class Localization
     }
 
     /**
+     * @param bool $force
      * @throws LocalizationException
      */
     public function generate(bool $force = false)
     {
         if ($force || $this->prepareCache() || $this->isCacheOutdated()) {
+            $this->clearCacheDirectory();
             $globalArray = $this->buildGlobalArrayFromJsonFiles();
-            list($constants, $methods) = $this->buildClassFile($globalArray);
+            list($constants, $methods, $classes) = $this->buildClassFile($globalArray);
             if (!empty($methods)) {
                 $className = self::GENERATED_CLASS_NAME;
-                $class = $this->createLocalizeClass($className, $constants, $methods);
-                file_put_contents(ROOT_DIR . "/locale/cache/{$this->appLocale}/$className.php", $class);
+                $class = $this->createLocalizeClass($className, $constants, $methods, $classes);
+                file_put_contents(ROOT_DIR . "/locale/cache/{$this->appLocale}/" . self::GENERATED_CLASS_NAME . ".php", $class);
             }
         }
-        if (!class_exists("Localize")) {
+        if (!class_exists(self::GENERATED_CLASS_NAME)) {
             require ROOT_DIR . "/locale/cache/{$this->appLocale}/Localize.php";
         }
     }
@@ -74,26 +78,28 @@ class Localization
     {
         $constants = "";
         $methods = [];
+        $classes = [];
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                list($returnedConstants, $returnedMethods) = $this->buildClassFile($value);
-                $className = $this->generateClassName($key) . "Localize";
-                $class = $this->createLocalizeClass($className, $returnedConstants, $returnedMethods);
+                list($returnedConstants, $returnedMethods, $returnedClasses) = $this->buildClassFile($value);
+                $className = 'C' . Cryptography::randomString(20);
+                $class = $this->createLocalizeClass($className, $returnedConstants, $returnedMethods, $returnedClasses);
                 file_put_contents(ROOT_DIR . "/locale/cache/{$this->appLocale}/$className.php", $class);
                 $methods[] = $key;
+                $classes[] = $className;
             } else {
                 $constants .= $this->addConstant($key, $value);
             }
         }
-        return [$constants, $methods];
+        return [$constants, $methods, $classes];
     }
 
-    private function createLocalizeClass(string $className, string $constants, array $methods)
+    private function createLocalizeClass(string $className, string $constants, array $methods, array $classes)
     {
         $output = "<?php" . PHP_EOL . PHP_EOL;
-        if (!empty($methods)) {
-            foreach ($methods as $method) {
-                $output .= $this->addRequire($method);
+        if (!empty($classes)) {
+            foreach ($classes as $class) {
+                $output .= $this->addRequire($class);
             }
             $output .= PHP_EOL;
         }
@@ -102,8 +108,8 @@ class Localization
             $output .= $constants . PHP_EOL;
         }
         if (!empty($methods)) {
-            foreach ($methods as $method) {
-                $output .= $this->addMethod($method);
+            foreach ($methods as $i => $method) {
+                $output .= $this->addMethod($method, $classes[$i]);
                 $output .= PHP_EOL;
             }
         }
@@ -117,26 +123,19 @@ class Localization
         return "\tpublic const $name = \"$value\";" . PHP_EOL;
     }
 
-    private function addMethod($name)
+    private function addMethod($name, $className)
     {
-        $className = $this->generateClassName($name) . 'Localize';
         return "\tpublic static function $name(): $className" . PHP_EOL . "\t{" . PHP_EOL . "\t\treturn $className::getInstance();" . PHP_EOL . "\t}" . PHP_EOL;
     }
 
     private function addRequire($name)
     {
-        $className = $this->generateClassName($name) . 'Localize';
-        return "require \"$className.php\";" . PHP_EOL;
+        return "require \"$name.php\";" . PHP_EOL;
     }
 
     private function startClass($className)
     {
         return "final class " . $className . PHP_EOL . "{" . PHP_EOL;
-    }
-
-    private function generateClassName($name)
-    {
-        return ucwords($name);
     }
 
     private function singleton()
@@ -218,5 +217,15 @@ class Localization
         $this->appLocale = Session::getInstance()->read(self::SESSION_LANGUAGE_KEY,
             Configuration::getApplicationConfiguration('locale'));
         $this->initializeLocale();
+    }
+
+    private function clearCacheDirectory()
+    {
+        $files = glob(ROOT_DIR . "/locale/cache/{$this->appLocale}");
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
     }
 }
