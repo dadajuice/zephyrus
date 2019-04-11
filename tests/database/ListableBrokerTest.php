@@ -1,8 +1,9 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Database\Broker;
 use Zephyrus\Database\Database;
-use Zephyrus\Database\ListableBroker;
+use Zephyrus\Database\Listable;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 
@@ -56,18 +57,18 @@ class ListableBrokerTest extends TestCase
 
     private function buildClass()
     {
-        return new class(self::$database) extends ListableBroker {
-            public function count(): int
+        return new class(self::$database) extends Broker implements Listable {
+            function count(): int
             {
                 return $this->filteredSelectSingle("SELECT COUNT(*) as n FROM heroes")->n;
             }
 
-            public function findAll(): array
+            function findAll(): array
             {
                 return $this->filteredSelect("SELECT * FROM heroes");
             }
 
-            protected function search(): string
+            function search(): string
             {
                 return "(name LIKE :search)";
             }

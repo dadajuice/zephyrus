@@ -25,11 +25,14 @@ abstract class Broker
      */
     private $fetchStyle = self::DEFAULT_FETCH;
 
+    use Filterable { filterQuery as private; }
+
     /**
      * Broker constructor called by children. Simply get the database reference
      * for further use.
      *
      * @param null|Database $database
+     * @throws DatabaseException
      */
     public function __construct(?Database $database = null)
     {
@@ -84,6 +87,30 @@ abstract class Broker
     }
 
     /**
+     * @param string $query
+     * @param array $parameters
+     * @param string $allowedTags
+     * @return \stdClass | null
+     */
+    public function filteredSelectSingle(string $query, array $parameters = [], string $allowedTags = ""): ?\stdClass
+    {
+        $this->filterQuery($query, $parameters);
+        return $this->selectSingle($query, $parameters, $allowedTags);
+    }
+
+    /**
+     * @param string $query
+     * @param array $parameters
+     * @param string $allowedTags
+     * @return \stdClass[]
+     */
+    public function filteredSelect(string $query, array $parameters = [], string $allowedTags = ""): array
+    {
+        $this->filterQuery($query, $parameters);
+        return $this->select($query, $parameters, $allowedTags);
+    }
+
+    /**
      * Execute a SELECT query which should return a single data row. Best
      * suited for queries involving primary key in where. Will return null
      * if the query did not return any results. If more than one row is
@@ -132,7 +159,6 @@ abstract class Broker
      * handler. Best suited method for INSERT, UPDATE and DELETE queries.
      *
      * @param callable $callback
-     * @throws DatabaseException
      * @return mixed
      */
     protected function transaction(callable $callback)
@@ -151,7 +177,6 @@ abstract class Broker
             return $result;
         } catch (\Exception $e) {
             $this->database->rollback();
-
             throw new DatabaseException($e->getMessage());
         }
     }
