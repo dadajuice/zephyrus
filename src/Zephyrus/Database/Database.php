@@ -12,6 +12,16 @@ class Database
     private $handle = null;
 
     /**
+     * @var Database
+     */
+    private static $sharedInstance = null;
+
+    /**
+     * @var string
+     */
+    private $dsn;
+
+    /**
      * Execute a parametrized SQL query. Parameters must be included as an
      * array compatible with the PDO query preparation.
      *
@@ -88,6 +98,14 @@ class Database
     }
 
     /**
+     * @return string
+     */
+    public function getDataSourceName(): string
+    {
+        return $this->dsn;
+    }
+
+    /**
      * Manual database instance constructor.
      *
      * @param string $dsn
@@ -97,6 +115,7 @@ class Database
      */
     public function __construct(string $dsn, string $username = "", string $password = "")
     {
+        $this->dsn = $dsn;
         try {
             $this->handle = new TransactionPDO($dsn, $username, $password);
             $this->handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -111,9 +130,26 @@ class Database
      * @throws DatabaseException
      * @return Database
      */
-    public static function buildFromConfiguration()
+    public static function buildFromConfiguration(): Database
     {
+        if (!is_null(self::$sharedInstance)) {
+             return self::$sharedInstance;
+        }
         $config = Configuration::getDatabaseConfiguration();
+        $instance = self::initializeFromConfiguration($config);
+        if ($config['shared'] ?? false) {
+            self::$sharedInstance = $instance;
+        }
+        return $instance;
+    }
+
+    /**
+     * @param array $config
+     * @return Database
+     * @throws DatabaseException
+     */
+    private static function initializeFromConfiguration(array $config): Database
+    {
         $dsn = $config['dsn'] ?? "mysql:dbname={$config['database']};
             host={$config['host']};charset={$config['charset']}";
         $username = $config['username'] ?? "";

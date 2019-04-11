@@ -16,7 +16,7 @@ class UploadFileTest extends TestCase
             'size' => 825
         ];
         $file = new UploadFile($data);
-        self::assertEquals(825, $file->getSize());
+        self::assertEquals(839, $file->getSize());
         self::assertEquals(ROOT_DIR . '/config.ini', $file->getTemporaryFilename());
         self::assertEquals('test.ini', $file->getOriginalFilename());
         self::assertEquals('text/plain', $file->getMimeType());
