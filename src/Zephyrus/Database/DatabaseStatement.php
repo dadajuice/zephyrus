@@ -102,7 +102,9 @@ class DatabaseStatement
     private function sanitizeArrayOutput(&$row)
     {
         foreach ($row as &$value) {
-            $value = $this->sanitize($value);
+            if (!is_null($value)) {
+                $value = $this->sanitize($value);
+            }
         }
     }
 

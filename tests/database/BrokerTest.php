@@ -199,4 +199,17 @@ class BrokerTest extends TestCase
         $id = $class->insert();
         self::assertEquals(5, $id);
     }
+
+    public function testNullResults()
+    {
+        $class = new class(self::$database) extends Broker {
+            public function findById($id)
+            {
+                $this->query("INSERT INTO heroes(id, name) VALUES (10, null);");
+                return $this->selectSingle("SELECT name FROM heroes WHERE id = $id");
+            }
+        };
+        $row = $class->findById(10);
+        self::assertEquals(null, $row->name);
+    }
 }
