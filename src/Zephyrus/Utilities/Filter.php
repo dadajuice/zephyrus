@@ -4,7 +4,6 @@ use Zephyrus\Network\Request;
 
 class Filter
 {
-    const MIN_SEARCH_LENGTH = 2;
     const PAGE_PARAMETER_NAME = Pager::URL_PARAMETER;
     const SORT_PARAMETER_NAME = "sort";
     const ORDER_PARAMETER_NAME = "order";
@@ -106,7 +105,7 @@ class Filter
     private function initializeSearch()
     {
         $search = $this->request->getParameter(self::SEARCH_PARAMETER_NAME);
-        $this->search = (!is_null($search) && strlen($search) >= self::MIN_SEARCH_LENGTH) ? $search : null;
+        $this->search = !is_null($search) ? $search : null;
     }
 
     private function initializePage()
