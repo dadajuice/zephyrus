@@ -149,4 +149,27 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid("1234", ["password" => "5678", "username" => "blewis"]));
         self::assertFalse($rule->isValid("1234", ["username" => "blewis"]));
     }
+
+    public function testIsArray()
+    {
+        $rule = Rule::array("err");
+        self::assertTrue($rule->isValid(["1", 2, "hello"]));
+        self::assertFalse($rule->isValid("e"));
+        self::assertTrue($rule->isValid(["bat" => "man"]));
+    }
+
+    public function testIsBoolean()
+    {
+        $rule = Rule::boolean("err");
+        self::assertTrue($rule->isValid("true"));
+        self::assertTrue($rule->isValid("false"));
+        self::assertTrue($rule->isValid(false));
+        self::assertTrue($rule->isValid(true));
+        self::assertTrue($rule->isValid(0));
+        self::assertTrue($rule->isValid(1));
+
+        self::assertFalse($rule->isValid("hello"));
+        self::assertFalse($rule->isValid("e"));
+        self::assertFalse($rule->isValid(56));
+    }
 }

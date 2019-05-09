@@ -110,6 +110,24 @@ class Rule
         }, $errorMessage);
     }
 
+    public static function array(string $errorMessage): Rule
+    {
+        return new Rule(function($data) {
+            return is_array($data);
+        }, $errorMessage);
+    }
+
+    public static function boolean(string $errorMessage): Rule
+    {
+        return new Rule(function($data) {
+            return is_bool($data)
+                || strcasecmp($data, "true") == 0
+                || strcasecmp($data, "false") == 0
+                || (is_int($data) && $data == 0)
+                || (is_int($data) && $data == 1);
+        }, $errorMessage);
+    }
+
     public function __construct($validation, string $errorMessage = "")
     {
         $this->validation = $validation;
