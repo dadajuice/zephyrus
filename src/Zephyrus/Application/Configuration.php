@@ -31,29 +31,30 @@ class Configuration
         }
     }
 
-    public static function getApplicationConfiguration($property = null)
+    public static function getApplicationConfiguration($property = null, $defaultValue = null)
     {
-        return self::getConfiguration('application', $property);
+        return self::getConfiguration('application', $property, $defaultValue);
     }
 
-    public static function getSecurityConfiguration($property = null)
+    public static function getSecurityConfiguration($property = null, $defaultValue = null)
     {
-        return self::getConfiguration('security', $property);
+        return self::getConfiguration('security', $property, $defaultValue);
     }
 
-    public static function getDatabaseConfiguration($property = null)
+    public static function getDatabaseConfiguration($property = null, $defaultValue = null)
     {
-        return self::getConfiguration('database', $property);
+        return self::getConfiguration('database', $property, $defaultValue);
     }
 
-    public static function getSessionConfiguration($property = null)
+    public static function getSessionConfiguration($property = null, $defaultValue = null)
     {
-        return self::getConfiguration('session', $property);
+        return self::getConfiguration('session', $property, $defaultValue);
     }
 
     /**
      * @param string $section
      * @param string $property
+     * @param null $defaultValue
      * @return mixed
      */
     public static function getConfiguration(string $section, ?string $property = null, $defaultValue = null)
