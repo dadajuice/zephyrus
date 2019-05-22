@@ -104,7 +104,7 @@ class DatabaseStatement
     private function convertRowTypes(&$row)
     {
         foreach (get_object_vars($row) as $column => $value) {
-            if (isset($this->fetchColumnTypes[$column]) && is_callable($this->fetchColumnTypes[$column])) {
+            if (!is_null($value) && isset($this->fetchColumnTypes[$column]) && is_callable($this->fetchColumnTypes[$column])) {
                 $row->{$column} = $this->fetchColumnTypes[$column]($row->{$column});
             }
         }
