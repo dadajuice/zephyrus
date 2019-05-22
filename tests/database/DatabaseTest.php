@@ -60,7 +60,7 @@ class DatabaseTest extends TestCase
         $statement = self::$database->query('SELECT * FROM heroes');
         $statement->next();
         $res = $statement->next();
-        self::assertEquals('Superman', $res['name']);
+        self::assertEquals('Superman', $res->name);
         self::$database->beginTransaction();
         self::$database->query("INSERT INTO heroes(id, name) VALUES (3, 'Flash');");
         self::$database->rollback();
@@ -88,7 +88,7 @@ class DatabaseTest extends TestCase
         $statement->next();
         $statement->next();
         $res = $statement->next();
-        self::assertEquals('Aquaman', $res['name']);
+        self::assertEquals('Aquaman', $res->name);
         self::$database->rollback();
         $statement = self::$database->query('SELECT * FROM heroes');
         $i = 0;

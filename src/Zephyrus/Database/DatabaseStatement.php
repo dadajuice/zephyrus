@@ -1,9 +1,15 @@
 <?php namespace Zephyrus\Database;
 
 use PDOStatement;
+use stdClass;
+use Zephyrus\Application\Configuration;
 
 class DatabaseStatement
 {
+    const TYPE_INTEGER = ['LONGLONG', 'LONG', 'INTEGER'];
+    const TYPE_BOOLEAN = ['TINY'];
+    const TYPE_FLOAT = ['NEWDECIMAL', 'FLOAT', 'DOUBLE'];
+
     /**
      * @var PDOStatement
      */
@@ -14,9 +20,17 @@ class DatabaseStatement
      */
     private $allowedHtmlTags = "";
 
+    /**
+     * @var array
+     */
+    private $fetchColumnTypes = [];
+
     public function __construct(PDOStatement $statement)
     {
         $this->statement = $statement;
+        if (Configuration::getDatabaseConfiguration('convert_type', false)) {
+            $this->initializeTypeConversion();
+        }
     }
 
     /**
@@ -24,12 +38,17 @@ class DatabaseStatement
      * executed query. Automatically strip slashes that would have been stored
      * in database as escaping.
      *
-     * @param int $fetchStyle
-     * @return array
+     * @return stdClass|null
      */
-    public function next($fetchStyle = \PDO::FETCH_BOTH)
+    public function next(): ?stdClass
     {
-        $row = $this->statement->fetch($fetchStyle);
+        $row = $this->statement->fetch(\PDO::FETCH_OBJ);
+        if ($row === false) {
+            return null;
+        }
+        if (!empty($this->fetchColumnTypes)) {
+            $this->convertRowTypes($row);
+        }
         $this->sanitizeOutput($row);
         return $row;
     }
@@ -82,28 +101,20 @@ class DatabaseStatement
         $this->allowedHtmlTags = "";
     }
 
+    private function convertRowTypes(&$row)
+    {
+        foreach (get_object_vars($row) as $column => $value) {
+            if (isset($this->fetchColumnTypes[$column]) && is_callable($this->fetchColumnTypes[$column])) {
+                $row->{$column} = $this->fetchColumnTypes[$column]($row->{$column});
+            }
+        }
+    }
+
     private function sanitizeOutput(&$row)
     {
-        if (is_array($row)) {
-            $this->sanitizeArrayOutput($row);
-        }
-        if (is_object($row)) {
-            $this->sanitizeObjectOutput($row);
-        }
-    }
-
-    private function sanitizeObjectOutput(&$row)
-    {
-        $properties = get_object_vars($row);
-        $this->sanitizeArrayOutput($properties);
-        $row = (object) $properties;
-    }
-
-    private function sanitizeArrayOutput(&$row)
-    {
-        foreach ($row as &$value) {
-            if (!is_null($value)) {
-                $value = $this->sanitize($value);
+        foreach (get_object_vars($row) as $column => $value) {
+            if (!is_null($value) && is_string($value)) {
+                $row->{$column} = $this->sanitize($value);
             }
         }
     }
@@ -111,5 +122,30 @@ class DatabaseStatement
     private function sanitize($value)
     {
         return strip_tags($value, $this->allowedHtmlTags);
+    }
+
+    private function initializeTypeConversion()
+    {
+        for ($i = 0; $i < $this->statement->columnCount(); ++$i) {
+            $meta = $this->statement->getColumnMeta($i);
+            $this->fetchColumnTypes[$meta['name']] = $this->getMetaCallback(strtoupper($meta['native_type']));
+        }
+    }
+
+    private function getMetaCallback(string $pdoType): ?string
+    {
+        if (in_array($pdoType, self::TYPE_INTEGER)) {
+            return "intval";
+        }
+        // Boolean type doesnt exists in SQLITE
+        // @codeCoverageIgnoreStart
+        if (in_array($pdoType, self::TYPE_BOOLEAN)) {
+            return "boolval";
+        }
+        // @codeCoverageIgnoreEnd
+        if (in_array($pdoType, self::TYPE_FLOAT)) {
+            return "floatval";
+        }
+        return null;
     }
 }

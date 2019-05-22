@@ -1,6 +1,6 @@
 <?php namespace Zephyrus\Database;
 
-use PDO;
+use stdClass;
 use Zephyrus\Exceptions\DatabaseException;
 use Zephyrus\Utilities\Pager;
 
@@ -8,7 +8,6 @@ abstract class Broker
 {
     const SQL_FORMAT_DATE = "Y-m-d";
     const SQL_FORMAT_DATE_TIME = "Y-m-d H:i:s";
-    const DEFAULT_FETCH = PDO::FETCH_OBJ;
 
     /**
      * @var Database
@@ -19,11 +18,6 @@ abstract class Broker
      * @var Pager
      */
     private $pager = null;
-
-    /**
-     * @var int
-     */
-    private $fetchStyle = self::DEFAULT_FETCH;
 
     use Filterable { filterQuery as private; }
 
@@ -60,14 +54,6 @@ abstract class Broker
     public function getPager()
     {
         return $this->pager;
-    }
-
-    /**
-     * @param int $fetchStyle
-     */
-    protected function setFetchStyle(int $fetchStyle)
-    {
-        $this->fetchStyle = $fetchStyle;
     }
 
     /**
@@ -119,14 +105,13 @@ abstract class Broker
      * @param string $query
      * @param array $parameters
      * @param string $allowedTags
-     * @return \stdClass
+     * @return stdClass|null
      */
-    protected function selectSingle(string $query, array $parameters = [], string $allowedTags = "")
+    protected function selectSingle(string $query, array $parameters = [], string $allowedTags = ""): ?stdClass
     {
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($allowedTags);
-        $result = $statement->next($this->fetchStyle);
-        return ($result) ? $result : null;
+        return $statement->next();
     }
 
     /**
@@ -146,7 +131,7 @@ abstract class Broker
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($allowedTags);
         $results = [];
-        while ($row = $statement->next($this->fetchStyle)) {
+        while ($row = $statement->next()) {
             $results[] = $row;
         }
         return $results;

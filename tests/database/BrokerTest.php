@@ -79,26 +79,6 @@ class BrokerTest extends TestCase
         self::assertEquals('Superman', $row->name);
     }
 
-    public function testFetchStyle()
-    {
-        $class = new class(self::$database) extends Broker {
-
-            public function __construct(?Database $database = null)
-            {
-                parent::__construct($database);
-                $this->setFetchStyle(\PDO::FETCH_BOTH);
-            }
-
-            public function findById($id)
-            {
-                return $this->selectSingle("SELECT * FROM heroes WHERE id = ?", [$id]);
-            }
-        };
-
-        $row = $class->findById(2);
-        self::assertEquals('Superman', $row['name']);
-    }
-
     public function testFindByIdWithHtml()
     {
         $class = new class(self::$database) extends Broker {

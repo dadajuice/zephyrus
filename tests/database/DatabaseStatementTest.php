@@ -13,8 +13,8 @@ class DatabaseStatementTest extends TestCase
     public static function setUpBeforeClass()
     {
         self::$database = new Database('sqlite::memory:');
-        self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
-        self::$database->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
+        self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT, power REAL DEFAULT 0);');
+        self::$database->query("INSERT INTO heroes(id, name, power) VALUES (1, 'Batman', 3.5);");
     }
 
     public function testHtmlSanitize()
@@ -22,7 +22,7 @@ class DatabaseStatementTest extends TestCase
         self::$database->query("INSERT INTO heroes(id, name) VALUES (2, '<p>superman</p>');");
         $result = self::$database->query("SELECT * FROM heroes WHERE id = 2");
         $row = $result->next();
-        self::assertEquals('superman', $row['name']);
+        self::assertEquals('superman', $row->name);
     }
 
     public function testAllowHtml()
@@ -34,10 +34,10 @@ class DatabaseStatementTest extends TestCase
         self::assertEquals('<b>', $result->getAllowedHtmlTags());
         $result->setAllowedHtmlTags('<b><u>');
         $row = $result->next();
-        self::assertEquals('<b>arrow</b>', $row['name']);
+        self::assertEquals('<b>arrow</b>', $row->name);
         $result = self::$database->query("SELECT * FROM heroes WHERE id = 3");
         $result->disallowDirectHtmlTags();
         $row = $result->next();
-        self::assertEquals('arrow', $row['name']);
+        self::assertEquals('arrow', $row->name);
     }
 }
