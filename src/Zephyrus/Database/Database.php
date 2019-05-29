@@ -1,11 +1,14 @@
 <?php namespace Zephyrus\Database;
 
 use PDO;
+use PDOException;
 use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\DatabaseException;
 
 class Database
 {
+    private const DEFAULT_DBMS = 'mysql';
+
     /**
      * @var TransactionPDO
      */
@@ -106,6 +109,14 @@ class Database
     }
 
     /**
+     * @return string
+     */
+    public function getDatabaseManagementSystem(): string
+    {
+        return $this->handle->getAttribute(PDO::ATTR_DRIVER_NAME);
+    }
+
+    /**
      * Manual database instance constructor.
      *
      * @param string $dsn
@@ -119,7 +130,7 @@ class Database
         try {
             $this->handle = new TransactionPDO($dsn, $username, $password);
             $this->handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             throw new DatabaseException("Connection failed to database : " . $e->getMessage());
         }
     }
@@ -127,15 +138,16 @@ class Database
     /**
      * Constructs a database instance from the defined configurations.
      *
-     * @throws DatabaseException
+     * @param array|null $configuration
      * @return Database
+     * @throws DatabaseException
      */
-    public static function buildFromConfiguration(): Database
+    public static function buildFromConfiguration(?array $configuration = null): Database
     {
-        if (!is_null(self::$sharedInstance)) {
-             return self::$sharedInstance;
+        $config = $configuration ?? Configuration::getDatabaseConfiguration();
+        if (!is_null(self::$sharedInstance) && ($config['shared'] ?? false)) {
+            return self::$sharedInstance;
         }
-        $config = Configuration::getDatabaseConfiguration();
         $instance = self::initializeFromConfiguration($config);
         if ($config['shared'] ?? false) {
             self::$sharedInstance = $instance;
@@ -150,10 +162,30 @@ class Database
      */
     private static function initializeFromConfiguration(array $config): Database
     {
-        $dsn = $config['dsn'] ?? "mysql:dbname={$config['database']};
-            host={$config['host']};charset={$config['charset']}";
-        $username = $config['username'] ?? "";
-        $password = $config['password'] ?? "";
-        return new self($dsn, $username, $password);
+        $dsn = self::buildDataSourceName($config);
+        return new self($dsn, $config['username'] ?? null, $config['password'] ?? null);
+    }
+
+    /**
+     * Mandatory fields to use :
+     * database (database name to connect to)
+     * host
+     *
+     *
+     * @param array $config
+     * @throws DatabaseException
+     * @return mixed|string
+     */
+    private static function buildDataSourceName(array $config)
+    {
+        $dbms = $config['dbms'] ?? self::DEFAULT_DBMS;
+        if (!in_array($dbms, PDO::getAvailableDrivers())) {
+            throw new DatabaseException("Configured Database management system [$dbms] doesn't correspond 
+                to one of the available drivers [" . implode(',', PDO::getAvailableDrivers()) . "]");
+        }
+        $charset = (isset($config['charset'])) ? ";charset={$config['charset']};" : "";
+        $port = (isset($config['port'])) ? ";port={$config['port']};" : "";
+        return $config['dsn']
+            ?? $dbms . ':dbname=' . $config['database'] . ';host=' . $config['host'] . $port . $charset;
     }
 }
