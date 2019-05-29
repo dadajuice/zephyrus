@@ -33,27 +33,32 @@ class Pager
     private $maxEntities;
 
     /**
-     * @var
+     * @var string
      */
     private $urlParameter;
+
+    /**
+     * @var int
+     */
+    private $offset;
 
     public function __construct($recordCount, $maxEntities = self::PAGE_MAX_ENTITIES, $urlParameter = self::URL_PARAMETER)
     {
         $request = RequestFactory::read();
         $this->urlParameter = $urlParameter;
-        $page = $request->getParameter($urlParameter);
+        $page = $request->getParameter($urlParameter, 1);
         $this->maxEntities = $maxEntities;
-        $this->currentPage = (is_null($page)) ? 1 : $page;
+        $this->currentPage = (!is_numeric($page) || $page < 0) ? 1 : $page;
         $this->maxPage = ceil($recordCount / $maxEntities);
         $this->pageUrl = $request->getUri()->getPath();
         $this->pageQuery = $this->getQueryString($request->getUri()->getQuery());
+        $this->offset = $this->maxEntities * ($this->currentPage - 1);
         $this->validate();
     }
 
-    public function getSqlLimit()
+    public function getSqlLimit(string $dbms = 'mysql')
     {
-        $offset = $this->maxEntities * ($this->currentPage - 1);
-        return " LIMIT $offset, $this->maxEntities";
+        return ($dbms == 'mysql') ? $this->getMySqlLimit() : $this->getPostgreSqlLimit();
     }
 
     /**
@@ -210,5 +215,15 @@ class Pager
         if ($this->currentPage < 1 || $this->currentPage > $this->maxPage) {
             $this->currentPage = 1;
         }
+    }
+
+    private function getPostgreSqlLimit()
+    {
+        return " LIMIT $this->maxEntities OFFSET $this->offset";
+    }
+
+    private function getMySqlLimit()
+    {
+        return " LIMIT $this->offset, $this->maxEntities";
     }
 }

@@ -16,6 +16,8 @@ class PagerTest extends TestCase
         self::assertEquals(Pager::PAGE_MAX_ENTITIES, $max);
         $limit = $pager->getSqlLimit();
         self::assertEquals(" LIMIT 200, 50", $limit);
+        $limit = $pager->getSqlLimit('pgsql');
+        self::assertEquals(" LIMIT 50 OFFSET 200", $limit);
     }
 
     public function testSimpleDisplay()
