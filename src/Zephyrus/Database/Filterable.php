@@ -56,9 +56,9 @@ trait Filterable
         $lastHavingByOccurrence = strripos($query, "having");
         $insertionPosition = strlen($query);
         if ($lastGroupByOccurrence !== false && $lastGroupByOccurrence > $lastWhereByOccurrence) {
-            $insertionPosition = $lastGroupByOccurrence;
+            $insertionPosition = $lastGroupByOccurrence - 1;
         } elseif ($lastHavingByOccurrence !== false && $lastHavingByOccurrence > $lastWhereByOccurrence) {
-            $insertionPosition = $lastHavingByOccurrence;
+            $insertionPosition = $lastHavingByOccurrence - 1;
         }
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);

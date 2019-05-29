@@ -75,6 +75,7 @@ abstract class Broker
     /**
      * @param string $query
      * @param array $parameters
+     * @param bool $ignoreOrder
      * @param string $allowedTags
      * @return \stdClass | null
      */
@@ -87,6 +88,7 @@ abstract class Broker
     /**
      * @param string $query
      * @param array $parameters
+     * @param bool $ignoreOrder
      * @param string $allowedTags
      * @return \stdClass[]
      */
