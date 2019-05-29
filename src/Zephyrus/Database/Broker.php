@@ -78,9 +78,9 @@ abstract class Broker
      * @param string $allowedTags
      * @return \stdClass | null
      */
-    public function filteredSelectSingle(string $query, array $parameters = [], string $allowedTags = ""): ?\stdClass
+    public function filteredSelectSingle(string $query, array $parameters = [], bool $ignoreOrder = false, string $allowedTags = ""): ?\stdClass
     {
-        $this->filterQuery($query, $parameters);
+        $this->filterQuery($query, $parameters, $ignoreOrder);
         return $this->selectSingle($query, $parameters, $allowedTags);
     }
 
@@ -90,9 +90,9 @@ abstract class Broker
      * @param string $allowedTags
      * @return \stdClass[]
      */
-    public function filteredSelect(string $query, array $parameters = [], string $allowedTags = ""): array
+    public function filteredSelect(string $query, array $parameters = [], bool $ignoreOrder = false, string $allowedTags = ""): array
     {
-        $this->filterQuery($query, $parameters);
+        $this->filterQuery($query, $parameters, $ignoreOrder);
         return $this->select($query, $parameters, $allowedTags);
     }
 
@@ -126,7 +126,7 @@ abstract class Broker
     protected function select(string $query, array $parameters = [], string $allowedTags = ""): array
     {
         if (!is_null($this->pager)) {
-            $query .= $this->pager->getSqlLimit();
+            $query .= $this->pager->getSqlLimit($this->database->getDatabaseManagementSystem());
         }
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($allowedTags);

@@ -124,6 +124,18 @@ class DatabaseTest extends TestCase
         new Database(';lsdklfhjk');
     }
 
+    /**
+     * @expectedException \Zephyrus\Exceptions\DatabaseException
+     */
+    public function testUnavailableDbms()
+    {
+        Database::buildFromConfiguration([
+            'dbms' => 'batman',
+            'host' => 'localhost',
+            'username' => 'bob'
+        ]);
+    }
+
     public function testBuildFromConfiguration()
     {
         $db = Database::buildFromConfiguration();

@@ -34,7 +34,7 @@ trait Filterable
         $this->filter = null;
     }
 
-    public function filterQuery(string& $query, array& $parameters = [])
+    public function filterQuery(string& $query, array& $parameters = [], bool $ignoreOrder = false)
     {
         if (!is_null($this->filter)) {
             $search = $this->filter->getSearch();
@@ -42,7 +42,9 @@ trait Filterable
                 $search = "%$search%";
                 $query = $this->buildSearch($query);
             }
-            $query .= $this->buildOrderBy();
+            if (!$ignoreOrder) {
+                $query .= $this->buildOrderBy();
+            }
             $parameters = array_merge($parameters, ['search' => $search]);
         }
     }
