@@ -37,9 +37,13 @@ class Database
     {
         try {
             $statement = $this->handle->prepare($query, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
-            $statement->execute($parameters);
+            foreach ($parameters as $name => &$variable) {
+                $statement->bindParam((is_string($name) ? ":$name" : intval($name) + 1), $variable,
+                    $this->evaluatePdoType($variable));
+            }
+            $statement->execute();
             return new DatabaseStatement($statement);
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             throw new DatabaseException('Error while preparing query « ' . $query . ' » (' .
                 $e->getMessage() . ')', $query);
         }
@@ -69,7 +73,7 @@ class Database
     {
         try {
             $this->handle->commit();
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             throw new DatabaseException("Couldn't commit SQL transaction. Are you sure a transaction 
                 has been started ?");
         }
@@ -86,7 +90,7 @@ class Database
     {
         try {
             $this->handle->rollBack();
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             throw new DatabaseException("Couldn't rollback SQL transaction. Are you sure a transaction 
                 has been started ?");
         }
@@ -187,5 +191,26 @@ class Database
         $port = (isset($config['port'])) ? ";port={$config['port']};" : "";
         return $config['dsn']
             ?? $dbms . ':dbname=' . $config['database'] . ';host=' . $config['host'] . $port . $charset;
+    }
+
+    /**
+     * Guesses the best PDO::PARAM_x type constant for a given variable.
+     *
+     * @param mixed $variable
+     * @return int
+     */
+    private function evaluatePdoType($variable): int
+    {
+        if (is_float($variable)) {
+            // PDO doesn't have PARAM_FLOAT, so it must be evaluated as STR
+            return PDO::PARAM_STR;
+        } elseif (is_int($variable)) {
+            return PDO::PARAM_INT;
+        } elseif (is_bool($variable)) {
+            return PDO::PARAM_BOOL;
+        } elseif (is_null($variable)) {
+            return PDO::PARAM_NULL;
+        }
+        return PDO::PARAM_STR;
     }
 }
