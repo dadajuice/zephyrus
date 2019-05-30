@@ -50,8 +50,6 @@ class FilterableTest extends TestCase
         RequestFactory::set($r);
         $class = $this->buildClass();
         $class->applyFilter();
-        $res = $class->findAllHaving();
-        var_dump($res);
         self::assertEquals('2', $class->findAllHaving()[0]->n);
     }
 
