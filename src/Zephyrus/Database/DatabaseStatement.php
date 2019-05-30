@@ -6,9 +6,9 @@ use Zephyrus\Application\Configuration;
 
 class DatabaseStatement
 {
-    const TYPE_INTEGER = ['LONGLONG', 'LONG', 'INTEGER'];
-    const TYPE_BOOLEAN = ['TINY'];
-    const TYPE_FLOAT = ['NEWDECIMAL', 'FLOAT', 'DOUBLE'];
+    const TYPE_INTEGER = ['LONGLONG', 'LONG', 'INTEGER', 'INT4'];
+    const TYPE_BOOLEAN = ['TINY', 'BOOL'];
+    const TYPE_FLOAT = ['NEWDECIMAL', 'FLOAT', 'DOUBLE', 'DECIMAL', 'NUMERIC'];
 
     /**
      * @var PDOStatement
@@ -104,7 +104,7 @@ class DatabaseStatement
     private function convertRowTypes(&$row)
     {
         foreach (get_object_vars($row) as $column => $value) {
-            if (!is_null($value) && isset($this->fetchColumnTypes[$column]) && is_callable($this->fetchColumnTypes[$column])) {
+            if (isset($this->fetchColumnTypes[$column]) && !is_null($value) && is_callable($this->fetchColumnTypes[$column])) {
                 $row->{$column} = $this->fetchColumnTypes[$column]($row->{$column});
             }
         }
