@@ -97,11 +97,12 @@ class Database
     }
 
     /**
+     * @param string|null $name
      * @return string
      */
-    public function getLastInsertedId()
+    public function getLastInsertedId(string $name = null)
     {
-        return $this->handle->lastInsertId();
+        return $this->handle->lastInsertId($name);
     }
 
     /**
