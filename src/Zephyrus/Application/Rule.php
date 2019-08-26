@@ -17,7 +17,7 @@ class Rule
      */
     private $errorMessage;
 
-    /**
+    /*
      * Includes all rules defined as trait classes
      */
     use BaseRules;

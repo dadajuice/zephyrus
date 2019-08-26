@@ -132,6 +132,7 @@ class Database
     public function __construct(string $dsn, string $username = "", string $password = "")
     {
         $this->dsn = $dsn;
+
         try {
             $this->handle = new TransactionPDO($dsn, $username, $password);
             $this->handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -144,10 +145,10 @@ class Database
      * Constructs a database instance from the defined configurations.
      *
      * @param array|null $configuration
-     * @return Database
      * @throws DatabaseException
+     * @return Database
      */
-    public static function buildFromConfiguration(?array $configuration = null): Database
+    public static function buildFromConfiguration(?array $configuration = null): self
     {
         $config = $configuration ?? Configuration::getDatabaseConfiguration();
         if (!is_null(self::$sharedInstance) && ($config['shared'] ?? false)) {
@@ -162,10 +163,10 @@ class Database
 
     /**
      * @param array $config
-     * @return Database
      * @throws DatabaseException
+     * @return Database
      */
-    private static function initializeFromConfiguration(array $config): Database
+    private static function initializeFromConfiguration(array $config): self
     {
         $dsn = self::buildDataSourceName($config);
         return new self($dsn, $config['username'] ?? null, $config['password'] ?? null);
@@ -174,7 +175,7 @@ class Database
     /**
      * Mandatory fields to use :
      * database (database name to connect to)
-     * host
+     * host.
      *
      *
      * @param array $config

@@ -11,7 +11,7 @@ interface Listable
      *
      * @return int
      */
-    function count(): int;
+    public function count(): int;
 
     /**
      * Retrieves all the rows while applying the filters (sort, order and
@@ -21,7 +21,7 @@ interface Listable
      *
      * @return array
      */
-    function findAll(): array;
+    public function findAll(): array;
 
     /**
      * Must provide the search query respecting the established convention by
@@ -34,7 +34,7 @@ interface Listable
      *
      * @return string
      */
-    function search(): string;
+    public function search(): string;
 
     /**
      * Must provide correspondence between sort label used on the front end (as
@@ -55,5 +55,5 @@ interface Listable
      * @param string $order
      * @return string[]
      */
-    function sort(string $order): array;
+    public function sort(string $order): array;
 }
