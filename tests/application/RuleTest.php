@@ -135,6 +135,21 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid("05:89"));
     }
 
+    public function testIsDateTime12Hours()
+    {
+        $rule = Rule::dateTime12Hours();
+        self::assertTrue($rule->isValid("2019-01-01 11:07"));
+        self::assertFalse($rule->isValid("2019-01-01 23:07"));
+    }
+
+    public function testIsDateTime24Hours()
+    {
+        $rule = Rule::dateTime24Hours();
+        self::assertTrue($rule->isValid("2019-01-01 11:07"));
+        self::assertTrue($rule->isValid("2019-01-01 23:07"));
+        self::assertFalse($rule->isValid("2019-01-01 28:27"));
+    }
+
     public function testIsPhone()
     {
         $rule = Rule::phone();

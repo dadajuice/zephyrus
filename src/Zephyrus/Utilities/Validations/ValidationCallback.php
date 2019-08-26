@@ -12,7 +12,7 @@ interface ValidationCallback
     const DATE_ISO = ['Zephyrus\Utilities\Validation', 'isDate'];
     const TIME_12HOURS = ['Zephyrus\Utilities\Validation', 'isTime12Hours'];
     const TIME_24HOURS = ['Zephyrus\Utilities\Validation', 'isTime24Hours'];
-    const DATE_TIME_12HOURS = ['Zephyrus\Utilities\Validation', 'isDateTime24Hours'];
+    const DATE_TIME_12HOURS = ['Zephyrus\Utilities\Validation', 'isDateTime12Hours'];
     const DATE_TIME_24HOURS = ['Zephyrus\Utilities\Validation', 'isDateTime24Hours'];
     const ALPHA = ['Zephyrus\Utilities\Validation', 'isAlpha'];
     const NAME = ['Zephyrus\Utilities\Validation', 'isName'];
