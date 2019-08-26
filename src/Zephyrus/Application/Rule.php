@@ -1,6 +1,9 @@
 <?php namespace Zephyrus\Application;
 
-use Zephyrus\Utilities\Validator;
+use Zephyrus\Application\Rules\BaseRules;
+use Zephyrus\Application\Rules\SpecializedRules;
+use Zephyrus\Application\Rules\StringRules;
+use Zephyrus\Application\Rules\TimeRules;
 
 class Rule
 {
@@ -14,119 +17,13 @@ class Rule
      */
     private $errorMessage;
 
-    public static function notEmpty(string $errorMessage = "")
-    {
-        return new self(Validator::NOT_EMPTY, $errorMessage);
-    }
-
-    public static function name(string $errorMessage = "")
-    {
-        return new self(Validator::NAME, $errorMessage);
-    }
-
-    public static function passwordCompliant(string $errorMessage = "")
-    {
-        return new self(Validator::PASSWORD_COMPLIANT, $errorMessage);
-    }
-
-    public static function decimal(string $errorMessage = "", $allowSigned = false)
-    {
-        return new self((!$allowSigned) ? Validator::DECIMAL : Validator::DECIMAL_SIGNED, $errorMessage);
-    }
-
-    public static function integer(string $errorMessage = "", $allowSigned = false)
-    {
-        return new self((!$allowSigned) ? Validator::INTEGER : Validator::INTEGER_SIGNED, $errorMessage);
-    }
-
-    public static function email(string $errorMessage = "")
-    {
-        return new self(Validator::EMAIL, $errorMessage);
-    }
-
-    public static function date(string $errorMessage = "")
-    {
-        return new self(Validator::DATE_ISO, $errorMessage);
-    }
-
-    public static function time12Hours(string $errorMessage = "")
-    {
-        return new self(Validator::TIME_12HOURS, $errorMessage);
-    }
-
-    public static function time24Hours(string $errorMessage = "")
-    {
-        return new self(Validator::TIME_24HOURS, $errorMessage);
-    }
-
-    public static function alpha(string $errorMessage = "")
-    {
-        return new self(Validator::ALPHA, $errorMessage);
-    }
-
-    public static function alphanumeric(string $errorMessage = "")
-    {
-        return new self(Validator::ALPHANUMERIC, $errorMessage);
-    }
-
-    public static function url(string $errorMessage = "")
-    {
-        return new self(Validator::URL, $errorMessage);
-    }
-
-    public static function phone(string $errorMessage = "")
-    {
-        return new self(Validator::PHONE, $errorMessage);
-    }
-
-    public static function zipCode(string $errorMessage = "")
-    {
-        return new self(Validator::ZIP_CODE, $errorMessage);
-    }
-
-    public static function postalCode(string $errorMessage = "")
-    {
-        return new self(Validator::POSTAL_CODE, $errorMessage);
-    }
-
-    public static function range($min, $max, string $errorMessage = "")
-    {
-        return new self(function ($data) use ($min, $max) {
-            return ($min <= $data) && ($data <= $max);
-        }, $errorMessage);
-    }
-
-    public static function inArray(array $array, string $errorMessage = "")
-    {
-        return new self(function ($data) use ($array) {
-            return in_array($data, $array);
-        }, $errorMessage);
-    }
-
-    public static function sameAs(string $comparedFieldName, string $errorMessage = "")
-    {
-        return new self(function ($data, $values) use ($comparedFieldName) {
-            return isset($values[$comparedFieldName]) && $data == $values[$comparedFieldName];
-        }, $errorMessage);
-    }
-
-    public static function array(string $errorMessage): Rule
-    {
-        return new Rule(function($data) {
-            return is_array($data);
-        }, $errorMessage);
-    }
-
-    public static function boolean(string $errorMessage): Rule
-    {
-        return new Rule(function($data) {
-            return is_bool($data)
-                || strcasecmp($data, "true") == 0
-                || strcasecmp($data, "false") == 0
-                || (is_int($data) && $data == 0)
-                || (is_int($data) && $data == 1);
-        }, $errorMessage);
-    }
+    /**
+     * Includes all rules defined as trait classes
+     */
+    use BaseRules;
+    use SpecializedRules;
+    use StringRules;
+    use TimeRules;
 
     public function __construct($validation, string $errorMessage = "")
     {

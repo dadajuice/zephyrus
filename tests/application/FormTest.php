@@ -5,7 +5,7 @@ use Zephyrus\Application\Feedback;
 use Zephyrus\Application\Form;
 use Zephyrus\Application\Rule;
 use Zephyrus\Application\Session;
-use Zephyrus\Utilities\Validator;
+use Zephyrus\Utilities\Validations\ValidationCallback;
 
 class FormTest extends TestCase
 {
@@ -70,12 +70,12 @@ class FormTest extends TestCase
         $form->addField('name', '');
         $form->addField('name2', 'bob*');
         $form->addField('price', '12.50e');
-        $form->validate('name', new Rule(Validator::NOT_EMPTY, 'err_1'));
-        $form->validateWhenFieldHasNoError('name', new Rule(Validator::ALPHANUMERIC, 'err_2'));
-        $form->validate('name2', new Rule(Validator::NOT_EMPTY, 'err_11'));
-        $form->validateWhenFieldHasNoError('name2', new Rule(Validator::ALPHANUMERIC, 'err_22'));
-        $form->validate('price', new Rule(Validator::NOT_EMPTY, 'err_3'));
-        $form->validateWhenFormHasNoError('price', new Rule(Validator::DECIMAL, 'err_4'));
+        $form->validate('name', new Rule(ValidationCallback::NOT_EMPTY, 'err_1'));
+        $form->validateWhenFieldHasNoError('name', new Rule(ValidationCallback::ALPHANUMERIC, 'err_2'));
+        $form->validate('name2', new Rule(ValidationCallback::NOT_EMPTY, 'err_11'));
+        $form->validateWhenFieldHasNoError('name2', new Rule(ValidationCallback::ALPHANUMERIC, 'err_22'));
+        $form->validate('price', new Rule(ValidationCallback::NOT_EMPTY, 'err_3'));
+        $form->validateWhenFormHasNoError('price', new Rule(ValidationCallback::DECIMAL, 'err_4'));
         $form->verify();
         $errors = $form->getErrorMessages();
         self::assertEquals('err_1', $errors[0]);
@@ -146,7 +146,7 @@ class FormTest extends TestCase
         Form::removeMemorizedValue();
         $form = new Form();
         $form->addField('name', 'bob');
-        $form->validate('name', new Rule(Validator::NOT_EMPTY, 'err_1'));
+        $form->validate('name', new Rule(ValidationCallback::NOT_EMPTY, 'err_1'));
         $form->verify();
         self::assertEquals('bob', Form::readMemorizedValue('name'));
         self::assertEquals('lewis', Form::readMemorizedValue('gfdfg', 'lewis'));
@@ -208,7 +208,7 @@ class FormTest extends TestCase
     {
         $form = new Form();
         $form->addField('name', '');
-        $form->validate('bob', new Rule(Validator::ALPHANUMERIC, "err_1"));
+        $form->validate('bob', new Rule(ValidationCallback::ALPHANUMERIC, "err_1"));
         self::assertFalse($form->verify());
     }
 }

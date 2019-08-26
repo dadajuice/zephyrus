@@ -49,7 +49,7 @@ class CallbackTest extends TestCase
 
     public function testStaticMethod()
     {
-        $callback = new Callback(['\Zephyrus\Utilities\Validations\BaseValidation', 'isAlphanumeric']);
+        $callback = new Callback(['\Zephyrus\Utilities\Validation', 'isAlphanumeric']);
         $result = $callback->execute('ewretyr-345');
         self::assertFalse($result);
     }
