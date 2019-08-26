@@ -37,7 +37,7 @@ trait StringValidations
         return filter_var($data, FILTER_VALIDATE_EMAIL);
     }
 
-    public static function isRegexValid($data, $regex): bool
+    public static function isRegex($data, $regex): bool
     {
         return preg_match('/^' . $regex . '$/', $data);
     }

@@ -25,5 +25,5 @@ interface ValidationCallback
     const POSTAL_CODE = ['Zephyrus\Utilities\Validation', 'isPostalCode'];
     const BOOLEAN = ['Zephyrus\Utilities\Validation', 'isBoolean'];
     const IN_RANGE = ['Zephyrus\Utilities\Validation', 'isInRange'];
-
+    const REGEX = ['Zephyrus\Utilities\Validation', 'isRegex'];
 }

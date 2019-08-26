@@ -282,4 +282,17 @@ class RuleTest extends TestCase
         self::assertTrue($rule->isValid("hello"));
         self::assertFalse($rule->isValid(""));
     }
+
+    public function testIsRegex()
+    {
+        $rule = Rule::regex("[a-e]{2}-[0-9]+");
+        self::assertTrue($rule->isValid("ab-45"));
+        self::assertTrue($rule->isValid("ab-1"));
+        self::assertTrue($rule->isValid("aa-45968347982375"));
+        self::assertFalse($rule->isValid("aa-"));
+        self::assertFalse($rule->isValid("aa"));
+        self::assertFalse($rule->isValid("fe-23"));
+        self::assertFalse($rule->isValid("zz-zz"));
+        self::assertFalse($rule->isValid(""));
+    }
 }
