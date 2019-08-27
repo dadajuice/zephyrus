@@ -6,6 +6,7 @@ finder:
   exclude:
     - "tests"
     - "vendor"
+    - "src/Zephyrus/Utilities/Validations/FileValidations.php"
 
 disabled:
   - post_increment
