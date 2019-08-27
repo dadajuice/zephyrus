@@ -26,4 +26,6 @@ interface ValidationCallback
     const BOOLEAN = ['Zephyrus\Utilities\Validation', 'isBoolean'];
     const IN_RANGE = ['Zephyrus\Utilities\Validation', 'isInRange'];
     const REGEX = ['Zephyrus\Utilities\Validation', 'isRegex'];
+    const UPLOAD = ['Zephyrus\Utilities\Validation', 'isUpload'];
+    const IMAGE = ['Zephyrus\Utilities\Validation', 'isImageAuthentic'];
 }

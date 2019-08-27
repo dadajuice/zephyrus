@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Application;
 
 use Zephyrus\Application\Rules\BaseRules;
+use Zephyrus\Application\Rules\FileRules;
 use Zephyrus\Application\Rules\SpecializedRules;
 use Zephyrus\Application\Rules\StringRules;
 use Zephyrus\Application\Rules\TimeRules;
@@ -24,6 +25,7 @@ class Rule
     use SpecializedRules;
     use StringRules;
     use TimeRules;
+    use FileRules;
 
     public function __construct($validation, string $errorMessage = "")
     {

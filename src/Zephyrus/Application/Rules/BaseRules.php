@@ -49,7 +49,7 @@ trait BaseRules
         return new Rule(ValidationCallback::BOOLEAN, $errorMessage);
     }
 
-    public static function regex($pattern, string $errorMessage = ""): Rule
+    public static function regex(string $pattern, string $errorMessage = ""): Rule
     {
         return new Rule(function ($data) use ($pattern) {
             return Validation::isRegex($data, $pattern);
