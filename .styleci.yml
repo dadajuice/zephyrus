@@ -7,7 +7,7 @@ finder:
     - "tests"
     - "vendor"
   not-name:
-    - "src/Zephyrus/Utilities/Validations/FileValidations.php"
+    - "*FileValidations.php"
 
 disabled:
   - post_increment
