@@ -6,6 +6,7 @@ finder:
   exclude:
     - "tests"
     - "vendor"
+  not-name:
     - "src/Zephyrus/Utilities/Validations/FileValidations.php"
 
 disabled:
