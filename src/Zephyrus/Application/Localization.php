@@ -221,7 +221,7 @@ class Localization
 
     private function clearCacheDirectory()
     {
-        $files = glob(ROOT_DIR . "/locale/cache/{$this->appLocale}");
+        $files = recursiveGlob(ROOT_DIR . "/locale/cache/{$this->appLocale}/*");
         foreach ($files as $file) {
             if (is_file($file)) {
                 unlink($file);
