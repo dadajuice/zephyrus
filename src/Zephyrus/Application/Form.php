@@ -107,6 +107,14 @@ class Form
         self::memorizeValue($parameterName, $value);
     }
 
+    public function removeField(string $parameterName)
+    {
+        if (isset($this->fields[$parameterName])) {
+            unset($this->fields[$parameterName]);
+            self::removeMemorizedValue($parameterName);
+        }
+    }
+
     public function addError(string $field, string $message)
     {
         $this->errors[$field][] = $message;

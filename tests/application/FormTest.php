@@ -162,6 +162,16 @@ class FormTest extends TestCase
         self::assertFalse(isset($_SESSION['_FIELDS']));
     }
 
+    public function testRemoveField()
+    {
+        $form = new Form();
+        $form->addField('name', 'oui');
+        $form->addField('name2', 'bob2');
+        self::assertTrue($form->isRegistered('name2'));
+        $form->removeField('name2');
+        self::assertFalse($form->isRegistered('name2'));
+    }
+
     public function testBuildObject()
     {
         $form = new Form();
