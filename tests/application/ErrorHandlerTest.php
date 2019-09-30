@@ -17,7 +17,7 @@ class ErrorHandlerTest extends TestCase
      */
     public function testInvalidArgument()
     {
-        $handler = new ErrorHandler();
+        $handler = ErrorHandler::getInstance();
         $handler->exception(function() {});
     }
 
@@ -26,7 +26,7 @@ class ErrorHandlerTest extends TestCase
      */
     public function testInvalidArgumentType()
     {
-        $handler = new ErrorHandler();
+        $handler = ErrorHandler::getInstance();
         $handler->exception(function(Database $e) {});
     }
 }

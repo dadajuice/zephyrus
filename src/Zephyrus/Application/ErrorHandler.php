@@ -15,12 +15,35 @@ class ErrorHandler
     private $registeredErrorCallbacks = [];
 
     /**
-     * Initialize every handlers (error, fatal and exceptions).
+     * @var ErrorHandler
      */
-    public function __construct()
+    private static $instance;
+
+    /**
+     * @return ErrorHandler
+     */
+    public static function getInstance(): self
     {
-        set_exception_handler([$this, 'exceptionHandler']);
-        set_error_handler([$this, 'errorHandler']);
+        if (is_null(self::$instance)) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    public function restoreDefaultHandlers()
+    {
+        restore_error_handler();
+        restore_exception_handler();
+    }
+
+    public function restoreDefaultErrorHandler()
+    {
+        restore_error_handler();
+    }
+
+    public function restoreDefaultExceptionHandler()
+    {
+        restore_exception_handler();
     }
 
     /**
@@ -36,6 +59,7 @@ class ErrorHandler
         $this->registerError(E_USER_DEPRECATED, $callback);
         $this->registerError(E_NOTICE, $callback);
         $this->registerError(E_USER_NOTICE, $callback);
+        set_error_handler([$this, 'errorHandler']);
     }
 
     /**
@@ -50,8 +74,7 @@ class ErrorHandler
     {
         $this->registerError(E_WARNING, $callback);
         $this->registerError(E_USER_WARNING, $callback);
-        $this->registerError(E_CORE_WARNING, $callback);
-        $this->registerError(E_COMPILE_WARNING, $callback);
+        set_error_handler([$this, 'errorHandler']);
     }
 
     /**
@@ -64,21 +87,8 @@ class ErrorHandler
     public function error(callable $callback)
     {
         $this->registerError(E_USER_ERROR, $callback);
-    }
-
-    /**
-     * Defines a callback to use when a fatal error type occurs (E_ERROR_,
-     * E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR).
-     *
-     * @param callable $callback
-     * @throws \Exception
-     */
-    public function fatal(callable $callback)
-    {
-        $this->registerError(E_COMPILE_ERROR, $callback);
-        $this->registerError(E_CORE_ERROR, $callback);
-        $this->registerError(E_ERROR, $callback);
-        $this->registerError(E_PARSE, $callback);
+        $this->registerError(E_RECOVERABLE_ERROR, $callback);
+        set_error_handler([$this, 'errorHandler']);
     }
 
     /**
@@ -105,6 +115,7 @@ class ErrorHandler
                 Throwable class");
         }
         $this->registeredThrowableCallbacks[$argumentClass->getShortName()] = $callback;
+        set_exception_handler([$this, 'exceptionHandler']);
     }
 
     /**
@@ -132,7 +143,7 @@ class ErrorHandler
      * the best user defined callback as a response. If there is no direct
      * callback associated, it will tries to find a definition within the
      * Exception class hierarchy. If nothing is found, the default behavior is
-     * to die the script. Should not be called manually. Used as a registered
+     * to display the error. Should not be called manually. Used as a registered
      * PHP handler.
      *
      * @param \Throwable $error
@@ -144,6 +155,8 @@ class ErrorHandler
         $registeredException = $this->findRegisteredExceptions($reflection);
         if (!is_null($registeredException)) {
             $registeredException($error);
+        } else {
+            $this->printUnhandledException($error);
         }
     }
 
@@ -163,6 +176,10 @@ class ErrorHandler
         if (!(error_reporting() & $type)) {
             // This error code is not included in error_reporting
             return true;
+        }
+        if (0 === error_reporting()) {
+            // error was suppressed with the @-operator
+            return false;
         }
         if (array_key_exists($type, $this->registeredErrorCallbacks)) {
             $callback = $this->registeredErrorCallbacks[$type];
@@ -191,4 +208,40 @@ class ErrorHandler
         }
         return null;
     }
+
+    /**
+     * Mimics xdebug style of exception displaying table.
+     *
+     * @param \Throwable $error
+     */
+    private function printUnhandledException(\Throwable $error)
+    {
+        $traces = array_reverse($error->getTrace());
+        $previousFile = "";
+        $previousLine = 0;
+        ?>
+        <table>
+            <tr><th align='left' bgcolor='#f57900' colspan="3"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> <?= $error->getMessage() ?> in <?= $error->getFile() ?> on line <i><?= $error->getLine() ?></i></th></tr>
+            <tr><th align='left' bgcolor='#e9b96e' colspan='3'>Call Stack</th></tr>
+            <tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
+            <?php foreach ($traces as $i => $trace): ?>
+                <?php
+                if (!empty($trace['file'])) {
+                    $previousFile = $trace['file'];
+                }
+                if (!empty($trace['line'])) {
+                    $previousLine = $trace['line'];
+                }
+                $filename = pathinfo($previousFile, PATHINFO_FILENAME);
+                ?>
+                <tr><td bgcolor='#eeeeec' align='center'><?= $i ?></td><td bgcolor='#eeeeec'><?= ((isset($trace['class'])) ? $trace['class'] : "") . ((isset($trace['type'])) ? $trace['type'] : "") . $trace['function'] ?>()</td><td title='<?= $previousFile ?>' bgcolor='#eeeeec'>.../<?= $filename ?><b>:</b><?= $previousLine ?></td></tr>
+            <?php endforeach; ?>
+        </table>
+        <?php
+    }
+
+    /**
+     * Made private to make sure to use Singleton pattern getInstance method.
+     */
+    private function __construct() { }
 }
