@@ -7,6 +7,7 @@ use Zephyrus\Exceptions\HttpRequestException;
 class HttpRequest
 {
     const DEFAULT_CONNECTION_TIMEOUT = 15;
+    const DEFAULT_CONTENT_TYPE = 'application/x-www-form-urlencoded';
 
     /**
      * @var array
@@ -22,11 +23,6 @@ class HttpRequest
      * @var string
      */
     private $method;
-
-    /**
-     * @var array
-     */
-    private $parameters = [];
 
     /**
      * @var int
@@ -47,6 +43,11 @@ class HttpRequest
      * @var array
      */
     private $options = [];
+
+    /**
+     * @var string
+     */
+    private $contentType = self::DEFAULT_CONTENT_TYPE;
 
     /**
      * @var string
@@ -78,44 +79,40 @@ class HttpRequest
         return new self('delete', $url);
     }
 
+    /**
+     * @param string $filepath
+     * @param string $uploadFilename
+     * @throws InvalidArgumentException
+     * @return CURLFile
+     */
+    public static function prepareUploadFile(string $filepath, string $uploadFilename): CURLFile
+    {
+        if (!is_readable($filepath)) {
+            throw new InvalidArgumentException("Specified filepath [$filepath] is not readable and thus cannot be prepared as a remote request file transfer");
+        }
+        $info = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($info, $filepath);
+        finfo_close($info);
+        $extension = pathinfo($filepath, PATHINFO_EXTENSION);
+        return new CurlFile($filepath, $mime,$uploadFilename . '.' . $extension);
+    }
+
     public function __construct(string $method, string $url)
     {
         $this->method = strtolower($method);
         $this->url = $url;
     }
 
-    public function execute(array $parameters = [])
+    public function execute(array $parameters = []): string
     {
-        $curl = $this->buildCurl(array_merge($this->parameters, $parameters));
-        if (!$this->response = curl_exec($curl)) {
+        $curl = $this->buildCurl($parameters);
+        $this->response = curl_exec($curl);
+        if ($this->response === false) {
             throw new HttpRequestException(curl_error($curl), $this->method, $this->url);
         }
         $this->responseResults = curl_getinfo($curl);
         curl_close($curl);
         return $this->response;
-    }
-
-    public function addParameter(string $name, $value)
-    {
-        $this->parameters[$name] = $value;
-    }
-
-    /**
-     * @param string $name
-     * @param string $filepath
-     * @param string $uploadFilename
-     * @throws InvalidArgumentException
-     */
-    public function addFileParameter(string $name, string $filepath, string $uploadFilename)
-    {
-        $this->parameters[$name] = $this->buildUploadFile($filepath, $uploadFilename);
-    }
-
-    public function addParameters(array $parameters)
-    {
-        foreach ($parameters as $name => $value) {
-            $this->parameters[$name] = $value;
-        }
     }
 
     public function addHeader(string $name, string $value)
@@ -166,6 +163,14 @@ class HttpRequest
         $this->userAgent = $userAgent;
     }
 
+    /**
+     * @param string $contentType
+     */
+    public function setContentType(string $contentType)
+    {
+        $this->contentType = $contentType;
+    }
+
     public function getResponse()
     {
         return $this->response;
@@ -207,7 +212,6 @@ class HttpRequest
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, 0);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->connectionTimeout);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $this->headers);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, $this->followRedirection);
     }
 
@@ -234,33 +238,48 @@ class HttpRequest
 
     private function setCurlData(&$curl, array $data)
     {
+        $parameters = $data;
+        $hasUpload = $this->hasUploadedFile($data);
+        $this->addHeader('Content-Type', ($hasUpload) ? 'multipart/form-data' : $this->contentType);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $this->headers);
+        if ($hasUpload) {
+            $parameters = $this->prepareMultipartFormData($data);
+        }
         if ($this->method != 'get') {
-            curl_setopt($curl,CURLOPT_POST, count($data));
-            $hasUpload = false;
-            foreach ($data as $name => $value) {
-                if ($value instanceof CURLFile) {
-                    $hasUpload = true;
-                }
-            }
-            curl_setopt($curl,CURLOPT_POSTFIELDS, ($hasUpload) ? $data : http_build_query($data));
+            curl_setopt($curl,CURLOPT_POST, count($parameters));
+            curl_setopt($curl,CURLOPT_POSTFIELDS, ($hasUpload) ? $parameters : http_build_query($parameters));
         }
     }
 
-    /**
-     * @param string $filepath
-     * @param string $uploadFilename
-     * @throws InvalidArgumentException
-     * @return CURLFile
-     */
-    private function buildUploadFile(string $filepath, string $uploadFilename): CURLFile
+    private function hasUploadedFile(array $data)
     {
-        if (!is_readable($filepath)) {
-            throw new InvalidArgumentException("Specified filepath [$filepath] is not readable and thus cannot be prepared as a remote request file transfer");
+        foreach ($data as $value) {
+            if ($value instanceof CURLFile) {
+                return true;
+            }
         }
-        $info = finfo_open(FILEINFO_MIME_TYPE);
-        $mime = finfo_file($info, $filepath);
-        finfo_close($info);
-        $extension = pathinfo($filepath, PATHINFO_EXTENSION);
-        return new CurlFile($filepath, $mime,$uploadFilename . '.' . $extension);
+        return false;
+    }
+
+    private function prepareMultipartFormData(array $data)
+    {
+        $parameters = [];
+        foreach ($data as $parameterName => $parameterValue) {
+            // Problem with cURL while sending array in multipart/form-data
+            if (is_array($parameterValue)) {
+                foreach ($parameterValue as $key => $value) {
+                    if (is_array($value)) {
+                        // Nested array case (2 levels)
+                        foreach ($value as $innerKey => $innerValue) {
+                            $parameters[$parameterName . '[' . $key . '][' . $innerKey . ']'] = $innerValue;
+                        }
+                    }
+                    $parameters[$parameterName . '[' . $key . ']'] = $value;
+                }
+                continue;
+            }
+            $parameters[$parameterName] = $parameterValue;
+        }
+        return $parameters;
     }
 }
