@@ -4,7 +4,7 @@ class Formatter
 {
     public static function formatElapsedDateTime($dateTime, $now = null)
     {
-        /*if (!$dateTime instanceof \DateTime) {
+        if (!$dateTime instanceof \DateTime) {
             $dateTime = new \DateTime($dateTime);
         }
         if (is_null($now)) {
@@ -14,8 +14,7 @@ class Formatter
             $now = new \DateTime($now);
         }
         $diff = $dateTime->diff($now);
-        return self::getElapsedMessage($diff, $dateTime);*/
-        return self::formatDateTime($dateTime);
+        return self::getElapsedMessage($diff, $dateTime);
     }
 
     public static function formatDate($dateTime)
