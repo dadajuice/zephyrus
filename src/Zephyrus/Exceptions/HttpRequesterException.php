@@ -1,6 +1,6 @@
 <?php namespace Zephyrus\Exceptions;
 
-class HttpRequestException extends \Exception
+class HttpRequesterException extends \Exception
 {
     public function __construct($message, $method, $url)
     {

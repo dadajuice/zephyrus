@@ -2,9 +2,9 @@
 
 use CURLFile;
 use InvalidArgumentException;
-use Zephyrus\Exceptions\HttpRequestException;
+use Zephyrus\Exceptions\HttpRequesterException;
 
-class HttpRequest
+class HttpRequester
 {
     const DEFAULT_CONNECTION_TIMEOUT = 15;
     const DEFAULT_CONTENT_TYPE = 'application/x-www-form-urlencoded';
@@ -108,7 +108,7 @@ class HttpRequest
         $curl = $this->buildCurl($parameters);
         $this->response = curl_exec($curl);
         if ($this->response === false) {
-            throw new HttpRequestException(curl_error($curl), $this->method, $this->url);
+            throw new HttpRequesterException(curl_error($curl), $this->method, $this->url);
         }
         $this->responseResults = curl_getinfo($curl);
         curl_close($curl);
