@@ -47,6 +47,7 @@ class Formatter
         $formatter = new \NumberFormatter($locale, \NumberFormatter::PERCENT);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
+        $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP);
         $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
         return $result;
     }
@@ -57,6 +58,7 @@ class Formatter
         $formatter = new \NumberFormatter($locale, \NumberFormatter::CURRENCY);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
+        $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP);
         $result = $formatter->formatCurrency($amount, Configuration::getApplicationConfiguration('currency'));
         return $result;
     }
@@ -67,6 +69,7 @@ class Formatter
         $formatter = new \NumberFormatter($locale, \NumberFormatter::DECIMAL);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
+        $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP);
         $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
         return $result;
     }
