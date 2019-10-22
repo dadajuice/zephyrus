@@ -54,7 +54,7 @@ class ResponseFactory
         return $response;
     }
 
-    public function buildDownload(string $filePath, ?string $filename = null): Response
+    public function buildDownload(string $filePath, ?string $filename = null, bool $deleteAfter = false): Response
     {
         if (is_null($filename)) {
             $filename = basename($filePath);
@@ -69,8 +69,11 @@ class ResponseFactory
         $response->addHeader("Content-Disposition", 'attachment; filename="' . $filename . '"');
         $response->addHeader("Content-Transfer-Encoding", "binary");
         $response->addHeader("Content-Length", $contentLength);
-        $response->setContentCallback(function () use ($filePath) {
+        $response->setContentCallback(function () use ($filePath, $deleteAfter) {
             @readfile($filePath);
+            if ($deleteAfter) {
+                unlink($filePath);
+            }
         });
         return $response;
     }

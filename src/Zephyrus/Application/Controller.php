@@ -126,15 +126,17 @@ abstract class Controller implements Routable
     /**
      * Renders a given file as a downloadable content with application/octet-stream
      * content type. If no filename is given, it will automatically use the actual
-     * file basename.
+     * file basename. If the deleteAfter argument is set to true, it will
+     * automatically remove the file after sending it. Useful for temporary files.
      *
      * @param string $filePath
      * @param null|string $filename
+     * @param bool $deleteAfter
      * @return Response
      */
-    protected function download(string $filePath, ?string $filename = null): Response
+    protected function download(string $filePath, ?string $filename = null, bool $deleteAfter = false): Response
     {
-        return ResponseFactory::getInstance()->buildDownload($filePath, $filename);
+        return ResponseFactory::getInstance()->buildDownload($filePath, $filename, $deleteAfter);
     }
 
     /**
