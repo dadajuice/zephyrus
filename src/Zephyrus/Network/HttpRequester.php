@@ -103,6 +103,22 @@ class HttpRequester
         $this->url = $url;
     }
 
+    public function executeDownload(array $parameters = [], ?string $filePath = null): string
+    {
+        if (is_null($filePath)) {
+            $filePath = tempnam(sys_get_temp_dir(), "zeph");
+        }
+        $file = fopen($filePath, 'w+');
+        if ($file === false) {
+            throw new HttpRequesterException("Cannot open file [$filePath] for download", $this->method, $this->url);
+        }
+        $this->addOption(CURLOPT_TIMEOUT, 50);
+        $this->addOption(CURLOPT_FILE, $file);
+        $this->execute($parameters);
+        fclose($file);
+        return $filePath;
+    }
+
     public function execute(array $parameters = []): string
     {
         $curl = $this->buildCurl($parameters);
@@ -127,7 +143,7 @@ class HttpRequester
         }
     }
 
-    public function addOption(string $curlOption, string $value)
+    public function addOption(string $curlOption, $value)
     {
         $this->options[$curlOption] = $value;
     }
