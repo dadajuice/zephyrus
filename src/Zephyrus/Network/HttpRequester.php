@@ -103,6 +103,37 @@ class HttpRequester
         $this->url = $url;
     }
 
+    public function executeStream($callback, array $parameters = [])
+    {
+        $this->addOption(CURLOPT_WRITEFUNCTION, function($curl, $data) use ($callback) {
+            $bytes = strlen($data);
+            static $buf = '';
+            $buf .= $data;
+            $info = curl_getinfo($curl);
+
+            while (1) {
+                $pos = strpos($buf, "\n");
+                if ($pos === false) {
+                    break;
+                }
+
+                // Trim buffer
+                $data = substr($buf, 0, $pos + 1);
+                $buf = substr($buf, $pos + 1);
+
+                // Only log if there is something there
+                if (strlen($data) > 50) {
+                    // Removes "data:" prefix of SSE
+                    $results = str_replace("data:","", $data);
+                    ($callback)($results, $info);
+                }
+            }
+
+            return $bytes;
+        });
+        return $this->execute($parameters);
+    }
+
     public function executeDownload(array $parameters = [], ?string $filePath = null): string
     {
         if (is_null($filePath)) {
