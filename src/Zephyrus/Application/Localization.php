@@ -6,7 +6,6 @@ use Zephyrus\Security\Cryptography;
 class Localization
 {
     public const GENERATED_CLASS_NAME = "Localize";
-    private const SESSION_LANGUAGE_KEY = "__zephyrus_lang";
 
     /**
      * @var Localization
@@ -24,6 +23,46 @@ class Localization
             self::$instance = new self();
         }
         return self::$instance;
+    }
+
+    public static function getInstalledLanguages(): array
+    {
+        $dirs = array_filter(glob(ROOT_DIR . '/locale/*'), 'is_dir');
+        array_walk($dirs, function (&$value) {
+            $value = basename($value);
+        });
+        $dirs = array_filter($dirs, function ($value) {
+            return $value != "cache";
+        });
+        $languages = [];
+        foreach ($dirs as $dir) {
+            $parts = explode("_", $dir);
+            $languages[] = (object) [
+                'lang' => $parts[0],
+                'country' => $parts[1]
+            ];
+        }
+        return $languages;
+    }
+
+    /**
+     * Initialize the localization environment. If no locale is given, it will
+     * be initialized with the default locale set in the config.ini file. Will
+     * throw an exception if environment is already started.
+     *
+     * @param string|null $locale
+     * @throws LocalizationException
+     */
+    public function start(?string $locale = null)
+    {
+        if (!is_null($this->appLocale)) {
+            throw new \RuntimeException("Localization environment already started");
+        }
+        $this->appLocale = $locale ?? Configuration::getApplicationConfiguration('locale');
+        $this->initializeLocale();
+        if (file_exists(ROOT_DIR . '/locale')) {
+            $this->generate();
+        }
     }
 
     public function localize($key, array $args = []): string
@@ -46,11 +85,6 @@ class Localization
         $parameters[0] = constant($constant);
         $parameters = array_merge($parameters, $args);
         return call_user_func_array('sprintf', $parameters);
-    }
-
-    public function changeLocale($locale)
-    {
-        Session::getInstance()->set(self::SESSION_LANGUAGE_KEY, $locale);
     }
 
     /**
@@ -212,12 +246,7 @@ class Localization
         putenv("LANG=" . $this->appLocale);
     }
 
-    private function __construct()
-    {
-        $this->appLocale = Session::getInstance()->read(self::SESSION_LANGUAGE_KEY,
-            Configuration::getApplicationConfiguration('locale'));
-        $this->initializeLocale();
-    }
+    private function __construct() { }
 
     private function clearCacheDirectory()
     {

@@ -7,7 +7,7 @@ use Zephyrus\Exceptions\LocalizationException;
 
 class LocalizationTest extends TestCase
 {
-    public function testLocalize()
+    /*public function testLocalize()
     {
         Session::getInstance()->start();
         Localization::getInstance()->generate();
@@ -52,16 +52,6 @@ class LocalizationTest extends TestCase
         Session::kill();
     }
 
-    public function testChangeLocale()
-    {
-        Session::getInstance()->start();
-        Localization::getInstance()->generate();
-        Localization::getInstance()->changeLocale("en_CA");
-        self::assertEquals("en_CA", Session::getInstance()->read("__zephyrus_lang", "fail"));
-        $this->removeDirectory(ROOT_DIR . '/locale/cache');
-        Session::kill();
-    }
-
     private function removeDirectory($path)
     {
         $files = recursiveGlob($path . '/*');
@@ -77,5 +67,5 @@ class LocalizationTest extends TestCase
             rmdir($directories[$i]);
         }
         rmdir($path);
-    }
+    }*/
 }
