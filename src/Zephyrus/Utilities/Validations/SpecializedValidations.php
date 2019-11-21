@@ -46,4 +46,28 @@ trait SpecializedValidations
     {
         return preg_match("/^[ABCEGHJ-NPRSTVXY][0-9][ABCEGHJ-NPRSTV-Z] ?[0-9][ABCEGHJ-NPRSTV-Z][0-9]$/", strtoupper($data));
     }
+
+    public static function isIPv4($data, bool $includeReserved = true, bool $includePrivate = true)
+    {
+        $flag = FILTER_FLAG_IPV4
+            | ((!$includeReserved) ? FILTER_FLAG_NO_RES_RANGE : 0)
+            | ((!$includePrivate) ? FILTER_FLAG_NO_PRIV_RANGE : 0);
+        return filter_var($data, FILTER_VALIDATE_IP, $flag);
+    }
+
+    public static function isIPv6($data, bool $includeReserved = true, bool $includePrivate = true)
+    {
+        $flag = FILTER_FLAG_IPV6
+            | ((!$includeReserved) ? FILTER_FLAG_NO_RES_RANGE : 0)
+            | ((!$includePrivate) ? FILTER_FLAG_NO_PRIV_RANGE : 0);
+        return filter_var($data, FILTER_VALIDATE_IP, $flag);
+    }
+
+    public static function isIpAddress($data, bool $includeReserved = true, bool $includePrivate = true)
+    {
+        $flag = (FILTER_FLAG_IPV6 | FILTER_FLAG_IPV4)
+            | ((!$includeReserved) ? FILTER_FLAG_NO_RES_RANGE : 0)
+            | ((!$includePrivate) ? FILTER_FLAG_NO_PRIV_RANGE : 0);
+        return filter_var($data, FILTER_VALIDATE_IP, $flag);
+    }
 }

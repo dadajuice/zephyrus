@@ -28,4 +28,7 @@ interface ValidationCallback
     const REGEX = ['Zephyrus\Utilities\Validation', 'isRegex'];
     const UPLOAD = ['Zephyrus\Utilities\Validation', 'isUpload'];
     const IMAGE = ['Zephyrus\Utilities\Validation', 'isImageAuthentic'];
+    const IP_V4 = ['Zephyrus\Utilities\Validation', 'isIPv4'];
+    const IP_V6 = ['Zephyrus\Utilities\Validation', 'isIPv6'];
+    const IP_ADDRESS = ['Zephyrus\Utilities\Validation', 'isIpAddress'];
 }
