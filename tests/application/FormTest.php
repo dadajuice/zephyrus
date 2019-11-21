@@ -71,9 +71,9 @@ class FormTest extends TestCase
         $form->addField('name2', 'bob*');
         $form->addField('price', '12.50e');
         $form->validate('name', new Rule(ValidationCallback::NOT_EMPTY, 'err_1'));
-        $form->validateWhenFieldHasNoError('name', new Rule(ValidationCallback::ALPHANUMERIC, 'err_2'));
+        $form->validateWhenFieldHasNoError('name', Rule::alphanumeric('err_2'));
         $form->validate('name2', new Rule(ValidationCallback::NOT_EMPTY, 'err_11'));
-        $form->validateWhenFieldHasNoError('name2', new Rule(ValidationCallback::ALPHANUMERIC, 'err_22'));
+        $form->validateWhenFieldHasNoError('name2', Rule::alphanumeric('err_22'));
         $form->validate('price', new Rule(ValidationCallback::NOT_EMPTY, 'err_3'));
         $form->validateWhenFormHasNoError('price', new Rule(ValidationCallback::DECIMAL, 'err_4'));
         $form->verify();
@@ -218,7 +218,7 @@ class FormTest extends TestCase
     {
         $form = new Form();
         $form->addField('name', '');
-        $form->validate('bob', new Rule(ValidationCallback::ALPHANUMERIC, "err_1"));
+        $form->validate('bob', Rule::alphanumeric('err_1'));
         self::assertFalse($form->verify());
     }
 }

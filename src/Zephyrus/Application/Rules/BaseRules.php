@@ -44,6 +44,13 @@ trait BaseRules
         }, $errorMessage);
     }
 
+    public static function arrayNotEmpty(string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data) {
+            return is_array($data) && !empty($data);
+        }, $errorMessage);
+    }
+
     public static function boolean(string $errorMessage = ""): Rule
     {
         return new Rule(ValidationCallback::BOOLEAN, $errorMessage);

@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Application\Rules;
 
 use Zephyrus\Application\Rule;
+use Zephyrus\Utilities\Validation;
 use Zephyrus\Utilities\Validations\ValidationCallback;
 
 trait StringRules
@@ -25,13 +26,17 @@ trait StringRules
         return new Rule(ValidationCallback::EMAIL, $errorMessage);
     }
 
-    public static function alpha(string $errorMessage = ""): Rule
+    public static function alpha(string $errorMessage = "", bool $considerAccentedChar = true): Rule
     {
-        return new Rule(ValidationCallback::ALPHA, $errorMessage);
+        return new Rule(function ($data) use ($considerAccentedChar) {
+            return Validation::isAlpha($data, $considerAccentedChar);
+        }, $errorMessage);
     }
 
-    public static function alphanumeric(string $errorMessage = ""): Rule
+    public static function alphanumeric(string $errorMessage = "", bool $considerAccentedChar = true): Rule
     {
-        return new Rule(ValidationCallback::ALPHANUMERIC, $errorMessage);
+        return new Rule(function ($data) use ($considerAccentedChar) {
+            return Validation::isAlphanumeric($data, $considerAccentedChar);
+        }, $errorMessage);
     }
 }

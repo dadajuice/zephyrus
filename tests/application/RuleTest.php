@@ -150,6 +150,15 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid("2019-01-01 28:27"));
     }
 
+    public function testIsDateTime24HoursWithSeconds()
+    {
+        $rule = Rule::dateTime24Hours("", true);
+        self::assertTrue($rule->isValid("2019-01-01 11:07:56"));
+        self::assertTrue($rule->isValid("2019-01-01 23:07:01"));
+        self::assertFalse($rule->isValid("2019-01-01 20:27:99"));
+        self::assertFalse($rule->isValid("2019-01-01 20:27"));
+    }
+
     public function testIsPhone()
     {
         $rule = Rule::phone();
@@ -180,8 +189,81 @@ class RuleTest extends TestCase
         self::assertTrue($rule->isValid("Nicolas Lacombe"));
         self::assertTrue($rule->isValid("Maxime Martel"));
         self::assertTrue($rule->isValid("Marc-Antoine Lemire"));
+        self::assertTrue($rule->isValid("Francis d'Argenson"));
         self::assertTrue($rule->isValid("marc-antoine"));
         self::assertFalse($rule->isValid("450-666-6666"));
+        self::assertFalse($rule->isValid("Tremblay, Jean"));
+        self::assertFalse($rule->isValid("Yo! Batman? (Oui allo?)"));
+    }
+
+    public function testIPv4All()
+    {
+        $rule = Rule::IPv4();
+        self::assertTrue($rule->isValid("206.167.238.12"));
+        self::assertTrue($rule->isValid("206.167.238.30"));
+        self::assertTrue($rule->isValid("127.0.0.1")); // reserved
+        self::assertTrue($rule->isValid("255.255.255.255")); // reserved
+        self::assertTrue($rule->isValid("10.10.5.5")); // private
+        self::assertTrue($rule->isValid("172.24.5.16")); // private
+        self::assertTrue($rule->isValid("192.168.12.34")); // private
+        self::assertFalse($rule->isValid("127.0"));
+        self::assertFalse($rule->isValid("99.450.0.1"));
+        self::assertFalse($rule->isValid("256.256.256.256"));
+    }
+
+    // 10.0.0.0 - 10.255.255.255
+    // 172.16.0.0 – 172.31.255.255
+    // 192.168.0.0 – 192.168.255.255
+    public function testIPv4NoPrivate()
+    {
+        $rule = Rule::IPv4("", true, false);
+        self::assertTrue($rule->isValid("206.167.238.12"));
+        self::assertTrue($rule->isValid("206.167.238.30"));
+        self::assertTrue($rule->isValid("127.0.0.1"));
+        self::assertTrue($rule->isValid("255.255.255.255"));
+        self::assertFalse($rule->isValid("10.10.5.5"));
+        self::assertFalse($rule->isValid("172.16.10.10"));
+        self::assertFalse($rule->isValid("192.168.10.10"));
+    }
+
+    // 0.0.0.0 - 0.255.255.255
+    // 127.0.0.0 - 127.255.255.255
+    // 169.254.0.0 – 169.254.255.255
+    // 255.255.255.255
+    public function testIPv4NoReserved()
+    {
+        $rule = Rule::IPv4("", false);
+        self::assertTrue($rule->isValid("206.167.238.12"));
+        self::assertTrue($rule->isValid("206.167.238.30"));
+        self::assertFalse($rule->isValid("127.0.0.1"));
+        self::assertFalse($rule->isValid("255.255.255.255"));
+        self::assertFalse($rule->isValid("169.254.10.20"));
+        self::assertFalse($rule->isValid("0.0.10.10"));
+    }
+
+    public function testIPv6All()
+    {
+        $rule = Rule::IPv6();
+        self::assertTrue($rule->isValid("2001:0db8:85a3:0000:0000:8a2e:0370:7334"));
+        self::assertFalse($rule->isValid("2001:0gg8:85a3:0000:0000:8a2e:0370:7334"));
+        self::assertFalse($rule->isValid("2001:0db8:85a3:0000:0000:0370:7334"));
+        self::assertFalse($rule->isValid("2001:0db8:85a30000:000:8a2e:0370:7334"));
+    }
+
+    public function testIpAddress()
+    {
+        $rule = Rule::ipAddress();
+        self::assertTrue($rule->isValid("2001:0db8:85a3:0000:0000:8a2e:0370:7334"));
+        self::assertTrue($rule->isValid("206.167.238.12"));
+    }
+
+    public function testArrayNotEmpty()
+    {
+        $rule = Rule::arrayNotEmpty();
+        self::assertTrue($rule->isValid([1, 2, 3]));
+        self::assertFalse($rule->isValid([]));
+        self::assertFalse($rule->isValid("oui"));
+        self::assertFalse($rule->isValid(null));
     }
 
     public function testIsZipCode()
@@ -212,6 +294,7 @@ class RuleTest extends TestCase
         self::assertTrue($rule->isValid("bob34"));
         self::assertTrue($rule->isValid("test"));
         self::assertTrue($rule->isValid("test1234"));
+        self::assertTrue($rule->isValid("École"));
         self::assertFalse($rule->isValid("dslfj**"));
         self::assertFalse($rule->isValid("test+test"));
         self::assertFalse($rule->isValid("@bob"));
