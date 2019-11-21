@@ -88,9 +88,10 @@ class LocalizationTest extends TestCase
     public function testInstalledLanguages()
     {
         $languages = Localization::getInstalledLanguages();
-        self::assertEquals(1, count($languages));
-        self::assertEquals('fr', $languages[0]->lang);
+        self::assertEquals(2, count($languages));
+        self::assertEquals('en', $languages[0]->lang);
         self::assertEquals('CA', $languages[0]->country);
+        self::assertEquals('fr', $languages[1]->lang);
     }
 
     private function removeDirectory($path)
