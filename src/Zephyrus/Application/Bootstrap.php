@@ -39,10 +39,6 @@ class Bootstrap
     private static function initializeLocale()
     {
         date_default_timezone_set(Configuration::getApplicationConfiguration('timezone'));
-        $localization = Localization::getInstance();
-        if (file_exists(ROOT_DIR . '/locale')) {
-            $localization->generate();
-        }
     }
 
     private static function fileToReflectionClass(string $file): ?\ReflectionClass
