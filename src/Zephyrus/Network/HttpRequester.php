@@ -320,8 +320,9 @@ class HttpRequester
                         foreach ($value as $innerKey => $innerValue) {
                             $parameters[$parameterName . '[' . $key . '][' . $innerKey . ']'] = $innerValue;
                         }
+                    } else {
+                        $parameters[$parameterName . '[' . $key . ']'] = $value;
                     }
-                    $parameters[$parameterName . '[' . $key . ']'] = $value;
                 }
                 continue;
             }
