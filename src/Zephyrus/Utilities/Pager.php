@@ -193,7 +193,7 @@ class Pager
 
     private function getQueryString($query)
     {
-        return preg_replace("/(&?" . $this->urlParameter . "=[0-9]*&?)/", "", $query);
+        return preg_replace("/(" . $this->urlParameter . "=[0-9]*&?)/", "", $query);
     }
 
     private function buildAnchor($pageNumber)
