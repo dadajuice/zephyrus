@@ -150,7 +150,7 @@ class HttpRequester
         return $filePath;
     }
 
-    public function execute(array $parameters = []): string
+    public function execute($parameters = []): string
     {
         $curl = $this->buildCurl($parameters);
         $this->response = curl_exec($curl);
@@ -233,7 +233,7 @@ class HttpRequester
         return $this->responseResults;
     }
 
-    private function buildCurl(array $data = [])
+    private function buildCurl($data = [])
     {
         $curl = curl_init($this->buildRequestedUrl($data));
         $this->setCurlBasicOptions($curl);
@@ -244,7 +244,7 @@ class HttpRequester
         return $curl;
     }
 
-    private function buildRequestedUrl(array $data = []): string
+    private function buildRequestedUrl($data = []): string
     {
         $requestedUrl = $this->url;
         if ($this->method == 'get' && !empty($data)) {
@@ -283,7 +283,7 @@ class HttpRequester
         }
     }
 
-    private function setCurlData(&$curl, array $data)
+    private function setCurlData(&$curl, $data)
     {
         $parameters = $data;
         $hasUpload = $this->hasUploadedFile($data);
@@ -294,15 +294,19 @@ class HttpRequester
         }
         if ($this->method != 'get') {
             curl_setopt($curl,CURLOPT_POST, count($parameters));
-            curl_setopt($curl,CURLOPT_POSTFIELDS, ($hasUpload) ? $parameters : http_build_query($parameters));
+            curl_setopt($curl,CURLOPT_POSTFIELDS, ($hasUpload || !is_array($parameters))
+                ? $parameters
+                : http_build_query($parameters));
         }
     }
 
-    private function hasUploadedFile(array $data)
+    private function hasUploadedFile($data)
     {
-        foreach ($data as $value) {
-            if ($value instanceof CURLFile) {
-                return true;
+        if (is_array($data)) {
+            foreach ($data as $value) {
+                if ($value instanceof CURLFile) {
+                    return true;
+                }
             }
         }
         return false;
