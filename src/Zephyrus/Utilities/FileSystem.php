@@ -1,8 +1,18 @@
 <?php namespace Zephyrus\Utilities;
 
+use InvalidArgumentException;
+use stdClass;
+
 class FileSystem
 {
+    /**
+     * @var string
+     */
     private $path;
+
+    /**
+     * @var bool
+     */
     private $isDirectory;
 
     /**
@@ -35,69 +45,99 @@ class FileSystem
         return $callback($directory);
     }
 
-    public function __construct($path)
+    public static function diskStats(string $partitionPath = "/var/www"): stdClass
+    {
+        $df = disk_free_space($partitionPath);
+        $dt = disk_total_space($partitionPath);
+        return (object) [
+            'free' => $df,
+            'total' => $dt,
+            'used' => $dt - $df,
+            'percent' => ($dt - $df) / $dt
+        ];
+    }
+
+    public static function createFile()
+    {
+
+    }
+
+    public static function createDirectory(string $path, int $mode = 0777): bool
+    {
+        return mkdir($path, $mode, true);
+    }
+
+    /**
+     * Creates a FileSystem instance base on the given path which can be either
+     * a directory root or a precise file. The public services (size, remove,
+     * getLastModifiedTime, getOwner, getGroup) will adapt according to the path
+     * type (file or folder). Will throw a InvalidArgumentException if the
+     * given path is not reachable.
+     *
+     * @param string $path
+     */
+    public function __construct(string $path)
     {
         $this->path = $path;
         if (!file_exists($this->path)) {
-            throw new \Exception("Specified path does not exist");
+            throw new InvalidArgumentException("The specified path <$path> does not exist");
         }
         $this->isDirectory = is_dir($this->path);
         $this->path = rtrim($this->path, DIRECTORY_SEPARATOR);
     }
 
-    /**
-     * If the initial path is a single file, will remove it. If the given path
-     * is a directory, it will completely empty it and then remove the directory.
-     */
-    public function remove()
+    public function getAllFiles()
     {
-        if ($this->isDirectory) {
-            $this->removeDirectory($this->path);
-        } else {
-            unlink($this->path);
-        }
+
+    }
+
+    public function exists($filename): bool
+    {
+        return false;
     }
 
     /**
-     * Returns the total filesize of the specified directory or single file in
+     * If the initial path is a single file, will remove it. If the given path
+     * is a directory, it will completely empty it and then remove the
+     * directory. Returns true on success and false on failure.
+     */
+    public function remove(): bool
+    {
+        return ($this->isDirectory)
+            ? $this->removeDirectory($this->path)
+            : unlink($this->path);
+    }
+
+    /**
+     * Returns the total file size of the specified directory or single file in
      * bytes.
      *
      * @return int
      */
-    public function size()
+    public function size(): int
     {
         if ($this->isDirectory) {
             $totalSize = 0;
-            $files = scandir($this->path);
-            foreach ($files as $backupFile) {
-                if ($backupFile != '.' && $backupFile != '..') {
-                    $totalSize += filesize($this->path . DIRECTORY_SEPARATOR . $backupFile);
-                }
-            }
+            $this->scanDirectoryCallback($this->path, function ($element) use (&$totalSize) {
+                $totalSize += filesize($element);
+            });
             return $totalSize;
         }
         return filesize($this->path);
     }
 
     /**
-     * Obtains the last modification timestamp of the given path. If its a
-     * directory, it will recursively fetch the most recent modification
-     * inside.
+     * Obtains the last modification timestamp of the path/file defined in the
+     * constructor. If its a directory, it will automatically fetch the latest
+     * modified time.
      *
      * @return int
      */
-    public function getLastModifiedTime(?string $fileName = null)
+    public function getLastModifiedTime(): int
     {
-        if ($this->isDirectory) {
-            $lastModifiedTime = 0;
-            $directoryLastModifiedTime = filemtime($fileName ?? $this->path);
-            foreach (glob("$this->path/*") as $file) {
-                $fileLastModifiedTime = (is_file($file)) ? filemtime($file) : $this->getLastModifiedTime($file);
-                $lastModifiedTime = max($fileLastModifiedTime, $directoryLastModifiedTime, $lastModifiedTime);
-            }
-            return $lastModifiedTime;
-        }
-        return filemtime($this->path);
+        return ($this->isDirectory)
+            ? $this->getDirectoryLastModifiedTime($this->path)
+            : filemtime($this->path);
     }
 
     /**
@@ -121,20 +161,50 @@ class FileSystem
     }
 
     /**
-     * Recursively delete everything inside a given directory path.
+     * Recursively delete everything inside a given directory path. Makes sure
+     * to ignore <.> and <..> navigation directory. Returns true on success or
+     * false on failure.
+     *
+     * @param string $directory
+     * @return bool
      */
-    private function removeDirectory($dir)
+    private function removeDirectory(string $directory): bool
     {
-        $objects = scandir($dir);
-        foreach ($objects as $object) {
-            if ($object != "." && $object != "..") {
-                if (is_dir($dir."/".$object) && !is_link($dir."/".$object)) {
-                    $this->removeDirectory($dir . "/" . $object);
-                } else {
-                    unlink($dir . "/" . $object);
-                }
+        $this->scanDirectoryCallback($directory, function ($element) {
+            return (is_dir($element) && !is_link($element))
+                ? $this->removeDirectory($element)
+                : unlink($element);
+        });
+        return rmdir($directory);
+    }
+
+    /**
+     * Obtains the last modification timestamp of the given directory path. It
+     * will recursively fetch the most recent modification inside.
+     *
+     * @param string $rootDirectoryPath
+     * @return int
+     */
+    private function getDirectoryLastModifiedTime(string $rootDirectoryPath): int
+    {
+        $lastModifiedTime = 0;
+        $directoryLastModifiedTime = filemtime($rootDirectoryPath);
+        foreach (glob("$rootDirectoryPath/*") as $file) {
+            $fileLastModifiedTime = (is_file($file))
+                ? filemtime($file)
+                : $this->getDirectoryLastModifiedTime($file);
+            $lastModifiedTime = max($fileLastModifiedTime, $directoryLastModifiedTime, $lastModifiedTime);
+        }
+        return $lastModifiedTime;
+    }
+
+    private function scanDirectoryCallback(string $directory, callable $callback)
+    {
+        $elements = scandir($directory);
+        foreach ($elements as $element) {
+            if ($element != "." && $element != "..") {
+                $callback($directory . DIRECTORY_SEPARATOR . $element);
             }
         }
-        rmdir($dir);
     }
 }
