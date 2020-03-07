@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Security;
 
+use InvalidArgumentException;
 use Zephyrus\Application\Configuration;
 
 class Cryptography
@@ -68,16 +69,15 @@ class Cryptography
      *
      * @param int $min
      * @param int $max
-     * @throws \Exception
      * @return int
      */
     public static function randomInt(int $min, int $max): int
     {
         if ($max <= $min) {
-            throw new \Exception('Minimum equal or greater than maximum!');
+            throw new InvalidArgumentException('Minimum equal or greater than maximum!');
         }
         if ($max < 0 || $min < 0) {
-            throw new \Exception('Only positive integers supported for now!');
+            throw new InvalidArgumentException('Only positive integers supported for now!');
         }
 
         $difference = $max - $min;
@@ -122,7 +122,7 @@ class Cryptography
      *
      * @param int $length
      * @throws \Exception
-     * @returns string
+     * @return string
      */
     public static function randomBytes(int $length = 1): string
     {
