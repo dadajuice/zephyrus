@@ -247,7 +247,7 @@ abstract class RouterEngine
     }
 
     /**
-     * Verify if the HTTP method used in the request is valid (GET,
+     * Verify if the HTTP method used in the request is valid (GET, PATCH,
      * POST, DELETE, PUT) and check if the method has at least one route
      * specified (through the veryMethodDefinition method). An exception
      * is thrown if one of these conditions are not satisfied.
@@ -256,7 +256,7 @@ abstract class RouterEngine
      */
     private function verifyRequestMethod()
     {
-        if (!in_array($this->requestedMethod, ['GET', 'POST', 'PUT', 'DELETE'])) {
+        if (!in_array($this->requestedMethod, ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])) {
             throw new RouteMethodUnsupportedException($this->requestedMethod);
         }
         if (!$this->isRequestedMethodHasDefinitions()) {

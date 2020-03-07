@@ -55,6 +55,22 @@ class Router extends RouterEngine
     }
 
     /**
+     * Add a new PATCH route for the application. The PATCH method must be
+     * used to update a specific resource (or collection) and must be
+     * considered idempotent.
+     *
+     * E.g. PATCH /book/{id}
+     *
+     * @param string $uri
+     * @param callable $callback
+     * @param string | array | null $acceptedFormats
+     */
+    public function patch($uri, $callback, $acceptedFormats = null)
+    {
+        parent::addRoute('PATCH', $uri, $callback, $acceptedFormats);
+    }
+
+    /**
      * Add a new DELETE route for the application. The DELETE method must
      * be used only to delete a specific resource (or collection) and must
      * be considered idempotent.

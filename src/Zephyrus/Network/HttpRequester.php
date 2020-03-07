@@ -74,6 +74,11 @@ class HttpRequester
         return new self('put', $url);
     }
 
+    public static function patch(string $url): self
+    {
+        return new self('patch', $url);
+    }
+
     public static function delete(string $url): self
     {
         return new self('delete', $url);

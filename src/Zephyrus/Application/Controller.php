@@ -40,6 +40,11 @@ abstract class Controller implements Routable
         $this->router->put($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
+    final protected function patch($uri, $instanceMethod, $acceptedFormats = null)
+    {
+        $this->router->patch($uri, [$this, $instanceMethod], $acceptedFormats);
+    }
+
     final protected function delete($uri, $instanceMethod, $acceptedFormats = null)
     {
         $this->router->delete($uri, [$this, $instanceMethod], $acceptedFormats);
