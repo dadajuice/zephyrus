@@ -2,6 +2,13 @@
 
 class File extends FileSystemNode
 {
+    /**
+     * Creates a new file and returns an instance of the newly created
+     * file.
+     *
+     * @param string $path
+     * @return File
+     */
     public static function create(string $path): self
     {
         touch($path);
