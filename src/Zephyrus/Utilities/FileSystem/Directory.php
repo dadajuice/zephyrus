@@ -1,46 +1,125 @@
 <?php namespace Zephyrus\Utilities\FileSystem;
 
 use InvalidArgumentException;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RegexIterator;
 
 class Directory extends FileSystemNode
 {
-    public static function create(string $path, int $mode = 0777): self
+    /**
+     * @var bool
+     */
+    private $recursive = true;
+
+    /**
+     * Creates a new directory and returns an instance of the newly created
+     * directory.
+     *
+     * @param string $path
+     * @param int $permission
+     * @return Directory
+     */
+    public static function create(string $path, int $permission = 0777): self
     {
-        mkdir($path, $mode, true);
+        mkdir($path, $permission, true);
         return new self($path);
     }
 
     /**
-     * Creates a FileSystem instance base on the given path which can be either
-     * a directory root or a precise file. The public services (size, remove,
-     * getLastModifiedTime, getOwner, getGroup) will adapt according to the path
-     * type (file or folder). Will throw a InvalidArgumentException if the
-     * given path is not reachable.
+     * Constructs a Directory instance with the given root. Allows for recursive
+     * features if the useRecursive is set to true (default). Otherwise, the
+     * directory will only consider its first level of files for all features.
      *
      * @param string $directoryRoot
+     * @param bool $useRecursive
      */
-    public function __construct(string $directoryRoot)
+    public function __construct(string $directoryRoot, bool $useRecursive = true)
     {
         parent::__construct($directoryRoot);
         if (!is_dir($directoryRoot)) {
             throw new InvalidArgumentException("The specified path <$directoryRoot> is not a directory");
         }
+        $this->recursive = $useRecursive;
     }
 
     /**
+     * Iterates over every possible files and folders recursively by default
+     * and sends each file's path into the given callback. Usage:
      *
+     * $directory->scan(function($filepath) { ... });
      *
-     * @param bool $recursive
-     * @return array
+     * @param callable $callback
      */
-    public function getFiles(bool $recursive = true): array
+    public function scan(callable $callback)
     {
-
+        $this->scanRecursively($this->path, $callback);
     }
 
+    /**
+     * Retrieves all directory's available file names (without the directory
+     * name by default).
+     *
+     * @param bool $includeDirectoryName
+     * @return string[]
+     */
+    public function getFilenames(bool $includeDirectoryName = false): array
+    {
+        $files = [];
+        $this->scanRecursively($this->path, function ($filepath) use (&$files, $includeDirectoryName) {
+            if (!is_dir($filepath)) {
+                $files[] = ($includeDirectoryName)
+                    ? $filepath
+                    : pathinfo($filepath, PATHINFO_BASENAME);
+            }
+        });
+        return $files;
+    }
+
+    /**
+     * Retrieves all directory's available files as File instances.
+     *
+     * @return File[]
+     */
+    public function getFiles(): array
+    {
+        $files = $this->getFilenames(true);
+        return $this->pathToFiles($files);
+    }
+
+    /**
+     * Searches for all file names that satisfies the given pattern inside
+     * the directory.
+     *
+     * @param string $pattern
+     * @param bool $includeDirectoryName
+     * @return array
+     */
+    public function findFilenames(string $pattern, bool $includeDirectoryName = false): array
+    {
+        $directoryIterator = new RecursiveDirectoryIterator($this->path, RecursiveDirectoryIterator::SKIP_DOTS);
+        $recursiveIterator = new RecursiveIteratorIterator($directoryIterator);
+        $files = new RegexIterator($recursiveIterator, $pattern, RegexIterator::GET_MATCH);
+        $fileList = [];
+        foreach ($files as $file) {
+            $fileList[] = ($includeDirectoryName)
+                ? $file
+                : pathinfo($file, PATHINFO_BASENAME);
+        }
+        return $fileList;
+    }
+
+    /**
+     * Searches for all file instances that satisfies the given pattern inside
+     * the directory.
+     *
+     * @param string $pattern
+     * @return File[];
+     */
     public function findFiles(string $pattern): array
     {
-
+        $files = $this->findFilenames($pattern, true);
+        return $this->pathToFiles($files);
     }
 
     /**
@@ -62,7 +141,7 @@ class Directory extends FileSystemNode
     public function size(): int
     {
         $totalSize = 0;
-        $this->scanDirectoryCallback($this->path, function ($element) use (&$totalSize) {
+        $this->scanRecursively($this->path, function ($element) use (&$totalSize) {
             $totalSize += filesize($element);
         });
         return $totalSize;
@@ -90,7 +169,7 @@ class Directory extends FileSystemNode
      */
     private function removeDirectory(string $directory): bool
     {
-        $this->scanDirectoryCallback($directory, function ($element) {
+        $this->scanRecursively($directory, function ($element) {
             return (is_dir($element) && !is_link($element))
                 ? $this->removeDirectory($element)
                 : unlink($element);
@@ -118,13 +197,40 @@ class Directory extends FileSystemNode
         return $lastModifiedTime;
     }
 
-    private function scanDirectoryCallback(string $directory, callable $callback)
+    /**
+     * Scans through every file recursively from a given directory and sends
+     * the path of each file to the specified callback.
+     *
+     * @param string $directory
+     * @param callable $callback
+     */
+    private function scanRecursively(string $directory, callable $callback)
     {
         $elements = scandir($directory);
         foreach ($elements as $element) {
             if ($element != "." && $element != "..") {
-                $callback($directory . DIRECTORY_SEPARATOR . $element);
+                $fullPath = $directory . DIRECTORY_SEPARATOR . $element;
+                $callback($fullPath);
+                if ($this->recursive && is_dir($fullPath)) {
+                    $this->scanRecursively($fullPath, $callback);
+                }
             }
         }
+    }
+
+    /**
+     * Builds a list of File instances based on a given array of string file
+     * paths.
+     *
+     * @param array $files
+     * @return File[]
+     */
+    private function pathToFiles(array $files): array
+    {
+        $fileObjects = [];
+        foreach ($files as $completeFilePath) {
+            $fileObjects[] = new File($completeFilePath);
+        }
+        return $fileObjects;
     }
 }
