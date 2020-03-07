@@ -105,12 +105,12 @@ class Directory extends FileSystemNode
     {
         $directoryIterator = new RecursiveDirectoryIterator($this->path, RecursiveDirectoryIterator::SKIP_DOTS);
         $recursiveIterator = new RecursiveIteratorIterator($directoryIterator);
-        $files = new RegexIterator($recursiveIterator, $pattern, RegexIterator::GET_MATCH);
+        $files = new RegexIterator($recursiveIterator, "/$pattern/", RegexIterator::GET_MATCH);
         $fileList = [];
         foreach ($files as $file) {
             $fileList[] = ($includeDirectoryName)
-                ? $file
-                : pathinfo($file, PATHINFO_BASENAME);
+                ? $file[0]
+                : pathinfo($file[0], PATHINFO_BASENAME);
         }
         return $fileList;
     }
@@ -148,7 +148,9 @@ class Directory extends FileSystemNode
     {
         $totalSize = 0;
         $this->scanRecursively($this->path, function ($element) use (&$totalSize) {
-            $totalSize += filesize($element);
+            if (!is_dir($element)) {
+                $totalSize += filesize($element);
+            }
         });
         return $totalSize;
     }
