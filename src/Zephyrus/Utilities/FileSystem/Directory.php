@@ -8,11 +8,6 @@ use RegexIterator;
 class Directory extends FileSystemNode
 {
     /**
-     * @var bool
-     */
-    private $recursive = true;
-
-    /**
      * Creates a new directory and returns an instance of the newly created
      * directory.
      *
@@ -27,20 +22,18 @@ class Directory extends FileSystemNode
     }
 
     /**
-     * Constructs a Directory instance with the given root. Allows for recursive
-     * features if the useRecursive is set to true (default). Otherwise, the
-     * directory will only consider its first level of files for all features.
+     * Constructs a Directory instance with the given root. All the class
+     * services consider recursive navigation (meaning it will go fetch
+     * within nested directories).
      *
      * @param string $directoryRoot
-     * @param bool $useRecursive
      */
-    public function __construct(string $directoryRoot, bool $useRecursive = true)
+    public function __construct(string $directoryRoot)
     {
         parent::__construct($directoryRoot);
         if (!is_dir($directoryRoot)) {
             throw new InvalidArgumentException("The specified path <$directoryRoot> is not a directory");
         }
-        $this->recursive = $useRecursive;
     }
 
     /**
@@ -54,6 +47,16 @@ class Directory extends FileSystemNode
     public function scan(callable $callback)
     {
         $this->scanRecursively($this->path, $callback);
+    }
+
+    /**
+     * Recursively copies all file within the directory to the destination.
+     *
+     * @param string $destination
+     */
+    public function copy(string $destination)
+    {
+        $this->copyRecursively($this->path, $destination);
     }
 
     /**
@@ -211,11 +214,34 @@ class Directory extends FileSystemNode
             if ($element != "." && $element != "..") {
                 $fullPath = $directory . DIRECTORY_SEPARATOR . $element;
                 $callback($fullPath);
-                if ($this->recursive && is_dir($fullPath)) {
+                if (is_dir($fullPath)) {
                     $this->scanRecursively($fullPath, $callback);
                 }
             }
         }
+    }
+
+    /**
+     * Copies every files recursively within the source directory to the destination
+     * path.
+     *
+     * @param string $source
+     * @param string $destination
+     */
+    private function copyRecursively(string $source, string $destination)
+    {
+        $dir = opendir($source);
+        @mkdir($destination);
+        while (false !== ($file = readdir($dir))) {
+            if (($file != '.') && ($file != '..')) {
+                if (is_dir($source . '/' . $file)) {
+                    $this->copyRecursively($source . '/' . $file,$destination . '/' . $file);
+                } else {
+                    copy($source . '/' . $file,$destination . '/' . $file);
+                }
+            }
+        }
+        closedir($dir);
     }
 
     /**

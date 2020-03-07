@@ -29,14 +29,40 @@ abstract class FileSystemNode
     }
 
     /**
-     * Renames the specified directory or file to the given new name. If the new
-     * path include new directory, they will be created.
+     * Moves the specified directory or file to the given new path. If the new
+     * path include new directories, they will be created. The new path must
+     * include the complete filename is its a file.
      *
      * @param string $newPath
      */
-    public function rename(string $newPath)
+    public function move(string $newPath)
     {
         rename($this->path, $newPath);
+    }
+
+    /**
+     * Renames the specified directory or file to the given new name.
+     *
+     * @param string $newName
+     */
+    public function rename(string $newName)
+    {
+        $newPath = pathinfo($this->path, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR . $newName;
+        rename($this->path, $newPath);
+    }
+
+    /**
+     * Copies the file to the destination. Creates all the requires directories
+     * if needed.
+     *
+     * @param string $destination
+     */
+    public function copy(string $destination)
+    {
+        if (!file_exists(dirname($destination))) {
+            mkdir(dirname($destination), 0777, true);
+        }
+        copy($this->path, $destination);
     }
 
     /**
@@ -55,6 +81,7 @@ abstract class FileSystemNode
     /**
      * Retrieves the current owner of the file or directory specified.
      *
+     * @codeCoverageIgnore
      * @return string
      */
     public function getOwner(): string
@@ -65,6 +92,7 @@ abstract class FileSystemNode
     /**
      * Retrieves the current group of the file or directory specified.
      *
+     * @codeCoverageIgnore
      * @return string
      */
     public function getGroup(): string
