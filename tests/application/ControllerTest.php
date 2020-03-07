@@ -230,6 +230,29 @@ class ControllerTest extends TestCase
         self::assertEquals('test', $output);
     }
 
+    public function testPatchRouting()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+                parent::patch('/update', 'update');
+            }
+
+            public function update()
+            {
+                echo 'test';
+            }
+        };
+        $controller->initializeRoutes();
+        $req = new Request('http://test.local/update', 'patch');
+        ob_start();
+        $router->run($req);
+        $output = ob_get_clean();
+        self::assertEquals('test', $output);
+    }
+
     public function testDeleteRouting()
     {
         $router = new Router();
