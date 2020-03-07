@@ -1,5 +1,7 @@
 <?php namespace Zephyrus\Utilities\Validations;
 
+use Zephyrus\Utilities\FileSystem\File;
+
 /**
  * Trait FileValidations
  * @package Zephyrus\Utilities\Validations
@@ -48,9 +50,7 @@ trait FileValidations
         if (!isset($data['tmp_name'])) {
             return false;
         }
-        $info = finfo_open(FILEINFO_MIME_TYPE);
-        $mime = finfo_file($info, $data['tmp_name']);
-        finfo_close($info);
+        $mime = (new File($data['tmp_name']))->getMimeType();
         return in_array($mime, $allowedMimeTypes);
     }
 
