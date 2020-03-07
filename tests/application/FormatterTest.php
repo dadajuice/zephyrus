@@ -1,8 +1,7 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Zephyrus\Application\Configuration;
-use Zephyrus\Application\Formatter;
+use Zephyrus\Utilities\Formatter;
 
 class FormatterTest extends TestCase
 {
@@ -17,135 +16,97 @@ class FormatterTest extends TestCase
 
     public function testFormatDecimal()
     {
-        $result = Formatter::formatDecimal(12.342743);
+        $result = Formatter::decimal(12.342743);
         self::assertEquals("12,3427", $result);
-        $result = Formatter::formatDecimal(12.346);
+        $result = Formatter::decimal(12.346);
         self::assertEquals("12,346", $result);
-        $result = Formatter::formatDecimal(12.1);
+        $result = Formatter::decimal(12.1);
         self::assertEquals("12,10", $result);
-        $result = Formatter::formatDecimal(12);
+        $result = Formatter::decimal(12);
         self::assertEquals("12,00", $result);
-        $result = Formatter::formatDecimal("er");
+        $result = Formatter::decimal("er");
         self::assertEquals("0,00", $result);
-        $result = Formatter::formatDecimal(12.342743, 2, 2);
+        $result = Formatter::decimal(12.342743, 2, 2);
         self::assertEquals("12,34", $result);
-        $result = Formatter::formatDecimal(12.346, 2, 2);
+        $result = Formatter::decimal(12.346, 2, 2);
         self::assertEquals("12,35", $result);
-        $result = Formatter::formatDecimal(12.13454, 0, 1);
+        $result = Formatter::decimal(12.13454, 0, 1);
         self::assertEquals("12,1", $result);
-        $result = Formatter::formatDecimal(12.16454, 0, 1);
+        $result = Formatter::decimal(12.16454, 0, 1);
         self::assertEquals("12,2", $result);
-        $result = Formatter::formatDecimal(12, 0, 0);
+        $result = Formatter::decimal(12, 0, 0);
         self::assertEquals("12", $result);
     }
 
     public function testFormatSeoUrl()
     {
-        $result = Formatter::formatSeoUrl("École en frAnçais");
+        $result = Formatter::seourl("École en frAnçais");
         self::assertEquals("ecole-en-francais", $result);
     }
 
     public function testFormatMoney()
     {
-        $result = Formatter::formatMoney(500.45);
+        $result = Formatter::money(500.45);
         self::assertEquals('500,45 $', $result);
-        $result = Formatter::formatMoney(500.459);
+        $result = Formatter::money(500.459);
         self::assertEquals('500,46 $', $result);
-        $result = Formatter::formatMoney(500.75657645345, 0, 0);
+        $result = Formatter::money(500.75657645345, 0, 0);
         self::assertEquals('501 $', $result);
-        $result = Formatter::formatMoney(500.455);
+        $result = Formatter::money(500.455);
         self::assertEquals('500,46 $', $result);
-        $result = Formatter::formatMoney(2.265);
+        $result = Formatter::money(2.265);
         self::assertEquals('2,27 $', $result);
-        $result = Formatter::formatMoney(2.275);
+        $result = Formatter::money(2.275);
         self::assertEquals('2,28 $', $result);
-        $result = Formatter::formatMoney(2.2650);
+        $result = Formatter::money(2.2650);
         self::assertEquals('2,27 $', $result);
-        $result = Formatter::formatMoney(2.263);
+        $result = Formatter::money(2.263);
         self::assertEquals('2,26 $', $result);
     }
 
     public function testFormatPercent()
     {
-        $result = Formatter::formatPercent(0.15);
+        $result = Formatter::percent(0.15);
         self::assertEquals('15,00 %', $result);
-        $result = Formatter::formatPercent(0.15, 0, 0);
+        $result = Formatter::percent(0.15, 0, 0);
         self::assertEquals('15 %', $result);
-        $result = Formatter::formatPercent(0.875, 1);
+        $result = Formatter::percent(0.875, 1);
         self::assertEquals('87,5 %', $result);
     }
 
     public function testFormatTime()
     {
-        $result = Formatter::formatTime('2016-01-01 23:15:00');
+        $result = Formatter::time('2016-01-01 23:15:00');
         self::assertEquals('23:15', $result);
     }
 
     public function testFormatDate()
     {
-        $result = Formatter::formatDate('2016-01-01 23:15:00');
+        $result = Formatter::date('2016-01-01 23:15:00');
         self::assertEquals(' 1 janvier 2016', $result);
     }
 
     public function testFormatDateTime()
     {
-        $result = Formatter::formatDateTime('2016-01-01 23:15:00');
+        $result = Formatter::datetime('2016-01-01 23:15:00');
         self::assertEquals(' 1 janvier 2016, 23:15', $result);
-    }
-
-    /*public function testFormatElapsed()
-    {
-        $result = Formatter::formatElapsedDateTime('2016-01-01 23:15:00');
-        self::assertEquals(' 1 janvier 2016, 23:15', $result);
-    }*/
-
-    public function testFormatElapsedSeconds()
-    {
-        $result = Formatter::formatElapsedDateTime('2016-01-01 23:15:10', '2016-01-01 23:15:20');
-        self::assertEquals('Il y a 10 secondes', $result);
-    }
-
-    public function testFormatElapsedMinutes()
-    {
-        $result = Formatter::formatElapsedDateTime('2016-01-01 23:16:10', '2016-01-01 23:14:20');
-        self::assertEquals('Il y a 1 minute', $result);
-    }
-
-    public function testEnglishElapsedMessage()
-    {
-        Configuration::set(['application' => ['locale' => 'en_CA']]);
-        $result = Formatter::formatElapsedDateTime('2016-01-01 23:16:10', '2016-01-01 23:14:20');
-        self::assertEquals('1 minute ago', $result);
-        Configuration::set(null);
-    }
-
-    public function testFormatElapsedYesterday()
-    {
-        $result = Formatter::formatElapsedDateTime('2015-12-31 23:00:10', '2016-01-01 23:14:20');
-        self::assertEquals('Hier 23:00', $result);
-    }
-
-    public function testFormatElapsedToday()
-    {
-        $result = Formatter::formatElapsedDateTime('2016-01-01 10:00:10', '2016-01-01 23:14:20');
-        self::assertEquals('Aujourd\'hui 10:00', $result);
     }
 
     public function testFormatSizeKb()
     {
-        $result = Formatter::formatHumanFileSize(1000000);
-        self::assertEquals('976,6 ko', $result);
+        $result = Formatter::filesize(1000000);
+        self::assertEquals('976,6 kb', $result);
     }
 
     public function testFormatSizeMb()
     {
-        $result = Formatter::formatHumanFileSize(2000000);
-        self::assertEquals('1,9 mo', $result);
+        $result = Formatter::filesize(2000000);
+        self::assertEquals('1,9 mb', $result);
     }
 
     public function testFormatSizeGb()
     {
-        $result = Formatter::formatHumanFileSize(2000000000);
-        self::assertEquals('1,9 go', $result);
+        $result = Formatter::filesize(2000000000);
+        self::assertEquals('1,9 gb', $result);
     }
 }
