@@ -120,4 +120,12 @@ class FormatterTest extends TestCase
         $result = Formatter::volume(120.1);
         self::assertEquals('120,10 m<sup>3</sup>', $result);
     }
+
+    /**
+     * @expectedException \BadMethodCallException
+     */
+    public function testInvalidCustomFormat()
+    {
+        format('temperature', -5);
+    }
 }
