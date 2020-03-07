@@ -18,21 +18,6 @@ function purify($data)
 }
 
 /**
- * Securely print an email address in an HTML page without worrying about email
- * scrapper robots.
- *
- * @param string $email
- * @return string
- */
-function secureEmail($email)
-{
-    $result = '<script type="text/javascript" nonce="' . ContentSecurityPolicy::getRequestNonce() . '">';
-    $result .= 'document.write("' . str_rot13($email) . '".replace(/[a-zA-Z]/g, function(c){return String.fromCharCode((c<="Z"?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26);}));';
-    $result .= '</script>';
-    return $result;
-}
-
-/**
  * Performs a normal glob pattern search, but enters directories recursively.
  *
  * @param string $pattern
@@ -81,20 +66,8 @@ function naturalSort(array $objects, string $getterMethod = 'getNumber')
  */
 function format(string $type, ...$args)
 {
-    $class = '\Zephyrus\Application\Formatter';
-    $typeMapping = [
-        'filesize' => 'formatHumanFileSize',
-        'time' => 'formatTime',
-        'elapsed' => 'formatElapsedDateTime',
-        'datetime' => 'formatDateTime',
-        'date' => 'formatDate',
-        'percent' => 'formatPercent',
-        'money' => 'formatMoney',
-        'decimal' => 'formatDecimal'
-    ];
-    return (array_key_exists($type, $typeMapping))
-        ? forward_static_call_array([$class, $typeMapping[$type]], $args)
-        : 'FORMAT TYPE [' . $type . '] NOT DEFINED !';
+    $class = '\Zephyrus\Utilities\Formatter';
+    return forward_static_call_array([$class, $type], $args);
 }
 
 /**
