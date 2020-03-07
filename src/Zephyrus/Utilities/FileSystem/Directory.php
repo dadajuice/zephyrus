@@ -17,6 +17,9 @@ class Directory extends FileSystemNode
      */
     public static function create(string $path, int $permission = 0777): self
     {
+        if (file_exists($path)) {
+            throw new InvalidArgumentException("Specified path <$path> already exists");
+        }
         mkdir($path, $permission, true);
         return new self($path);
     }
@@ -197,7 +200,7 @@ class Directory extends FileSystemNode
                 : $this->getDirectoryLastModifiedTime($file);
             $lastModifiedTime = max($fileLastModifiedTime, $directoryLastModifiedTime, $lastModifiedTime);
         }
-        return $lastModifiedTime;
+        return ($lastModifiedTime == 0) ? $directoryLastModifiedTime : $lastModifiedTime;
     }
 
     /**
