@@ -528,15 +528,6 @@ class RuleTest extends TestCase
     public function testIsImageAuthentic()
     {
         $rule = Rule::imageAuthentic();
-        /*$file = [
-            'error' => UPLOAD_ERR_OK,
-            'type' => 'image/png',
-            'name' => 'invalid.png',
-            'tmp_name' => ROOT_DIR . '/lib/images/invalid.png',
-            'size' => 1300000
-        ];
-        self::assertFalse($rule->isValid($file));*/
-
         $file = [
             'error' => UPLOAD_ERR_OK,
             'type' => 'image/png',
@@ -546,6 +537,19 @@ class RuleTest extends TestCase
         ];
         self::assertTrue($rule->isValid($file));
         self::assertFalse($rule->isValid([]));
+    }
+
+    public function testIsImageNotAuthentic()
+    {
+        $rule = Rule::imageAuthentic();
+        $file = [
+            'error' => UPLOAD_ERR_OK,
+            'type' => 'image/png',
+            'name' => 'not_image.png',
+            'tmp_name' => ROOT_DIR . '/lib/images/not_image.png',
+            'size' => 1300000
+        ];
+        self::assertFalse($rule->isValid($file));
     }
 }
 
