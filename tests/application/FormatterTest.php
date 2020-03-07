@@ -109,4 +109,15 @@ class FormatterTest extends TestCase
         $result = Formatter::filesize(2000000000);
         self::assertEquals('1,9 gb', $result);
     }
+
+    public function testRegisterCustomFormat()
+    {
+        Formatter::register('volume', function ($value) {
+            return Formatter::decimal($value, 2, 2) . " m<sup>3</sup>";
+        });
+        $result = format('volume', 120.1);
+        self::assertEquals('120,10 m<sup>3</sup>', $result);
+        $result = Formatter::volume(120.1);
+        self::assertEquals('120,10 m<sup>3</sup>', $result);
+    }
 }
