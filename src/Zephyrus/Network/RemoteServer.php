@@ -59,7 +59,7 @@ class RemoteServer
     public function isServiceAvailable(int $port = 80, int $timeout = self::DEFAULT_PING_TIMEOUT): bool
     {
         $isUp = false;
-        if ($socket =@ fsockopen($this->ipAddress, $port, $errno, $errstr, $timeout)) {
+        if ($socket = @fsockopen($this->ipAddress, $port, $errno, $errstr, $timeout)) {
             $isUp = true;
             fclose($socket);
         }
