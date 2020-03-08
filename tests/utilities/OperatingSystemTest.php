@@ -13,7 +13,7 @@ class OperatingSystemTest extends TestCase
 
     public function testDiskStats()
     {
-        $results = OperatingSystem::getDiskStats();
+        $results = OperatingSystem::getDiskStats("/");
         self::assertTrue(is_object($results));
         OperatingSystem::getCpuAverageLoad();
         OperatingSystem::getMemoryUsage();
