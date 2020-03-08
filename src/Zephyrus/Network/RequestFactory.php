@@ -62,7 +62,8 @@ class RequestFactory
         $parameters = array_merge(
             self::getParametersFromGlobal($_GET),
             self::getParametersFromGlobal($_POST),
-            self::getParametersFromGlobal($_FILES));
+            self::getParametersFromGlobal($_FILES)
+        );
         $paramsSource = [];
         $rawInput = file_get_contents('php://input');
         switch ($contentType) {

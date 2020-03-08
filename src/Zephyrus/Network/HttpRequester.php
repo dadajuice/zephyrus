@@ -99,7 +99,7 @@ class HttpRequester
         $mime = finfo_file($info, $filepath);
         finfo_close($info);
         $extension = pathinfo($filepath, PATHINFO_EXTENSION);
-        return new CurlFile($filepath, $mime,$uploadFilename . '.' . $extension);
+        return new CurlFile($filepath, $mime, $uploadFilename . '.' . $extension);
     }
 
     public function __construct(string $method, string $url)
@@ -110,7 +110,7 @@ class HttpRequester
 
     public function executeStream($callback, array $parameters = [])
     {
-        $this->addOption(CURLOPT_WRITEFUNCTION, function($curl, $data) use ($callback) {
+        $this->addOption(CURLOPT_WRITEFUNCTION, function ($curl, $data) use ($callback) {
             $bytes = strlen($data);
             static $buf = '';
             $buf .= $data;
@@ -129,7 +129,7 @@ class HttpRequester
                 // Only log if there is something there
                 if (strlen($data) > 50) {
                     // Removes "data:" prefix of SSE
-                    $results = str_replace("data:","", $data);
+                    $results = str_replace("data:", "", $data);
                     ($callback)($results, $info);
                 }
             }
@@ -298,8 +298,8 @@ class HttpRequester
             $parameters = $this->prepareMultipartFormData($data);
         }
         if ($this->method != 'get') {
-            curl_setopt($curl,CURLOPT_POST, count($parameters));
-            curl_setopt($curl,CURLOPT_POSTFIELDS, ($hasUpload || !is_array($parameters))
+            curl_setopt($curl, CURLOPT_POST, count($parameters));
+            curl_setopt($curl, CURLOPT_POSTFIELDS, ($hasUpload || !is_array($parameters))
                 ? $parameters
                 : http_build_query($parameters));
         }

@@ -14,7 +14,7 @@ trait StringValidations
     }
 
     /**
-     * is alpha with numbers
+     * is alpha with numbers.
      *
      * @param $data
      * @param bool $considerAccentedChar

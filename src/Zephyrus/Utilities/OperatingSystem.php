@@ -18,16 +18,13 @@ class OperatingSystem
 
     public static function getName()
     {
-
     }
 
     public static function getCpu()
     {
-
     }
 
     public static function getMemory()
     {
-
     }
 }

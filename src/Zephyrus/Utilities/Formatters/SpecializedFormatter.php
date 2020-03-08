@@ -26,8 +26,10 @@ trait SpecializedFormatter
      * @param int $sizeInBytes
      * @return string
      */
-    public static function filesize(int $sizeInBytes,
-                                    array $units = ['G' => 'gb', 'M' => 'mb', 'K' => 'kb', 'B' => 'bytes'])
+    public static function filesize(
+        int $sizeInBytes,
+        array $units = ['G' => 'gb', 'M' => 'mb', 'K' => 'kb', 'B' => 'bytes']
+    )
     {
         $fileSize = $sizeInBytes;
         $unit = $units['B'];

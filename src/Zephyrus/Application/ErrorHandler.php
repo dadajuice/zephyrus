@@ -218,13 +218,12 @@ class ErrorHandler
     {
         $traces = array_reverse($error->getTrace());
         $previousFile = "";
-        $previousLine = 0;
-        ?>
+        $previousLine = 0; ?>
         <table>
             <tr><th align='left' bgcolor='#f57900' colspan="3"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> <?= $error->getMessage() ?> in <?= $error->getFile() ?> on line <i><?= $error->getLine() ?></i></th></tr>
             <tr><th align='left' bgcolor='#e9b96e' colspan='3'>Call Stack</th></tr>
             <tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
-            <?php foreach ($traces as $i => $trace): ?>
+            <?php foreach ($traces as $i => $trace) { ?>
                 <?php
                 if (!empty($trace['file'])) {
                     $previousFile = $trace['file'];
@@ -235,7 +234,7 @@ class ErrorHandler
                 $filename = pathinfo($previousFile, PATHINFO_FILENAME);
                 ?>
                 <tr><td bgcolor='#eeeeec' align='center'><?= $i ?></td><td bgcolor='#eeeeec'><?= ((isset($trace['class'])) ? $trace['class'] : "") . ((isset($trace['type'])) ? $trace['type'] : "") . $trace['function'] ?>()</td><td title='<?= $previousFile ?>' bgcolor='#eeeeec'>.../<?= $filename ?><b>:</b><?= $previousLine ?></td></tr>
-            <?php endforeach; ?>
+            <?php } ?>
         </table>
         <?php
     }
@@ -243,5 +242,7 @@ class ErrorHandler
     /**
      * Made private to make sure to use Singleton pattern getInstance method.
      */
-    private function __construct() { }
+    private function __construct()
+    {
+    }
 }

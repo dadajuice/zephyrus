@@ -10,7 +10,9 @@ abstract class FileSystemNode
     protected $path;
 
     abstract public function remove(): bool;
+
     abstract public function size(): int;
+
     abstract public function getLastModifiedTime(): int;
 
     /**

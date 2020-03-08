@@ -41,7 +41,7 @@ class Directory extends FileSystemNode
 
     /**
      * Iterates over every possible files and folders recursively by default
-     * and sends each file's path into the given callback. Usage:
+     * and sends each file's path into the given callback.
      *
      * $directory->scan(function($filepath) { ... });
      *
@@ -240,9 +240,9 @@ class Directory extends FileSystemNode
         while (false !== ($file = readdir($dir))) {
             if (($file != '.') && ($file != '..')) {
                 if (is_dir($source . '/' . $file)) {
-                    $this->copyRecursively($source . '/' . $file,$destination . '/' . $file);
+                    $this->copyRecursively($source . '/' . $file, $destination . '/' . $file);
                 } else {
-                    copy($source . '/' . $file,$destination . '/' . $file);
+                    copy($source . '/' . $file, $destination . '/' . $file);
                 }
             }
         }

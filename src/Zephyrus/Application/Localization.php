@@ -246,7 +246,9 @@ class Localization
         putenv("LANG=" . $this->appLocale);
     }
 
-    private function __construct() { }
+    private function __construct()
+    {
+    }
 
     private function clearCacheDirectory()
     {
