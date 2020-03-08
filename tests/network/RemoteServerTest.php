@@ -25,4 +25,11 @@ class RemoteServerTest extends TestCase
         $remote = new RemoteServer("206.167.240.12");
         self::assertEquals(null, $remote->getHostname());
     }
+
+    public function testSsl()
+    {
+        $remote = new RemoteServer("github.com");
+        $date = $remote->getSslExpiration();
+        self::assertTrue(Validation::isDateTime24Hours($date, true));
+    }
 }
