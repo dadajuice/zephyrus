@@ -49,7 +49,7 @@ trait StringValidations
 
     public static function isEmail($data): bool
     {
-        return filter_var($data, FILTER_VALIDATE_EMAIL);
+        return filter_var($data, FILTER_VALIDATE_EMAIL) !== false;
     }
 
     public static function isRegex($data, $regex): bool

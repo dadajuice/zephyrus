@@ -52,7 +52,7 @@ trait SpecializedValidations
         $flag = FILTER_FLAG_IPV4
             | ((!$includeReserved) ? FILTER_FLAG_NO_RES_RANGE : 0)
             | ((!$includePrivate) ? FILTER_FLAG_NO_PRIV_RANGE : 0);
-        return filter_var($data, FILTER_VALIDATE_IP, $flag);
+        return filter_var($data, FILTER_VALIDATE_IP, $flag) !== false;
     }
 
     public static function isIPv6($data, bool $includeReserved = true, bool $includePrivate = true)
@@ -60,7 +60,7 @@ trait SpecializedValidations
         $flag = FILTER_FLAG_IPV6
             | ((!$includeReserved) ? FILTER_FLAG_NO_RES_RANGE : 0)
             | ((!$includePrivate) ? FILTER_FLAG_NO_PRIV_RANGE : 0);
-        return filter_var($data, FILTER_VALIDATE_IP, $flag);
+        return filter_var($data, FILTER_VALIDATE_IP, $flag) !== false;
     }
 
     public static function isIpAddress($data, bool $includeReserved = true, bool $includePrivate = true)
@@ -68,6 +68,6 @@ trait SpecializedValidations
         $flag = (FILTER_FLAG_IPV6 | FILTER_FLAG_IPV4)
             | ((!$includeReserved) ? FILTER_FLAG_NO_RES_RANGE : 0)
             | ((!$includePrivate) ? FILTER_FLAG_NO_PRIV_RANGE : 0);
-        return filter_var($data, FILTER_VALIDATE_IP, $flag);
+        return filter_var($data, FILTER_VALIDATE_IP, $flag) !== false;
     }
 }
