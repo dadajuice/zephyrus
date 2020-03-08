@@ -43,7 +43,11 @@ class RemoteServer
         return $this->ipAddress;
     }
 
-    // DNS_A, DNS_CNAME, DNS_HINFO, DNS_CAA, DNS_MX, DNS_NS, DNS_PTR, DNS_SOA, DNS_TXT, DNS_AAAA, DNS_SRV, DNS_NAPTR, DNS_A6, DNS_ALL or DNS_ANY.
+    /**
+     * @codeCoverageIgnore
+     * @param int $type
+     * @return array
+     */
     public function getDnsRecord(int $type = DNS_ANY): array
     {
         return dns_get_record($this->ipAddress, $type);

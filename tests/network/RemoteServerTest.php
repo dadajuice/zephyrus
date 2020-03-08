@@ -15,7 +15,6 @@ class RemoteServerTest extends TestCase
     public function testDns()
     {
         $remote = new RemoteServer("github.com");
-        self::assertTrue(!empty($remote->getDnsRecord(DNS_A)[0]['host']));
         self::assertEquals('github.com', $remote->getHostname());
         self::assertTrue(Validation::isIPv4($remote->getIpAddress()));
     }
