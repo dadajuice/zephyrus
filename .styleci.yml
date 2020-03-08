@@ -16,7 +16,6 @@ disabled:
   - align_double_arrow
   - blank_line_after_opening_tag
   - phpdoc_align
-  - simplified_null_return
   - single_quote
   - trailing_comma_in_multiline_array
   - phpdoc_separation
