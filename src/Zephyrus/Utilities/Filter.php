@@ -34,10 +34,22 @@ class Filter
      */
     private $page;
 
-    public function __construct(Request $request, ?string $defaultSort = null, ?string $defaultOrder = null)
+    /**
+     * @var string
+     */
+    private $defaultSort;
+
+    /**
+     * @var string
+     */
+    private $defaultOrder;
+
+    public function __construct(Request $request, string $defaultSort = "", string $defaultOrder = "asc")
     {
         $this->request = $request;
-        $this->initializeQueryStrings($defaultSort, $defaultOrder);
+        $this->defaultOrder = $defaultOrder;
+        $this->defaultSort = $defaultSort;
+        $this->initializeQueryStrings();
     }
 
     /**
@@ -80,34 +92,49 @@ class Filter
         return $this->page;
     }
 
-    private function initializeQueryStrings(?string $defaultSort = null, ?string $defaultOrder = null)
+    private function initializeQueryStrings()
     {
-        $this->initializeSort($defaultSort ?? "");
-        $this->initializeOrder($defaultOrder ?? "asc");
+        $this->initializeSort();
+        $this->initializeOrder();
         $this->initializeSearch();
         $this->initializePage();
     }
 
-    private function initializeSort(string $defaultSort)
+    /**
+     * Initializes the sort property according to the request. Will use the
+     * configured default sort if none provided in the request.
+     */
+    private function initializeSort()
     {
-        $this->sort = $this->request->getParameter(self::SORT_PARAMETER_NAME) ?? $defaultSort;
+        $this->sort = $this->request->getParameter(self::SORT_PARAMETER_NAME) ?? $this->defaultSort;
     }
 
-    private function initializeOrder(string $defaultOrder)
+    /**
+     * Initializes the order property according to the request and makes sure
+     * to always have either asc or desc. Will use the configured default sort
+     * if none provided in the request.
+     */
+    private function initializeOrder()
     {
-        $order = $this->request->getParameter(self::ORDER_PARAMETER_NAME) ?? $defaultOrder;
+        $order = $this->request->getParameter(self::ORDER_PARAMETER_NAME) ?? $this->defaultOrder;
         if ($order != "asc" && $order != "desc") {
             $order = "asc";
         }
         $this->order = $order;
     }
 
+    /**
+     * Initializes the search property according to the request.
+     */
     private function initializeSearch()
     {
-        $search = $this->request->getParameter(self::SEARCH_PARAMETER_NAME);
-        $this->search = !is_null($search) ? $search : null;
+        $this->search = $this->request->getParameter(self::SEARCH_PARAMETER_NAME);
     }
 
+    /**
+     * Initializes the page property according to the request and makes sure to
+     * be on page 1 if the given page is not numeric.
+     */
     private function initializePage()
     {
         $page = $this->request->getParameter(self::PAGE_PARAMETER_NAME, 1);
