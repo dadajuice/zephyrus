@@ -5,6 +5,7 @@ class Form
     private const TRIGGER_ALWAYS = 0;
     private const TRIGGER_NO_ERROR = 1;
     private const TRIGGER_FIELD_NO_ERROR = 2;
+    private const SESSION_KEY = '_FIELDS';
 
     /**
      * @var array
@@ -32,7 +33,9 @@ class Form
      */
     public static function readMemorizedValue($fieldId, $defaultValue = "")
     {
-        return (isset($_SESSION['_FIELDS'][$fieldId])) ? $_SESSION['_FIELDS'][$fieldId] : $defaultValue;
+        return (isset($_SESSION[self::SESSION_KEY][$fieldId]))
+            ? $_SESSION[self::SESSION_KEY][$fieldId]
+            : $defaultValue;
     }
 
     /**
@@ -44,10 +47,10 @@ class Form
      */
     public static function memorizeValue($fieldId, $value)
     {
-        if (!isset($_SESSION['_FIELDS'])) {
-            $_SESSION['_FIELDS'] = [];
+        if (!isset($_SESSION[self::SESSION_KEY])) {
+            $_SESSION[self::SESSION_KEY] = [];
         }
-        $_SESSION['_FIELDS'][$fieldId] = $value;
+        $_SESSION[self::SESSION_KEY][$fieldId] = $value;
     }
 
     /**
@@ -58,12 +61,12 @@ class Form
      */
     public static function removeMemorizedValue($fieldId = null)
     {
-        if (isset($_SESSION['_FIELDS'])) {
+        if (isset($_SESSION[self::SESSION_KEY])) {
             if (is_null($fieldId)) {
-                $_SESSION['_FIELDS'] = null;
-                unset($_SESSION['_FIELDS']);
+                $_SESSION[self::SESSION_KEY] = null;
+                unset($_SESSION[self::SESSION_KEY]);
             } else {
-                unset($_SESSION['_FIELDS'][$fieldId]);
+                unset($_SESSION[self::SESSION_KEY][$fieldId]);
             }
         }
     }
@@ -88,8 +91,8 @@ class Form
      */
     public function verify(): bool
     {
-        foreach ($this->rules as $field => $validations) {
-            $this->verifyAllRules($field, $validations);
+        foreach ($this->rules as $validation) {
+            $this->verifyAllRules($validation);
         }
         return empty($this->errors);
     }
@@ -117,7 +120,10 @@ class Form
 
     public function addError(string $field, string $message)
     {
-        $this->errors[$field][] = $message;
+        $this->errors[] = (object) [
+            'field' => $field,
+            'message' => $message
+        ];
     }
 
     public function hasError(?string $field = null): bool
@@ -125,23 +131,33 @@ class Form
         if (is_null($field)) {
             return !empty($this->errors);
         }
-        return isset($this->errors[$field]);
+        foreach ($this->errors as $error) {
+            if ($error->field == $field) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function getErrors(): array
     {
-        return $this->errors;
+        $errorsAssociated = [];
+        foreach ($this->errors as $error) {
+            if (!isset($errorsAssociated[$error->field])) {
+                $errorsAssociated[$error->field] = [];
+            }
+            $errorsAssociated[$error->field][] = $error->message;
+        }
+        return $errorsAssociated;
     }
 
     public function getErrorMessages(): array
     {
-        $results = [];
-        foreach ($this->errors as $errors) {
-            foreach ($errors as $message) {
-                $results[] = $message;
-            }
+        $messages = [];
+        foreach ($this->errors as $error) {
+            $messages[] = $error->message;
         }
-        return $results;
+        return $messages;
     }
 
     public function registerFeedback()
@@ -149,9 +165,9 @@ class Form
         Feedback::error($this->getErrors());
     }
 
-    public function getValue(string $field)
+    public function getValue(string $field, $defaultValue = null)
     {
-        return $this->fields[$field] ?? null;
+        return $this->fields[$field] ?? $defaultValue;
     }
 
     public function getFields(): array
@@ -169,6 +185,7 @@ class Form
      * methods.
      *
      * @param object $instance
+     * @return object
      */
     public function buildObject($instance = null)
     {
@@ -183,15 +200,13 @@ class Form
         }
     }
 
-    private function verifyAllRules(string $field, array $validations)
+    private function verifyAllRules(\stdClass $validation)
     {
-        foreach ($validations as $validation) {
-            if ($this->isValidationTriggered($field, $validation)) {
-                $result = $validation->rule->isValid($this->fields[$field] ?? null, $this->fields);
-                if (!$result) {
-                    $this->errors[$field][] = $validation->rule->getErrorMessage();
-                    self::removeMemorizedValue($field);
-                }
+        if ($this->isValidationTriggered($validation->field, $validation)) {
+            $result = $validation->rule->isValid($this->fields[$validation->field] ?? null, $this->fields);
+            if (!$result) {
+                $this->addError($validation->field, $validation->rule->getErrorMessage());
+                self::removeMemorizedValue($validation->field);
             }
         }
     }
@@ -208,8 +223,9 @@ class Form
     {
         $validation = new \stdClass();
         $validation->rule = $rule;
+        $validation->field = $field;
         $validation->trigger = $trigger;
         $validation->optional = $optional;
-        $this->rules[$field][] = $validation;
+        $this->rules[] = $validation;
     }
 }

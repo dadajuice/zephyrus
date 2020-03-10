@@ -221,4 +221,21 @@ class FormTest extends TestCase
         $form->validate('bob', Rule::alphanumeric('err_1'));
         self::assertFalse($form->verify());
     }
+
+    public function testRuleOrder()
+    {
+        $form = new Form();
+        $form->addField('something', 'Martin Sandwish');
+        $form->addField('age', 'lul');
+        $form->validate('something', Rule::integer('err_1'));
+        $form->validate('age', Rule::integer('err_2'));
+        $form->validate('something', Rule::ipAddress('err_3'));
+        $form->verify();
+        $errors = $form->getErrorMessages();
+
+        // Must be in the order of programming instead of field names
+        self::assertEquals('err_1', $errors[0]);
+        self::assertEquals('err_2', $errors[1]);
+        self::assertEquals('err_3', $errors[2]);
+    }
 }
