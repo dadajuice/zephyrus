@@ -1,11 +1,12 @@
 <?php namespace Zephyrus\Utilities;
 
+use Zephyrus\Database\Adapters\DatabaseAdapter;
 use Zephyrus\Network\RequestFactory;
 
 class Pager
 {
-    const PAGE_MAX_ENTITIES = 50;
-    const URL_PARAMETER = 'page';
+    const DEFAULT_PAGE_MAX_ENTITIES = 50;
+    const DEFAULT_URL_PARAMETER = 'page';
 
     /**
      * @var int
@@ -42,7 +43,7 @@ class Pager
      */
     private $offset;
 
-    public function __construct($recordCount, $maxEntities = self::PAGE_MAX_ENTITIES, $urlParameter = self::URL_PARAMETER)
+    public function __construct($recordCount, $maxEntities = self::DEFAULT_PAGE_MAX_ENTITIES, $urlParameter = self::DEFAULT_URL_PARAMETER)
     {
         $request = RequestFactory::read();
         $this->urlParameter = $urlParameter;
@@ -56,17 +57,20 @@ class Pager
         $this->validate();
     }
 
-    public function getSqlLimit(string $dbms = 'mysql')
-    {
-        return ($dbms == 'mysql') ? $this->getMySqlLimit() : $this->getPostgreSqlLimit();
-    }
-
     /**
      * @return int
      */
     public function getMaxEntitiesPerPage()
     {
         return $this->maxEntities;
+    }
+
+    /**
+     * @return int
+     */
+    public function getOffset()
+    {
+        return $this->offset;
     }
 
     /**
@@ -98,6 +102,11 @@ class Pager
         ob_start();
         $this->displayPager();
         return ob_get_clean();
+    }
+
+    public function getSqlLimitClause(DatabaseAdapter $adapter)
+    {
+        return $adapter->getLimitClause($this->offset, $this->getMaxEntitiesPerPage());
     }
 
     /**
@@ -215,15 +224,5 @@ class Pager
         if ($this->currentPage < 1 || $this->currentPage > $this->maxPage) {
             $this->currentPage = 1;
         }
-    }
-
-    private function getPostgreSqlLimit()
-    {
-        return " LIMIT $this->maxEntities OFFSET $this->offset";
-    }
-
-    private function getMySqlLimit()
-    {
-        return " LIMIT $this->offset, $this->maxEntities";
     }
 }

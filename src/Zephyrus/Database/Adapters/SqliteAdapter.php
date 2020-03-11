@@ -4,7 +4,7 @@
 namespace Zephyrus\Database\Adapters;
 
 
-class SqliteAdapter
+class SqliteAdapter extends DatabaseAdapter
 {
 
 }

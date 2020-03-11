@@ -1,7 +1,6 @@
 <?php namespace Zephyrus\Database;
 
 use stdClass;
-use Zephyrus\Database\Adapters\DatabaseAdapter;
 use Zephyrus\Exceptions\DatabaseException;
 use Zephyrus\Utilities\Pager;
 
@@ -33,32 +32,14 @@ abstract class Broker
         }
     }
 
-
-
-    public function getAdapter(): DatabaseAdapter
+    /**
+     * @param string $name
+     * @param string $value
+     */
+    public function addSessionVariable(string $name, string $value)
     {
-        return new DatabaseAdapter();
+        $this->database->getAdapter()->addSessionVariable($name, $value);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /**
      * @return Database
@@ -105,32 +86,6 @@ abstract class Broker
     }
 
     /**
-     * @param string $query
-     * @param array $parameters
-     * @param bool $ignoreOrder
-     * @param string $allowedTags
-     * @return \stdClass | null
-     */
-    public function filteredSelectSingle(string $query, array $parameters = [], bool $ignoreOrder = false, string $allowedTags = ""): ?\stdClass
-    {
-        $this->filterQuery($query, $ignoreOrder);
-        return $this->selectSingle($query, $parameters, $allowedTags);
-    }
-
-    /**
-     * @param string $query
-     * @param array $parameters
-     * @param bool $ignoreOrder
-     * @param string $allowedTags
-     * @return \stdClass[]
-     */
-    public function filteredSelect(string $query, array $parameters = [], bool $ignoreOrder = false, string $allowedTags = ""): array
-    {
-        $this->filterQuery($query, $ignoreOrder);
-        return $this->select($query, $parameters, $allowedTags);
-    }
-
-    /**
      * Execute a SELECT query which should return a single data row. Best
      * suited for queries involving primary key in where. Will return null
      * if the query did not return any results. If more than one row is
@@ -143,6 +98,7 @@ abstract class Broker
      */
     protected function selectSingle(string $query, array $parameters = [], string $allowedTags = ""): ?stdClass
     {
+        $query = $this->filterQuery($query);
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($allowedTags);
         return $statement->next();
@@ -160,8 +116,9 @@ abstract class Broker
     protected function select(string $query, array $parameters = [], string $allowedTags = ""): array
     {
         if (!is_null($this->pager)) {
-            $query .= $this->pager->getSqlLimit($this->database->getDatabaseManagementSystem());
+            $query .= $this->pager->getSqlLimitClause($this->database->getAdapter());
         }
+        $query = $this->filterQuery($query);
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($allowedTags);
         $results = [];
@@ -213,17 +170,16 @@ abstract class Broker
         return $this->database->query($query, $parameters);
     }
 
-    public static function list(Broker $broker, string $defaultSort = "", string $defaultOrder = "asc",
-                                int $pagerLimit = Pager::PAGE_MAX_ENTITIES): stdClass
+    public function list(string $defaultSort = "", string $defaultOrder = "asc", int $pagerLimit = Pager::DEFAULT_PAGE_MAX_ENTITIES): stdClass
     {
         if (!($broker instanceof Listable)) {
             throw new \RuntimeException("Provided broker must implements the Listable instance");
         }
 
-        $totalCount = $broker->count();
+        $totalCount = $broker->getDatabase()->getAdapter()->countAll('');
         $broker->applyFilter($defaultSort, $defaultOrder);
         $rows = $broker->findAll();
-        $count = count($rows);
+        $count = $broker->count();
 
         if ($pagerLimit > 0) {
             $broker->buildPager($count, $pagerLimit);

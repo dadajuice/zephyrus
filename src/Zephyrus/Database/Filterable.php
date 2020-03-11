@@ -20,14 +20,6 @@ trait Filterable
      */
     private $sortableFields = [];
 
-    /**
-     * @return null | Filter
-     */
-    public function getFilter(): ?Filter
-    {
-        return $this->filter;
-    }
-
     // ['firstname', 'lastname']
     protected function setSearchableFields(array $fields)
     {
@@ -41,7 +33,9 @@ trait Filterable
     }
 
     /**
-     * Creates the filter according to the request.
+     * Applies a Filter instance based on the HTTP Request for the current
+     * broker. Any subsequent select queries will automatically include the
+     * filter (sort, order and search).
      *
      * @param string $defaultSort
      * @param string $defaultOrder
@@ -51,25 +45,51 @@ trait Filterable
         $this->filter = new Filter(RequestFactory::read(), $defaultSort, $defaultOrder);
     }
 
+    /**
+     * Removes the applied filter meaning that any subsequent filteredQuery
+     * wont use the filter.
+     */
     public function removeFilter()
     {
         $this->filter = null;
     }
 
-    public function filterQuery(string &$query, bool $ignoreOrder = false)
+    /**
+     * Adds the correct SQL clause to the given query for search terms and sort
+     * order if any filter is given.
+     *
+     * @param string $query
+     * @return string
+     */
+    public function filterQuery(string $query): string
     {
         if (is_null($this->filter)) {
-            return;
+            return $query;
         }
         if ($this->filter->hasSearch()) {
-            $query = $this->buildSearch($query);
+            $query = $this->buildSearchWhere($query);
         }
-        if (!$ignoreOrder) {
+        if ($this->filter->hasSort()) {
             $query .= $this->buildOrderBy();
         }
+        return $query;
     }
 
-    private function buildSearch(string $query)
+    /**
+     * @return null | Filter
+     */
+    public function getFilter(): ?Filter
+    {
+        return $this->filter;
+    }
+
+    /**
+     * Includes the WHERE clause properly placed inside the given query.
+     *
+     * @param string $query
+     * @return string
+     */
+    private function buildSearchWhere(string $query): string
     {
         $lastWhereByOccurrence = strripos($query, "where");
         $lastGroupByOccurrence = strripos($query, "group by");
@@ -82,15 +102,17 @@ trait Filterable
         }
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);
-        return $begin . $this->buildWhere($query) . $end;
+        $clause = (($lastWhereByOccurrence !== false) ? " AND " : " WHERE ");
+        return $begin . $clause . '(' . $this->buildSearch() . ')' . $end;
     }
 
-    private function buildWhere(string $query): string
-    {
-        $lastWhereByOccurrence = strripos($query, "where");
-        return (($lastWhereByOccurrence !== false) ? " AND " : " WHERE ") . '(' . $this->search() . ')';
-    }
-
+    /**
+     * Builds the ORDER BY sql clause according to the filter setting. If no
+     * sort correspondences exists, it will directly use the sort url argument
+     * as order field.
+     *
+     * @return string
+     */
     private function buildOrderBy(): string
     {
         $sort = $this->filter->getSort();
@@ -102,14 +124,21 @@ trait Filterable
         return "";
     }
 
-    private function search()
+    /**
+     * Builds the search clause (e.g firstname LIKE %test% OR lastname
+     * LIKE %test%). Uses a defined searchPattern method in the database
+     * adapter.
+     *
+     * @return string
+     */
+    private function buildSearch(): string
     {
         $clause = "";
         foreach ($this->searchableFields as $field) {
             if (!empty($clause)) {
                 $clause .= ' OR ';
             }
-            $clause .= $this->getAdapter()->searchPattern($field, $this->getFilter()->getSearch());
+            $clause .= $this->getDatabase()->getAdapter()->searchPattern($field, $this->getFilter()->getSearch());
         }
         return $clause;
     }

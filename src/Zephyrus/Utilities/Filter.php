@@ -61,6 +61,14 @@ class Filter
     }
 
     /**
+     * @return bool
+     */
+    public function hasSort(): bool
+    {
+        return !empty($this->sort);
+    }
+
+    /**
      * @return string
      */
     public function getSort(): string

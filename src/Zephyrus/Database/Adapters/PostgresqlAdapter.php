@@ -1,15 +1,15 @@
 <?php namespace Zephyrus\Database\Adapters;
 
-class PostgresqlAdapter
+class PostgresqlAdapter extends DatabaseAdapter
 {
+    public function getLimitClause(int $offset, int $maxEntities): string
+    {
+        return " LIMIT $maxEntities OFFSET $offset";
+    }
+
     // myapp.user
     public function addSessionVariable(string $name, string $value)
     {
-        parent::query("set session \"$name\" = '" . $value . "';");
-    }
-
-    public function getDriverName()
-    {
-        return "pgsql";
+        $this->database->query("set session \"$name\" = '" . $value . "';");
     }
 }

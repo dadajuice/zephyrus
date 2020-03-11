@@ -67,6 +67,7 @@ class Database
         try {
             $this->handle = new TransactionPDO($dsn, $username, $password);
             $this->handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->buildAdapter($this->getDatabaseManagementSystem());
         } catch (PDOException $e) {
             throw new DatabaseException("Connection failed to database : " . $e->getMessage());
         }
@@ -81,7 +82,7 @@ class Database
      * @throws DatabaseException
      * @return DatabaseStatement
      */
-    public function query(string $query, array $parameters = [])
+    public function query(string $query, array $parameters = []): DatabaseStatement
     {
         try {
             $statement = $this->handle->prepare($query, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
@@ -98,6 +99,14 @@ class Database
             throw new DatabaseException('Error while preparing query « ' . $query . ' » (' .
                 $e->getMessage() . ')', $query);
         }
+    }
+
+    /**
+     * @return DatabaseAdapter
+     */
+    public function getAdapter(): DatabaseAdapter
+    {
+        return $this->adapter;
     }
 
     /**
@@ -227,24 +236,17 @@ class Database
         return PDO::PARAM_STR;
     }
 
-
-
-
-    private function buildAdapter($dbms)
+    private function buildAdapter(string $dbms)
     {
         $mysql = ['mysql', 'mariadb'];
         $postgres = ['postgres', 'pgsql', 'postgresql'];
         $sqlite = ['sqlite'];
-
         if (in_array($dbms, $mysql)) {
-            $this->adapter = new MysqlAdapter();
+            $this->adapter = new MysqlAdapter($this);
         } elseif (in_array($dbms, $postgres)) {
-            $this->adapter = new PostgresqlAdapter();
+            $this->adapter = new PostgresqlAdapter($this);
         } elseif (in_array($dbms, $sqlite)) {
-            $this->adapter = new SqliteAdapter();
+            $this->adapter = new SqliteAdapter($this);
         }
-        $this->adapter = new DatabaseAdapter();
     }
-
-
 }

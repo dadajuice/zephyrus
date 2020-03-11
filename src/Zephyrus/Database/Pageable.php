@@ -12,13 +12,20 @@ trait Pageable
     /**
      * @var int
      */
-    private $limit = Pager::PAGE_MAX_ENTITIES;
+    private $limit = Pager::DEFAULT_PAGE_MAX_ENTITIES;
 
     /**
      * @var string
      */
-    private $parameterName = Pager::URL_PARAMETER;
+    private $parameterName = Pager::DEFAULT_URL_PARAMETER;
 
+    /**
+     * Overrides the default pager settings (page limit and the url parameter
+     * name).
+     *
+     * @param int $limit
+     * @param string $parameterName
+     */
     public function configurePager(int $limit, string $parameterName)
     {
         $this->limit = $limit;
@@ -26,6 +33,9 @@ trait Pageable
     }
 
     /**
+     * Applies a Pager instance to the current broker. Meaning that all
+     * subsequent queries will limit the results automatically.
+     *
      * @param int $count
      */
     public function applyPager(int $count)
@@ -34,15 +44,19 @@ trait Pageable
     }
 
     /**
+     * Removes the applied pager meaning that any subsequent queries wont use
+     * the pagination.
+     */
+    public function removePager()
+    {
+        $this->pager = null;
+    }
+
+    /**
      * @return Pager
      */
     public function getPager(): ?Pager
     {
         return $this->pager;
-    }
-
-    public function removePager()
-    {
-        $this->pager = null;
     }
 }

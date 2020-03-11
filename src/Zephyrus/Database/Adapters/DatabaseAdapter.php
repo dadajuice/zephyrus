@@ -1,58 +1,46 @@
 <?php namespace Zephyrus\Database\Adapters;
 
 use PDO;
+use Zephyrus\Database\Database;
 use Zephyrus\Exceptions\DatabaseException;
 
-class DatabaseAdapter
+abstract class DatabaseAdapter
 {
     /**
      * @var string
      */
-    private $charset;
+    protected $database;
 
-    /**
-     * @var string
-     */
-    private $username;
-
-    /**
-     * @var string
-     */
-    private $database;
-
-    /**
-     * @var int
-     */
-    private $port;
-
-    /**
-     * @var string
-     */
-    private $host;
-
-    /**
-     * @var string
-     */
-    private $dsn;
-
-    public function __construct(string $dbms)
+    public function __construct(Database $database)
     {
-        if (!in_array($dbms, PDO::getAvailableDrivers())) {
-            throw new DatabaseException("Configured Database management system [$dbms] doesn't correspond 
-                to one of the available drivers [" . implode(',', PDO::getAvailableDrivers()) . "]");
-        }
+        $this->database = $database;
     }
 
-    public function getDriverName()
-    {
-        return "pgsql";
-    }
-
-    public function searchPattern(string $field, string $search)
+    public function searchPattern(string $field, string $search): string
     {
         $field = $this->purify($field);
         $search = $this->purify($search);
         return "($field LIKE %$search%)";
+    }
+
+    public function getLimitClause(int $offset, int $maxEntities): string
+    {
+        return " LIMIT $offset, $maxEntities";
+    }
+
+    public function addSessionVariable(string $name, string $value)
+    {
+        $this->database->query("SET @$name = ?", [$value]);
+    }
+
+    public function countAll(string $table)
+    {
+        return "SELECT COUNT(*) FROM $table";
+    }
+
+    public function getDriverName(): string
+    {
+        return $this->database->getDatabaseManagementSystem();
     }
 
     /**
@@ -62,21 +50,8 @@ class DatabaseAdapter
      * @param string $data
      * @return string
      */
-    public function purify($data)
+    public function purify($data): string
     {
         return htmlspecialchars(trim(strip_tags($data)), ENT_QUOTES | ENT_HTML401, 'UTF-8');
-    }
-
-    public function getDataSourceName()
-    {
-        $dbms = $config['dbms'] ?? self::DEFAULT_DBMS;
-        if (!in_array($dbms, PDO::getAvailableDrivers())) {
-            throw new DatabaseException("Configured Database management system [$dbms] doesn't correspond 
-                to one of the available drivers [" . implode(',', PDO::getAvailableDrivers()) . "]");
-        }
-        $charset = (isset($config['charset'])) ? ";charset={$config['charset']};" : "";
-        $port = (isset($config['port'])) ? ";port={$config['port']};" : "";
-        return $config['dsn']
-            ?? $dbms . ':dbname=' . $config['database'] . ';host=' . $config['host'] . $port . $charset;
     }
 }
