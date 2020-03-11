@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Database;
 
 use stdClass;
+use Zephyrus\Database\Adapters\DatabaseAdapter;
 use Zephyrus\Exceptions\DatabaseException;
 use Zephyrus\Utilities\Pager;
 
@@ -14,16 +15,12 @@ abstract class Broker
      */
     private $database;
 
-    /**
-     * @var Pager
-     */
-    private $pager = null;
-
+    use Pageable;
     use Filterable { filterQuery as private; }
 
     /**
      * Broker constructor called by children. Simply get the database reference
-     * for further use.
+     * for further use. Pageable.
      *
      * @param null|Database $database
      * @throws DatabaseException
@@ -36,25 +33,32 @@ abstract class Broker
         }
     }
 
-    /**
-     * @param int $count
-     * @param int $limit
-     * @param string $urlParameter
-     * @return Pager
-     */
-    public function buildPager($count, $limit = Pager::PAGE_MAX_ENTITIES, $urlParameter = Pager::URL_PARAMETER)
+
+
+    public function getAdapter(): DatabaseAdapter
     {
-        $this->pager = new Pager($count, $limit, $urlParameter);
-        return $this->pager;
+        return new DatabaseAdapter();
     }
 
-    /**
-     * @return Pager
-     */
-    public function getPager()
-    {
-        return $this->pager;
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * @return Database
@@ -73,6 +77,34 @@ abstract class Broker
     }
 
     /**
+     * Shorthand method to begin a transaction.
+     */
+    protected function beginTransaction()
+    {
+        $this->database->beginTransaction();
+    }
+
+    /**
+     * Shorthand method to commit a started transaction.
+     *
+     * @throws DatabaseException
+     */
+    protected function commit()
+    {
+        $this->database->commit();
+    }
+
+    /**
+     * Shorthand method to rollback a started transaction.
+     *
+     * @throws DatabaseException
+     */
+    protected function rollback()
+    {
+        $this->database->rollback();
+    }
+
+    /**
      * @param string $query
      * @param array $parameters
      * @param bool $ignoreOrder
@@ -81,7 +113,7 @@ abstract class Broker
      */
     public function filteredSelectSingle(string $query, array $parameters = [], bool $ignoreOrder = false, string $allowedTags = ""): ?\stdClass
     {
-        $this->filterQuery($query, $parameters, $ignoreOrder);
+        $this->filterQuery($query, $ignoreOrder);
         return $this->selectSingle($query, $parameters, $allowedTags);
     }
 
@@ -94,7 +126,7 @@ abstract class Broker
      */
     public function filteredSelect(string $query, array $parameters = [], bool $ignoreOrder = false, string $allowedTags = ""): array
     {
-        $this->filterQuery($query, $parameters, $ignoreOrder);
+        $this->filterQuery($query, $ignoreOrder);
         return $this->select($query, $parameters, $allowedTags);
     }
 
@@ -164,7 +196,6 @@ abstract class Broker
             return $result;
         } catch (\Exception $e) {
             $this->database->rollback();
-
             throw new DatabaseException($e->getMessage());
         }
     }
@@ -180,5 +211,40 @@ abstract class Broker
     protected function query(string $query, array $parameters = [])
     {
         return $this->database->query($query, $parameters);
+    }
+
+    public static function list(Broker $broker, string $defaultSort = "", string $defaultOrder = "asc",
+                                int $pagerLimit = Pager::PAGE_MAX_ENTITIES): stdClass
+    {
+        if (!($broker instanceof Listable)) {
+            throw new \RuntimeException("Provided broker must implements the Listable instance");
+        }
+
+        $totalCount = $broker->count();
+        $broker->applyFilter($defaultSort, $defaultOrder);
+        $rows = $broker->findAll();
+        $count = count($rows);
+
+        if ($pagerLimit > 0) {
+            $broker->buildPager($count, $pagerLimit);
+        }
+
+        return (object) [
+            'results' => (object) [
+                'rows' => $rows,
+                'count' => $count,
+                'totalCount' => $totalCount,
+            ],
+            'pager' => (object) [
+                'maxPage' => (!is_null($broker->getPager())) ? $broker->getPager()->getMaxPage() : 0,
+                'currentPage' => (!is_null($broker->getPager())) ? $broker->getPager()->getCurrentPage() : 0,
+                'maxEntitiesPerPage' => (!is_null($broker->getPager())) ? $broker->getPager()->getMaxEntitiesPerPage() : 0
+            ],
+            'filter' => (object) [
+                'search' => $broker->getFilter()->getSearch(),
+                'sort' => $broker->getFilter()->getSort(),
+                'order' => $broker->getFilter()->getOrder()
+            ]
+        ];
     }
 }

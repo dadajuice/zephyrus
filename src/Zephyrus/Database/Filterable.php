@@ -11,11 +11,33 @@ trait Filterable
     private $filter = null;
 
     /**
+     * @var array
+     */
+    private $searchableFields = [];
+
+    /**
+     * @var array
+     */
+    private $sortableFields = [];
+
+    /**
      * @return null | Filter
      */
     public function getFilter(): ?Filter
     {
         return $this->filter;
+    }
+
+    // ['firstname', 'lastname']
+    protected function setSearchableFields(array $fields)
+    {
+        $this->searchableFields = $fields;
+    }
+
+    // ['nom' => 'firstname']
+    protected function setSortableFields(array $fields)
+    {
+        $this->sortableFields = $fields;
     }
 
     /**
@@ -34,18 +56,16 @@ trait Filterable
         $this->filter = null;
     }
 
-    public function filterQuery(string &$query, array &$parameters = [], bool $ignoreOrder = false)
+    public function filterQuery(string &$query, bool $ignoreOrder = false)
     {
-        if (!is_null($this->filter)) {
-            $search = $this->filter->getSearch();
-            if (!is_null($search)) {
-                $search = "%$search%";
-                $query = $this->buildSearch($query);
-            }
-            if (!$ignoreOrder) {
-                $query .= $this->buildOrderBy();
-            }
-            $parameters = array_merge($parameters, ['search' => $search]);
+        if (is_null($this->filter)) {
+            return;
+        }
+        if ($this->filter->hasSearch()) {
+            $query = $this->buildSearch($query);
+        }
+        if (!$ignoreOrder) {
+            $query .= $this->buildOrderBy();
         }
     }
 
@@ -68,7 +88,7 @@ trait Filterable
     private function buildWhere(string $query): string
     {
         $lastWhereByOccurrence = strripos($query, "where");
-        return (($lastWhereByOccurrence !== false) ? " AND " : " WHERE ") . $this->search();
+        return (($lastWhereByOccurrence !== false) ? " AND " : " WHERE ") . '(' . $this->search() . ')';
     }
 
     private function buildOrderBy(): string
@@ -76,10 +96,21 @@ trait Filterable
         $sort = $this->filter->getSort();
         if (!empty($sort)) {
             $order = $this->filter->getOrder();
-            $convertedSorts = $this->sort($order);
-            $orderBy = (array_key_exists($sort, $convertedSorts)) ? $convertedSorts[$sort] : $sort;
-            return " ORDER BY $orderBy $order";
+            $clause = $this->sortableFields[$sort] ?? $sort;
+            return " ORDER BY $clause $order";
         }
         return "";
+    }
+
+    private function search()
+    {
+        $clause = "";
+        foreach ($this->searchableFields as $field) {
+            if (!empty($clause)) {
+                $clause .= ' OR ';
+            }
+            $clause .= $this->getAdapter()->searchPattern($field, $this->getFilter()->getSearch());
+        }
+        return $clause;
     }
 }

@@ -3,6 +3,10 @@
 use PDO;
 use PDOException;
 use Zephyrus\Application\Configuration;
+use Zephyrus\Database\Adapters\DatabaseAdapter;
+use Zephyrus\Database\Adapters\MysqlAdapter;
+use Zephyrus\Database\Adapters\PostgresqlAdapter;
+use Zephyrus\Database\Adapters\SqliteAdapter;
 use Zephyrus\Exceptions\DatabaseException;
 
 class Database
@@ -10,19 +14,63 @@ class Database
     private const DEFAULT_DBMS = 'mysql';
 
     /**
-     * @var TransactionPDO
-     */
-    private $handle = null;
-
-    /**
      * @var Database
      */
     private static $sharedInstance = null;
 
     /**
+     * @var DatabaseAdapter
+     */
+    private $adapter;
+
+    /**
+     * @var TransactionPDO
+     */
+    private $handle = null;
+
+    /**
      * @var string
      */
     private $dsn;
+
+    /**
+     * Constructs a database instance from the defined configurations (config.ini).
+     *
+     * @param array|null $configuration
+     * @throws DatabaseException
+     * @return Database
+     */
+    public static function buildFromConfiguration(?array $configuration = null): self
+    {
+        $config = $configuration ?? Configuration::getDatabaseConfiguration();
+        if (!is_null(self::$sharedInstance) && ($config['shared'] ?? false)) {
+            return self::$sharedInstance;
+        }
+        $instance = self::initializeFromConfiguration($config);
+        if ($config['shared'] ?? false) {
+            self::$sharedInstance = $instance;
+        }
+        return $instance;
+    }
+
+    /**
+     * Manual database instance constructor.
+     *
+     * @param string $dsn
+     * @param string $username
+     * @param string $password
+     * @throws DatabaseException
+     */
+    public function __construct(string $dsn, string $username = "", string $password = "")
+    {
+        $this->dsn = $dsn;
+        try {
+            $this->handle = new TransactionPDO($dsn, $username, $password);
+            $this->handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            throw new DatabaseException("Connection failed to database : " . $e->getMessage());
+        }
+    }
 
     /**
      * Execute a parametrized SQL query. Parameters must be included as an
@@ -33,7 +81,7 @@ class Database
      * @throws DatabaseException
      * @return DatabaseStatement
      */
-    public function query($query, $parameters = [])
+    public function query(string $query, array $parameters = [])
     {
         try {
             $statement = $this->handle->prepare($query, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
@@ -125,46 +173,6 @@ class Database
     }
 
     /**
-     * Manual database instance constructor.
-     *
-     * @param string $dsn
-     * @param string $username
-     * @param string $password
-     * @throws DatabaseException
-     */
-    public function __construct(string $dsn, string $username = "", string $password = "")
-    {
-        $this->dsn = $dsn;
-
-        try {
-            $this->handle = new TransactionPDO($dsn, $username, $password);
-            $this->handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $e) {
-            throw new DatabaseException("Connection failed to database : " . $e->getMessage());
-        }
-    }
-
-    /**
-     * Constructs a database instance from the defined configurations.
-     *
-     * @param array|null $configuration
-     * @throws DatabaseException
-     * @return Database
-     */
-    public static function buildFromConfiguration(?array $configuration = null): self
-    {
-        $config = $configuration ?? Configuration::getDatabaseConfiguration();
-        if (!is_null(self::$sharedInstance) && ($config['shared'] ?? false)) {
-            return self::$sharedInstance;
-        }
-        $instance = self::initializeFromConfiguration($config);
-        if ($config['shared'] ?? false) {
-            self::$sharedInstance = $instance;
-        }
-        return $instance;
-    }
-
-    /**
      * @param array $config
      * @throws DatabaseException
      * @return Database
@@ -218,4 +226,25 @@ class Database
         }
         return PDO::PARAM_STR;
     }
+
+
+
+
+    private function buildAdapter($dbms)
+    {
+        $mysql = ['mysql', 'mariadb'];
+        $postgres = ['postgres', 'pgsql', 'postgresql'];
+        $sqlite = ['sqlite'];
+
+        if (in_array($dbms, $mysql)) {
+            $this->adapter = new MysqlAdapter();
+        } elseif (in_array($dbms, $postgres)) {
+            $this->adapter = new PostgresqlAdapter();
+        } elseif (in_array($dbms, $sqlite)) {
+            $this->adapter = new SqliteAdapter();
+        }
+        $this->adapter = new DatabaseAdapter();
+    }
+
+
 }
