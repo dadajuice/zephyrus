@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Database;
+<?php namespace Zephyrus\Database\Core;
 
 use Zephyrus\Network\RequestFactory;
 use Zephyrus\Utilities\Filter;
@@ -138,7 +138,7 @@ trait Filterable
             if (!empty($clause)) {
                 $clause .= ' OR ';
             }
-            $clause .= $this->getDatabase()->getAdapter()->searchPattern($field, $this->getFilter()->getSearch());
+            $clause .= $this->getDatabase()->getAdapter()->getSearchFieldClause($field, $this->getFilter()->getSearch());
         }
         return $clause;
     }

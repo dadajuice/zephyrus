@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Database;
+<?php namespace Zephyrus\Database\Core;
 
 class TransactionPDO extends \PDO
 {

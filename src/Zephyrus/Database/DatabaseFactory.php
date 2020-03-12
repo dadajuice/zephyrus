@@ -1,0 +1,58 @@
+<?php namespace Zephyrus\Database;
+
+use Zephyrus\Application\Configuration;
+use Zephyrus\Database\Core\Adapters\DatabaseAdapter;
+use Zephyrus\Database\Core\Adapters\MysqlAdapter;
+use Zephyrus\Database\Core\Adapters\PostgresqlAdapter;
+use Zephyrus\Database\Core\Adapters\SqliteAdapter;
+use Zephyrus\Database\Core\Database;
+use Zephyrus\Exceptions\DatabaseException;
+
+class DatabaseFactory
+{
+    /**
+     * @var Database
+     */
+    private static $sharedInstance = null;
+
+    /**
+     * @param array $configurations
+     * @return Database
+     * @throws DatabaseException
+     */
+    public static function buildFromConfigurations(?array $configurations = null): Database
+    {
+        $configurations = $configurations ?? Configuration::getDatabaseConfiguration();
+        if (!is_null(self::$sharedInstance) && ($configurations['shared'] ?? false)) {
+            return self::$sharedInstance;
+        }
+        if (!key_exists('dbms', $configurations)) {
+            throw new \InvalidArgumentException("The [dbms] database configuration option is required");
+        }
+        $adapter = self::buildAdapter($configurations);
+        $instance = new Database($adapter);
+        if ($configurations['shared'] ?? false) {
+            self::$sharedInstance = $instance;
+        }
+        return $instance;
+    }
+
+    /**
+     * @param array $configurations
+     * @return DatabaseAdapter|null
+     * @throws DatabaseException
+     */
+    private static function buildAdapter(array $configurations): ?DatabaseAdapter
+    {
+        if (in_array($configurations['dbms'], MysqlAdapter::DBMS)) {
+            return new MysqlAdapter($configurations);
+        }
+        if (in_array($configurations['dbms'], PostgresqlAdapter::DBMS)) {
+            return new PostgresqlAdapter($configurations);
+        }
+        if (in_array($configurations['dbms'], SqliteAdapter::DBMS)) {
+            return new SqliteAdapter($configurations);
+        }
+        return null;
+    }
+}
