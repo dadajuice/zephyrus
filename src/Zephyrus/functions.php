@@ -5,9 +5,6 @@ use Zephyrus\Application\Localization;
 use Zephyrus\Application\Session;
 use Zephyrus\Security\ContentSecurityPolicy;
 
-/**
- * ISO 86
- */
 define('FORMAT_DATE', "Y-m-d");
 define('FORMAT_TIME', "H:i:s");
 define('FORMAT_DATE_TIME', FORMAT_DATE . " " . FORMAT_TIME);

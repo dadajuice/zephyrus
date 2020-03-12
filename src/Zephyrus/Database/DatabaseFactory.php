@@ -17,8 +17,8 @@ class DatabaseFactory
 
     /**
      * @param array $configurations
-     * @return Database
      * @throws DatabaseException
+     * @return Database
      */
     public static function buildFromConfigurations(?array $configurations = null): Database
     {
@@ -42,8 +42,8 @@ class DatabaseFactory
 
     /**
      * @param array $configurations
-     * @return DatabaseAdapter|null
      * @throws DatabaseException
+     * @return DatabaseAdapter|null
      */
     private static function buildAdapter(array $configurations): ?DatabaseAdapter
     {

@@ -63,7 +63,8 @@ abstract class DatabaseBroker
     }
 
     /**
-     * <p><a>
+     * <p><a>.
+     *
      * @param string $allowedTags
      */
     protected function setAllowedHtmlTags(string $allowedTags)
@@ -88,8 +89,8 @@ abstract class DatabaseBroker
      *
      * @param string $query
      * @param array $parameters
-     * @return DatabaseStatement
      * @throws DatabaseException
+     * @return DatabaseStatement
      */
     protected function query(string $query, array $parameters = []): DatabaseStatement
     {

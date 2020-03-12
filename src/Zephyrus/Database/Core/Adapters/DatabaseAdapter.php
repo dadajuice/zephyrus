@@ -48,10 +48,10 @@ abstract class DatabaseAdapter
     private $dsn;
 
     /**
-     * @return PDO
      * @throws DatabaseException
+     * @return PDO
      */
-    public function buildHandle() :\PDO
+    public function buildHandle() : \PDO
     {
         if (!in_array($this->dbms, PDO::getAvailableDrivers())) {
             throw new DatabaseException("Configured Database management 
@@ -73,7 +73,7 @@ abstract class DatabaseAdapter
      */
     public function __construct(array $configurations)
     {
-        if (!key_exists('dbms', $configurations)) {
+        if (!array_key_exists('dbms', $configurations)) {
             throw new \InvalidArgumentException("The [dbms] database configuration option is required");
         }
         $this->dbms = $configurations['dbms'];
