@@ -110,6 +110,12 @@ class FormatterTest extends TestCase
         self::assertEquals('1,9 gb', $result);
     }
 
+    public function testDuration()
+    {
+        $result = Formatter::duration(30000);
+        self::assertEquals('08:20:00', $result);
+    }
+
     public function testRegisterCustomFormat()
     {
         Formatter::register('volume', function ($value) {
