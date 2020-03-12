@@ -1,8 +1,9 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Zephyrus\Database\Broker;
-use Zephyrus\Database\Database;
+use Zephyrus\Database\Core\Database;
+use Zephyrus\Database\DatabaseBroker;
+use Zephyrus\Database\DatabaseFactory;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 
@@ -15,7 +16,7 @@ class BrokerTest extends TestCase
 
     public static function setUpBeforeClass()
     {
-        self::$database = new Database('sqlite::memory:');
+        self::$database = DatabaseFactory::buildFromConfigurations(['dbms' => 'sqlite']);
         self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
         self::$database->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
         self::$database->query("INSERT INTO heroes(id, name) VALUES (2, 'Superman');");
@@ -24,7 +25,8 @@ class BrokerTest extends TestCase
 
     public function testPager()
     {
-        $class = new class(self::$database) extends Broker {
+        $class = new class(self::$database) extends DatabaseBroker
+        {
             public function findAll()
             {
                 return $this->select("SELECT * FROM heroes");
@@ -32,22 +34,23 @@ class BrokerTest extends TestCase
         };
         $req = new Request('http://test.local/3', 'GET', ['id' => '3']);
         RequestFactory::set($req);
-        $pager = $class->buildPager(3, 1);
-        $limit = $pager->getSqlLimit();
+        $class->configurePager(1, 'page');
+        $class->applyPager(3);
+        $limit = $class->getPager()->getSqlLimitClause(self::$database->getAdapter());
         self::assertEquals(" LIMIT 0, 1", $limit);
         $pager2 = $class->getPager();
-        self::assertEquals(" LIMIT 0, 1", $pager2->getSqlLimit());
+        self::assertEquals(" LIMIT 0, 1", $pager2->getSqlLimitClause(self::$database->getAdapter()));
         $res = $class->findAll();
         self::assertEquals(1, count($res));
     }
 
     public function testSetDatabase()
     {
-        $class = new class() extends Broker {
-
+        $class = new class() extends DatabaseBroker
+        {
             public function insert()
             {
-                parent::setDatabase(new Database('sqlite::memory:'));
+                parent::setDatabase(DatabaseFactory::buildFromConfigurations(['dbms' => 'sqlite']));
                 return $this->getDatabase()->getLastInsertedId();
             }
         };
@@ -57,7 +60,8 @@ class BrokerTest extends TestCase
 
     public function testGetDatabase()
     {
-        $class = new class(self::$database) extends Broker {
+        $class = new class(self::$database) extends DatabaseBroker
+        {
             public function insert()
             {
                 return $this->getDatabase()->getLastInsertedId();
@@ -69,7 +73,8 @@ class BrokerTest extends TestCase
 
     public function testFindById()
     {
-        $class = new class(self::$database) extends Broker {
+        $class = new class(self::$database) extends DatabaseBroker
+        {
             public function findById($id)
             {
                 return $this->selectSingle("SELECT * FROM heroes WHERE id = ?", [$id]);
@@ -81,10 +86,12 @@ class BrokerTest extends TestCase
 
     public function testFindByIdWithHtml()
     {
-        $class = new class(self::$database) extends Broker {
+        $class = new class(self::$database) extends DatabaseBroker
+        {
             public function findById($id)
             {
-                return $this->selectSingle("SELECT * FROM heroes WHERE id = ?", [$id], "<b>");
+                $this->setAllowedHtmlTags("<b>");
+                return $this->selectSingle("SELECT * FROM heroes WHERE id = ?", [$id]);
             }
         };
         $row = $class->findById(3);
@@ -93,7 +100,8 @@ class BrokerTest extends TestCase
 
     public function testFindByIdWithoutHtml()
     {
-        $class = new class(self::$database) extends Broker {
+        $class = new class(self::$database) extends DatabaseBroker
+        {
             public function findById($id)
             {
                 return $this->selectSingle("SELECT * FROM heroes WHERE id = ?", [$id]);
@@ -105,7 +113,8 @@ class BrokerTest extends TestCase
 
     public function testFindAll()
     {
-        $class = new class(self::$database) extends Broker {
+        $class = new class(self::$database) extends DatabaseBroker
+        {
             public function findAll()
             {
                 return $this->select("SELECT * FROM heroes");
@@ -118,10 +127,12 @@ class BrokerTest extends TestCase
 
     public function testFindAllWithHtml()
     {
-        $class = new class(self::$database) extends Broker {
+        $class = new class(self::$database) extends DatabaseBroker
+        {
             public function findAll()
             {
-                return $this->select("SELECT * FROM heroes", [], "<b>");
+                $this->setAllowedHtmlTags("<b>");
+                return $this->select("SELECT * FROM heroes", []);
             }
         };
         $rows = $class->findAll();
@@ -130,7 +141,8 @@ class BrokerTest extends TestCase
 
     public function testTransaction()
     {
-        $class = new class(self::$database) extends Broker {
+        $class = new class(self::$database) extends DatabaseBroker
+        {
             public function insert()
             {
                 $this->transaction(function () {
@@ -153,7 +165,8 @@ class BrokerTest extends TestCase
      */
     public function testInvalidTransaction()
     {
-        $class = new class(self::$database) extends Broker {
+        $class = new class(self::$database) extends DatabaseBroker
+        {
             public function insert()
             {
                 $this->transaction(function ($database, $value) {
@@ -167,7 +180,8 @@ class BrokerTest extends TestCase
 
     public function testTransactionWithDatabase()
     {
-        $class = new class(self::$database) extends Broker {
+        $class = new class(self::$database) extends DatabaseBroker
+        {
             public function insert()
             {
                 return $this->transaction(function (Database $database) {
@@ -182,7 +196,8 @@ class BrokerTest extends TestCase
 
     public function testNullResults()
     {
-        $class = new class(self::$database) extends Broker {
+        $class = new class(self::$database) extends DatabaseBroker
+        {
             public function findById($id)
             {
                 $this->query("INSERT INTO heroes(id, name) VALUES (10, null);");

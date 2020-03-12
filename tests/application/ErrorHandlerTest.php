@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\ErrorHandler;
-use Zephyrus\Database\Database;
+use Zephyrus\Database\Core\Database;
 
 class ErrorHandlerTest extends TestCase
 {

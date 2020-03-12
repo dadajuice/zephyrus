@@ -1,7 +1,6 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Zephyrus\Database\Broker;
 use Zephyrus\Utilities\FileSystem\Directory;
 use Zephyrus\Utilities\FileSystem\File;
 
@@ -11,7 +10,7 @@ class DirectoryTest extends TestCase
     {
         $directory = Directory::create(ROOT_DIR . '/lib/filesystem/new_dir');
         self::assertTrue(file_exists(ROOT_DIR . '/lib/filesystem/new_dir'));
-        self::assertEquals(date(Broker::SQL_FORMAT_DATE), date(Broker::SQL_FORMAT_DATE, $directory->getLastModifiedTime()));
+        self::assertEquals(date(FORMAT_DATE), date(FORMAT_DATE, $directory->getLastModifiedTime()));
     }
 
     /**
@@ -97,7 +96,7 @@ class DirectoryTest extends TestCase
         $file->write("hello world");
         $file->touch(strtotime('2025-01-01 15:00:00'));
         $directory = new Directory(ROOT_DIR . '/lib/filesystem/new_dir');
-        self::assertEquals('2025-01-01', date(Broker::SQL_FORMAT_DATE, $directory->getLastModifiedTime()));
+        self::assertEquals('2025-01-01', date(FORMAT_DATE, $directory->getLastModifiedTime()));
         $directory->remove();
         self::assertFalse(file_exists(ROOT_DIR . '/lib/filesystem/new_dir'));
     }

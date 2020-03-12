@@ -1,7 +1,8 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Zephyrus\Database\Database;
+use Zephyrus\Database\Core\Database;
+use Zephyrus\Database\DatabaseFactory;
 
 class DatabaseStatementTest extends TestCase
 {
@@ -12,7 +13,7 @@ class DatabaseStatementTest extends TestCase
 
     public static function setUpBeforeClass()
     {
-        self::$database = new Database('sqlite::memory:');
+        self::$database = DatabaseFactory::buildFromConfigurations(['dbms' => 'sqlite']);
         self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT, power REAL DEFAULT 0);');
         self::$database->query("INSERT INTO heroes(id, name, power) VALUES (1, 'Batman', 3.5);");
     }

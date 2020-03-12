@@ -1,8 +1,9 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Zephyrus\Database\Broker;
-use Zephyrus\Database\Database;
+use Zephyrus\Database\Core\Database;
+use Zephyrus\Database\DatabaseBroker;
+use Zephyrus\Database\DatabaseFactory;
 use Zephyrus\Database\Listable;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
@@ -16,7 +17,7 @@ class FilterableTest extends TestCase
 
     public static function setUpBeforeClass()
     {
-        self::$database = new Database('sqlite::memory:');
+        self::$database = DatabaseFactory::buildFromConfigurations(['dbms' => 'sqlite']);
         self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
         self::$database->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
         self::$database->query("INSERT INTO heroes(id, name) VALUES (2, 'Superman');");
@@ -55,32 +56,28 @@ class FilterableTest extends TestCase
 
     private function buildClass()
     {
-        return new class(self::$database) extends Broker implements Listable {
+        return new class(self::$database) extends DatabaseBroker implements Listable
+        {
+            function __construct(?Database $database = null)
+            {
+                parent::__construct($database);
+                $this->setSortableFields(['alias' => 'name']);
+                $this->setSearchableFields(['name']);
+            }
+
             function count(): int
             {
-                return $this->filteredSelectSingle("SELECT COUNT(*) as n FROM heroes GROUP BY name", [], true)->n;
+                return $this->selectSingle("SELECT COUNT(*) as n FROM heroes GROUP BY name", [], true)->n;
             }
 
             function findAll(): array
             {
-                return $this->filteredSelect("SELECT * FROM heroes GROUP BY name");
+                return $this->select("SELECT * FROM heroes GROUP BY name");
             }
 
             function findAllHaving()
             {
-                return $this->filteredSelect("SELECT count(id) n FROM heroes GROUP BY name HAVING n = 2");
-            }
-
-            function search(): string
-            {
-                return "(name LIKE :search)";
-            }
-
-            function sort(string $order): array
-            {
-                return [
-                    'alias' => 'name'
-                ];
+                return $this->select("SELECT count(id) n FROM heroes GROUP BY name HAVING n = 2");
             }
         };
     }

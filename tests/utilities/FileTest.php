@@ -1,7 +1,6 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Zephyrus\Database\Broker;
 use Zephyrus\Utilities\FileSystem\Directory;
 use Zephyrus\Utilities\FileSystem\File;
 
@@ -15,7 +14,7 @@ class FileTest extends TestCase
         self::assertEquals('newly.txt', $file->getBasename());
         self::assertEquals('txt', $file->getExtension());
         self::assertEquals(ROOT_DIR . '/lib/filesystem', $file->getDirectoryName());
-        self::assertEquals(date(Broker::SQL_FORMAT_DATE), date(Broker::SQL_FORMAT_DATE, $file->getLastModifiedTime()));
+        self::assertEquals(date(FORMAT_DATE), date(FORMAT_DATE, $file->getLastModifiedTime()));
         self::assertFalse(strpos($file->getRealPath(), '..'));
     }
 
@@ -62,7 +61,7 @@ class FileTest extends TestCase
     {
         $file = new File(ROOT_DIR . '/lib/filesystem/newly.txt');
         $file->touch(strtotime('2025-01-01 15:00:00'));
-        self::assertEquals('2025-01-01', date(Broker::SQL_FORMAT_DATE, $file->getLastModifiedTime()));
+        self::assertEquals('2025-01-01', date(FORMAT_DATE, $file->getLastModifiedTime()));
     }
 
     /**

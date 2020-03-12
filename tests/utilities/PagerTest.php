@@ -1,6 +1,8 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Database\Core\Adapters\MysqlAdapter;
+use Zephyrus\Database\Core\Adapters\PostgresqlAdapter;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 use Zephyrus\Utilities\Pager;
@@ -13,11 +15,11 @@ class PagerTest extends TestCase
         RequestFactory::set($req);
         $pager = new Pager(1000);
         $max = $pager->getMaxEntitiesPerPage();
-        self::assertEquals(Pager::PAGE_MAX_ENTITIES, $max);
-        $limit = $pager->getSqlLimit();
+        self::assertEquals(Pager::DEFAULT_PAGE_MAX_ENTITIES, $max);
+        $limit = $pager->getSqlLimitClause(new MysqlAdapter(['dbms' => 'mysql']));
         self::assertEquals(" LIMIT 200, 50", $limit);
-        $limit = $pager->getSqlLimit('pgsql');
-        self::assertEquals(" LIMIT 50 OFFSET 200", $limit);
+        /*$limit = $pager->getSqlLimitClause(new PostgresqlAdapter(['dbms' => 'pgsql']));
+        self::assertEquals(" LIMIT 50 OFFSET 200", $limit);*/
     }
 
     public function testSimpleDisplay()
@@ -50,7 +52,7 @@ class PagerTest extends TestCase
         $req = new Request('http://test.local/3?page=-1', 'GET', ['parameters' => ['id' => '3', 'page' => -1]]);
         RequestFactory::set($req);
         $pager = new Pager(1000);
-        $limit = $pager->getSqlLimit();
+        $limit = $pager->getSqlLimitClause(new MysqlAdapter(['dbms' => 'mysql']));
         self::assertEquals(" LIMIT 0, 50", $limit);
     }
 
