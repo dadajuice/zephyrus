@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Database\Core\Database;
+use Zephyrus\Database\DatabaseBroker;
 use Zephyrus\Database\DatabaseFactory;
 use Zephyrus\Exceptions\DatabaseException;
 
@@ -19,10 +20,26 @@ class DatabaseTest extends TestCase
 
     public function testLastInsertId()
     {
-        self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
-        $res = self::$database->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
+        self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT NULL, enabled INTEGER, power REAL);');
+        $res = self::$database->query("INSERT INTO heroes(id, name, enabled, power) VALUES (1, 'Batman', 1, 5.6);");
         self::assertEquals(1, $res->count());
         self::assertEquals(1, self::$database->getLastInsertedId());
+    }
+
+    /**
+     * @depends testLastInsertId
+     */
+    public function testEvaluationOfTypes()
+    {
+        $broker = new class(self::$database) extends DatabaseBroker
+        {
+            public function find()
+            {
+                $this->select("SELECT * FROM heroes WHERE id = ?", [1]);
+                $this->select("SELECT * FROM heroes WHERE power > ?", [2.5]);
+            }
+        };
+        $broker->find();
     }
 
     /**
@@ -136,13 +153,4 @@ class DatabaseTest extends TestCase
             'username' => 'bob'
         ]);
     }
-
-    /*public function testBuildFromConfiguration()
-    {
-        $db = Database::buildFromConfiguration();
-        $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
-        $res = $db->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
-        self::assertEquals(1, $res->count());
-        self::assertEquals(1, $db->getLastInsertedId());
-    }*/
 }

@@ -117,6 +117,7 @@ class BrokerTest extends TestCase
         {
             public function findAll()
             {
+                $this->addSessionVariable('test', 'test');
                 return $this->select("SELECT * FROM heroes");
             }
         };
@@ -132,7 +133,11 @@ class BrokerTest extends TestCase
             public function findAll()
             {
                 $this->setAllowedHtmlTags("<b>");
-                return $this->select("SELECT * FROM heroes", []);
+                $before = $this->getAllowedHtmlTags();
+                $results = $this->select("SELECT * FROM heroes", []);
+                $this->removeAllowedHtmlTags();
+                $after = $this->getAllowedHtmlTags();
+                return ($before == $after) ? [] : $results;
             }
         };
         $rows = $class->findAll();
@@ -185,6 +190,7 @@ class BrokerTest extends TestCase
             public function insert()
             {
                 return $this->transaction(function (Database $database) {
+                    $this->removePager();
                     $this->query("INSERT INTO heroes(id, name) VALUES (5, 'Bob');");
                     return $database->getLastInsertedId();
                 });

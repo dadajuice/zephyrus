@@ -26,6 +26,15 @@ class FilterableTest extends TestCase
         self::$database->query("INSERT INTO heroes(id, name) VALUES (5, 'Batman');");
     }
 
+    public function testFindAllNoSort()
+    {
+        $r = new Request('http://test.local', 'GET', ['parameters' => ['search' => 'man']]);
+        RequestFactory::set($r);
+        $class = $this->buildClassNoSort();
+        $class->applyFilter();
+        self::assertEquals('Batman', $class->findAll()[0]->name);
+    }
+
     public function testFindAll()
     {
         $r = new Request('http://test.local', 'GET', ['parameters' => ['search' => 'man', 'order' => 'asc', 'sort' => 'alias']]);
@@ -62,7 +71,7 @@ class FilterableTest extends TestCase
             {
                 parent::__construct($database);
                 $this->setSortableFields(['alias' => 'name']);
-                $this->setSearchableFields(['name']);
+                $this->setSearchableFields(['name', 'id']);
             }
 
             function count(): int
@@ -73,6 +82,33 @@ class FilterableTest extends TestCase
             function findAll(): array
             {
                 return $this->select("SELECT * FROM heroes GROUP BY name");
+            }
+
+            function findAllHaving()
+            {
+                return $this->select("SELECT count(id) n FROM heroes GROUP BY name HAVING n = 2");
+            }
+        };
+    }
+
+    private function buildClassNoSort()
+    {
+        return new class(self::$database) extends DatabaseBroker implements Listable
+        {
+            function __construct(?Database $database = null)
+            {
+                parent::__construct($database);
+                $this->setSearchableFields(['name']);
+            }
+
+            function count(): int
+            {
+                return $this->selectSingle("SELECT COUNT(*) as n FROM heroes GROUP BY name", [], true)->n;
+            }
+
+            function findAll(): array
+            {
+                return $this->select("SELECT * FROM heroes");
             }
 
             function findAllHaving()
