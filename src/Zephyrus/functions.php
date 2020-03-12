@@ -15,32 +15,10 @@ use Zephyrus\Security\ContentSecurityPolicy;
 function recursiveGlob($pattern, $flags = 0)
 {
     $files = glob($pattern, $flags);
-    foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
+    foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
         $files = array_merge($files, recursiveGlob($dir . '/' . basename($pattern), $flags));
     }
     return $files;
-}
-
-/**
- * Sort a collection of objects naturally using a specified getter method.
- *
- * @param object[] $objects
- * @param string $getterMethod
- * @return object[]
- */
-function naturalSort(array $objects, string $getterMethod = 'getNumber')
-{
-    $orderedResults = [];
-    $numbers = [];
-    foreach ($objects as $object) {
-        $numbers[] = $object->{$getterMethod}();
-    }
-    natsort($numbers);
-    $orderedKeys = array_keys($numbers);
-    foreach ($orderedKeys as $index) {
-        $orderedResults[] = $objects[$index];
-    }
-    return $orderedResults;
 }
 
 /**
