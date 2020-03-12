@@ -103,7 +103,8 @@ trait Filterable
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);
         $clause = (($lastWhereByOccurrence !== false) ? " AND " : " WHERE ");
-        return $begin . $clause . '(' . $this->buildSearch() . ')' . $end;
+        $search = $this->buildSearch();
+        return (!empty($search)) ? $begin . $clause . '(' . $search . ')' . $end : $query;
     }
 
     /**
