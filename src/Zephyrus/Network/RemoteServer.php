@@ -1,7 +1,5 @@
 <?php namespace Zephyrus\Network;
 
-use Zephyrus\Database\Broker;
-
 class RemoteServer
 {
     const DEFAULT_PING_TIMEOUT = 2;
@@ -81,6 +79,6 @@ class RemoteServer
         $results = shell_exec("echo | openssl s_client -connect {$this->ipAddress}:$port 2>/dev/null | openssl x509 -noout -dates");
         $parts = array_filter(explode(PHP_EOL, $results));
         $expiration = str_replace('notAfter=', '', $parts[1]);
-        return date(Broker::SQL_FORMAT_DATE_TIME, strtotime($expiration));
+        return date(FORMAT_DATE_TIME, strtotime($expiration));
     }
 }

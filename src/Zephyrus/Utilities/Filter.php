@@ -4,7 +4,7 @@ use Zephyrus\Network\Request;
 
 class Filter
 {
-    const PAGE_PARAMETER_NAME = Pager::URL_PARAMETER;
+    const PAGE_PARAMETER_NAME = Pager::DEFAULT_URL_PARAMETER;
     const SORT_PARAMETER_NAME = "sort";
     const ORDER_PARAMETER_NAME = "order";
     const SEARCH_PARAMETER_NAME = "search";

@@ -1,6 +1,6 @@
 <?php namespace Zephyrus\Utilities;
 
-use Zephyrus\Database\Adapters\DatabaseAdapter;
+use Zephyrus\Database\Core\Adapters\DatabaseAdapter;
 use Zephyrus\Network\RequestFactory;
 
 class Pager
