@@ -51,13 +51,14 @@ abstract class DatabaseAdapter
      * @throws DatabaseException
      * @return PDO
      */
-    public function buildHandle() : \PDO
+    public function buildHandle(): \PDO
     {
         if (!in_array($this->dbms, PDO::getAvailableDrivers())) {
             throw new DatabaseException("Configured Database management 
                 system [{$this->dbms}] doesn't correspond to one of the available 
                 drivers [" . implode(',', PDO::getAvailableDrivers()) . "]");
         }
+
         try {
             $handle = new TransactionPDO($this->dsn, $this->username, $this->password);
             $handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

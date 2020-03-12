@@ -164,6 +164,7 @@ abstract class DatabaseBroker
             return $result;
         } catch (\Exception $e) {
             $this->database->rollback();
+
             throw new DatabaseException($e->getMessage());
         }
     }

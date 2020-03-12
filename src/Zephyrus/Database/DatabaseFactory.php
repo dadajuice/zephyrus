@@ -26,7 +26,7 @@ class DatabaseFactory
         if (!is_null(self::$sharedInstance) && ($configurations['shared'] ?? false)) {
             return self::$sharedInstance;
         }
-        if (!key_exists('dbms', $configurations)) {
+        if (!array_key_exists('dbms', $configurations)) {
             throw new \InvalidArgumentException("The [dbms] database configuration option is required");
         }
         $adapter = self::buildAdapter($configurations);
