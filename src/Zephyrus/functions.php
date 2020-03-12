@@ -6,18 +6,6 @@ use Zephyrus\Application\Session;
 use Zephyrus\Security\ContentSecurityPolicy;
 
 /**
- * Basic filtering to eliminate any tags and empty leading / trailing
- * characters.
- *
- * @param string $data
- * @return string
- */
-function purify($data)
-{
-    return htmlspecialchars(trim(strip_tags($data)), ENT_QUOTES | ENT_HTML401, 'UTF-8');
-}
-
-/**
  * Performs a normal glob pattern search, but enters directories recursively.
  *
  * @param string $pattern
