@@ -30,6 +30,9 @@ class DatabaseFactory
             throw new \InvalidArgumentException("The [dbms] database configuration option is required");
         }
         $adapter = self::buildAdapter($configurations);
+        if (is_null($adapter)) {
+            throw new DatabaseException("No adapter found for the given database management system [{$configurations['dbms']}]");
+        }
         $instance = new Database($adapter);
         if ($configurations['shared'] ?? false) {
             self::$sharedInstance = $instance;
