@@ -13,7 +13,7 @@ class PostgresqlAdapter extends DatabaseAdapter
     {
         $field = $this->purify($field);
         $search = $this->purify($search);
-        return "($field ILIKE %$search%)";
+        return "($field ILIKE '%$search%')";
     }
 
     // myapp.user

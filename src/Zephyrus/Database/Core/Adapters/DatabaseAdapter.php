@@ -95,7 +95,7 @@ abstract class DatabaseAdapter
     {
         $field = $this->purify($field);
         $search = $this->purify($search);
-        return "($field LIKE %$search%)";
+        return "($field LIKE '%$search%')";
     }
 
     /**
