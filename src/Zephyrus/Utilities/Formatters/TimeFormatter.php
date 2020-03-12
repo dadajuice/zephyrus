@@ -29,9 +29,8 @@ trait TimeFormatter
         return strftime(Configuration::getConfiguration('lang', 'time'), $dateTime->getTimestamp());
     }
 
-    // Configuration::getConfiguration('lang', 'duration') //
-    public static function duration($seconds, $minuteSuffix = ":", $hourSuffix = ":", $secondSuffix = "", $daySuffix = "")
+    public static function duration($seconds, $minuteSuffix = ":", $hourSuffix = ":", $secondSuffix = "")
     {
-        return gmdate("z" . $daySuffix . " H" . $hourSuffix . "i" . $minuteSuffix . "s" . $secondSuffix, $seconds);
+        return gmdate("H" . $hourSuffix . "i" . $minuteSuffix . "s" . $secondSuffix, $seconds);
     }
 }
