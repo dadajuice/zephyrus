@@ -11,7 +11,6 @@ class PostgresqlAdapter extends DatabaseAdapter
 
     public function getSearchFieldClause(string $field, string $search): string
     {
-        $field = $this->purify($field);
         $search = $this->purify($search);
         return "($field ILIKE '%$search%')";
     }

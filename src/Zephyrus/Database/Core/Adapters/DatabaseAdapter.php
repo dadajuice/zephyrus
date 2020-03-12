@@ -53,6 +53,11 @@ abstract class DatabaseAdapter
      */
     public function buildHandle() :\PDO
     {
+        if (!in_array($this->dbms, PDO::getAvailableDrivers())) {
+            throw new DatabaseException("Configured Database management 
+                system [{$this->dbms}] doesn't correspond to one of the available 
+                drivers [" . implode(',', PDO::getAvailableDrivers()) . "]");
+        }
         try {
             $handle = new TransactionPDO($this->dsn, $this->username, $this->password);
             $handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -71,11 +76,6 @@ abstract class DatabaseAdapter
         if (!key_exists('dbms', $configurations)) {
             throw new \InvalidArgumentException("The [dbms] database configuration option is required");
         }
-        if (!in_array($configurations['dbms'], PDO::getAvailableDrivers())) {
-            throw new DatabaseException("Configured Database management 
-                system [{$configurations['dbms']}] doesn't correspond to one of 
-                the available drivers [" . implode(',', PDO::getAvailableDrivers()) . "]");
-        }
         $this->dbms = $configurations['dbms'];
         $this->username = $configurations['username'] ?? "";
         $this->password = $configurations['password'] ?? "";
@@ -93,7 +93,6 @@ abstract class DatabaseAdapter
      */
     public function getSearchFieldClause(string $field, string $search): string
     {
-        $field = $this->purify($field);
         $search = $this->purify($search);
         return "($field LIKE '%$search%')";
     }
@@ -115,7 +114,7 @@ abstract class DatabaseAdapter
      */
     public function getAddEnvironmentVariableClause(string $name, string $value): string
     {
-        return "SET @$name = $value";
+        return "SET @$name = '$value'";
     }
 
     /**
@@ -189,15 +188,15 @@ abstract class DatabaseAdapter
     /**
      * @return string
      */
-    public function getDsn(): string
+    public function getDataSourceName(): string
     {
         return $this->dsn;
     }
 
     protected function buildDataSourceName(): string
     {
-        $charset = (!empty($this->charset)) ? ";charset={$this->charset};" : "";
-        $port = (!empty($this->port)) ? ";port={$this->port};" : "";
-        return $this->dbms . ':dbname=' . $this->databaseName . ';host=' . $this->host . $port . $charset;
+        $charset = (!empty($this->charset)) ? "charset={$this->charset};" : "";
+        $port = (!empty($this->port)) ? "port={$this->port};" : "";
+        return $this->dbms . ':dbname=' . $this->databaseName . ';host=' . $this->host . ';' . $port . $charset;
     }
 }
