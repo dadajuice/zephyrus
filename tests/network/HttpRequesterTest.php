@@ -58,6 +58,15 @@ class HttpRequesterTest extends TestCase
         self::assertFalse(file_exists($filePath));
     }
 
+    /**
+     * @expectedException \Zephyrus\Exceptions\HttpRequesterException
+     */
+    public function testInvalidDownloadFile()
+    {
+        $request = HttpRequester::get("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/existing.txt");
+        $filePath = $request->executeDownload([], '/etc/new_files.txt');
+    }
+
     public function testUpload()
     {
         $request = HttpRequester::post("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/sdfdgdfdgfdfg.txt");

@@ -122,16 +122,14 @@ class HttpRequester
                     break;
                 }
 
-                // Trim buffer
+                // @codeCoverageIgnoreStart
                 $data = substr($buf, 0, $pos + 1);
                 $buf = substr($buf, $pos + 1);
-
-                // Only log if there is something there
                 if (strlen($data) > 50) {
-                    // Removes "data:" prefix of SSE
                     $results = str_replace("data:", "", $data);
                     ($callback)($results, $info);
                 }
+                // @codeCoverageIgnoreEnd
             }
 
             return $bytes;
@@ -144,7 +142,7 @@ class HttpRequester
         if (is_null($filePath)) {
             $filePath = tempnam(sys_get_temp_dir(), "zeph");
         }
-        $file = fopen($filePath, 'w+');
+        $file = @fopen($filePath, 'w+');
         if ($file === false) {
             throw new HttpRequesterException("Cannot open file [$filePath] for download", $this->method, $this->url);
         }
