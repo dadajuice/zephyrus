@@ -99,11 +99,15 @@ class ErrorHandler
      * the default Exception behavior must be overridden).
      *
      * @param callable $callback
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     public function exception(callable $callback)
     {
-        $reflection = new \ReflectionFunction($callback);
+        try {
+            $reflection = new \ReflectionFunction($callback);
+        } catch (\ReflectionException $e) {
+            throw new \InvalidArgumentException("Specified callback is invalid : " . $e->getMessage());
+        }
         $parameters = $reflection->getParameters();
         if (count($parameters) != 1) {
             throw new \InvalidArgumentException("Specified callback must only have one argument hinted as a 
