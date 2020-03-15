@@ -120,8 +120,11 @@ class Database
     }
 
     /**
-     * Guesses the best PDO::PARAM_x type constant for a given variable.
+     * Guesses the best PDO::PARAM_x type constant for a given variable. Ignored
+     * from coverage because test Database (sqlite) doesn't have proper BOOL or
+     * NULL.
      *
+     * @codeCoverageIgnore
      * @param mixed $variable
      * @return int
      */
