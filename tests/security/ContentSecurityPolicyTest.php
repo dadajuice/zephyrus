@@ -23,6 +23,13 @@ EOT;
         self::assertTrue(in_array($result, $headers));
     }
 
+    public function testNonce()
+    {
+        $nonce = ContentSecurityPolicy::getRequestNonce();
+        $nonce2 = nonce();
+        self::assertEquals($nonce, $nonce2);
+    }
+
     public function testHeaders()
     {
         $csp = new ContentSecurityPolicy();

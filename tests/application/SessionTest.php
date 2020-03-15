@@ -42,6 +42,8 @@ class SessionTest extends TestCase
         $session->start();
         $session->set('val', '4567');
         self::assertEquals('4567', $_SESSION['val']);
+        self::assertEquals('4567', sess('val'));
+        self::assertEquals('none', sess('kldsfjljdfs', 'none'));
         $session->destroy();
     }
 

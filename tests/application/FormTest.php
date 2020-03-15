@@ -149,7 +149,9 @@ class FormTest extends TestCase
         $form->validate('name', new Rule(ValidationCallback::NOT_EMPTY, 'err_1'));
         $form->verify();
         self::assertEquals('bob', Form::readMemorizedValue('name'));
+        self::assertEquals('bob', val('name'));
         self::assertEquals('lewis', Form::readMemorizedValue('gfdfg', 'lewis'));
+        self::assertEquals('lewis', val('lksdjfjf', 'lewis'));
     }
 
     public function testRemoveAllMemorized()
