@@ -51,7 +51,9 @@ class ViewBuilder
             'basedir' => ROOT_DIR . '/public',
             'expressionLanguage' => 'js',
             'upToDateCheck' => true,
-            'cache' => $cacheEnabled ? Configuration::getConfiguration('pug', 'cache') : null
+            'cache' => $cacheEnabled
+                ? Configuration::getConfiguration('pug', 'cache_directory')
+                : null
         ];
         $this->pug = new Pug($options);
     }
