@@ -47,13 +47,12 @@ class ViewBuilder
     private function buildPug()
     {
         $cacheEnabled = Configuration::getConfiguration('pug', 'cache_enabled');
+        $cacheDirectory = Configuration::getConfiguration('pug', 'cache_directory');
         $options = [
             'basedir' => ROOT_DIR . '/public',
             'expressionLanguage' => 'js',
             'upToDateCheck' => true,
-            'cache' => $cacheEnabled
-                ? Configuration::getConfiguration('pug', 'cache_directory')
-                : null
+            'cache' => $cacheEnabled ? $cacheDirectory : null
         ];
         $this->pug = new Pug($options);
     }
