@@ -9,8 +9,9 @@ class Authorization
     const GET = 1;
     const POST = 2;
     const PUT = 4;
-    const DELETE = 8;
-    const ALL = 15;
+    const PATCH = 8;
+    const DELETE = 16;
+    const ALL = 31;
 
     const MODE_BLACKLIST = 0;
     const MODE_WHITELIST = 1;
@@ -144,6 +145,9 @@ class Authorization
         }
         if ($httpMethod & self::PUT) {
             $methods[] = 'PUT';
+        }
+        if ($httpMethod & self::PATCH) {
+            $methods[] = 'PATCH';
         }
         if ($httpMethod & self::DELETE) {
             $methods[] = 'DELETE';
