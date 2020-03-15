@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Application;
 
-use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\ResponseFactory;
@@ -216,48 +215,48 @@ abstract class Controller implements Routable
      * @param int $httpStatusCode
      * @return Response
      */
-    protected function abort(int $httpStatusCode)
+    protected function abort(int $httpStatusCode): Response
     {
-        return new Response(ContentType::PLAIN, $httpStatusCode);
+        return ResponseFactory::getInstance()->buildAbort($httpStatusCode);
     }
 
     /**
      * @return Response
      */
-    protected function abortNotFound()
+    protected function abortNotFound(): Response
     {
-        return new Response(ContentType::PLAIN, 404);
+        return ResponseFactory::getInstance()->buildAbortNotFound();
     }
 
     /**
      * @return Response
      */
-    protected function abortInternalError()
+    protected function abortInternalError(): Response
     {
-        return new Response(ContentType::PLAIN, 500);
+        return ResponseFactory::getInstance()->buildAbortInternalError();
     }
 
     /**
      * @return Response
      */
-    protected function abortForbidden()
+    protected function abortForbidden(): Response
     {
-        return new Response(ContentType::PLAIN, 403);
+        return ResponseFactory::getInstance()->buildAbortForbidden();
     }
 
     /**
      * @return Response
      */
-    protected function abortMethodNotAllowed()
+    protected function abortMethodNotAllowed(): Response
     {
-        return new Response(ContentType::PLAIN, 405);
+        return ResponseFactory::getInstance()->buildAbortMethodNotAllowed();
     }
 
     /**
      * @return Response
      */
-    protected function abortNotAcceptable()
+    protected function abortNotAcceptable(): Response
     {
-        return new Response(ContentType::PLAIN, 406);
+        return ResponseFactory::getInstance()->buildAbortNotAcceptable();
     }
 }
