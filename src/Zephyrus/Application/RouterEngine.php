@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Application;
 
+use ReflectionFunctionAbstract;
 use Zephyrus\Exceptions\RouteMethodUnsupportedException;
 use Zephyrus\Exceptions\RouteNotAcceptedException;
 use Zephyrus\Exceptions\RouteNotFoundException;
@@ -38,7 +39,9 @@ abstract class RouterEngine
      * initiated request, the best route to execute. Cannot be overridden.
      *
      * @param Request $request
-     * @throws \Exception
+     * @throws RouteNotFoundException
+     * @throws RouteMethodUnsupportedException
+     * @throws RouteNotAcceptedException
      */
     final public function run(Request $request)
     {
@@ -109,7 +112,8 @@ abstract class RouterEngine
      * request is then return. Hence the need to declare routes in
      * correct order.
      *
-     * @throws \Exception
+     * @throws RouteNotFoundException
+     * @throws RouteNotAcceptedException
      * @return mixed[]
      */
     private function findRouteFromRequest()
@@ -159,7 +163,6 @@ abstract class RouterEngine
      * callback function (through method loadMissingRequestParameters).
      *
      * @param mixed[] $route
-     * @throws \Exception
      */
     private function prepareResponse($route)
     {
@@ -176,7 +179,6 @@ abstract class RouterEngine
      * methods if they are available.
      *
      * @param $route
-     * @throws \Exception
      * @return Response | null
      */
     private function createResponse($route): ?Response
@@ -218,11 +220,11 @@ abstract class RouterEngine
     /**
      * Retrieves the specified function arguments.
      *
-     * @param \ReflectionFunctionAbstract $reflection
+     * @param ReflectionFunctionAbstract $reflection
      * @param $values
      * @return array
      */
-    private function getFunctionArguments(\ReflectionFunctionAbstract $reflection, $values)
+    private function getFunctionArguments(ReflectionFunctionAbstract $reflection, $values)
     {
         $arguments = [];
         if (!empty($reflection->getParameters())) {
@@ -237,7 +239,6 @@ abstract class RouterEngine
      * Load parameters located inside the request object.
      *
      * @param mixed[] $values
-     * @throws \Exception
      */
     private function loadRequestParameters($values)
     {
@@ -252,7 +253,8 @@ abstract class RouterEngine
      * specified (through the veryMethodDefinition method). An exception
      * is thrown if one of these conditions are not satisfied.
      *
-     * @throws \Exception
+     * @throws RouteMethodUnsupportedException
+     * @throws RouteNotFoundException
      */
     private function verifyRequestMethod()
     {
@@ -267,8 +269,6 @@ abstract class RouterEngine
     /**
      * Verify if the method has at least one route specified. An
      * exception is thrown otherwise.
-     *
-     * @throws \Exception
      */
     private function isRequestedMethodHasDefinitions()
     {
