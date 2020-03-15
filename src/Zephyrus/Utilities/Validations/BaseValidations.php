@@ -1,6 +1,6 @@
 <?php namespace Zephyrus\Utilities\Validations;
 
-trait BaseValidation
+trait BaseValidations
 {
     public static function isDecimal($data): bool
     {
