@@ -258,4 +258,13 @@ class FormTest extends TestCase
         $errors = $form->getErrorMessages();
         self::assertEquals('err_99', $errors[0]);
     }
+
+    public function testRuleAllField2()
+    {
+        $form = new Form();
+        $form->addField('test', 'bob');
+        $form->addField('names[]', ['bob', 'bob', 'bob']);
+        $form->validate('names[]', Rule::all(Rule::sameAs('test'), "err_99"));
+        self::assertTrue($form->verify());
+    }
 }
