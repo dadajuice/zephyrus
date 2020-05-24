@@ -39,6 +39,15 @@ trait StringValidations
         return preg_match("/^[a-zA-Z" . $punctuationChar . $accentedChar . "]+$/", $data);
     }
 
+    /**
+     * Validates that the given string is compliant with basic password
+     * requirements which are : at least one uppercase, at least one
+     * lowercase, at least one number and having minimum a length of
+     * 8 characters.
+     *
+     * @param $data
+     * @return bool
+     */
     public static function isPasswordCompliant($data): bool
     {
         $uppercase = preg_match('@[A-Z]@', $data);
