@@ -62,4 +62,17 @@ trait BaseRules
             return Validation::isRegex($data, $pattern);
         }, $errorMessage);
     }
+
+    public static function all(Rule $rule, string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data, $fields) use ($rule) {
+            if (!is_array($data)) {
+                return false;
+            }
+            $filteredArray = array_filter($data, function ($value) use ($rule, $fields) {
+                return $rule->isValid($value, $fields);
+            });
+            return count($filteredArray) == count($data);
+        }, $errorMessage);
+    }
 }

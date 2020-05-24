@@ -240,4 +240,22 @@ class FormTest extends TestCase
         self::assertEquals('err_2', $errors[1]);
         self::assertEquals('err_3', $errors[2]);
     }
+
+    public function testRuleAllField()
+    {
+        $form = new Form();
+        $form->addField('ids[]', [1, 2, 3, 4, 5, 6]);
+        $form->validate('ids[]', Rule::all(Rule::integer(), "err_99"));
+        self::assertTrue($form->verify());
+    }
+
+    public function testInvalidRuleAllField()
+    {
+        $form = new Form();
+        $form->addField('ids[]', [1, 2, 3, "err", 5, 6]);
+        $form->validate('ids[]', Rule::all(Rule::integer(), "err_99"));
+        self::assertFalse($form->verify());
+        $errors = $form->getErrorMessages();
+        self::assertEquals('err_99', $errors[0]);
+    }
 }

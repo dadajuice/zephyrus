@@ -171,6 +171,13 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid("450-eee-3422"));
     }
 
+    public function testArrayAll()
+    {
+        $rule = Rule::all(Rule::integer(), "not all integers");
+        self::assertTrue($rule->isValid([1, 2, 3, 4, 5, 6]));
+        self::assertFalse($rule->isValid([1, 2, "error", 4, 5, 6]));
+    }
+
     public function testIsAlpha()
     {
         $rule = Rule::alpha();
