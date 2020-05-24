@@ -1,9 +1,7 @@
-<?php namespace Models;
+<?php namespace Zephyrus\Utilities;
 
 use stdClass;
-use Zephyrus\Network\RequestFactory;
-use Zephyrus\Utilities\Filter;
-use Zephyrus\Utilities\Pager;
+use Zephyrus\Network\Request;
 
 class ListView
 {
@@ -52,10 +50,10 @@ class ListView
      *
      * @param stdClass $resultSet
      */
-    public function __construct(stdClass $resultSet)
+    public function __construct(stdClass $resultSet, Request $request)
     {
         $this->resultSet = $resultSet;
-        $this->filter = new Filter(RequestFactory::read(), $resultSet->filter->sort, $resultSet->filter->order);
+        $this->filter = new Filter($request, $resultSet->filter->sort, $resultSet->filter->order);
         $this->pager = new Pager($this->resultSet->results->count, $this->resultSet->pager->maxEntitiesPerPage);
     }
 

@@ -55,9 +55,9 @@ class CsrfGuard
      */
     private $deleteSecured = true;
 
-    public function __construct()
+    public function __construct(?Request &$request)
     {
-        $this->request = RequestFactory::read();
+        $this->request = &$request;
         $configs = Configuration::getSecurityConfiguration();
         if (isset($configs['csrf_guard_req'])) {
             $methodsToFilter = $configs['csrf_guard_req'];

@@ -28,9 +28,9 @@ abstract class Controller extends \Zephyrus\Application\Controller
     public function __construct(Router $router)
     {
         parent::__construct($router);
-        $this->csrfGuard = new CsrfGuard();
+        $this->csrfGuard = new CsrfGuard($this->request);
+        $this->authorization = new Authorization($this->request);
         $this->secureHeader = new SecureHeader();
-        $this->authorization = new Authorization();
     }
 
     /**

@@ -12,8 +12,7 @@ class AuthorizationTest extends TestCase
     public function testModeWhitelist()
     {
         $req = new Request('http://test.local', 'POST');
-        RequestFactory::set($req);
-        $auth = new Authorization();
+        $auth = new Authorization($req);
         $auth->setMode(Authorization::MODE_WHITELIST);
         self::assertFalse($auth->isAuthorized('/'));
     }
@@ -21,8 +20,7 @@ class AuthorizationTest extends TestCase
     public function testModeBlacklist()
     {
         $req = new Request('http://test.local', 'POST');
-        RequestFactory::set($req);
-        $auth = new Authorization();
+        $auth = new Authorization($req);
         $auth->setMode(Authorization::MODE_BLACKLIST);
         self::assertTrue($auth->isAuthorized('/'));
     }
@@ -30,8 +28,7 @@ class AuthorizationTest extends TestCase
     public function testUrlArgument()
     {
         $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        $auth = new Authorization();
+        $auth = new Authorization($req);
         $auth->addRule('cook', function ($id) {
             return $id < 100;
         });
@@ -43,8 +40,7 @@ class AuthorizationTest extends TestCase
     public function testSessionRule()
     {
         $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
-        $auth = new Authorization();
+        $auth = new Authorization($req);
         $auth->setMode(Authorization::MODE_WHITELIST);
         $auth->addSessionRule('admin', 'level', '777');
         $auth->protect('/users/{subpath}', Authorization::GET, 'admin');
@@ -61,7 +57,8 @@ class AuthorizationTest extends TestCase
      */
     public function testSessionRuleAlreadyDefined()
     {
-        $auth = new Authorization();
+        $req = new Request('http://test.local', 'GET');
+        $auth = new Authorization($req);
         $auth->addSessionRule('admin', 'level', '777');
         $auth->addSessionRule('admin', 'level', '777');
     }
@@ -72,7 +69,8 @@ class AuthorizationTest extends TestCase
      */
     public function testSessionRuleAlreadyDefined2()
     {
-        $auth = new Authorization();
+        $req = new Request('http://test.local', 'GET');
+        $auth = new Authorization($req);
         $auth->addSessionRule('admin', 'level', '777');
         $auth->addIpAddressRule('admin', '10.10.10.10');
     }
@@ -83,7 +81,8 @@ class AuthorizationTest extends TestCase
      */
     public function testSessionRuleAlreadyDefined3()
     {
-        $auth = new Authorization();
+        $req = new Request('http://test.local', 'GET');
+        $auth = new Authorization($req);
         $auth->addSessionRule('admin', 'level', '777');
         $auth->addRule('admin', function () {
             return false;
@@ -96,7 +95,8 @@ class AuthorizationTest extends TestCase
      */
     public function testSessionRuleDefined()
     {
-        $auth = new Authorization();
+        $req = new Request('http://test.local', 'GET');
+        $auth = new Authorization($req);
         $auth->protect('/users/*', Authorization::GET, 'admin');
         $auth->protect('/users/*', Authorization::GET, 'admin');
     }
@@ -107,7 +107,8 @@ class AuthorizationTest extends TestCase
      */
     public function testRequirementUndefined()
     {
-        $auth = new Authorization();
+        $req = new Request('http://test.local', 'GET');
+        $auth = new Authorization($req);
         $auth->protect('/logs', Authorization::GET, 'invalid');
         $auth->isAuthorized('/logs');
     }
@@ -117,7 +118,8 @@ class AuthorizationTest extends TestCase
      */
     public function testMode()
     {
-        $auth = new Authorization();
+        $req = new Request('http://test.local', 'GET');
+        $auth = new Authorization($req);
         $auth->setMode(Authorization::MODE_WHITELIST);
         self::assertEquals(Authorization::MODE_WHITELIST, $auth->getMode());
         $auth->setMode(Authorization::MODE_BLACKLIST);
@@ -130,14 +132,16 @@ class AuthorizationTest extends TestCase
      */
     public function testNotAuthorized()
     {
-        $auth = new Authorization();
+        $req = new Request('http://test.local', 'GET');
+        $auth = new Authorization($req);
         $auth->setMode(Authorization::MODE_WHITELIST);
         self::assertFalse($auth->isAuthorized('/'));
     }
 
     public function testHome()
     {
-        $auth = new Authorization();
+        $req = new Request('http://test.local', 'GET');
+        $auth = new Authorization($req);
         $auth->addSessionRule('admin', 'GOZU');
         $auth->protect('/', Authorization::ALL, 'admin');
         self::assertFalse($auth->isAuthorized('/'));
@@ -145,7 +149,8 @@ class AuthorizationTest extends TestCase
 
     public function testNoRules()
     {
-        $auth = new Authorization();
+        $req = new Request('http://test.local', 'GET');
+        $auth = new Authorization($req);
         $auth->setMode(Authorization::MODE_WHITELIST);
         $auth->addSessionRule('admin', 'GOZU');
         $auth->protect('/', Authorization::ALL, 'admin');
@@ -158,17 +163,14 @@ class AuthorizationTest extends TestCase
      */
     public function testIpRequirement()
     {
-        $auth = new Authorization();
-        $auth->addIpAddressRule('school', '207.167.241.10');
-        $auth->protect('/bob', Authorization::ALL, 'school');
         $server['REMOTE_ADDR'] = '207.167.241.10';
         $req = new Request('http://test.local', 'GET', [
             'server' => $server
         ]);
-        RequestFactory::set($req);
+        $auth = new Authorization($req);
+        $auth->addIpAddressRule('school', '207.167.241.10');
+        $auth->protect('/bob', Authorization::ALL, 'school');
         self::assertTrue($auth->isAuthorized('/bob'));
-        $req = new Request('http://test.local', 'GET');
-        RequestFactory::set($req);
     }
 
     /**
@@ -176,7 +178,8 @@ class AuthorizationTest extends TestCase
      */
     public function testCallbackRequirement()
     {
-        $auth = new Authorization();
+        $req = new Request('http://test.local', 'GET');
+        $auth = new Authorization($req);
         $auth->addRule('public', function () {
             return true;
         });

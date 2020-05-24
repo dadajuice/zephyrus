@@ -53,7 +53,7 @@ class RequestTest extends TestCase
         $request = new Request($uri, $method, [
             'server' => $server
         ]);
-        self::assertEquals([], $request->getHeaders());
+        self::assertEquals(2, count($request->getHeaders()));
         self::assertEquals(null, $request->getHeader('TEST'));
     }
 

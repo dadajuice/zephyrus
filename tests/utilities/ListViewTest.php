@@ -1,9 +1,9 @@
 <?php namespace Zephyrus\Tests\utilities;
 
-use Models\ListView;
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
+use Zephyrus\Utilities\ListView;
 
 class ListViewTest extends TestCase
 {
@@ -65,7 +65,6 @@ class ListViewTest extends TestCase
     public function buildList()
     {
         $r = new Request('http://test.local', 'GET', ['parameters' => ['search' => 'man', 'order' => 'asc', 'sort' => 'name']]);
-        RequestFactory::set($r);
         return new ListView((object) [
             'results' => (object) [
                 'rows' => [(object)['name' => 'batman'], (object)['name' => 'aquaman']],
@@ -82,6 +81,6 @@ class ListViewTest extends TestCase
                 'sort' => 'name',
                 'order' => 'asc'
             ]
-        ]);
+        ], $r);
     }
 }

@@ -10,7 +10,8 @@ class CsrfGuardTest extends TestCase
 {
     public function testHiddenFields()
     {
-        $csrf = new CsrfGuard();
+        $req = new Request('http://test.local/test', 'GET');
+        $csrf = new CsrfGuard($req);
         $result = $csrf->generateHiddenFields();
         self::assertTrue($this->hasHiddenFields($result));
     }
@@ -18,8 +19,7 @@ class CsrfGuardTest extends TestCase
     public function testGuard()
     {
         $req = new Request('http://test.local/test', 'GET');
-        RequestFactory::set($req);
-        $csrf = new CsrfGuard();
+        $csrf = new CsrfGuard($req);
         $csrf->setDeleteSecured(true);
         $csrf->setGetSecured(false);
         $csrf->setPostSecured(false);
@@ -31,8 +31,7 @@ class CsrfGuardTest extends TestCase
         $value = $fields[2];
 
         $req = new Request('http://test.local/test', 'DELETE', ['parameters' => ['CSRFName' => $name, 'CSRFToken' => $value]]);
-        RequestFactory::set($req);
-        $csrf = new CsrfGuard();
+        $csrf = new CsrfGuard($req);
         $csrf->setDeleteSecured(true);
         $csrf->setGetSecured(false);
         $csrf->setPostSecured(false);
@@ -44,7 +43,8 @@ class CsrfGuardTest extends TestCase
 
     public function testFormInject()
     {
-        $csrf = new CsrfGuard();
+        $req = new Request('http://test.local/test', 'POST');
+        $csrf = new CsrfGuard($req);
         $html = '<html><body><form action="test" method="get"><input type="text" name="test" /></form></body>';
         $result = $csrf->injectForms($html);
         self::assertTrue($this->hasHiddenFields($result));
@@ -52,7 +52,8 @@ class CsrfGuardTest extends TestCase
 
     public function testFormInjectExclusion()
     {
-        $csrf = new CsrfGuard();
+        $req = new Request('http://test.local/test', 'POST');
+        $csrf = new CsrfGuard($req);
         $html = '<html><body><form nocsrf="true" action="test" method="get"><input type="text" name="test" /></form></body>';
         $result = $csrf->injectForms($html);
         self::assertEquals($html, $result);
@@ -60,7 +61,8 @@ class CsrfGuardTest extends TestCase
 
     public function testProperties()
     {
-        $csrf = new CsrfGuard();
+        $req = new Request('http://test.local/test', 'POST');
+        $csrf = new CsrfGuard($req);
         $csrf->setDeleteSecured(true);
         $csrf->setPostSecured(true);
         $csrf->setPutSecured(true);
@@ -77,8 +79,7 @@ class CsrfGuardTest extends TestCase
     public function testGuardException()
     {
         $req = new Request('http://test.local/test', 'POST');
-        RequestFactory::set($req);
-        $csrf = new CsrfGuard();
+        $csrf = new CsrfGuard($req);
         $csrf->guard();
     }
 
@@ -88,8 +89,7 @@ class CsrfGuardTest extends TestCase
     public function testInvalidToken()
     {
         $req = new Request('http://test.local/test', 'PUT', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
-        RequestFactory::set($req);
-        $csrf = new CsrfGuard();
+        $csrf = new CsrfGuard($req);
         $csrf->guard();
     }
 
@@ -99,8 +99,7 @@ class CsrfGuardTest extends TestCase
     public function testInvalidGuard()
     {
         $req = new Request('http://test.local/test', 'POST', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
-        RequestFactory::set($req);
-        $csrf = new CsrfGuard();
+        $csrf = new CsrfGuard($req);
         $csrf->guard();
     }
 
@@ -110,8 +109,7 @@ class CsrfGuardTest extends TestCase
     public function testInvalidGetGuard()
     {
         $req = new Request('http://test.local/test', 'GET');
-        RequestFactory::set($req);
-        $csrf = new CsrfGuard();
+        $csrf = new CsrfGuard($req);
         $csrf->setGetSecured(true);
         $csrf->guard();
     }
@@ -122,8 +120,7 @@ class CsrfGuardTest extends TestCase
     public function testNoStorageGuard()
     {
         $req = new Request('http://test.local/test', 'GET');
-        RequestFactory::set($req);
-        $csrf = new CsrfGuard();
+        $csrf = new CsrfGuard($req);
         $csrf->setGetSecured(false);
         $csrf->guard();
         $output = $csrf->generateHiddenFields();
@@ -132,8 +129,7 @@ class CsrfGuardTest extends TestCase
         $value = $fields[2];
 
         $req = new Request('http://test.local/test', 'DELETE', ['parameters' => ['CSRFName' => $name, 'CSRFToken' => $value]]);
-        RequestFactory::set($req);
-        $csrf = new CsrfGuard();
+        $csrf = new CsrfGuard($req);
         $csrf->setDeleteSecured(true);
         Session::getInstance()->remove('__CSRF_TOKEN');
         $csrf->guard();

@@ -1,8 +1,11 @@
 <?php namespace Zephyrus\Security;
 
+use InvalidArgumentException;
+use ReflectionFunctionAbstract;
+use RuntimeException;
 use Zephyrus\Application\Callback;
 use Zephyrus\Application\Route;
-use Zephyrus\Network\RequestFactory;
+use Zephyrus\Network\Request;
 
 class Authorization
 {
@@ -15,6 +18,11 @@ class Authorization
 
     const MODE_BLACKLIST = 0;
     const MODE_WHITELIST = 1;
+
+    /**
+     * @var Request
+     */
+    private $request;
 
     /**
      * @var array
@@ -31,10 +39,15 @@ class Authorization
      */
     private $protections = [];
 
+    public function __construct(?Request &$request)
+    {
+        $this->request = &$request;
+    }
+
     public function addRule(string $name, callable $callback)
     {
         if (isset($this->rules[$name])) {
-            throw new \InvalidArgumentException("Requirement $name is already defined");
+            throw new InvalidArgumentException("Requirement $name is already defined");
         }
         $this->rules[$name] = $callback;
     }
@@ -42,7 +55,7 @@ class Authorization
     public function addSessionRule(string $name, string $key, $value = null)
     {
         if (isset($this->rules[$name])) {
-            throw new \InvalidArgumentException("Requirement $name is already defined");
+            throw new InvalidArgumentException("Requirement $name is already defined");
         }
         $this->rules[$name] = function () use ($key, $value) {
             return isset($_SESSION[$key]) && (is_null($value) || $_SESSION[$key] == $value);
@@ -52,10 +65,11 @@ class Authorization
     public function addIpAddressRule(string $name, string $idAddress)
     {
         if (isset($this->rules[$name])) {
-            throw new \InvalidArgumentException("Requirement $name is already defined");
+            throw new InvalidArgumentException("Requirement $name is already defined");
         }
-        $this->rules[$name] = function () use ($idAddress) {
-            return RequestFactory::read()->getClientIp() == $idAddress;
+        $request = $this->request;
+        $this->rules[$name] = function () use ($idAddress, $request) {
+            return $request->getClientIp() == $idAddress;
         };
     }
 
@@ -95,7 +109,7 @@ class Authorization
 
     private function getCorrespondingRuleResults(string $uri): array
     {
-        $method = RequestFactory::read()->getMethod();
+        $method = $this->request->getMethod();
         if (!isset($this->protections[$method])) {
             return [];
         }
@@ -105,7 +119,7 @@ class Authorization
             if ($protection['route']->match($uri)) {
                 foreach ($protection['rules'] as $rule) {
                     if (!isset($this->rules[$rule])) {
-                        throw new \RuntimeException("The specified rule [$rule] has not been defined");
+                        throw new RuntimeException("The specified rule [$rule] has not been defined");
                     }
                     $callback = new Callback($this->rules[$rule]);
                     $values = $protection['route']->getArguments($uri);
@@ -125,7 +139,7 @@ class Authorization
         }
 
         if (isset($this->protections[$httpMethod][$pathRegex])) {
-            throw new \InvalidArgumentException("Rule already exists for $httpMethod $pathRegex");
+            throw new InvalidArgumentException("Rule already exists for $httpMethod $pathRegex");
         }
 
         $this->protections[$httpMethod][$pathRegex] = [
@@ -158,10 +172,11 @@ class Authorization
     /**
      * Retrieves the specified function arguments.
      *
-     * @param \ReflectionFunctionAbstract $reflection
+     * @param ReflectionFunctionAbstract $reflection
+     * @param $values
      * @return array
      */
-    private function getFunctionArguments(\ReflectionFunctionAbstract $reflection, $values)
+    private function getFunctionArguments(ReflectionFunctionAbstract $reflection, $values)
     {
         $arguments = [];
         if (!empty($reflection->getParameters())) {
