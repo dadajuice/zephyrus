@@ -47,7 +47,7 @@ class ControllerTest extends TestCase
                 parent::get('/', 'index');
             }
 
-            public function before()
+            public function before(): ?Response
             {
                 return ResponseFactory::getInstance()->buildJson(['test' => 'success']);
             }
@@ -75,7 +75,7 @@ class ControllerTest extends TestCase
                 parent::get('/', 'index');
             }
 
-            public function after(?Response $response)
+            public function after(?Response $response): ?Response
             {
                 return ResponseFactory::getInstance()->buildJson(['test' => 'success']);
             }

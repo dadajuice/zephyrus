@@ -38,7 +38,7 @@ abstract class Controller extends \Zephyrus\Application\Controller
      * @throws InvalidCsrfException
      * @throws IntrusionDetectionException
      */
-    public function before()
+    public function before(): ?Response
     {
         $failedRequirements = [];
         if (!$this->authorization->isAuthorized($this->request->getUri()->getPath(), $failedRequirements)) {
@@ -51,9 +51,10 @@ abstract class Controller extends \Zephyrus\Application\Controller
         if (Configuration::getSecurityConfiguration('ids_enabled')) {
             IntrusionDetection::getInstance()->run();
         }
+        return null;
     }
 
-    public function after(?Response $response)
+    public function after(?Response $response): ?Response
     {
         if (!is_null($response)
             && $response->getContentType() == ContentType::HTML

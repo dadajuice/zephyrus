@@ -53,9 +53,12 @@ abstract class Controller implements Routable
      * Method called immediately before calling the associated route callback
      * method. The default behavior is to do nothing. This should be overridden
      * to customize any operation to be made prior the route callback.
+     *
+     * @return Response | null
      */
-    public function before()
+    public function before(): ?Response
     {
+        return null;
     }
 
     /**
@@ -66,9 +69,11 @@ abstract class Controller implements Routable
      * before callback or the natural execution.
      *
      * @param Response $response
+     * @return Response | null
      */
-    public function after(?Response $response)
+    public function after(?Response $response): ?Response
     {
+        return $response;
     }
 
     /**
