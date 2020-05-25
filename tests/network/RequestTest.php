@@ -42,6 +42,57 @@ class RequestTest extends TestCase
         self::assertEquals('text/html', $request->getAccept());
     }
 
+    public function testMultipleAccept()
+    {
+        $server = [];
+        $uri = 'http://127.0.0.1/test/3?sort=4&filter[]=a&filter[]=b#section';
+        $method = 'GET';
+        $server['REMOTE_ADDR'] = '192.168.2.1';
+        $server['HTTP_ACCEPT'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'; // Mimic real Accept
+        $server['HTTP_USER_AGENT'] = 'chrome';
+        $request = new Request($uri, $method, [
+            'server' => $server
+        ]);
+        self::assertEquals('text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', $request->getAccept());
+        $accept = $request->getAcceptedRepresentations();
+        self::assertEquals(4, count($accept));
+        self::assertEquals('text/html', $accept[0]);
+        self::assertEquals('application/xhtml+xml', $accept[1]);
+        self::assertEquals('application/xml', $accept[2]);
+        self::assertEquals('*/*', $accept[3]);
+
+        // Specific type priority (those without * should be first for same priority)
+        $server = [];
+        $uri = 'http://127.0.0.1/test/3?sort=4&filter[]=a&filter[]=b#section';
+        $method = 'GET';
+        $server['REMOTE_ADDR'] = '192.168.2.1';
+        $server['HTTP_ACCEPT'] = '*/*,text/html,application/*,application/xml';
+        $server['HTTP_USER_AGENT'] = 'chrome';
+        $request = new Request($uri, $method, [
+            'server' => $server
+        ]);
+        $accept = $request->getAcceptedRepresentations();
+        self::assertEquals('text/html', $accept[0]);
+        self::assertEquals('application/xml', $accept[1]);
+        self::assertEquals('application/*', $accept[2]);
+        self::assertEquals('*/*', $accept[3]);
+
+        // Specific type priority (those without * should be first for same priority)
+        $server = [];
+        $uri = 'http://127.0.0.1/test/3?sort=4&filter[]=a&filter[]=b#section';
+        $method = 'GET';
+        $server['REMOTE_ADDR'] = '192.168.2.1';
+        $server['HTTP_ACCEPT'] = '*/*;q=0.9,text/html;q=0.4,application/json;q=0.5';
+        $server['HTTP_USER_AGENT'] = 'chrome';
+        $request = new Request($uri, $method, [
+            'server' => $server
+        ]);
+        $accept = $request->getAcceptedRepresentations();
+        self::assertEquals('*/*', $accept[0]);
+        self::assertEquals('application/json', $accept[1]);
+        self::assertEquals('text/html', $accept[2]);
+    }
+
     public function testHeader()
     {
         $server = [];

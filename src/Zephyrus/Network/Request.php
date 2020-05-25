@@ -194,6 +194,38 @@ class Request
     }
 
     /**
+     * Retrieves the defined accepted representations order by specified
+     * priority using the standard parameter "q" which should range from
+     * 0 (lowest) to 1 (highest).
+     *
+     * @return array
+     */
+    public function getAcceptedRepresentations(): array
+    {
+        $acceptedRepresentations = explode(',', $this->accept);
+        array_walk($acceptedRepresentations, function (&$accept) {
+            // When no priority parameter is given, use natural defined order
+            // by adding q=1.
+            if (strpos($accept, ';q') === false) {
+                $accept .= ';q=1';
+            }
+            $accept = explode(';q=', $accept);
+        });
+        usort($acceptedRepresentations, function ($a, $b) {
+            // Sort using priority parameters
+            return $b[1] <=> $a[1];
+        });
+        usort($acceptedRepresentations, function ($a, $b) {
+            // Sort using specificity (*/*) for same priority
+            if ($a[1] == $b[1]) {
+                return substr_count($a[0], '*') <=> substr_count($b[0], '*');
+            }
+            return 0;
+        });
+        return array_column($acceptedRepresentations, 0);
+    }
+
+    /**
      * @return Uri
      */
     public function getUri()
