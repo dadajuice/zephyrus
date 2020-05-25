@@ -25,9 +25,9 @@ abstract class RouterEngine
     private $requestedUri;
 
     /**
-     * @var string HTTP accept directive specified by the client
+     * @var array HTTP accept directive specified by the client
      */
-    private $requestedRepresentation;
+    private $requestedRepresentations;
 
     /**
      * @var Request
@@ -49,7 +49,7 @@ abstract class RouterEngine
         $path = $this->request->getUri()->getPath();
         $this->requestedUri = ($path != "/") ? rtrim($path, "/") : "/";
         $this->requestedMethod = strtoupper($this->request->getMethod());
-        $this->requestedRepresentation = $this->request->getAccept();
+        $this->requestedRepresentations = $this->request->getAcceptedRepresentations();
         $this->verifyRequestMethod();
         $route = $this->findRouteFromRequest();
         $this->prepareResponse($route);
@@ -119,16 +119,21 @@ abstract class RouterEngine
     private function findRouteFromRequest()
     {
         $routes = $this->routes[$this->requestedMethod];
+        $matchingRoutes = [];
         foreach ($routes as $route) {
             if ($route['route']->match($this->requestedUri)) {
-                if (!$this->isRequestAcceptedForRoute($route)) {
-                    throw new RouteNotAcceptedException($this->requestedRepresentation);
-                }
+                $matchingRoutes[] = $route;
+            }
+        }
+        if (empty($matchingRoutes)) {
+            throw new RouteNotFoundException($this->requestedUri, $this->requestedMethod);
+        }
+        foreach ($matchingRoutes as $route) {
+            if ($this->isRequestAcceptedForRoute($route)) {
                 return $route;
             }
         }
-
-        throw new RouteNotFoundException($this->requestedUri, $this->requestedMethod);
+        throw new RouteNotAcceptedException($this->request->getAccept());
     }
 
     /**
@@ -142,18 +147,15 @@ abstract class RouterEngine
     private function isRequestAcceptedForRoute($route)
     {
         $acceptedFormats = $route['acceptedRequestFormats'];
-        if (is_null($acceptedFormats)) {
-            return true;
-        }
         if (is_array($acceptedFormats)) {
             foreach ($acceptedFormats as $format) {
-                if (strpos($this->requestedRepresentation, $format) !== false) {
+                if (in_array($format, $this->requestedRepresentations)) {
                     return true;
                 }
             }
             return false;
         }
-        return strpos($this->requestedRepresentation, $acceptedFormats) !== false;
+        return in_array($acceptedFormats, $this->requestedRepresentations);
     }
 
     /**
@@ -186,7 +188,7 @@ abstract class RouterEngine
         $controller = $this->getRouteControllerInstance($route);
         if (!is_null($controller)) {
             $responseBefore = $controller->before();
-            if ($responseBefore instanceof Response) {
+            if (!is_null($responseBefore) && $responseBefore instanceof Response) {
                 return $responseBefore;
             }
         }
@@ -199,7 +201,7 @@ abstract class RouterEngine
 
         if (!is_null($controller)) {
             $responseAfter = $controller->after($response);
-            if ($responseAfter instanceof Response) {
+            if (!is_null($responseAfter) && $responseAfter instanceof Response) {
                 return $responseAfter;
             }
         }
