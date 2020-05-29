@@ -103,11 +103,13 @@ class ErrorHandler
      */
     public function exception(callable $callback)
     {
+        // @codeCoverageIgnoreStart
         try {
             $reflection = new \ReflectionFunction($callback);
         } catch (\ReflectionException $e) {
             throw new \InvalidArgumentException("Specified callback is invalid : " . $e->getMessage());
         }
+        // @codeCoverageIgnoreEnd
         $parameters = $reflection->getParameters();
         if (count($parameters) != 1) {
             throw new \InvalidArgumentException("Specified callback must only have one argument hinted as a 
@@ -179,11 +181,15 @@ class ErrorHandler
     {
         if (!(error_reporting() & $type)) {
             // This error code is not included in error_reporting
+            // @codeCoverageIgnoreStart
             return true;
+            // @codeCoverageIgnoreEnd
         }
         if (0 === error_reporting()) {
             // error was suppressed with the @-operator
+            // @codeCoverageIgnoreStart
             return false;
+            // @codeCoverageIgnoreEnd
         }
         if (array_key_exists($type, $this->registeredErrorCallbacks)) {
             $callback = $this->registeredErrorCallbacks[$type];
@@ -191,7 +197,9 @@ class ErrorHandler
             $reflection->invokeArgs($args);
             return true;
         }
+        // @codeCoverageIgnoreStart
         return false;
+        // @codeCoverageIgnoreEnd
     }
 
     /**
