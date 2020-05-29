@@ -178,6 +178,12 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid([1, 2, "error", 4, 5, 6]));
     }
 
+    public function testArrayAllNotArray()
+    {
+        $rule = Rule::all(Rule::integer(), "not all integers");
+        self::assertFalse($rule->isValid("Invalid"));
+    }
+
     public function testIsAlpha()
     {
         $rule = Rule::alpha();
