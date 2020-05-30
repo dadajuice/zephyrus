@@ -152,22 +152,40 @@ class Localization
         return $output;
     }
 
-    private function addConstant($name, $value)
+    /**
+     * Creates a constant string to be included into the cache class. Makes sure
+     * to convert double quote into equivalent html entity to prevent PHP syntax
+     * error in the resulting class.
+     *
+     * @param string $name
+     * @param string $value
+     * @return string
+     */
+    private function addConstant(string $name, string $value)
     {
+        $value = str_replace('"', '&quot;', $value);
         return "\tpublic const $name = \"$value\";" . PHP_EOL;
     }
 
-    private function addMethod($name, $className)
+    /**
+     * Creates a method string to be included into the cache class which shall
+     * allow to go into another cache class.
+     *
+     * @param string $name
+     * @param string $className
+     * @return string
+     */
+    private function addMethod(string $name, string $className)
     {
         return "\tpublic static function $name(): $className" . PHP_EOL . "\t{" . PHP_EOL . "\t\treturn $className::getInstance();" . PHP_EOL . "\t}" . PHP_EOL;
     }
 
-    private function addRequire($name)
+    private function addRequire(string $name)
     {
         return "require \"$name.php\";" . PHP_EOL;
     }
 
-    private function startClass($className)
+    private function startClass(string $className)
     {
         return "final class " . $className . PHP_EOL . "{" . PHP_EOL;
     }

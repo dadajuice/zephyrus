@@ -6,6 +6,9 @@
     },
     "success": {
       "add_user": "L'utilisateur [%s] a été ajouté avec succès"
+    },
+    "greetings": {
+      "hello_world": "\"hello world!\" testing nested double quote"
     }
   }
 }
