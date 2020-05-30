@@ -4,7 +4,6 @@ use Zephyrus\Application\Configuration;
 use Zephyrus\Application\Session;
 use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Network\Request;
-use Zephyrus\Network\RequestFactory;
 
 class CsrfGuard
 {

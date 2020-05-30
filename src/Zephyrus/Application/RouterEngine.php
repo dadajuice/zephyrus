@@ -133,6 +133,7 @@ abstract class RouterEngine
                 return $route;
             }
         }
+
         throw new RouteNotAcceptedException($this->request->getAccept());
     }
 

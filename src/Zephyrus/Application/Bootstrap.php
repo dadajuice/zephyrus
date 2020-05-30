@@ -47,8 +47,8 @@ class Bootstrap
 
     /**
      * @param string $file
-     * @return ReflectionClass
      * @throws ReflectionException
+     * @return ReflectionClass
      */
     private static function fileToReflectionClass(string $file): ReflectionClass
     {

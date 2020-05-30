@@ -29,8 +29,7 @@ trait SpecializedFormatter
     public static function filesize(
         int $sizeInBytes,
         array $units = ['G' => 'gb', 'M' => 'mb', 'K' => 'kb', 'B' => 'bytes']
-    )
-    {
+    ) {
         $fileSize = $sizeInBytes;
         $unit = $units['B'];
         if ($sizeInBytes >= 1073741824) {
