@@ -109,7 +109,7 @@ class Authorization
 
     private function getCorrespondingRuleResults(string $uri): array
     {
-        $method = $this->request->getMethod();
+        $method = strtoupper($this->request->getMethod());
         if (!isset($this->protections[$method])) {
             return [];
         }
@@ -134,7 +134,7 @@ class Authorization
 
     private function addProtection(string $httpMethod, string $pathRegex, $rules)
     {
-        if (!isset($this->protections[$httpMethod])) {
+        if (!isset($this->protections[strtoupper($httpMethod)])) {
             $this->protections[$httpMethod] = [];
         }
 
