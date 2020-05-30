@@ -2,6 +2,7 @@
 
 interface ContentType
 {
+    const ANY = '*/*';
     const HTML = 'text/html'; /* RFC 2854 */
     const PLAIN = 'text/plain'; /* RFC 2046 */
     const XML = 'text/xml'; /* RFC 3023 */
