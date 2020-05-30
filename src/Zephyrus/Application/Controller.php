@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Application;
 
+use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\ResponseFactory;
@@ -24,27 +25,27 @@ abstract class Controller implements Routable
         $this->request = &$router->getRequest();
     }
 
-    final protected function get($uri, $instanceMethod, $acceptedFormats = null)
+    final protected function get($uri, $instanceMethod, $acceptedFormats = ContentType::ANY)
     {
         $this->router->get($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
-    final protected function post($uri, $instanceMethod, $acceptedFormats = null)
+    final protected function post($uri, $instanceMethod, $acceptedFormats = ContentType::ANY)
     {
         $this->router->post($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
-    final protected function put($uri, $instanceMethod, $acceptedFormats = null)
+    final protected function put($uri, $instanceMethod, $acceptedFormats = ContentType::ANY)
     {
         $this->router->put($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
-    final protected function patch($uri, $instanceMethod, $acceptedFormats = null)
+    final protected function patch($uri, $instanceMethod, $acceptedFormats = ContentType::ANY)
     {
         $this->router->patch($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
-    final protected function delete($uri, $instanceMethod, $acceptedFormats = null)
+    final protected function delete($uri, $instanceMethod, $acceptedFormats = ContentType::ANY)
     {
         $this->router->delete($uri, [$this, $instanceMethod], $acceptedFormats);
     }

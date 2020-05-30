@@ -222,7 +222,7 @@ class Request
             }
             return 0;
         });
-        return array_column($acceptedRepresentations, 0);
+        return array_filter(array_column($acceptedRepresentations, 0));
     }
 
     /**

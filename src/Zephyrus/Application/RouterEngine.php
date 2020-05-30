@@ -147,6 +147,9 @@ abstract class RouterEngine
      */
     private function isRequestAcceptedForRoute($route)
     {
+        if (empty($this->requestedRepresentations)) {
+            return true;
+        }
         $acceptedFormats = $route['acceptedRequestFormats'];
         if (is_array($acceptedFormats)) {
             foreach ($acceptedFormats as $format) {

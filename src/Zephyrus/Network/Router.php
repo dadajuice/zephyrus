@@ -17,7 +17,7 @@ class Router extends RouterEngine
      * @param callable $callback
      * @param string | array | null $acceptedFormats
      */
-    public function get($uri, $callback, $acceptedFormats = null)
+    public function get($uri, $callback, $acceptedFormats = ContentType::ANY)
     {
         parent::addRoute('GET', $uri, $callback, $acceptedFormats);
     }
@@ -33,7 +33,7 @@ class Router extends RouterEngine
      * @param callable $callback
      * @param string| array | null $acceptedFormats
      */
-    public function post($uri, $callback, $acceptedFormats = null)
+    public function post($uri, $callback, $acceptedFormats = ContentType::ANY)
     {
         parent::addRoute('POST', $uri, $callback, $acceptedFormats);
     }
@@ -49,7 +49,7 @@ class Router extends RouterEngine
      * @param callable $callback
      * @param string | array | null $acceptedFormats
      */
-    public function put($uri, $callback, $acceptedFormats = null)
+    public function put($uri, $callback, $acceptedFormats = ContentType::ANY)
     {
         parent::addRoute('PUT', $uri, $callback, $acceptedFormats);
     }
@@ -65,7 +65,7 @@ class Router extends RouterEngine
      * @param callable $callback
      * @param string | array | null $acceptedFormats
      */
-    public function patch($uri, $callback, $acceptedFormats = null)
+    public function patch($uri, $callback, $acceptedFormats = ContentType::ANY)
     {
         parent::addRoute('PATCH', $uri, $callback, $acceptedFormats);
     }
@@ -82,7 +82,7 @@ class Router extends RouterEngine
      * @param callable $callback
      * @param string | array | null $acceptedFormats
      */
-    public function delete($uri, $callback, $acceptedFormats = null)
+    public function delete($uri, $callback, $acceptedFormats = ContentType::ANY)
     {
         parent::addRoute('DELETE', $uri, $callback, $acceptedFormats);
     }
