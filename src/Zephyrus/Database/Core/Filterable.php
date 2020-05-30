@@ -98,7 +98,11 @@ trait Filterable
         if ($lastGroupByOccurrence !== false && $lastGroupByOccurrence > $lastWhereByOccurrence) {
             $insertionPosition = $lastGroupByOccurrence - 1;
         } elseif ($lastHavingByOccurrence !== false && $lastHavingByOccurrence > $lastWhereByOccurrence) {
+            // Having without a group by clause case ... valid as standard SQL but cannot
+            // be properly tested due to DBMS limitations.
+            // @codeCoverageIgnoreStart
             $insertionPosition = $lastHavingByOccurrence - 1;
+            // @codeCoverageIgnoreEnd
         }
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);
@@ -116,13 +120,12 @@ trait Filterable
      */
     private function buildOrderBy(): string
     {
+        // Cannot be empty because the calling method makes sure its not empty
+        // before calling it.
         $sort = $this->filter->getSort();
-        if (!empty($sort)) {
-            $order = $this->filter->getOrder();
-            $clause = $this->sortableFields[$sort] ?? $sort;
-            return " ORDER BY $clause $order";
-        }
-        return "";
+        $order = $this->filter->getOrder();
+        $clause = $this->sortableFields[$sort] ?? $sort;
+        return " ORDER BY $clause $order";
     }
 
     /**
