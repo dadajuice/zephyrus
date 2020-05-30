@@ -9,7 +9,8 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/6981c700b82a43834672/maintainability)](https://codeclimate.com/github/dadajuice/zephyrus/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/6981c700b82a43834672/test_coverage)](https://codeclimate.com/github/dadajuice/zephyrus/test_coverage)
-[![Travis](https://img.shields.io/travis/dadajuice/zephyrus.svg)]()
+[![codecov](https://codecov.io/gh/dadajuice/zephyrus/branch/master/graph/badge.svg)](https://codecov.io/gh/dadajuice/zephyrus)
+[![Travis](https://travis-ci.org/dadajuice/zephyrus.svg?branch=master)]()
 [![StyleCI](https://styleci.io/repos/77175312/shield?branch=master)](https://styleci.io/repos/77175312)
 [![GitHub issues](https://img.shields.io/github/issues/dadajuice/zephyrus.svg)]()
 [![GitHub release](https://img.shields.io/github/release/dadajuice/zephyrus.svg)]()
