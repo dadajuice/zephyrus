@@ -14,7 +14,6 @@
 [![StyleCI](https://styleci.io/repos/77175312/shield?branch=master)](https://styleci.io/repos/77175312)
 [![GitHub issues](https://img.shields.io/github/issues/dadajuice/zephyrus.svg)]()
 [![GitHub release](https://img.shields.io/github/release/dadajuice/zephyrus.svg)]()
-[![license](https://img.shields.io/github/license/dadajuice/zephyrus.svg)]()
 
 # Fonctionnalités
 * Structure de projet simpliste
