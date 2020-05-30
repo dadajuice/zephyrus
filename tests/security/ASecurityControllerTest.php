@@ -13,7 +13,7 @@ use Zephyrus\Security\ContentSecurityPolicy;
 use Zephyrus\Security\Controller;
 use Zephyrus\Security\IntrusionDetection;
 
-class SecurityControllerTest extends TestCase
+class ASecurityControllerTest extends TestCase
 {
     public function testGetRouting()
     {
@@ -123,7 +123,7 @@ class SecurityControllerTest extends TestCase
 
             private function setupAuthorizations()
             {
-                parent::getAuthorization()->setMode(Authorization::MODE_WHITELIST);
+                parent::getAuthorization()->setMode(Authorization::MODE_BLACKLIST);
                 parent::getAuthorization()->addSessionRule('sudo', 'AUTH_LEVEL', 'sudo');
                 parent::getAuthorization()->addRule('public', function () {
                     return true;
