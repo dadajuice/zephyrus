@@ -18,12 +18,12 @@ class FilterableTest extends TestCase
     public static function setUpBeforeClass()
     {
         self::$database = DatabaseFactory::buildFromConfigurations(['dbms' => 'sqlite']);
-        self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
-        self::$database->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
-        self::$database->query("INSERT INTO heroes(id, name) VALUES (2, 'Superman');");
-        self::$database->query("INSERT INTO heroes(id, name) VALUES (3, 'Aquaman');");
-        self::$database->query("INSERT INTO heroes(id, name) VALUES (4, 'Flash');");
-        self::$database->query("INSERT INTO heroes(id, name) VALUES (5, 'Batman');");
+        self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT, epic NUMERIC);');
+        self::$database->query("INSERT INTO heroes(id, name, epic) VALUES (1, 'Batman', 10);");
+        self::$database->query("INSERT INTO heroes(id, name, epic) VALUES (2, 'Superman', 10);");
+        self::$database->query("INSERT INTO heroes(id, name, epic) VALUES (3, 'Aquaman', 6);");
+        self::$database->query("INSERT INTO heroes(id, name, epic) VALUES (4, 'Flash', 6);");
+        self::$database->query("INSERT INTO heroes(id, name, epic) VALUES (5, 'Batman', 10);");
     }
 
     public function testFindAllNoSort()
@@ -54,6 +54,22 @@ class FilterableTest extends TestCase
         self::assertEquals(1, $class->count());
     }
 
+    public function testCountRemoveFilter()
+    {
+        $r = new Request('http://test.local', 'GET', ['parameters' => ['search' => 'man']]);
+        RequestFactory::set($r);
+        $class = $this->buildClassNoSort();
+        $class->applyFilter();
+        $allFiltered = $class->findAll();
+        self::assertEquals(4, count($allFiltered));
+        self::assertEquals(4, $class->count());
+
+        $class->removeFilter();
+        $allUnfiltered = $class->findAll();
+        self::assertEquals(5, count($allUnfiltered));
+        self::assertEquals(5, $class->count());
+    }
+
     public function testHaving()
     {
         $r = new Request('http://test.local', 'GET', ['parameters' => ['search' => '']]);
@@ -63,6 +79,18 @@ class FilterableTest extends TestCase
         self::assertEquals('2', $class->findAllHaving()[0]->n);
     }
 
+    /*
+    // Cannot be tested
+    public function testHavingWithoutGroupBy()
+    {
+        $r = new Request('http://test.local', 'GET', ['parameters' => ['search' => 'SupEr']]);
+        RequestFactory::set($r);
+        $class = $this->buildClass();
+        $class->applyFilter();
+        $list = $class->findAllHavingWithoutGroupBy();
+        self::assertEquals('Superman', $list[0]->name);
+    }
+    */
     private function buildClass()
     {
         return new class(self::$database) extends DatabaseBroker implements Listable
@@ -76,7 +104,7 @@ class FilterableTest extends TestCase
 
             function count(): int
             {
-                return $this->selectSingle("SELECT COUNT(*) as n FROM heroes GROUP BY name", [], true)->n;
+                return $this->selectSingle("SELECT COUNT(*) as n FROM heroes GROUP BY name")->n;
             }
 
             function findAll(): array
@@ -87,6 +115,13 @@ class FilterableTest extends TestCase
             function findAllHaving()
             {
                 return $this->select("SELECT count(id) n FROM heroes GROUP BY name HAVING n = 2");
+            }
+
+            // Obtain the most powerful heroes (those with the max epic score)
+            // Cannot be tested because of DBMS limitation (GROUP BY clause is required before HAVING)
+            function findAllHavingWithoutGroupBy()
+            {
+                return $this->select("SELECT name FROM heroes HAVING MAX(epic)");
             }
         };
     }
@@ -103,7 +138,7 @@ class FilterableTest extends TestCase
 
             function count(): int
             {
-                return $this->selectSingle("SELECT COUNT(*) as n FROM heroes GROUP BY name", [], true)->n;
+                return $this->selectSingle("SELECT COUNT(*) as n FROM heroes")->n;
             }
 
             function findAll(): array
