@@ -57,7 +57,107 @@ $ composer install
 ```
 
 # Utilisation
-À venir ...
+
+#### Exemple 1 : Obtenir une liste et un détail depuis la base de données (simple)
+
+app/Models/Brokers/ClientBroker.php
+```php
+<?php namespace Models\Brokers;
+
+class ClientBroker extends Broker
+{
+    public function findAll(): array
+    {
+        return $this->select("SELECT * FROM client");
+    }
+
+    public function findById($clientId): ?\stdClass
+    {
+        return $this->selectSingle("SELECT * FROM client WHERE client_id = ?", [$clientId]);
+    }
+}
+```
+
+app/Controllers/ExampleBroker.php
+```php
+<?php namespace Controllers;
+
+use Models\Brokers\ClientBroker;
+
+class ExampleController extends ApiController
+{
+    public function initializeRoutes()
+    {      
+        $this->get("/clients", "index");
+        $this->get("/clients/{id}", "read");
+    }
+
+    public function index()
+    {
+        $broker = new ClientBroker();       
+        return $this->success(['clients' => $broker->findAll()]);
+    }
+
+    public function read($clientId)
+    {
+        $broker = new ClientBroker();
+        $client = $broker->findById($clientId);
+        if (is_null($client)) {
+            return $this->abortNotFound();  
+        }
+        return $this->success(['client' => $client]);
+    }
+}
+```
+
+#### Exemple 2 : Traitement d'une insertion avec validation
+
+```php
+<?php namespace Controllers;
+
+use Models\Brokers\UserBroker;
+use Zephyrus\Application\Rule;
+
+class ExampleController extends ApiController
+{
+    public function initializeRoutes()
+    {              
+        ...
+        $this->post("/users", "insert");
+    }
+
+    public function insert()
+    {
+        // Construire un objet Form depuis les données de la requête
+        $form = $this->buildForm();
+    
+        // Appliquer une série de règles de validation sur les champs nécessaires. Il existe une grande quantité
+        // de validations intégrés dans Zephyrus. Consulter les Rule:: pour les découvrir.
+        $form->validate('firstname', Rule::notEmpty("Firstname must not be empty"));
+        $form->validate('lastname', Rule::notEmpty("Lastname must not be empty"));
+        $form->validate('birthdate', Rule::date("Date is invalid"));
+        $form->validate('email', Rule::email("Email is invalid"));
+        $form->validate('password', Rule::passwordCompliant("Password does not meet security requirements"));
+        $form->validate('password_confirm', Rule::sameAs("password", "Password doesn't match"));
+        $form->validate('username', Rule::notEmpty("Username must not be empty"));
+        $form->validate('username', new Rule(function ($value) {
+            return $value != "admin";
+        }, "Username must not be admin!"));
+
+        // Si la vérification échoue, retourner les messages d'erreur
+        if (!$form->verify()) {            
+            return $this->error($form->getErrorMessages());
+        }
+
+        // Effectuer le traitement si aucune erreur n'est détectée (dans ce cas, ajouter l'utilisateur depuis
+        // un courtier et obtenir le nouvel identifiant).
+        $clientId = (new UserBroker())->insert($form->buildObject());
+
+        // Retourner au client l'identifiant du nouvel utilisateur
+        return $this->success(['client_id' => $clientId]);
+    }
+}
+```
 
 # Contribution
 
