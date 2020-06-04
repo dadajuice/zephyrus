@@ -7,7 +7,6 @@ use Zephyrus\Network\Response;
  * RFC7231 compliant.
  *
  * Trait AbortResponses
- * @package Zephyrus\Network\Responses
  */
 trait AbortResponses
 {
