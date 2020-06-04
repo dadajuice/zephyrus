@@ -91,18 +91,16 @@ trait Filterable
      */
     private function buildSearchWhere(string $query): string
     {
-        $lastWhereByOccurrence = strripos($query, "where");
-        $lastGroupByOccurrence = strripos($query, "group by");
-        $lastHavingByOccurrence = strripos($query, "having");
+        $lastFromByOccurrence = strripos($query, "from");
+        $lastWhereByOccurrence = strripos($query, "where", $lastFromByOccurrence);
+        $lastGroupByOccurrence = strripos($query, "group by", $lastFromByOccurrence);
+        $lastHavingByOccurrence = strripos($query, "having", $lastFromByOccurrence);
         $insertionPosition = strlen($query);
         if ($lastGroupByOccurrence !== false && $lastGroupByOccurrence > $lastWhereByOccurrence) {
             $insertionPosition = $lastGroupByOccurrence - 1;
         } elseif ($lastHavingByOccurrence !== false && $lastHavingByOccurrence > $lastWhereByOccurrence) {
-            // Having without a group by clause case ... valid as standard SQL but cannot
-            // be properly tested due to DBMS limitations.
-            // @codeCoverageIgnoreStart
+            // Having without a group by clause case (valid as standard SQL)
             $insertionPosition = $lastHavingByOccurrence - 1;
-            // @codeCoverageIgnoreEnd
         }
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);
