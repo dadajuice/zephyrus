@@ -219,58 +219,72 @@ abstract class Controller implements Routable
 
     /**
      * @param int $httpStatusCode
+     * @param string $content
+     * @param string $contentType
      * @return Response
      */
-    protected function abort(int $httpStatusCode): Response
+    protected function abort(int $httpStatusCode, string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return ResponseFactory::getInstance()->buildAbort($httpStatusCode);
+        return ResponseFactory::getInstance()->buildAbort($httpStatusCode, $content, $contentType);
     }
 
     /**
+     * @param string $content
+     * @param string $contentType
      * @return Response
      */
-    protected function abortNotFound(): Response
+    protected function abortNotFound(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return ResponseFactory::getInstance()->buildAbortNotFound();
+        return ResponseFactory::getInstance()->buildAbortNotFound($content, $contentType);
     }
 
     /**
+     * @param string $content
+     * @param string $contentType
      * @return Response
      */
-    protected function abortBadRequest(): Response
+    protected function abortBadRequest(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return ResponseFactory::getInstance()->buildAbortBadRequest();
+        return ResponseFactory::getInstance()->buildAbortBadRequest($content, $contentType);
     }
 
     /**
+     * @param string $content
+     * @param string $contentType
      * @return Response
      */
-    protected function abortInternalError(): Response
+    protected function abortInternalError(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return ResponseFactory::getInstance()->buildAbortInternalError();
+        return ResponseFactory::getInstance()->buildAbortInternalError($content, $contentType);
     }
 
     /**
+     * @param string $content
+     * @param string $contentType
      * @return Response
      */
-    protected function abortForbidden(): Response
+    protected function abortForbidden(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return ResponseFactory::getInstance()->buildAbortForbidden();
+        return ResponseFactory::getInstance()->buildAbortForbidden($content, $contentType);
     }
 
     /**
+     * @param string $content
+     * @param string $contentType
      * @return Response
      */
-    protected function abortMethodNotAllowed(): Response
+    protected function abortMethodNotAllowed(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return ResponseFactory::getInstance()->buildAbortMethodNotAllowed();
+        return ResponseFactory::getInstance()->buildAbortMethodNotAllowed($content, $contentType);
     }
 
     /**
+     * @param string $content
+     * @param string $contentType
      * @return Response
      */
-    protected function abortNotAcceptable(): Response
+    protected function abortNotAcceptable(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return ResponseFactory::getInstance()->buildAbortNotAcceptable();
+        return ResponseFactory::getInstance()->buildAbortNotAcceptable($content, $contentType);
     }
 }
