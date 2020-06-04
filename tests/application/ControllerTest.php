@@ -585,6 +585,24 @@ class ControllerTest extends TestCase
         self::assertEquals(404, http_response_code());
     }
 
+    public function testBadRequest()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                return parent::abortBadRequest();
+            }
+        };
+        $controller->index()->send();
+        self::assertEquals(400, http_response_code());
+    }
+
     public function testInternalError()
     {
         $router = new Router();

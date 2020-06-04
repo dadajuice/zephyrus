@@ -237,6 +237,14 @@ abstract class Controller implements Routable
     /**
      * @return Response
      */
+    protected function abortBadRequest(): Response
+    {
+        return ResponseFactory::getInstance()->buildAbortBadRequest();
+    }
+
+    /**
+     * @return Response
+     */
     protected function abortInternalError(): Response
     {
         return ResponseFactory::getInstance()->buildAbortInternalError();

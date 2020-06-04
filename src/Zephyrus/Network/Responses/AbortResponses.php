@@ -3,35 +3,48 @@
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Response;
 
+/**
+ * RFC7231 compliant.
+ *
+ * Trait AbortResponses
+ * @package Zephyrus\Network\Responses
+ */
 trait AbortResponses
 {
-    public function buildAbort(int $httpStatusCode): Response
+    public function buildAbort(int $httpStatusCode, string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return new Response(ContentType::PLAIN, $httpStatusCode);
+        $response = new Response($contentType, $httpStatusCode);
+        $response->setContent($content);
+        return $response;
     }
 
-    public function buildAbortNotFound(): Response
+    public function buildAbortBadRequest(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return new Response(ContentType::PLAIN, 404);
+        return $this->buildAbort(400, $content, $contentType);
     }
 
-    public function buildAbortInternalError(): Response
+    public function buildAbortNotFound(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return new Response(ContentType::PLAIN, 500);
+        return $this->buildAbort(404, $content, $contentType);
     }
 
-    public function buildAbortForbidden(): Response
+    public function buildAbortForbidden(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return new Response(ContentType::PLAIN, 403);
+        return $this->buildAbort(403, $content, $contentType);
     }
 
-    public function buildAbortMethodNotAllowed(): Response
+    public function buildAbortMethodNotAllowed(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return new Response(ContentType::PLAIN, 405);
+        return $this->buildAbort(405, $content, $contentType);
     }
 
-    public function buildAbortNotAcceptable(): Response
+    public function buildAbortNotAcceptable(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return new Response(ContentType::PLAIN, 406);
+        return $this->buildAbort(406, $content, $contentType);
+    }
+
+    public function buildAbortInternalError(string $content = "", string $contentType = ContentType::PLAIN): Response
+    {
+        return $this->buildAbort(500, $content, $contentType);
     }
 }
