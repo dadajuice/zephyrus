@@ -11,6 +11,7 @@ interface ContentType
     const CSS = 'text/css'; /* RFC 2318 */
     const CSV = 'text/csv'; /* RFC 4180 */
     const JSON = 'application/json'; /* RFC 4627 */
+    const JSON_API = 'application/vnd.api+json'; /* RFC 7159 */
     const JAVASCRIPT = 'text/javascript'; /* RFC 4329 */
     const PDF = 'application/pdf'; /* RFC 3778 */
     const GZIP = 'application/gzip'; /* RFC 6713 */
