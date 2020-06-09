@@ -37,7 +37,7 @@ class HttpRequester
     /**
      * @var string
      */
-    private $userAgent = "";
+    private $userAgent = "Zephyrus HTTP Requester/1.0.0";
 
     /**
      * @var array
