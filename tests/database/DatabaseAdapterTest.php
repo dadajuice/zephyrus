@@ -5,6 +5,7 @@ use Zephyrus\Database\Core\Adapters\DatabaseAdapter;
 use Zephyrus\Database\Core\Adapters\MysqlAdapter;
 use Zephyrus\Database\Core\Adapters\PostgresqlAdapter;
 use Zephyrus\Database\Core\Adapters\SqliteAdapter;
+use Zephyrus\Database\Core\Database;
 
 class DatabaseAdapterTest extends TestCase
 {
@@ -50,6 +51,18 @@ class DatabaseAdapterTest extends TestCase
             'database' => ROOT_DIR . '/lib/db.sqlite'
         ]);
         self::assertEquals(ROOT_DIR . '/lib/db.sqlite', $adapter->getDatabaseName());
+    }
+
+    /**
+     * @expectedException \Zephyrus\Exceptions\DatabaseException
+     */
+    public function testFileSqliteError()
+    {
+        $adapter = new SqliteAdapter([
+            'dbms' => 'mysql',
+            'database' => ROOT_DIR . '/lib/db.sqlidfljsdfkjlsdkfjlte'
+        ]);
+        $database = new Database($adapter);
     }
 
     public function testPgsql()
