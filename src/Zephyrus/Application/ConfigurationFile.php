@@ -27,7 +27,7 @@ class ConfigurationFile
         }
         $file = fopen($this->path, 'w');
         flock($file, LOCK_EX);
-        fwrite($file, implode(PHP_EOL, $this->buildConfigurations()) . PHP_EOL);
+        fwrite($file, implode(PHP_EOL, $this->buildConfigurations()));
         flock($file, LOCK_UN);
         fclose($file);
         return true;
