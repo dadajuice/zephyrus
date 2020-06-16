@@ -46,6 +46,15 @@ class CsrfGuard
     private $putSecured = true;
 
     /**
+     * Determines if the HTTP PATCH requests are secured by the CSRF filter. It
+     * implies that for EVERY request of this type, the CSRF token should be
+     * provided.
+     *
+     * @var bool
+     */
+    private $patchSecured = true;
+
+    /**
      * Determines if the HTTP DELETE requests are secured by the CSRF filter. It
      * implies that for EVERY request of this type, the CSRF token should be
      * provided.
@@ -58,10 +67,11 @@ class CsrfGuard
     {
         $this->request = &$request;
         $configs = Configuration::getSecurityConfiguration();
-        if (isset($configs['csrf_guard_req'])) {
-            $methodsToFilter = $configs['csrf_guard_req'];
+        if (isset($configs['csrf_guard_methods'])) {
+            $methodsToFilter = $configs['csrf_guard_methods'];
             $this->setPostSecured(in_array('POST', $methodsToFilter));
             $this->setPutSecured(in_array('PUT', $methodsToFilter));
+            $this->setPatchSecured(in_array('PATCH', $methodsToFilter));
             $this->setDeleteSecured(in_array('DELETE', $methodsToFilter));
             $this->setGetSecured(in_array('GET', $methodsToFilter));
         }
@@ -87,7 +97,7 @@ class CsrfGuard
      */
     public function guard()
     {
-        if ($this->isHttpMethodFiltered($this->request->getMethod())) {
+        if ($this->isHttpMethodFiltered(strtoupper($this->request->getMethod()))) {
             $formName = $this->getProvidedFormName();
             $providedToken = $this->getProvidedCsrfToken();
             if (is_null($formName) || is_null($providedToken)) {
@@ -167,6 +177,22 @@ class CsrfGuard
     public function setPutSecured(bool $putSecured)
     {
         $this->putSecured = $putSecured;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPatchSecured(): bool
+    {
+        return (bool) $this->patchSecured;
+    }
+
+    /**
+     * @param bool $patchSecured
+     */
+    public function setPatchSecured(bool $patchSecured)
+    {
+        $this->patchSecured = $patchSecured;
     }
 
     /**
@@ -297,6 +323,8 @@ class CsrfGuard
         } elseif ($this->postSecured && $method == "POST") {
             return true;
         } elseif ($this->putSecured && $method == "PUT") {
+            return true;
+        } elseif ($this->patchSecured && $method == "PATCH") {
             return true;
         } elseif ($this->deleteSecured && $method == "DELETE") {
             return true;

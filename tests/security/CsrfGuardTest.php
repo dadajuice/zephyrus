@@ -66,11 +66,13 @@ class CsrfGuardTest extends TestCase
         $csrf->setDeleteSecured(true);
         $csrf->setPostSecured(true);
         $csrf->setPutSecured(true);
+        $csrf->setPatchSecured(true);
         $csrf->setGetSecured(true);
         self::assertTrue($csrf->isDeleteSecured());
         self::assertTrue($csrf->isGetSecured());
         self::assertTrue($csrf->isPostSecured());
         self::assertTrue($csrf->isPutSecured());
+        self::assertTrue($csrf->isPatchSecured());
     }
 
     /**
@@ -89,6 +91,16 @@ class CsrfGuardTest extends TestCase
     public function testInvalidToken()
     {
         $req = new Request('http://test.local/test', 'PUT', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
+        $csrf = new CsrfGuard($req);
+        $csrf->guard();
+    }
+
+    /**
+     * @expectedException \Zephyrus\Exceptions\InvalidCsrfException
+     */
+    public function testInvalidToken2()
+    {
+        $req = new Request('http://test.local/test', 'PATCH', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
         $csrf = new CsrfGuard($req);
         $csrf->guard();
     }
