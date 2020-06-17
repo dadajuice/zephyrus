@@ -1,4 +1,4 @@
-<?php namespace Models\Utilities;
+<?php namespace Zephyrus\Utilities;
 
 use stdClass;
 

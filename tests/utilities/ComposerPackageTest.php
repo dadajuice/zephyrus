@@ -1,7 +1,7 @@
 <?php namespace Zephyrus\Tests\utilities;
 
-use Models\Utilities\ComposerPackage;
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Utilities\ComposerPackage;
 
 class ComposerPackageTest extends TestCase
 {
