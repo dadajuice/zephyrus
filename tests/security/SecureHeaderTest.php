@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Security\ContentSecurityPolicy;
+use Zephyrus\Security\CrossOriginResourcePolicy;
 use Zephyrus\Security\SecureHeader;
 
 class SecureHeaderTest extends TestCase
@@ -55,9 +56,11 @@ class SecureHeaderTest extends TestCase
 
     public function testAccessControl()
     {
+        $cors = new CrossOriginResourcePolicy();
+        $cors->setAccessControlAllowOrigin('dummy@domain.com');
         $header = new SecureHeader();
-        $header->setAccessControlAllowOrigin("dummy@domain.com");
-        self::assertEquals("dummy@domain.com", $header->getAccessControlAllowOrigin());
+        $header->setCrossOriginResourcePolicy($cors);
+        self::assertEquals('dummy@domain.com', $header->getCrossOriginResourcePolicy()->getAccessControlAllowOrigin());
         $header->send();
         self::assertTrue(in_array('Access-Control-Allow-Origin: dummy@domain.com', xdebug_get_headers()));
     }

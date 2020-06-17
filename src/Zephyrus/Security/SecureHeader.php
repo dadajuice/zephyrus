@@ -43,14 +43,6 @@ class SecureHeader
     private $strictTransportSecurity = "max-age=16070400; includeSubDomains";
 
     /**
-     * Access-Control-Allow-Origin response header indicates whether the response can be shared
-     * with resources with the given origin.
-     *
-     * @var string
-     */
-    private $accessControlAllowOrigin = "";
-
-    /**
      * Requires careful tuning and precise definition of the policy. If
      * enabled, CSP has significant impact on the way browser renders
      * pages (e.g., inline JavaScript disabled by default and must be
@@ -60,6 +52,14 @@ class SecureHeader
      * @var ContentSecurityPolicy
      */
     private $contentSecurityPolicy = null;
+
+    /**
+     * This class defines the CORS policy. This is needed for JavaScript frontside calls from another origin and thus
+     * need careful tuning for optimal security.
+     *
+     * @var CrossOriginResourcePolicy
+     */
+    private $crossOriginResourcePolicy = null;
 
     /**
      * Bulk send HTTP response header aiming security purposes. Each one are
@@ -73,7 +73,7 @@ class SecureHeader
         $this->sendFrameOptions();
         $this->sendXssProtection();
         $this->sendStrictTransport();
-        $this->sendAccessControlAllowOrigin();
+        $this->sendCrossOriginResourcePolicy();
         $this->sendContentSecurity();
     }
 
@@ -142,22 +142,6 @@ class SecureHeader
     }
 
     /**
-     * @return string
-     */
-    public function getAccessControlAllowOrigin(): string
-    {
-        return $this->accessControlAllowOrigin;
-    }
-
-    /**
-     * @param string $accessControlAllowOrigin
-     */
-    public function setAccessControlAllowOrigin(string $accessControlAllowOrigin): void
-    {
-        $this->accessControlAllowOrigin = $accessControlAllowOrigin;
-    }
-
-    /**
      * @return ContentSecurityPolicy
      */
     public function getContentSecurityPolicy(): ?ContentSecurityPolicy
@@ -171,6 +155,22 @@ class SecureHeader
     public function setContentSecurityPolicy(?ContentSecurityPolicy $csp)
     {
         $this->contentSecurityPolicy = $csp;
+    }
+
+    /**
+     * @return CrossOriginResourcePolicy
+     */
+    public function getCrossOriginResourcePolicy(): CrossOriginResourcePolicy
+    {
+        return $this->crossOriginResourcePolicy;
+    }
+
+    /**
+     * @param CrossOriginResourcePolicy $cors
+     */
+    public function setCrossOriginResourcePolicy(?CrossOriginResourcePolicy $cors)
+    {
+        $this->crossOriginResourcePolicy = $cors;
     }
 
     private function sendContentOptions()
@@ -201,10 +201,10 @@ class SecureHeader
         }
     }
 
-    private function sendAccessControlAllowOrigin()
+    private function sendCrossOriginResourcePolicy()
     {
-        if (!empty($this->accessControlAllowOrigin)) {
-            header('Access-Control-Allow-Origin: ' . $this->accessControlAllowOrigin);
+        if (!is_null($this->crossOriginResourcePolicy)) {
+            $this->crossOriginResourcePolicy->send();
         }
     }
 
