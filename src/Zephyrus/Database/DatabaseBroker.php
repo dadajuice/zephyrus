@@ -89,7 +89,6 @@ abstract class DatabaseBroker
      *
      * @param string $query
      * @param array $parameters
-     * @throws DatabaseException
      * @return DatabaseStatement
      */
     protected function query(string $query, array $parameters = []): DatabaseStatement
@@ -126,10 +125,10 @@ abstract class DatabaseBroker
      */
     protected function select(string $query, array $parameters = [], ?callable $callback = null): array
     {
+        $query = $this->filterQuery($query);
         if (!is_null($this->pager)) {
             $query .= $this->pager->getSqlLimitClause($this->database->getAdapter());
         }
-        $query = $this->filterQuery($query);
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($this->allowedHtmlTags);
         $results = [];
