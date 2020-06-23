@@ -25,6 +25,14 @@ class ResponseFactory
         return self::$instance;
     }
 
+    public function buildCreated(string $url, string $content = "", string $contentType = ContentType::PLAIN): Response
+    {
+        $response = new Response($contentType, 201);
+        $response->setContent($content);
+        $response->addHeader('Location', $url);
+        return $response;
+    }
+
     public function buildRedirect(string $url): Response
     {
         $response = new Response(ContentType::PLAIN, 303);

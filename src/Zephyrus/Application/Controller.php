@@ -218,6 +218,22 @@ abstract class Controller implements Routable
     }
 
     /**
+     * Throws an HTTP "201 Created" header that should be used with api compliant
+     * post response. Needs a redirect url (will send the location header just like
+     * a regular redirection). Optionally, can include a content body (e.g. JSON
+     * response of the created element).
+     *
+     * @param string $redirectUrl
+     * @param string $content
+     * @param string $contentType
+     * @return Response
+     */
+    public function created(string $redirectUrl, string $content = "", string $contentType = ContentType::PLAIN): Response
+    {
+        return ResponseFactory::getInstance()->buildCreated($redirectUrl, $content, $contentType);
+    }
+
+    /**
      * @param int $httpStatusCode
      * @param string $content
      * @param string $contentType
