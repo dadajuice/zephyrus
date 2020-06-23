@@ -32,6 +32,16 @@ trait Filterable
         $this->sortableFields = $fields;
     }
 
+    public function getSortableFields(): array
+    {
+        return $this->sortableFields;
+    }
+
+    public function getSearchableFields(): array
+    {
+        return $this->searchableFields;
+    }
+
     /**
      * Applies a Filter instance based on the HTTP Request for the current
      * broker. Any subsequent select queries will automatically include the

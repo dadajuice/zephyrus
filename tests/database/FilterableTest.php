@@ -41,6 +41,9 @@ class FilterableTest extends TestCase
         RequestFactory::set($r);
         $class = $this->buildClass();
         $class->applyFilter();
+        $class->getSortableFields();
+        self::assertEquals(['alias' => 'name'], $class->getSortableFields());
+        self::assertEquals(['name', 'id'], $class->getSearchableFields());
         self::assertEquals('Aquaman', $class->findAll()[0]->name);
     }
 
