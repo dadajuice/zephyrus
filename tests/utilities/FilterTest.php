@@ -31,6 +31,22 @@ class FilterTest extends TestCase
         self::assertEquals(5, $filter->getPage());
     }
 
+    public function testRemoveSort()
+    {
+        $filter = new Filter($this->getRequest());
+        self::assertEquals("username", $filter->getSort());
+        $filter->removeSort();
+        self::assertFalse($filter->hasSort());
+    }
+
+    public function testRemoveSearch()
+    {
+        $filter = new Filter($this->getRequest());
+        self::assertEquals("test", $filter->getSearch());
+        $filter->removeSearch();
+        self::assertFalse($filter->hasSearch());
+    }
+
     public function testInvalidPage()
     {
         $filter = new Filter(new Request('http://test.local', 'GET', ['parameters' => ['page' => "error"]]));
