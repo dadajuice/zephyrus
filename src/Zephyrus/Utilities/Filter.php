@@ -100,6 +100,26 @@ class Filter
         return $this->page;
     }
 
+    /**
+     * Removes the search clause from the filter. Can be useful for specific queries that absolutely needs to ignore
+     * the generated search SQL.
+     */
+    public function removeSearch()
+    {
+        $this->search = null;
+    }
+
+    /**
+     * Removes the sort clause from the filter. Can be useful for specific queries that absolutely needs to ignore
+     * the generated order by SQL. One clear example of these are the SELECT count(*) queries which do not need the
+     * order by clause.
+     */
+    public function removeSort()
+    {
+        $this->order = "";
+        $this->sort = "";
+    }
+
     private function initializeQueryStrings()
     {
         $this->initializeSort();
