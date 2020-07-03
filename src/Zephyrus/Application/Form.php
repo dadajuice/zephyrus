@@ -216,7 +216,7 @@ class Form
         if ($validation->trigger > self::TRIGGER_ALWAYS) {
             return !$this->hasError(($validation->trigger == self::TRIGGER_FIELD_NO_ERROR) ? $field : null);
         }
-        return !$validation->optional || ($validation->optional && !empty($this->fields[$field]));
+        return !$validation->optional || ($validation->optional && isset($this->fields[$field]));
     }
 
     private function addRule(string $field, Rule $rule, int $trigger, bool $optional)
