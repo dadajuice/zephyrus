@@ -23,6 +23,11 @@ class Form
     private $errors = [];
 
     /**
+     * @var bool
+     */
+    private $optionalOnEmpty = true;
+
+    /**
      * Reads a memorized value for a given fieldId. If value has not been set the
      * specified default value is assigned (empty if not set). Excellent to set
      * remembered data in forms.
@@ -181,6 +186,22 @@ class Form
     }
 
     /**
+     * @return bool
+     */
+    public function isOptionalOnEmpty(): bool
+    {
+        return $this->optionalOnEmpty;
+    }
+
+    /**
+     * @param bool $emptyIsOptional
+     */
+    public function setOptionalOnEmpty(bool $emptyIsOptional)
+    {
+        $this->optionalOnEmpty = $emptyIsOptional;
+    }
+
+    /**
      * Tries to set values to the specified object using available setter
      * methods.
      *
@@ -216,7 +237,9 @@ class Form
         if ($validation->trigger > self::TRIGGER_ALWAYS) {
             return !$this->hasError(($validation->trigger == self::TRIGGER_FIELD_NO_ERROR) ? $field : null);
         }
-        return !$validation->optional || ($validation->optional && isset($this->fields[$field]));
+        return !$validation->optional
+            || (!$this->optionalOnEmpty && $validation->optional && isset($this->fields[$field]))
+            || ($this->optionalOnEmpty && $validation->optional && !empty($this->fields[$field]));
     }
 
     private function addRule(string $field, Rule $rule, int $trigger, bool $optional)
