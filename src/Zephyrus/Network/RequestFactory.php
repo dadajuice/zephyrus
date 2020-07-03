@@ -47,7 +47,8 @@ class RequestFactory
             'parameters' => $parameters,
             'cookies' => $_COOKIE,
             'files' => $_FILES,
-            'server' => $server
+            'server' => $server,
+            'headers' => (function_exists('getallheaders')) ? getallheaders() : []
         ]);
     }
 

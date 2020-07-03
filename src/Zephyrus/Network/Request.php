@@ -58,6 +58,11 @@ class Request
     private $cookies;
 
     /**
+     * @var mixed[] list of all HTTP headers
+     */
+    private $headers;
+
+    /**
      * @var mixed[] list of all uploaded files
      */
     private $files;
@@ -69,7 +74,8 @@ class Request
      * 'parameters' => ['t' => 1, 'z' => 5],
      * 'cookies' => $_COOKIE,
      * 'files' => $_FILES,
-     * 'server' => $_SERVER
+     * 'server' => $_SERVER,
+     * 'headers' => getallheaders()
      *
      * @param string $uri
      * @param string $method
@@ -84,6 +90,7 @@ class Request
         $this->serverVariables = $options['server'] ?? [];
         $this->cookies = $options['cookies'] ?? [];
         $this->files = $options['files'] ?? [];
+        $this->headers = $options['headers'] ?? [];
         $this->initializeServer();
         $this->initializeBaseUrl();
     }
@@ -288,7 +295,7 @@ class Request
      */
     public function getHeaders(): array
     {
-        return (function_exists('getallheaders')) ? getallheaders() : [];
+        return $this->headers;
     }
 
     /**
@@ -297,8 +304,7 @@ class Request
      */
     public function getHeader(string $name): ?string
     {
-        $headers = $this->getHeaders();
-        return isset($headers[$name]) ? $headers[$name] : null;
+        return isset($this->headers[$name]) ? $this->headers[$name] : null;
     }
 
     private function initializeServer()
