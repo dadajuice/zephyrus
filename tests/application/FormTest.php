@@ -114,6 +114,18 @@ class FormTest extends TestCase
         self::assertTrue($form->verify());
     }
 
+    public function testOptionalFieldMode()
+    {
+        $form = new Form();
+        $form->setOptionalOnEmpty(false);
+        self::assertFalse($form->isOptionalOnEmpty());
+        $form->addFields([
+            'email' => ''
+        ]);
+        $form->validate('email', Rule::email('email not valid'), true);
+        self::assertFalse($form->verify());
+    }
+
     public function testInvalidCallbackForm()
     {
         $form = new Form();
