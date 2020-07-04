@@ -14,7 +14,31 @@ trait StringValidations
     }
 
     /**
-     * is alpha with numbers.
+     * Validates if the given string's length is under or equal the specified max length.
+     *
+     * @param $data
+     * @param int $maxLength
+     * @return bool
+     */
+    public static function isMaxLength($data, int $maxLength): bool
+    {
+        return strlen($data) <= $maxLength;
+    }
+
+    /**
+     * Validates if the given string's length is over or equal the specified max length.
+     *
+     * @param $data
+     * @param int $minLength
+     * @return bool
+     */
+    public static function isMinLength($data, int $minLength): bool
+    {
+        return strlen($data) >= $minLength;
+    }
+
+    /**
+     * Is alpha with numbers.
      *
      * @param $data
      * @param bool $considerAccentedChar

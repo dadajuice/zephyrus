@@ -36,12 +36,18 @@ trait TimeValidations
 
     public static function isDateTime12Hours($data, bool $includeSeconds = false): bool
     {
+        if (empty($data) || strpos($data, ' ') === false) {
+            return false;
+        }
         list($datePart, $timePart) = explode(' ', $data);
         return self::isDate($datePart) && self::isTime12Hours($timePart, $includeSeconds);
     }
 
     public static function isDateTime24Hours($data, bool $includeSeconds = false): bool
     {
+        if (empty($data) || strpos($data, ' ') === false) {
+            return false;
+        }
         list($datePart, $timePart) = explode(' ', $data);
         return self::isDate($datePart) && self::isTime24Hours($timePart, $includeSeconds);
     }

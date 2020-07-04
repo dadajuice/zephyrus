@@ -107,6 +107,7 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid("-109-01-01"));
         self::assertFalse($rule->isValid("2016"));
         self::assertFalse($rule->isValid("2017-50-03"));
+        self::assertFalse($rule->isValid(""));
     }
 
     public function testIsTime12Hours()
@@ -119,6 +120,7 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid("-08:00"));
         self::assertFalse($rule->isValid("er"));
         self::assertFalse($rule->isValid("05:89"));
+        self::assertFalse($rule->isValid(""));
     }
 
     public function testIsTime24Hours()
@@ -133,6 +135,7 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid("-08:00"));
         self::assertFalse($rule->isValid("er"));
         self::assertFalse($rule->isValid("05:89"));
+        self::assertFalse($rule->isValid(""));
     }
 
     public function testIsDateTime12Hours()
@@ -140,6 +143,7 @@ class RuleTest extends TestCase
         $rule = Rule::dateTime12Hours();
         self::assertTrue($rule->isValid("2019-01-01 11:07"));
         self::assertFalse($rule->isValid("2019-01-01 23:07"));
+        self::assertFalse($rule->isValid(""));
     }
 
     public function testIsDateTime24Hours()
@@ -148,6 +152,7 @@ class RuleTest extends TestCase
         self::assertTrue($rule->isValid("2019-01-01 11:07"));
         self::assertTrue($rule->isValid("2019-01-01 23:07"));
         self::assertFalse($rule->isValid("2019-01-01 28:27"));
+        self::assertFalse($rule->isValid(""));
     }
 
     public function testIsDateTime24HoursWithSeconds()
@@ -157,6 +162,7 @@ class RuleTest extends TestCase
         self::assertTrue($rule->isValid("2019-01-01 23:07:01"));
         self::assertFalse($rule->isValid("2019-01-01 20:27:99"));
         self::assertFalse($rule->isValid("2019-01-01 20:27"));
+        self::assertFalse($rule->isValid(""));
     }
 
     public function testIsPhone()
@@ -347,6 +353,21 @@ class RuleTest extends TestCase
         self::assertTrue($rule->isValid(4));
         self::assertFalse($rule->isValid(-5));
         self::assertFalse($rule->isValid(7));
+    }
+
+    public function testIsMinLength()
+    {
+        $rule = Rule::minLength(8);
+        self::assertTrue($rule->isValid("OuiAllo12345"));
+        self::assertFalse($rule->isValid("Oui"));
+    }
+
+    public function testIsMaxLength()
+    {
+        $rule = Rule::maxLength(4);
+        self::assertTrue($rule->isValid("12"));
+        self::assertTrue($rule->isValid("1234"));
+        self::assertFalse($rule->isValid("12345"));
     }
 
     public function testIsInArray()

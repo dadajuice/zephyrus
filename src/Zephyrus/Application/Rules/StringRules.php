@@ -39,4 +39,18 @@ trait StringRules
             return Validation::isAlphanumeric($data, $considerAccentedChar);
         }, $errorMessage);
     }
+
+    public static function minLength(int $minLength, string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data) use ($minLength) {
+            return Validation::isMinLength($data, $minLength);
+        }, $errorMessage);
+    }
+
+    public static function maxLength(int $maxLength, string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data) use ($maxLength) {
+            return Validation::isMaxLength($data, $maxLength);
+        }, $errorMessage);
+    }
 }
