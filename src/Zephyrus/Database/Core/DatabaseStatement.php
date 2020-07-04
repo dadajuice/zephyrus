@@ -127,8 +127,15 @@ class DatabaseStatement
     private function initializeTypeConversion()
     {
         for ($i = 0; $i < $this->statement->columnCount(); ++$i) {
-            $meta = $this->statement->getColumnMeta($i);
-            $this->fetchColumnTypes[$meta['name']] = $this->getMetaCallback(strtoupper($meta['native_type']));
+            try {
+                $meta = $this->statement->getColumnMeta($i);
+                $this->fetchColumnTypes[$meta['name']] = $this->getMetaCallback(strtoupper($meta['native_type']));
+            } catch (\Exception $exception) {
+                // With DBMS SQLite, if a query has no result, it cannot use the getColumnMeta method as this will
+                // throw an out of range exception even if the columnCount returns the correct result. Must be a bug
+                // within PDO statement with SQLite. To avoid any problem, an empty catch will make sure to ignore
+                // such error as anyway no conversion will be necessary with empty results.
+            }
         }
     }
 
