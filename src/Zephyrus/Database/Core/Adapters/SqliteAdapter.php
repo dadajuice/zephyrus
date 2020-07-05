@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Database\Core\Adapters;
 
+use Zephyrus\Database\Core\Database;
 use Zephyrus\Exceptions\DatabaseException;
 
 class SqliteAdapter extends DatabaseAdapter
@@ -35,5 +36,43 @@ class SqliteAdapter extends DatabaseAdapter
     public function getAddEnvironmentVariableClause(string $name, string $value): string
     {
         return "";
+    }
+
+    public function getAllTableNames(Database $database): array
+    {
+        $names = [];
+        $sql = "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'";
+        $statement = $database->query($sql);
+        $results = [];
+        while ($row = $statement->next()) {
+            $results[] = $row->name;
+        }
+        return $results;
+    }
+
+    public function getAllColumnNames(Database $database, string $tableName): array
+    {
+        $columns = [];
+        $statement = $database->query("PRAGMA table_info($tableName)");
+        while ($row = $statement->next()) {
+            $columns[] = $row->name;
+        }
+        return $columns;
+    }
+
+    public function getAllColumns(Database $database, string $tableName): array
+    {
+        $columns = [];
+        $statement = $database->query("PRAGMA table_info($tableName)");
+        while ($row = $statement->next()) {
+            $columns[] = (object) [
+                'name' => $row->name,
+                'type' => strtoupper($row->type),
+                'key' => ($row->pk) ? 'PRI' : null,
+                'default' => $row->dflt_value,
+                'notnull' => boolval($row->notnull)
+            ];
+        }
+        return $columns;
     }
 }

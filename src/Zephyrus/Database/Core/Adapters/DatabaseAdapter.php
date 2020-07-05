@@ -2,6 +2,7 @@
 
 use PDO;
 use PDOException;
+use Zephyrus\Database\Core\Database;
 use Zephyrus\Database\Core\TransactionPDO;
 use Zephyrus\Exceptions\DatabaseException;
 
@@ -192,6 +193,97 @@ abstract class DatabaseAdapter
     public function getDataSourceName(): string
     {
         return $this->dsn;
+    }
+
+    /**
+     * Meta query to retrieve all table names of given database instance. Must be redefined in children adapter classes
+     * to adapt for each supported DBMS. Should return only an array with the table names as value (e.g. ['user',
+     * 'client']).
+     *
+     * @param Database $database
+     * @return array
+     */
+    public function getAllTableNames(Database $database): array
+    {
+        return [];
+    }
+
+    /**
+     * Meta query to retrieve all table details of given database instance. Must be redefined in children adapter
+     * classes to adapt for each supported DBMS. Should return an array of stdClass respecting the following structure:
+     *
+     * [
+     *     [
+     *         'name' => 'user',
+     *         'columns' => [
+     *             [
+     *                 'name' => 'firstname',
+     *                 'type' => 'VARCHAR(50)',
+     *                 'key' => null,
+     *                 'default' => null,
+     *                 'notnull' => false
+     *             ],
+     *             [...]
+     *         ]
+     *     ]
+     * ]
+     *
+     * @param Database $database
+     * @return array
+     */
+    public function getAllTables(Database $database): array
+    {
+        $results = [];
+        foreach ($this->getAllTableNames($database) as $name) {
+            $results[] = (object) [
+                'name' => $name,
+                'columns' => $this->getAllColumns($database, $name),
+                'constraints' => $this->getAllConstraints($database, $name)
+            ];
+        }
+        return $results;
+    }
+
+    /**
+     * Meta query to retrieve all column names of given table name within the specified database instance. Must be
+     * redefined in children adapter classes to adapt for each supported DBMS. Should return only an array with the
+     * columns names as value (e.g. ['firstname', 'lastname']).
+     *
+     * @param Database $database
+     * @return array
+     */
+    public function getAllColumnNames(Database $database, string $tableName): array
+    {
+        return [];
+    }
+
+    public function getAllConstraints(Database $database, string $tableName): array
+    {
+        return [];
+    }
+
+    /**
+     * Meta query to retrieve all column details of given table name within the specified database instance. Must be
+     * redefined in children adapter classes to adapt for each supported DBMS. Should return an array of stdClass
+     * respecting the following structure:
+     *
+     * [
+     *     [
+     *         'name' => 'firstname',
+     *         'type' => 'VARCHAR(50)',
+     *         'key' => null,
+     *         'default' => null,
+     *         'notnull' => false
+     *     ],
+     *     [...]
+     * ]
+     *
+     * @param Database $database
+     * @return array
+     */
+    public function getAllColumns(Database $database, string $tableName): array
+    {
+        return [];
     }
 
     protected function buildDataSourceName(): string

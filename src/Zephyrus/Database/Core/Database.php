@@ -119,6 +119,31 @@ class Database
         return $this->handle->lastInsertId($name);
     }
 
+    public function getAllTableNames(): array
+    {
+        return $this->adapter->getAllTableNames($this);
+    }
+
+    public function getAllTables(): array
+    {
+        return $this->adapter->getAllTables($this);
+    }
+
+    public function getAllColumnNames(string $tableName): array
+    {
+        return $this->adapter->getAllColumnNames($this, $tableName);
+    }
+
+    public function getAllConstraints(string $tableName): array
+    {
+        return $this->adapter->getAllConstraints($this, $tableName);
+    }
+
+    public function getAllColumns(string $tableName): array
+    {
+        return $this->adapter->getAllColumns($this, $tableName);
+    }
+
     /**
      * Guesses the best PDO::PARAM_x type constant for a given variable. Ignored
      * from coverage because test Database (sqlite) doesn't have proper BOOL or
