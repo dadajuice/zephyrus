@@ -40,6 +40,46 @@ class RequestFactoryTest extends TestCase
         self::assertEquals('toto', $request->getParameter('password'));
     }
 
+    public function testJsonNestedRawCapture()
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['REQUEST_URI'] = 'http://test.local/';
+        $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
+        $_SERVER['HTTP_HOST'] = 'test.local';
+        $_SERVER['SERVER_PORT'] = '80';
+        $_SERVER['CONTENT_TYPE'] = ContentType::JSON;
+        RequestFactory::set(null);
+        stream_wrapper_unregister("php");
+        stream_wrapper_register("php", "\Zephyrus\Tests\PhpStreamMock");
+        file_put_contents('php://input', '{"username": "test", "password": "toto", "contact": {"phone": "555-555-5555", "email": "toto@mail.com"}}');
+        $request = RequestFactory::read();
+        stream_wrapper_restore("php");
+        self::assertEquals('test', $request->getParameter('username'));
+        self::assertEquals('toto', $request->getParameter('password'));
+        self::assertEquals('toto@mail.com', $request->getParameter('contact')->email);
+    }
+
+    public function testJsonNestedEmptyRawCapture()
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['REQUEST_URI'] = 'http://test.local/';
+        $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
+        $_SERVER['HTTP_HOST'] = 'test.local';
+        $_SERVER['SERVER_PORT'] = '80';
+        $_SERVER['CONTENT_TYPE'] = ContentType::JSON;
+        RequestFactory::set(null);
+        stream_wrapper_unregister("php");
+        stream_wrapper_register("php", "\Zephyrus\Tests\PhpStreamMock");
+        file_put_contents('php://input', '{"username": "test", "password": "toto", "contact": {}}');
+        $request = RequestFactory::read();
+        stream_wrapper_restore("php");
+        self::assertEquals('test', $request->getParameter('username'));
+        self::assertEquals('toto', $request->getParameter('password'));
+        self::assertEquals(new \stdClass(), $request->getParameter('contact'));
+    }
+
     public function testXmlRawCapture()
     {
         $_SERVER['REQUEST_METHOD'] = 'POST';
