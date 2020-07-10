@@ -107,24 +107,24 @@ class FilterableTest extends TestCase
 
             function count(): int
             {
-                return $this->selectSingle("SELECT COUNT(*) as n FROM heroes GROUP BY name")->n;
+                return $this->filteredSelectSingle("SELECT COUNT(*) as n FROM heroes GROUP BY name")->n;
             }
 
             function findAll(): array
             {
-                return $this->select("SELECT * FROM heroes GROUP BY name");
+                return $this->filteredSelect("SELECT * FROM heroes GROUP BY name");
             }
 
             function findAllHaving()
             {
-                return $this->select("SELECT count(id) n FROM heroes GROUP BY name HAVING n = 2");
+                return $this->filteredSelect("SELECT count(id) n FROM heroes GROUP BY name HAVING n = 2");
             }
 
             // Obtain the most powerful heroes (those with the max epic score)
             // Cannot be tested because of DBMS limitation (GROUP BY clause is required before HAVING)
             function findAllHavingWithoutGroupBy()
             {
-                return $this->select("SELECT name FROM heroes HAVING MAX(epic)");
+                return $this->filteredSelect("SELECT name FROM heroes HAVING MAX(epic)");
             }
         };
     }
@@ -141,17 +141,17 @@ class FilterableTest extends TestCase
 
             function count(): int
             {
-                return $this->selectSingle("SELECT COUNT(*) as n FROM heroes")->n;
+                return $this->filteredSelectSingle("SELECT COUNT(*) as n FROM heroes")->n;
             }
 
             function findAll(): array
             {
-                return $this->select("SELECT * FROM heroes");
+                return $this->filteredSelect("SELECT * FROM heroes");
             }
 
             function findAllHaving()
             {
-                return $this->select("SELECT count(id) n FROM heroes GROUP BY name HAVING n = 2");
+                return $this->filteredSelect("SELECT count(id) n FROM heroes GROUP BY name HAVING n = 2");
             }
         };
     }

@@ -29,7 +29,7 @@ class BrokerTest extends TestCase
         {
             public function findAll()
             {
-                return $this->select("SELECT * FROM heroes");
+                return $this->filteredSelect("SELECT * FROM heroes");
             }
         };
         $req = new Request('http://test.local/3', 'GET', ['id' => '3']);

@@ -23,8 +23,7 @@ abstract class DatabaseBroker
     use Filterable { filterQuery as private; }
 
     /**
-     * Broker constructor called by children. Simply get the database reference
-     * for further use. Pageable.
+     * Broker constructor called by children. Simply get the database reference for further use.
      *
      * @param null|Database $database
      * @throws DatabaseException
@@ -54,6 +53,10 @@ abstract class DatabaseBroker
     }
 
     /**
+     * Proceeds to include the given variable into the database environnement so that the executed queries, triggers or
+     * stored procedures could have access to the variable. Useful for example to pass a user id to register for
+     * automated log triggers.
+     *
      * @param string $name
      * @param string $value
      */
@@ -63,7 +66,10 @@ abstract class DatabaseBroker
     }
 
     /**
-     * <p><a>.
+     * Defines a set of HTML tags that are allowed to be processed by queries. The string should be defined as a
+     * sequence of fully formed tags (e.g. <p><a>). Consider using markdown for basic styling instead of direct HTML to
+     * limit risks of injection. This feature is available since many WYSIWYG editors still uses HTML tags for style
+     * definition.
      *
      * @param string $allowedTags
      */
@@ -72,20 +78,27 @@ abstract class DatabaseBroker
         $this->allowedHtmlTags = $allowedTags;
     }
 
+    /**
+     * Retrieves the previously allowed HTML tags that can be processed by queries.
+     *
+     * @return string
+     */
     protected function getAllowedHtmlTags(): string
     {
         return $this->allowedHtmlTags;
     }
 
+    /**
+     * Get rid of all previously set allowed HTML tags.
+     */
     protected function removeAllowedHtmlTags()
     {
         $this->allowedHtmlTags = "";
     }
 
     /**
-     * Executes any type of query and simply returns the DatabaseStatement
-     * object ready to be fetched. Will throw a DatabaseException is the query
-     * fails to execute.
+     * Executes any type of query and simply returns the DatabaseStatement object ready to be fetched. Will throw a
+     * DatabaseException is the query fails to execute.
      *
      * @param string $query
      * @param array $parameters
@@ -97,9 +110,8 @@ abstract class DatabaseBroker
     }
 
     /**
-     * Executes a SELECT query which should return a single data row. Best
-     * suited for queries involving primary key in where. Will return null
-     * if the query did not fetch any result.
+     * Executes a SELECT query which should return a single data row. Best suited for queries involving primary key in
+     * where. Will return null if the query did not fetch any result.
      *
      * @param string $query
      * @param array $parameters
@@ -108,15 +120,14 @@ abstract class DatabaseBroker
      */
     protected function selectSingle(string $query, array $parameters = []): ?stdClass
     {
-        $query = $this->filterQuery($query);
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($this->allowedHtmlTags);
         return $statement->next();
     }
 
     /**
-     * Execute a SELECT query which return the entire set of rows in an array. Will
-     * return an empty array if the query did not return any results.
+     * Execute a SELECT query which return the entire set of rows in an array. Will return an empty array if the query
+     * did not return any results.
      *
      * @param string $query
      * @param array $parameters
@@ -125,10 +136,6 @@ abstract class DatabaseBroker
      */
     protected function select(string $query, array $parameters = [], ?callable $callback = null): array
     {
-        $query = $this->filterQuery($query);
-        if (!is_null($this->pager)) {
-            $query .= $this->pager->getSqlLimitClause($this->database->getAdapter());
-        }
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($this->allowedHtmlTags);
         $results = [];
@@ -139,10 +146,41 @@ abstract class DatabaseBroker
     }
 
     /**
-     * Execute a query which should be contain inside a transaction. The specified
-     * callback method will optionally receive the Database instance if one argument
-     * is defined. Will work with nested transactions if using the TransactionPDO
-     * handler. Best suited method for INSERT, UPDATE and DELETE queries.
+     * Execute a SELECT query which return the entire set of rows in an array. Will filter the query according to the
+     * current filter loaded into the broker class. Returns null if the query did not fetch any result.
+     *
+     * @param string $query
+     * @param array $parameters
+     * @param callable|null $callback
+     * @return array|stdClass[]
+     */
+    protected function filteredSelect(string $query, array $parameters = [], ?callable $callback = null): array
+    {
+        $query = $this->filterQuery($query);
+        if (!is_null($this->pager)) {
+            $query .= $this->pager->getSqlLimitClause($this->database->getAdapter());
+        }
+        return $this->select($query, $parameters, $callback);
+    }
+
+    /**
+     * Executes a SELECT query which should return a single data row. Will filter the query according to the current
+     * filter loaded into the broker class. Returns null if the query did not fetch any result.
+     *
+     * @param string $query
+     * @param array $parameters
+     * @return stdClass|null
+     */
+    protected function filteredSelectSingle(string $query, array $parameters = []): ?stdClass
+    {
+        $query = $this->filterQuery($query);
+        return $this->selectSingle($query, $parameters);
+    }
+
+    /**
+     * Execute a query which should be contain inside a transaction. The specified callback method will optionally
+     * receive the Database instance if one argument is defined. Will work with nested transactions if using the
+     * transaction PDO handler. Best suited method for INSERT, UPDATE and DELETE queries.
      *
      * @param callable $callback
      * @return mixed

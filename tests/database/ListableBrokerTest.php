@@ -69,12 +69,12 @@ class ListableBrokerTest extends TestCase
 
             function count(): int
             {
-                return $this->selectSingle("SELECT COUNT(*) as n FROM heroes")->n;
+                return $this->filteredSelectSingle("SELECT COUNT(*) as n FROM heroes")->n;
             }
 
             function findAll(): array
             {
-                return $this->select("SELECT * FROM heroes");
+                return $this->filteredSelect("SELECT * FROM heroes");
             }
         };
     }

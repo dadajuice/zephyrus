@@ -70,12 +70,12 @@ class BrokerFilterTest extends TestCase
 
             public function count()
             {
-                return $this->selectSingle("SELECT COUNT(*) FROM heroes");
+                return $this->filteredSelectSingle("SELECT COUNT(*) FROM heroes");
             }
 
             public function findAll()
             {
-                return $this->select("SELECT * FROM heroes");
+                return $this->filteredSelect("SELECT * FROM heroes");
             }
         };
     }
