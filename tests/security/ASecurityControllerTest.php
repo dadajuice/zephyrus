@@ -88,7 +88,7 @@ class ASecurityControllerTest extends TestCase
         self::assertTrue(strpos($output, '<input type="hidden" name="CSRFToken"') !== false);
 
         // Headers
-        self::assertTrue(strpos(xdebug_get_headers()[45], "Content-Security-Policy") !== false);
+        self::assertTrue(strpos(xdebug_get_headers()[49], "Content-Security-Policy") !== false);
     }
 
     public function testGetRoutingFailed()

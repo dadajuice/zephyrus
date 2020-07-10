@@ -38,6 +38,9 @@ class Form
      */
     public static function readMemorizedValue($fieldId, $defaultValue = "")
     {
+        if (session_status() == PHP_SESSION_NONE) {
+            return $defaultValue;
+        }
         return (isset($_SESSION[self::SESSION_KEY][$fieldId]))
             ? $_SESSION[self::SESSION_KEY][$fieldId]
             : $defaultValue;
@@ -52,6 +55,9 @@ class Form
      */
     public static function memorizeValue($fieldId, $value)
     {
+        if (session_status() == PHP_SESSION_NONE) {
+            return;
+        }
         if (!isset($_SESSION[self::SESSION_KEY])) {
             $_SESSION[self::SESSION_KEY] = [];
         }
@@ -66,6 +72,9 @@ class Form
      */
     public static function removeMemorizedValue($fieldId = null)
     {
+        if (session_status() == PHP_SESSION_NONE) {
+            return;
+        }
         if (isset($_SESSION[self::SESSION_KEY])) {
             if (is_null($fieldId)) {
                 $_SESSION[self::SESSION_KEY] = null;

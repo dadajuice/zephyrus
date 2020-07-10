@@ -9,6 +9,12 @@ use Zephyrus\Utilities\Validations\ValidationCallback;
 
 class FormTest extends TestCase
 {
+    public static function tearDownAfterClass()
+    {
+        Session::getInstance()->destroy();
+        Session::kill();
+    }
+
     public function testValidForm()
     {
         $form = new Form();
@@ -164,6 +170,18 @@ class FormTest extends TestCase
         self::assertEquals('bob', val('name'));
         self::assertEquals('lewis', Form::readMemorizedValue('gfdfg', 'lewis'));
         self::assertEquals('lewis', val('lksdjfjf', 'lewis'));
+    }
+
+    public function testMemorizationWithoutSession()
+    {
+        Form::removeMemorizedValue();
+        $form = new Form();
+        $form->addField('name', 'bob');
+        $form->validate('name', new Rule(ValidationCallback::NOT_EMPTY, 'err_1'));
+        $form->verify();
+        Session::getInstance()->destroy();
+        self::assertEquals('failed', Form::readMemorizedValue('name', 'failed'));
+        Session::getInstance()->start();
     }
 
     public function testRemoveAllMemorized()
