@@ -25,7 +25,6 @@ class PostgresqlAdapter extends DatabaseAdapter
 
     public function getAllTableNames(Database $database): array
     {
-        $names = [];
         $sql = "SELECT tables.table_name FROM information_schema.tables WHERE tables.table_schema = 'public' AND tables.table_name != 'schema_version'";
         $statement = $database->query($sql);
         $results = [];
@@ -47,7 +46,7 @@ class PostgresqlAdapter extends DatabaseAdapter
 
     public function getAllConstraints(Database $database, string $tableName): array
     {
-        $contraints = [];
+        $constraints = [];
         $sql = "SELECT tco.constraint_type, kcu.column_name
                   FROM information_schema.table_constraints tco
                   JOIN information_schema.key_column_usage kcu
@@ -58,12 +57,12 @@ class PostgresqlAdapter extends DatabaseAdapter
                    AND kcu.table_schema = 'public'";
         $statement = $database->query($sql, [$tableName]);
         while ($row = $statement->next()) {
-            $contraints[] = (object) [
+            $constraints[] = (object) [
                 'column' => $row->column_name,
                 'type' => $row->constraint_type
             ];
         }
-        return $contraints;
+        return $constraints;
     }
 
     public function getAllColumns(Database $database, string $tableName): array

@@ -40,7 +40,6 @@ class SqliteAdapter extends DatabaseAdapter
 
     public function getAllTableNames(Database $database): array
     {
-        $names = [];
         $sql = "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'";
         $statement = $database->query($sql);
         $results = [];
@@ -48,6 +47,21 @@ class SqliteAdapter extends DatabaseAdapter
             $results[] = $row->name;
         }
         return $results;
+    }
+
+    public function getAllConstraints(Database $database, string $tableName): array
+    {
+        $constraints = [];
+        $statement = $database->query("PRAGMA table_info($tableName)");
+        while ($row = $statement->next()) {
+            if ($row->pk) {
+                $constraints[] = (object) [
+                    'column' => $row->name,
+                    'type' => 'PRIMARY KEY'
+                ];
+            }
+        }
+        return $constraints;
     }
 
     public function getAllColumnNames(Database $database, string $tableName): array
@@ -68,7 +82,6 @@ class SqliteAdapter extends DatabaseAdapter
             $columns[] = (object) [
                 'name' => $row->name,
                 'type' => strtoupper($row->type),
-                'key' => ($row->pk) ? 'PRI' : null,
                 'default' => $row->dflt_value,
                 'notnull' => boolval($row->notnull)
             ];

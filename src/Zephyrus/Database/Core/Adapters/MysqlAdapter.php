@@ -33,6 +33,22 @@ class MysqlAdapter extends DatabaseAdapter
         return $columns;
     }
 
+    public function getAllConstraints(Database $database, string $tableName): array
+    {
+        $constraints = [];
+        $sql = "SHOW FIELDS FROM $tableName";
+        $statement = $database->query($sql, [$tableName]);
+        while ($row = $statement->next()) {
+            if ($row->Key == 'PRI' || $row->Key == 'MUL') {
+                $constraints[] = (object) [
+                    'column' => $row->Field,
+                    'type' => ($row->Key == 'PRI') ? 'PRIMARY KEY' : 'FOREIGN KEY'
+                ];
+            }
+        }
+        return $constraints;
+    }
+
     public function getAllColumns(Database $database, string $tableName): array
     {
         $columns = [];
@@ -41,7 +57,6 @@ class MysqlAdapter extends DatabaseAdapter
             $columns[] = (object) [
                 'name' => $row->Field,
                 'type' => strtoupper($row->Type),
-                'key' => $row->Key,
                 'default' => $row->Default,
                 'notnull' => $row->Null == "YES"
             ];
