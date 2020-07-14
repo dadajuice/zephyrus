@@ -153,9 +153,8 @@ class Localization
     }
 
     /**
-     * Creates a constant string to be included into the cache class. Makes sure
-     * to convert double quote into equivalent html entity to prevent PHP syntax
-     * error in the resulting class.
+     * Creates a constant string to be included into the cache class. Makes sure to convert double quote and dollar sign
+     * into equivalent html entity to prevent PHP syntax error in the resulting class.
      *
      * @param string $name
      * @param string $value
@@ -164,6 +163,7 @@ class Localization
     private function addConstant(string $name, string $value)
     {
         $value = str_replace('"', '&quot;', $value);
+        $value = str_replace('$', '&#36;', $value);
         return "\tpublic const $name = \"$value\";" . PHP_EOL;
     }
 
