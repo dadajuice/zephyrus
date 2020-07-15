@@ -108,4 +108,16 @@ trait SpecializedValidations
         $json = json_decode($data);
         return $json && $data != $json;
     }
+
+    /**
+     * Validates a correctly formed XML string that should be done before a parsing.
+     *
+     * @param $data
+     * @return bool
+     */
+    public static function isXml($data): bool
+    {
+        $xml = @simplexml_load_string($data);
+        return (bool) $xml;
+    }
 }

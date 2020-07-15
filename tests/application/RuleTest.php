@@ -144,6 +144,14 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid(""));
     }
 
+    public function testIsXml()
+    {
+        $rule = Rule::xml();
+        self::assertTrue($rule->isValid("<root><head>tete</head><body>corps</body></root>"));
+        self::assertFalse($rule->isValid("<root><head>tete</head>corps</body></root>"));
+        self::assertFalse($rule->isValid("<root><head></root>"));
+    }
+
     public function testIsTime12Hours()
     {
         $rule = Rule::time12Hours();

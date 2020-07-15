@@ -28,6 +28,11 @@ trait SpecializedRules
         return new Rule(ValidationCallback::JSON, $errorMessage);
     }
 
+    public static function xml(string $errorMessage = ""): Rule
+    {
+        return new Rule(ValidationCallback::XML, $errorMessage);
+    }
+
     public static function phone(string $errorMessage = ""): Rule
     {
         return new Rule(ValidationCallback::PHONE, $errorMessage);
