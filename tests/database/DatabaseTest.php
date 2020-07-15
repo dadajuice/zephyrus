@@ -26,6 +26,15 @@ class DatabaseTest extends TestCase
         self::assertEquals(1, self::$database->getLastInsertedId());
     }
 
+    public function testMetaQueries()
+    {
+        self::assertEquals(['heroes'], self::$database->getAllTableNames());
+        self::assertEquals(['id', 'name', 'enabled', 'power'], self::$database->getAllColumnNames('heroes'));
+        self::assertEquals([(object) ['column' => 'id', 'type' => 'PRIMARY KEY']], self::$database->getAllConstraints('heroes'));
+        self::assertEquals(4, count(self::$database->getAllColumns('heroes')));
+        self::assertEquals(1, count(self::$database->getAllTables()));
+    }
+
     /**
      * @depends testLastInsertId
      */

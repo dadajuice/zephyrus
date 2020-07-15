@@ -23,6 +23,12 @@ class PostgresqlAdapter extends DatabaseAdapter
         return "set session \"$name\" = '$value';";
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param Database $database
+     * @return array
+     * @throws \Zephyrus\Exceptions\DatabaseException
+     */
     public function getAllTableNames(Database $database): array
     {
         $sql = "SELECT tables.table_name FROM information_schema.tables WHERE tables.table_schema = 'public' AND tables.table_name != 'schema_version'";
@@ -34,6 +40,13 @@ class PostgresqlAdapter extends DatabaseAdapter
         return $results;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param Database $database
+     * @param string $tableName
+     * @return array
+     * @throws \Zephyrus\Exceptions\DatabaseException
+     */
     public function getAllColumnNames(Database $database, string $tableName): array
     {
         $columns = [];
@@ -44,6 +57,13 @@ class PostgresqlAdapter extends DatabaseAdapter
         return $columns;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param Database $database
+     * @param string $tableName
+     * @return array
+     * @throws \Zephyrus\Exceptions\DatabaseException
+     */
     public function getAllConstraints(Database $database, string $tableName): array
     {
         $constraints = [];
@@ -65,6 +85,13 @@ class PostgresqlAdapter extends DatabaseAdapter
         return $constraints;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param Database $database
+     * @param string $tableName
+     * @return array
+     * @throws \Zephyrus\Exceptions\DatabaseException
+     */
     public function getAllColumns(Database $database, string $tableName): array
     {
         $columns = [];

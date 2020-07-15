@@ -11,9 +11,14 @@ class MysqlAdapter extends DatabaseAdapter
         return "SET @$name = '$value'";
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param Database $database
+     * @return array
+     * @throws \Zephyrus\Exceptions\DatabaseException
+     */
     public function getAllTableNames(Database $database): array
     {
-        $names = [];
         $sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = schema()";
         $statement = $database->query($sql);
         $results = [];
@@ -23,6 +28,13 @@ class MysqlAdapter extends DatabaseAdapter
         return $results;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param Database $database
+     * @param string $tableName
+     * @return array
+     * @throws \Zephyrus\Exceptions\DatabaseException
+     */
     public function getAllColumnNames(Database $database, string $tableName): array
     {
         $columns = [];
@@ -33,6 +45,13 @@ class MysqlAdapter extends DatabaseAdapter
         return $columns;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param Database $database
+     * @param string $tableName
+     * @return array
+     * @throws \Zephyrus\Exceptions\DatabaseException
+     */
     public function getAllConstraints(Database $database, string $tableName): array
     {
         $constraints = [];
@@ -49,6 +68,13 @@ class MysqlAdapter extends DatabaseAdapter
         return $constraints;
     }
 
+    /**
+     * @codeCoverageIgnore
+     * @param Database $database
+     * @param string $tableName
+     * @return array
+     * @throws \Zephyrus\Exceptions\DatabaseException
+     */
     public function getAllColumns(Database $database, string $tableName): array
     {
         $columns = [];

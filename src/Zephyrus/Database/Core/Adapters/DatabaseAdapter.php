@@ -210,23 +210,7 @@ abstract class DatabaseAdapter
 
     /**
      * Meta query to retrieve all table details of given database instance. Must be redefined in children adapter
-     * classes to adapt for each supported DBMS. Should return an array of stdClass respecting the following structure:
-     *
-     * [
-     *     [
-     *         'name' => 'user',
-     *         'columns' => [
-     *             [
-     *                 'name' => 'firstname',
-     *                 'type' => 'VARCHAR(50)',
-     *                 'key' => null,
-     *                 'default' => null,
-     *                 'notnull' => false
-     *             ],
-     *             [...]
-     *         ]
-     *     ]
-     * ]
+     * classes to adapt for each supported DBMS. Should return an array of stdClass.
      *
      * @param Database $database
      * @return array
@@ -250,6 +234,7 @@ abstract class DatabaseAdapter
      * columns names as value (e.g. ['firstname', 'lastname']).
      *
      * @param Database $database
+     * @param string $tableName
      * @return array
      */
     public function getAllColumnNames(Database $database, string $tableName): array
@@ -264,21 +249,10 @@ abstract class DatabaseAdapter
 
     /**
      * Meta query to retrieve all column details of given table name within the specified database instance. Must be
-     * redefined in children adapter classes to adapt for each supported DBMS. Should return an array of stdClass
-     * respecting the following structure:
-     *
-     * [
-     *     [
-     *         'name' => 'firstname',
-     *         'type' => 'VARCHAR(50)',
-     *         'key' => null,
-     *         'default' => null,
-     *         'notnull' => false
-     *     ],
-     *     [...]
-     * ]
+     * redefined in children adapter classes to adapt for each supported DBMS. Should return an array of stdClass.
      *
      * @param Database $database
+     * @param string $tableName
      * @return array
      */
     public function getAllColumns(Database $database, string $tableName): array
