@@ -3,14 +3,21 @@
 class File extends FileSystemNode
 {
     /**
-     * Creates a new file and returns an instance of the newly created
-     * file.
+     * Creates a new file and returns an instance of the newly created file. Will throw an exception if the override
+     * argument is set to false and the file already exists.
      *
      * @param string $path
+     * @param bool $overwrite
      * @return File
      */
-    public static function create(string $path): self
+    public static function create(string $path, bool $overwrite = false): self
     {
+        if (!$overwrite && self::exists($path)) {
+            throw new \InvalidArgumentException("Specified file <$path> already exists");
+        }
+        if ($overwrite && self::exists($path)) {
+            (new self($path))->remove();
+        }
         touch($path);
         return new self($path);
     }

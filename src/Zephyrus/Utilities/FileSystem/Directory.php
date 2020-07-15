@@ -13,12 +13,16 @@ class Directory extends FileSystemNode
      *
      * @param string $path
      * @param int $permission
+     * @param bool $overwrite
      * @return Directory
      */
-    public static function create(string $path, int $permission = 0777): self
+    public static function create(string $path, int $permission = 0777, bool $overwrite = false): self
     {
-        if (file_exists($path)) {
-            throw new InvalidArgumentException("Specified path <$path> already exists");
+        if (!$overwrite && self::exists($path)) {
+            throw new \InvalidArgumentException("Specified directory <$path> already exists");
+        }
+        if ($overwrite && self::exists($path)) {
+            (new self($path))->remove();
         }
         mkdir($path, $permission, true);
         return new self($path);

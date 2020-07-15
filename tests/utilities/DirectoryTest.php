@@ -11,6 +11,8 @@ class DirectoryTest extends TestCase
         $directory = Directory::create(ROOT_DIR . '/lib/filesystem/new_dir');
         self::assertTrue(file_exists(ROOT_DIR . '/lib/filesystem/new_dir'));
         self::assertEquals(date(FORMAT_DATE), date(FORMAT_DATE, $directory->getLastModifiedTime()));
+        Directory::create(ROOT_DIR . '/lib/filesystem/new_dir', 0777, true);
+        self::assertTrue(file_exists(ROOT_DIR . '/lib/filesystem/new_dir'));
     }
 
     /**
