@@ -38,4 +38,25 @@ trait TimeRules
             return Validation::isDateTime24Hours($data, $includeSeconds);
         }, $errorMessage);
     }
+
+    public static function dateBefore(string $referenceDate, string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data) use ($referenceDate) {
+            return Validation::isDateBefore($data, $referenceDate);
+        }, $errorMessage);
+    }
+
+    public static function dateAfter(string $referenceDate, string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data) use ($referenceDate) {
+            return Validation::isDateAfter($data, $referenceDate);
+        }, $errorMessage);
+    }
+
+    public static function dateBetween(string $referenceDateBegin, string $referenceDateEnd, string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data) use ($referenceDateBegin, $referenceDateEnd) {
+            return Validation::isDateBetween($data, $referenceDateBegin, $referenceDateEnd);
+        }, $errorMessage);
+    }
 }

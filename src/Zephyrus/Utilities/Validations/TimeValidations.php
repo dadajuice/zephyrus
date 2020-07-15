@@ -51,4 +51,28 @@ trait TimeValidations
         list($datePart, $timePart) = explode(' ', $data);
         return self::isDate($datePart) && self::isTime24Hours($timePart, $includeSeconds);
     }
+
+    public static function isDateBefore($data, $referenceDate): bool
+    {
+        if (empty($data) || !self::isDate($referenceDate)) {
+            return false;
+        }
+        return $data < $referenceDate;
+    }
+
+    public static function isDateAfter($data, $referenceDate): bool
+    {
+        if (empty($data) || !self::isDate($referenceDate)) {
+            return false;
+        }
+        return $data > $referenceDate;
+    }
+
+    public static function isDateBetween($data, $referenceDateBegin, $referenceDateEnd): bool
+    {
+        if (empty($data) || !self::isDate($referenceDateBegin) || !self::isDate($referenceDateEnd)) {
+            return false;
+        }
+        return $data > $referenceDateBegin && $data < $referenceDateEnd;
+    }
 }

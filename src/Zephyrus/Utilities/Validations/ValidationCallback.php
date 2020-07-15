@@ -14,9 +14,13 @@ interface ValidationCallback
     const TIME_24HOURS = ['Zephyrus\Utilities\Validation', 'isTime24Hours'];
     const DATE_TIME_12HOURS = ['Zephyrus\Utilities\Validation', 'isDateTime12Hours'];
     const DATE_TIME_24HOURS = ['Zephyrus\Utilities\Validation', 'isDateTime24Hours'];
+    const DATE_BEFORE = ['Zephyrus\Utilities\Validation', 'isDateBefore'];
+    const DATE_AFTER = ['Zephyrus\Utilities\Validation', 'isDateAfter'];
+    const DATE_BETWEEN = ['Zephyrus\Utilities\Validation', 'isDateBetween'];
     const ALPHA = ['Zephyrus\Utilities\Validation', 'isAlpha'];
     const NAME = ['Zephyrus\Utilities\Validation', 'isName'];
     const JSON = ['Zephyrus\Utilities\Validation', 'isJson'];
+    const XML = ['Zephyrus\Utilities\Validation', 'isXml'];
     const MIN_LENGTH = ['Zephyrus\Utilities\Validation', 'isMaxLength'];
     const MAX_LENGTH = ['Zephyrus\Utilities\Validation', 'isMinLength'];
     const VARIABLE = ['Zephyrus\Utilities\Validation', 'isVariable'];

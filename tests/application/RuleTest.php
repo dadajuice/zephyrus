@@ -110,6 +110,40 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid(""));
     }
 
+    public function testIsDateBefore()
+    {
+        $rule = Rule::dateBefore('2019-01-12');
+        self::assertTrue($rule->isValid("2017-01-01"));
+        self::assertTrue($rule->isValid("2019-01-11"));
+        self::assertFalse($rule->isValid("2019-01-12"));
+        self::assertFalse($rule->isValid("2020-01-12"));
+        self::assertFalse($rule->isValid(""));
+    }
+
+    public function testIsDateAfter()
+    {
+        $rule = Rule::dateAfter('2019-01-12');
+        self::assertFalse($rule->isValid("2017-01-01"));
+        self::assertFalse($rule->isValid("2019-01-11"));
+        self::assertFalse($rule->isValid("2019-01-12"));
+        self::assertTrue($rule->isValid("2019-01-13"));
+        self::assertTrue($rule->isValid("2020-01-12"));
+        self::assertFalse($rule->isValid(""));
+    }
+
+    public function testIsDateBetween()
+    {
+        $rule = Rule::dateBetween('2018-01-12', '2019-01-12');
+        self::assertFalse($rule->isValid("2017-01-01"));
+        self::assertFalse($rule->isValid("2019-01-15"));
+        self::assertFalse($rule->isValid("2019-01-12"));
+        self::assertFalse($rule->isValid("2018-01-12"));
+        self::assertTrue($rule->isValid("2018-05-13"));
+        self::assertTrue($rule->isValid("2018-08-23"));
+        self::assertTrue($rule->isValid("2019-01-11"));
+        self::assertFalse($rule->isValid(""));
+    }
+
     public function testIsTime12Hours()
     {
         $rule = Rule::time12Hours();
