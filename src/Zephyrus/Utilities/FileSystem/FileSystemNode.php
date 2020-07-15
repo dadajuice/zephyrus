@@ -15,6 +15,11 @@ abstract class FileSystemNode
 
     abstract public function getLastModifiedTime(): int;
 
+    static public function exists(string $path): bool
+    {
+        return file_exists($path);
+    }
+
     /**
      * Constructs an abstract FileSystemNode which is used by the Directory
      * and File classes. Throws an InvalidArgumentException if the given path

@@ -43,6 +43,7 @@ class FileTest extends TestCase
      */
     public function testCopy()
     {
+        self::assertTrue(File::exists(ROOT_DIR . '/lib/filesystem/newly.txt'));
         $file = new File(ROOT_DIR . '/lib/filesystem/newly.txt');
         $file->copy(ROOT_DIR . '/lib/filesystem/test/newly_bk.txt');
         self::assertTrue(file_exists(ROOT_DIR . '/lib/filesystem/test/newly_bk.txt'));
