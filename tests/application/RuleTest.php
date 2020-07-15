@@ -428,6 +428,13 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid(""));
     }
 
+    public function testIsVariable()
+    {
+        $rule = Rule::variable();
+        self::assertTrue($rule->isValid("mega"));
+        self::assertFalse($rule->isValid("1234mega"));
+    }
+
     public function testIsUpload()
     {
         $rule = Rule::fileUpload();

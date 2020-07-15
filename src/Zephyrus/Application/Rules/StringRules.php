@@ -53,4 +53,9 @@ trait StringRules
             return Validation::isMaxLength($data, $maxLength);
         }, $errorMessage);
     }
+
+    public static function variable(string $errorMessage = ""): Rule
+    {
+        return new Rule(ValidationCallback::VARIABLE, $errorMessage);
+    }
 }

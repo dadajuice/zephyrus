@@ -85,6 +85,18 @@ trait StringValidations
         return filter_var($data, FILTER_VALIDATE_EMAIL) !== false;
     }
 
+    /**
+     * Validates that the given string is compliant with PHP variable naming convention as defined in the official
+     * documentation (https://www.php.net/manual/en/language.variables.basics.php).
+     *
+     * @param $data
+     * @return bool
+     */
+    public static function isVariable($data): bool
+    {
+        return preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $data);
+    }
+
     public static function isRegex($data, $regex): bool
     {
         return preg_match('/^' . $regex . '$/', $data);
