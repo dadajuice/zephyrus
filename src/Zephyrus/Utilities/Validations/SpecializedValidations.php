@@ -22,6 +22,30 @@ trait SpecializedValidations
         return preg_match("/^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/", $data);
     }
 
+    public static function isLiveUrl($data, array $acceptedValidCodes = [200, 201, 202, 204, 301, 302]): bool
+    {
+        $result = false;
+        $url = filter_var($data, FILTER_VALIDATE_URL);
+        $handle = curl_init($url);
+        curl_setopt_array($handle, [
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_NOBODY => true,
+            CURLOPT_HEADER => false,
+            CURLOPT_RETURNTRANSFER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_TIMEOUT => 1,
+            CURLOPT_CONNECTTIMEOUT => 1
+        ]);
+        curl_exec($handle);
+        $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        if (in_array($httpCode, $acceptedValidCodes)) {
+            $result = true;
+        }
+        curl_close($handle);
+        return $result;
+    }
+
     /**
      * Validates United States postal code five-digit and nine-digit (called ZIP+4) formats.
      *
@@ -47,7 +71,7 @@ trait SpecializedValidations
         return preg_match("/^[ABCEGHJ-NPRSTVXY][0-9][ABCEGHJ-NPRSTV-Z] ?[0-9][ABCEGHJ-NPRSTV-Z][0-9]$/", strtoupper($data));
     }
 
-    public static function isIPv4($data, bool $includeReserved = true, bool $includePrivate = true)
+    public static function isIPv4($data, bool $includeReserved = true, bool $includePrivate = true): bool
     {
         $flag = FILTER_FLAG_IPV4
             | ((!$includeReserved) ? FILTER_FLAG_NO_RES_RANGE : 0)
@@ -55,7 +79,7 @@ trait SpecializedValidations
         return filter_var($data, FILTER_VALIDATE_IP, $flag) !== false;
     }
 
-    public static function isIPv6($data, bool $includeReserved = true, bool $includePrivate = true)
+    public static function isIPv6($data, bool $includeReserved = true, bool $includePrivate = true): bool
     {
         $flag = FILTER_FLAG_IPV6
             | ((!$includeReserved) ? FILTER_FLAG_NO_RES_RANGE : 0)
@@ -63,11 +87,25 @@ trait SpecializedValidations
         return filter_var($data, FILTER_VALIDATE_IP, $flag) !== false;
     }
 
-    public static function isIpAddress($data, bool $includeReserved = true, bool $includePrivate = true)
+    public static function isIpAddress($data, bool $includeReserved = true, bool $includePrivate = true): bool
     {
         $flag = (FILTER_FLAG_IPV6 | FILTER_FLAG_IPV4)
             | ((!$includeReserved) ? FILTER_FLAG_NO_RES_RANGE : 0)
             | ((!$includePrivate) ? FILTER_FLAG_NO_PRIV_RANGE : 0);
         return filter_var($data, FILTER_VALIDATE_IP, $flag) !== false;
+    }
+
+    /**
+     * Validates a correctly formed JSON string. Will rejects string that contains only number, string or boolean value
+     * even if they are technically valid JSON representation. This validation is to ensure to have a valid JSON object
+     * or array structure as it would be the basic usage of validation for JSON.
+     *
+     * @param $data
+     * @return bool
+     */
+    public static function isJson($data): bool
+    {
+        $json = json_decode($data);
+        return $json && $data != $json;
     }
 }

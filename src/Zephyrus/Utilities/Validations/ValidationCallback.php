@@ -16,10 +16,13 @@ interface ValidationCallback
     const DATE_TIME_24HOURS = ['Zephyrus\Utilities\Validation', 'isDateTime24Hours'];
     const ALPHA = ['Zephyrus\Utilities\Validation', 'isAlpha'];
     const NAME = ['Zephyrus\Utilities\Validation', 'isName'];
+    const JSON = ['Zephyrus\Utilities\Validation', 'isJson'];
     const MIN_LENGTH = ['Zephyrus\Utilities\Validation', 'isMaxLength'];
     const MAX_LENGTH = ['Zephyrus\Utilities\Validation', 'isMinLength'];
+    const VARIABLE = ['Zephyrus\Utilities\Validation', 'isVariable'];
     const ALPHANUMERIC = ['Zephyrus\Utilities\Validation', 'isAlphanumeric'];
     const URL = ['Zephyrus\Utilities\Validation', 'isUrl'];
+    const URL_LIVE = ['Zephyrus\Utilities\Validation', 'isLiveUrl'];
     const URL_STRICT = ['Zephyrus\Utilities\Validation', 'isStrictUrl'];
     const URL_YOUTUBE = ['Zephyrus\Utilities\Validation', 'isYoutubeUrl'];
     const PHONE = ['Zephyrus\Utilities\Validation', 'isPhone'];

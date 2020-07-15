@@ -11,9 +11,21 @@ trait SpecializedRules
         return new Rule(ValidationCallback::URL, $errorMessage);
     }
 
+    public static function liveUrl(string $errorMessage = "", array $acceptedValidCodes = [200, 201, 202, 204, 301, 302]): Rule
+    {
+        return new Rule(function ($data) use ($acceptedValidCodes) {
+            return Validation::isLiveUrl($data, $acceptedValidCodes);
+        }, $errorMessage);
+    }
+
     public static function youtubeUrl(string $errorMessage = ""): Rule
     {
         return new Rule(ValidationCallback::URL_YOUTUBE, $errorMessage);
+    }
+
+    public static function json(string $errorMessage = ""): Rule
+    {
+        return new Rule(ValidationCallback::JSON, $errorMessage);
     }
 
     public static function phone(string $errorMessage = ""): Rule

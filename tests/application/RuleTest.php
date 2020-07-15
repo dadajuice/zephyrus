@@ -435,6 +435,24 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid("1234mega"));
     }
 
+    public function testIsLiveUrl()
+    {
+        $rule = Rule::liveUrl();
+        self::assertTrue($rule->isValid("https://google.com"));
+        self::assertTrue($rule->isValid("https://github.com/dadajuice/zephyrus"));
+        self::assertFalse($rule->isValid("https://lksdfksdfkhjsdfkjhfdskjhfdskjfdsjkhdfs.clkdsfh.com"));
+    }
+
+    public function testIsJson()
+    {
+        $rule = Rule::json();
+        self::assertTrue($rule->isValid('{"name": "Bruce Wayne", "alias": "Batman"}'));
+        self::assertTrue($rule->isValid('[{"name": "Bruce Wayne", "alias": "Batman"}, {"name": "Clark Kent", "alias": "Superman"}]'));
+        self::assertFalse($rule->isValid('{"name": "Bruce Wayne", "alias": "Batman"'));
+        self::assertFalse($rule->isValid('{"name": "Bruce Wayne", alias: "Batman"}'));
+        self::assertFalse($rule->isValid('123'));
+    }
+
     public function testIsUpload()
     {
         $rule = Rule::fileUpload();
