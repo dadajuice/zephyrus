@@ -14,8 +14,8 @@ class MysqlAdapter extends DatabaseAdapter
     /**
      * @codeCoverageIgnore
      * @param Database $database
-     * @return array
      * @throws \Zephyrus\Exceptions\DatabaseException
+     * @return array
      */
     public function getAllTableNames(Database $database): array
     {
@@ -32,8 +32,8 @@ class MysqlAdapter extends DatabaseAdapter
      * @codeCoverageIgnore
      * @param Database $database
      * @param string $tableName
-     * @return array
      * @throws \Zephyrus\Exceptions\DatabaseException
+     * @return array
      */
     public function getAllColumnNames(Database $database, string $tableName): array
     {
@@ -49,8 +49,8 @@ class MysqlAdapter extends DatabaseAdapter
      * @codeCoverageIgnore
      * @param Database $database
      * @param string $tableName
-     * @return array
      * @throws \Zephyrus\Exceptions\DatabaseException
+     * @return array
      */
     public function getAllConstraints(Database $database, string $tableName): array
     {
@@ -72,8 +72,8 @@ class MysqlAdapter extends DatabaseAdapter
      * @codeCoverageIgnore
      * @param Database $database
      * @param string $tableName
-     * @return array
      * @throws \Zephyrus\Exceptions\DatabaseException
+     * @return array
      */
     public function getAllColumns(Database $database, string $tableName): array
     {

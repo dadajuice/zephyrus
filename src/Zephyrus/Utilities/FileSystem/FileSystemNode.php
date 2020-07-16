@@ -15,7 +15,7 @@ abstract class FileSystemNode
 
     abstract public function getLastModifiedTime(): int;
 
-    static public function exists(string $path): bool
+    public static function exists(string $path): bool
     {
         return file_exists($path);
     }
