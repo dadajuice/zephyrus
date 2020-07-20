@@ -2,6 +2,7 @@
 
 use Zephyrus\Exceptions\LocalizationException;
 use Zephyrus\Security\Cryptography;
+use Zephyrus\Utilities\FileSystem\Directory;
 
 class Localization
 {
@@ -36,11 +37,18 @@ class Localization
         });
         $languages = [];
         foreach ($dirs as $dir) {
+            $directory = new Directory(ROOT_DIR . '/locale/' . $dir);
             $parts = explode("_", $dir);
             $languages[] = (object) [
-                'lang' => $parts[0],
-                'country' => $parts[1]
+                'locale' => $dir,
+                'lang_code' => $parts[0],
+                'country_code' => $parts[1],
+                'country' => locale_get_display_region($dir),
+                'lang' => locale_get_display_language($dir),
+                'count' => count($directory->getFilenames()),
+                'size' => $directory->size()
             ];
+
         }
         return $languages;
     }
@@ -63,6 +71,11 @@ class Localization
         if (file_exists(ROOT_DIR . '/locale')) {
             $this->generate();
         }
+    }
+
+    public function getLoadedLocale(): string
+    {
+        return $this->appLocale;
     }
 
     public function localize($key, array $args = []): string
@@ -153,8 +166,9 @@ class Localization
     }
 
     /**
-     * Creates a constant string to be included into the cache class. Makes sure to convert double quote and dollar sign
-     * into equivalent html entity to prevent PHP syntax error in the resulting class.
+     * Creates a constant string to be included into the cache class. Makes sure
+     * to convert double quote into equivalent html entity to prevent PHP syntax
+     * error in the resulting class.
      *
      * @param string $name
      * @param string $value
