@@ -48,7 +48,6 @@ class Localization
                 'count' => count($directory->getFilenames()),
                 'size' => $directory->size()
             ];
-
         }
         return $languages;
     }

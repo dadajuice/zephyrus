@@ -47,6 +47,6 @@ trait SpecializedFormatter
 
     public static function ellipsis(string $str, int $length = 50, string $concat = "...")
     {
-        return (strlen($str) > $length) ? substr($str,0, $length) . $concat : $str;
+        return (strlen($str) > $length) ? substr($str, 0, $length) . $concat : $str;
     }
 }
