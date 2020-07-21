@@ -44,6 +44,12 @@ class FormatterTest extends TestCase
         self::assertEquals("ecole-en-francais", $result);
     }
 
+    public function testEllipsis()
+    {
+        $result = Formatter::ellipsis("Lorem ipsum", 4);
+        self::assertEquals("Lore...", $result);
+    }
+
     public function testFormatMoney()
     {
         $result = Formatter::money(500.45);

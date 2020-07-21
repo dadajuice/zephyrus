@@ -44,4 +44,9 @@ trait SpecializedFormatter
         }
         return Formatter::decimal($fileSize, 0, 2) . ' ' . $unit;
     }
+
+    public static function ellipsis(string $str, int $length = 50, string $concat = "...")
+    {
+        return (strlen($str) > $length) ? substr($str,0, $length) . $concat : $str;
+    }
 }
