@@ -17,5 +17,10 @@ class OperatingSystemTest extends TestCase
         self::assertTrue(is_object($results));
         OperatingSystem::getCpuAverageLoad();
         OperatingSystem::getMemoryUsage();
+        OperatingSystem::getAllocatedMemoryPeak();
+        OperatingSystem::getMemoryPeak();
+        OperatingSystem::getCurrentAllocatedMemory();
+        OperatingSystem::getCurrentMemory();
+        OperatingSystem::getActiveConnections(80);
     }
 }
