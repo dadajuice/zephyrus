@@ -10,6 +10,7 @@ class LocalizationTest extends TestCase
     {
         copy(ROOT_DIR . '/locale/routes.json', ROOT_DIR . '/locale/fr_CA/routes.json');
         Localization::getInstance()->start();
+        self::assertEquals('fr_CA', Localization::getInstance()->getLoadedLocale());
         self::assertEquals("Le courriel est invalide", Localization::getInstance()->localize("messages.errors.invalid_email"));
         self::assertEquals("L'utilisateur [bob] a été ajouté avec succès", Localization::getInstance()->localize("messages.success.add_user", ["bob"]));
         self::assertEquals("not.found", Localization::getInstance()->localize("not.found"));
