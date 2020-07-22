@@ -120,6 +120,77 @@ class FormTest extends TestCase
         self::assertTrue($form->verify());
     }
 
+    public function testOptionalWhenFieldHasNoError()
+    {
+        $form = new Form();
+        $form->addFields([
+            'email' => ''
+        ]);
+        $form->validate('email', Rule::notEmpty('email not valid'), true);
+        $form->validateWhenFieldHasNoError('email', Rule::email('email not valid'), true);
+        self::assertTrue($form->verify());
+    }
+
+    public function testOptionalWhenFieldHasNoErrorWithError()
+    {
+        $form = new Form();
+        $form->addFields([
+            'email' => ''
+        ]);
+        $form->validate('email', Rule::notEmpty('email not valid'), true);
+        $form->validateWhenFieldHasNoError('email', Rule::email('email not valid'));
+        self::assertFalse($form->verify());
+    }
+
+    public function testOptionalFieldModeError()
+    {
+        $form = new Form();
+        $form->setOptionalOnEmpty(false);
+        $form->addFields([
+            'email' => ''
+        ]);
+        $form->validate('email', Rule::notEmpty('email not valid'), true);
+        $form->validateWhenFieldHasNoError('email', Rule::email('email not valid'));
+        self::assertFalse($form->verify());
+    }
+
+    public function testOptionalWhenFormHasNoError()
+    {
+        $form = new Form();
+        $form->addFields([
+            'email' => '',
+            'username' => ''
+        ]);
+        $form->validate('username', Rule::notEmpty('username not valid'), true);
+        $form->validateWhenFormHasNoError('email', Rule::email('email not valid'), true);
+        self::assertTrue($form->verify());
+    }
+
+    public function testOptionalWhenFormHasNoErrorWithError()
+    {
+        $form = new Form();
+        $form->addFields([
+            'email' => '',
+            'username' => ''
+        ]);
+        $form->validate('username', Rule::notEmpty('username not valid'), true);
+        $form->validateWhenFieldHasNoError('email', Rule::email('email not valid'));
+        self::assertFalse($form->verify());
+    }
+
+    public function testOptionalFormModeError()
+    {
+        $form = new Form();
+        $form->setOptionalOnEmpty(false);
+        $form->addFields([
+            'email' => '',
+            'username' => ''
+        ]);
+        $form->validate('username', Rule::notEmpty('username not valid'), true);
+        $form->validateWhenFieldHasNoError('email', Rule::email('email not valid'));
+        self::assertFalse($form->verify());
+    }
+
     public function testOptionalFieldMode()
     {
         $form = new Form();
