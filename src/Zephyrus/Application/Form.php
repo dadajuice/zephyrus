@@ -243,8 +243,9 @@ class Form
 
     private function isValidationTriggered(string $field, $validation): bool
     {
-        if ($validation->trigger > self::TRIGGER_ALWAYS) {
-            return !$this->hasError(($validation->trigger == self::TRIGGER_FIELD_NO_ERROR) ? $field : null);
+        if ($validation->trigger > self::TRIGGER_ALWAYS
+            && ($this->hasError(($validation->trigger == self::TRIGGER_FIELD_NO_ERROR) ? $field : null))) {
+            return false;
         }
         return !$validation->optional
             || (!$this->optionalOnEmpty && $validation->optional && isset($this->fields[$field]))
