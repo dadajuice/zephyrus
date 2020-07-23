@@ -27,7 +27,7 @@ class ViewBuilder
 
     public function build(string $pageToRender): View
     {
-        $path = ROOT_DIR . '/app/Views/' . $pageToRender . '.pug';
+        $path = realpath(ROOT_DIR . '/app/Views/' . $pageToRender . '.pug');
         if (!file_exists($path) || !is_readable($path)) {
             throw new \Exception("The specified view file [$path] is not available (not readable or does not exists)");
         }
@@ -49,7 +49,7 @@ class ViewBuilder
         $cacheEnabled = Configuration::getConfiguration('pug', 'cache_enabled');
         $cacheDirectory = Configuration::getConfiguration('pug', 'cache_directory');
         $options = [
-            'basedir' => ROOT_DIR . '/public',
+            'basedir' => realpath(ROOT_DIR . '/public'),
             'expressionLanguage' => 'js',
             'upToDateCheck' => true,
             'cache' => $cacheEnabled ? $cacheDirectory : null

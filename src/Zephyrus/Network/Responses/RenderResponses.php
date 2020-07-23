@@ -31,7 +31,7 @@ trait RenderResponses
     private function tryToBuildPhpView($page, $args = []): ?Response
     {
         $response = new Response(ContentType::HTML);
-        $path = ROOT_DIR . '/app/Views/' . $page . '.php';
+        $path = realpath(ROOT_DIR . '/app/Views/' . $page . '.php');
         if (file_exists($path) && is_readable($path)) {
             ob_start();
             foreach ($args as $name => $value) {
