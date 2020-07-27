@@ -116,10 +116,12 @@ class RequestFactory
         $isSecure = !empty($server['HTTPS']) && $server['HTTPS'] == 'on';
         $serverProtocol = strtolower($server['SERVER_PROTOCOL']);
         $scheme = substr($serverProtocol, 0, strpos($serverProtocol, '/')) . (($isSecure) ? 's' : '');
-        $port = $server['SERVER_PORT'];
-        $port = ((!$isSecure && $port == '80') || ($isSecure && $port == '443')) ? '' : ':' . $port;
-        $host = $server['HTTP_HOST'] ?? null;
-        $host = (isset($host) ? $host : $server['SERVER_NAME']) . $port;
-        return $scheme . '://' . $host . $uri;
+        $port = '';
+        $host = (isset($server['HTTP_HOST']) ? $server['HTTP_HOST'] : $server['SERVER_NAME']);
+        if (strpos($host, ':') === false) {
+            $port = $server['SERVER_PORT'];
+            $port = ((!$isSecure && $port == '80') || ($isSecure && $port == '443')) ? '' : ':' . $port;
+        }
+        return $scheme . '://' . $host . $port . $uri;
     }
 }

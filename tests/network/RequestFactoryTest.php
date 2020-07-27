@@ -21,6 +21,21 @@ class RequestFactoryTest extends TestCase
         self::assertEquals('yeah', $request->getParameter('test'));
     }
 
+    public function testRequestedUri()
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['REQUEST_URI'] = '/test';
+        $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
+        $_SERVER['HTTP_HOST'] = 'test.local:445';
+        $_SERVER['SERVER_PORT'] = '445';
+        $_SERVER['CONTENT_TYPE'] = ContentType::PLAIN;
+        $_GET['test'] = 'yeah';
+        RequestFactory::set(null);
+        $request = RequestFactory::read();
+        self::assertEquals('http://test.local:445/test', $request->getRequestedUri());
+    }
+
     public function testJsonRawCapture()
     {
         $_SERVER['REQUEST_METHOD'] = 'POST';
