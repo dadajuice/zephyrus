@@ -14,10 +14,10 @@ class Cryptography
     /**
      * Cryptographically hash a specified string using the default PHP hashing algorithm. This method uses the default
      * hash function included in the PHP core and thus automatically provides a cryptographically random salt. If the
-     * property [project_password_pepper] is defined in the security section of the config.ini file, the method will
-     * concatenate the password with the configured pepper. This pepper should be unique by project and thus ensure that
-     * a given hashed password will work only within a specific project. The pepper is designed to be a "secret" kept
-     * within the server. Should be defined as a server environment to ensure maximum security.
+     * property [password_pepper] is defined in the security section of the config.ini file, the method will concatenate
+     * the password with the configured pepper. This pepper should be unique by project and thus ensure that a given
+     * hashed password will work only within a specific project. The pepper is designed to be a "secret" kept within the
+     * server. Should be defined as a server environment to ensure maximum security.
      *
      * @param string $clearTextPassword
      * @param string $algorithm
@@ -25,7 +25,7 @@ class Cryptography
      */
     public static function hashPassword(string $clearTextPassword, $algorithm = PASSWORD_DEFAULT): string
     {
-        $pepper = Configuration::getSecurityConfiguration("project_password_pepper", null);
+        $pepper = Configuration::getSecurityConfiguration("password_pepper", null);
         if ($pepper) {
             $clearTextPassword = $clearTextPassword . $pepper;
         }
@@ -42,7 +42,7 @@ class Cryptography
      */
     public static function verifyHashedPassword(string $clearTextPassword, string $hash): bool
     {
-        $pepper = Configuration::getSecurityConfiguration("project_password_pepper", null);
+        $pepper = Configuration::getSecurityConfiguration("password_pepper", null);
         if ($pepper) {
             $clearTextPassword = $clearTextPassword . $pepper;
         }
@@ -179,7 +179,7 @@ class Cryptography
         $hashAuthenticationKey = mb_substr($keys, 32, null, '8bit');
         $cipher = openssl_encrypt($plainText, $algorithm, $encryptionKey, OPENSSL_RAW_DATA, $initializationVector);
         $hmac = hash_hmac('sha256', $initializationVector . $cipher, $hashAuthenticationKey);
-        return $hmac . $initializationVector . $cipher;
+        return base64_encode($hmac . $initializationVector . $cipher);
     }
 
     /**
@@ -194,6 +194,7 @@ class Cryptography
      */
     public static function decrypt(string $cipherText, string $key): ?string
     {
+        $cipherText = base64_decode($cipherText);
         if (strlen($cipherText) < 81) {
             throw new InvalidArgumentException('Invalid cipher provided');
         }

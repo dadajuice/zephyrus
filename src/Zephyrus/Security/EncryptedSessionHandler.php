@@ -30,7 +30,7 @@ class EncryptedSessionHandler extends \SessionHandler
             $this->createEncryptionCookie();
             return true;
         }
-        $this->encryptionKey = base64_decode($_COOKIE[$this->cookieKeyName]);
+        $this->encryptionKey = $_COOKIE[$this->cookieKeyName];
         return true;
     }
 
@@ -44,7 +44,7 @@ class EncryptedSessionHandler extends \SessionHandler
     public function read($sessionId)
     {
         $data = parent::read($sessionId);
-        return (!$data) ? "" : Cryptography::decrypt(base64_decode($data), $this->encryptionKey);
+        return (!$data) ? "" : Cryptography::decrypt($data, $this->encryptionKey);
     }
 
     /**
@@ -58,7 +58,7 @@ class EncryptedSessionHandler extends \SessionHandler
     public function write($sessionId, $data)
     {
         $data = Cryptography::encrypt($data, $this->encryptionKey);
-        return parent::write($sessionId, base64_encode($data));
+        return parent::write($sessionId, $data);
     }
 
     /**
@@ -86,7 +86,7 @@ class EncryptedSessionHandler extends \SessionHandler
         $cookieSettings = session_get_cookie_params();
         setcookie(
             $this->cookieKeyName,
-            base64_encode($this->encryptionKey),
+            $this->encryptionKey,
             ($cookieSettings['lifetime'] > 0) ? time() + $cookieSettings['lifetime'] : 0,
             $cookieSettings['path'],
             $cookieSettings['domain'],
