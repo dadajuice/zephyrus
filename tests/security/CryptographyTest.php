@@ -84,4 +84,10 @@ class CryptographyTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         Cryptography::hash('test', 'non_existing_algorithm');
     }
+
+    public function testFileHash()
+    {
+        $hash = Cryptography::hashFile(ROOT_DIR . '/lib/images/batlike.jpg');
+        self::assertEquals('6a7022c3626487d202bfb593b3d7db3d', $hash);
+    }
 }

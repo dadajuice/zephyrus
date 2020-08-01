@@ -218,8 +218,7 @@ class Cryptography
 
     /**
      * Generates a key from a password based key derivation function (PBKDF) as defined in RFC2898. Uses the SHA256
-     * hashing algorithm. This method is useful to attach an encryption key to a user based on his password. Throws
-     * RuntimeException if the key generation fails.
+     * hashing algorithm. This method is useful to attach an encryption key to a user based on his password.
      *
      * @see https://www.ietf.org/rfc/rfc2898.txt
      * @param string $password
@@ -229,11 +228,7 @@ class Cryptography
      */
     public static function deriveKeyFromPassword(string $password, string $salt, int $length = 64): string
     {
-        $hash = hash_pbkdf2('sha256', $password, $salt, 80000, $length, true);
-        if ($hash === false) {
-            throw new \RuntimeException('Password based key derivation failed');
-        }
-        return $hash;
+        return hash_pbkdf2('sha256', $password, $salt, 80000, $length, true);
     }
 
     /**
