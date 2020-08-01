@@ -213,4 +213,36 @@ class BrokerTest extends TestCase
         $row = $class->findById(10);
         self::assertEquals(null, $row->name);
     }
+
+    public function testEncryption()
+    {
+        $class = new class(self::$database) extends DatabaseBroker
+        {
+            public function __construct(?Database $database = null)
+            {
+                parent::__construct($database);
+                $this->setEncryptedFields(['name']);
+            }
+
+            public function insert($name)
+            {
+                $this->query("INSERT INTO heroes(id, name) VALUES (99, ?);", [
+                    $this->sensitize($name)
+                ]);
+            }
+
+            public function findById($id)
+            {
+                return $this->selectSingle("SELECT name FROM heroes WHERE id = $id");
+            }
+        };
+        $class->insert("Martin Sandwich");
+
+        $statement = self::$database->query("SELECT name FROM heroes WHERE id = 99");
+        self::assertNotEquals("Martin Sandwich", $statement->next()->name);
+
+        $row = $class->findById(99);
+        self::assertEquals("Martin Sandwich", $row->name);
+        self::assertEquals("name", $class->getEncryptedFields()[0]);
+    }
 }

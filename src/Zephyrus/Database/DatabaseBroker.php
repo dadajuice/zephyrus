@@ -1,11 +1,13 @@
 <?php namespace Zephyrus\Database;
 
 use stdClass;
+use Zephyrus\Application\Configuration;
 use Zephyrus\Database\Core\Database;
 use Zephyrus\Database\Core\DatabaseStatement;
 use Zephyrus\Database\Core\Filterable;
 use Zephyrus\Database\Core\Pageable;
 use Zephyrus\Exceptions\DatabaseException;
+use Zephyrus\Security\Cryptography;
 
 abstract class DatabaseBroker
 {
@@ -18,6 +20,11 @@ abstract class DatabaseBroker
      * @var string
      */
     private $allowedHtmlTags = "";
+
+    /**
+     * @var array
+     */
+    private $encryptedFields = [];
 
     use Pageable;
     use Filterable { filterQuery as private; }
@@ -96,6 +103,27 @@ abstract class DatabaseBroker
         $this->allowedHtmlTags = "";
     }
 
+    public function isFieldEncrypted(string $field): bool
+    {
+        return in_array($field, $this->encryptedFields);
+    }
+
+    /**
+     * @return array
+     */
+    public function getEncryptedFields(): array
+    {
+        return $this->encryptedFields;
+    }
+
+    /**
+     * @param array $fields
+     */
+    protected function setEncryptedFields(array $fields): void
+    {
+        $this->encryptedFields = $fields;
+    }
+
     /**
      * Executes any type of query and simply returns the DatabaseStatement object ready to be fetched. Will throw a
      * DatabaseException is the query fails to execute.
@@ -115,14 +143,15 @@ abstract class DatabaseBroker
      *
      * @param string $query
      * @param array $parameters
-     * @param string $allowedTags
      * @return stdClass|null
      */
     protected function selectSingle(string $query, array $parameters = []): ?stdClass
     {
         $statement = $this->query($query, $parameters);
         $statement->setAllowedHtmlTags($this->allowedHtmlTags);
-        return $statement->next();
+        $row = $statement->next();
+        $this->decryptSensitiveFields($row);
+        return $row;
     }
 
     /**
@@ -140,6 +169,7 @@ abstract class DatabaseBroker
         $statement->setAllowedHtmlTags($this->allowedHtmlTags);
         $results = [];
         while ($row = $statement->next()) {
+            $this->decryptSensitiveFields($row);
             $results[] = (is_null($callback)) ? $row : $callback($row);
         }
         return $results;
@@ -203,6 +233,44 @@ abstract class DatabaseBroker
             $this->database->rollback();
 
             throw new DatabaseException($e->getMessage());
+        }
+    }
+
+    /**
+     * Encrypts the given value with the encryption key defined in the database configurations.
+     *
+     * @param $value
+     * @return string
+     */
+    protected function sensitize($value): string
+    {
+        $encryptionKey = Configuration::getDatabaseConfiguration('encryption_key');
+        if (is_null($encryptionKey)) {
+            throw new \RuntimeException("Encryption key hasn't been defined for database configuration"); // @codeCoverageIgnore
+        }
+        return Cryptography::encrypt($value, $encryptionKey);
+    }
+
+    /**
+     * Proceeds to decrypt any flagged sensitive database fields with the encryption key defined in the database
+     * configurations.
+     *
+     * @param $row
+     */
+    private function decryptSensitiveFields(&$row)
+    {
+        if ($row === false || empty($this->encryptedFields)) {
+            return;
+        }
+        $encryptionKey = Configuration::getDatabaseConfiguration('encryption_key');
+        if (is_null($encryptionKey)) {
+            throw new \RuntimeException("Encryption key hasn't been defined for database configuration"); // @codeCoverageIgnore
+        }
+        foreach (get_object_vars($row) as $column => $value) {
+            if (!is_null($value) && is_string($value) && $this->isFieldEncrypted($column)) {
+                $plainText = Cryptography::decrypt($value, $encryptionKey) ?? "ENCRYPTED";
+                $row->{$column} = $plainText;
+            }
         }
     }
 }
