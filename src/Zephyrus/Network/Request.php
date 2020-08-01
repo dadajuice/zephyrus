@@ -259,6 +259,14 @@ class Request
     /**
      * @return string
      */
+    public function getRoute()
+    {
+        return $this->getUri()->getPath();
+    }
+
+    /**
+     * @return string
+     */
     public function getRequestedUri(): string
     {
         return $this->requestedUri;

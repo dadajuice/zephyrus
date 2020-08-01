@@ -178,6 +178,7 @@ class RequestTest extends TestCase
         $method = 'GET';
         $request = new Request($uri, $method);
 
+        self::assertEquals("/test/3", $request->getRoute());
         self::assertEquals('127.0.0.1', $request->getUri()->getHost());
         self::assertEquals('http://127.0.0.1', $request->getBaseUrl());
         self::assertEquals('GET', $request->getMethod());
