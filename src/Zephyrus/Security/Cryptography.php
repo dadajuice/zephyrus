@@ -1,7 +1,6 @@
 <?php namespace Zephyrus\Security;
 
 use InvalidArgumentException;
-use stdClass;
 use Zephyrus\Application\Configuration;
 
 class Cryptography
@@ -176,7 +175,7 @@ class Cryptography
         $algorithm = self::getEncryptionAlgorithm();
         $initializationVector = self::randomBytes(openssl_cipher_iv_length($algorithm));
         $keys = self::deriveEncryptionKey($key, $initializationVector); // password is the encryption key
-        $encryptionKey  = mb_substr($keys, 0, 32, '8bit');
+        $encryptionKey = mb_substr($keys, 0, 32, '8bit');
         $hashAuthenticationKey = mb_substr($keys, 32, null, '8bit');
         $cipher = openssl_encrypt($plainText, $algorithm, $encryptionKey, OPENSSL_RAW_DATA, $initializationVector);
         $hmac = hash_hmac('sha256', $initializationVector . $cipher, $hashAuthenticationKey);
@@ -204,7 +203,7 @@ class Cryptography
         $initializationVector = mb_substr($cipherText, 64, 16, '8bit');
         $cipher = mb_substr($cipherText, 80, null, '8bit');
         $keys = self::deriveEncryptionKey($key, $initializationVector); // password is the encryption key
-        $encryptionKey  = mb_substr($keys, 0, 32, '8bit');
+        $encryptionKey = mb_substr($keys, 0, 32, '8bit');
         $hashAuthenticationKey = mb_substr($keys, 32, null, '8bit');
         $hmacValidation = hash_hmac('sha256', $initializationVector . $cipher, $hashAuthenticationKey);
         if (!hash_equals($hmac, $hmacValidation)) {
