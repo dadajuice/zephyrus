@@ -183,10 +183,9 @@ class Cryptography
     }
 
     /**
-     * Decrypts the given cipher using the configured encryption algorithm and the provided decryption key. Throws an
-     * exception if the cipher seems invalid (not properly concatenated with the IV). Provider cipher should have been
-     * made by the encrypt method. Returns the plain text or null if decryption failed. By default, will decrypt using
-     * the AES CBC mode 256 bits (aes-256-cbc) algorithm.
+     * Decrypts the given cipher using the configured encryption algorithm and the provided decryption key. Provided
+     * cipher should have been made by the encrypt method. Returns the plain text or null if decryption failed. By
+     * default, will decrypt using the AES CBC mode 256 bits (aes-256-cbc) algorithm. Returns null if decryption fails.
      *
      * @param string $cipherText
      * @param string $key
@@ -196,7 +195,7 @@ class Cryptography
     {
         $cipherText = base64_decode($cipherText);
         if (strlen($cipherText) < 81) {
-            throw new InvalidArgumentException('Invalid cipher provided');
+            return null;
         }
         $algorithm = self::getEncryptionAlgorithm();
         $hmac = mb_substr($cipherText, 0, 64, '8bit');

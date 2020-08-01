@@ -24,8 +24,8 @@ class CryptographyTest extends TestCase
 
     public function testInvalidDecryption()
     {
-        $this->expectException(InvalidArgumentException::class);
-        Cryptography::decrypt('asdfgsfg43524534erwqf', 'batman'); // not good length
+        $message = Cryptography::decrypt('asdfgsfg43524534erwqf', 'batman'); // not good length
+        self::assertNull($message);
     }
 
     public function testInvalidRandomInt()
