@@ -1,43 +1,55 @@
 <?php namespace Zephyrus\Tests;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Security\Cryptography;
 
 class CryptographyTest extends TestCase
 {
-    public function testEncryption()
+    public function testSuccessfulDecryption()
     {
         $cipher = Cryptography::encrypt('test', 'batman');
         $message = Cryptography::decrypt($cipher, 'batman');
         self::assertEquals('test', $message);
     }
 
-    /**
-     * @expectedException \Exception
-     */
-    public function testInvalidDecryption()
+    public function testFailedDecryptionHmac()
     {
-        Cryptography::decrypt('asdfgsfg43524534erwqf', 'batman');
+        $cipher = Cryptography::encrypt('test', 'batman');
+        $cipher[0] = $cipher[0] ^ chr(1); // change bit in hmac part
+        $message = Cryptography::decrypt($cipher, 'batman');
+        self::assertNull($message);
     }
 
-    /**
-     * @expectedException \Exception
-     */
+    public function testFailedDecryptionCipher()
+    {
+        $cipher = Cryptography::encrypt('test', 'batman');
+        $cipher[85] = $cipher[85] ^ chr(1); // change bit in cipher part
+        $message = Cryptography::decrypt($cipher, 'batman');
+        self::assertNull($message);
+    }
+
+    public function testInvalidDecryption()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        Cryptography::decrypt('asdfgsfg43524534erwqf', 'batman'); // not good length
+    }
+
     public function testInvalidRandomInt()
     {
+        $this->expectException(InvalidArgumentException::class);
         Cryptography::randomInt(10, 10);
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testInvalidNegativeRandomInt()
     {
+        $this->expectException(InvalidArgumentException::class);
         Cryptography::randomInt(-5, 10);
     }
 
     public function testEncryptionAlgorithm()
     {
+        // As defined in config.ini or default value
         self::assertEquals('aes-256-cbc', Cryptography::getEncryptionAlgorithm());
     }
 
@@ -54,17 +66,22 @@ class CryptographyTest extends TestCase
         self::assertEquals(1, preg_match('/^[0-9a-f]{6}$/', $result));
     }
 
-    public function testHash()
+    public function testHashPassword()
     {
-        $hash = Cryptography::hash('test');
-        self::assertTrue(Cryptography::verifyHash('test', $hash));
+        $hash = Cryptography::hashPassword('batmanisbest');
+        self::assertTrue(Cryptography::verifyHashedPassword('batmanisbest', $hash));
+        self::assertFalse(Cryptography::verifyHashedPassword('batmanibest', $hash));
     }
 
-    public function testRehashNeeded()
+    public function testHash()
     {
-        $shaHash = '18EE24150DCB1D96752A4D6DD0F20DFD8BA8C38527E40AA8509B7ADECF78F9C6';
-        $salt = '123456789012345678901234567890';
-        $result = Cryptography::isRehashNeeded($shaHash, $salt);
-        self::assertTrue($result);
+        $hash = Cryptography::hash('test', 'sha256');
+        self::assertEquals('9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', $hash);
+    }
+
+    public function testInvalidHash()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        Cryptography::hash('test', 'non_existing_algorithm');
     }
 }
