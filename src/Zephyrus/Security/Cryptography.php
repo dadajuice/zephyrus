@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Security;
 
 use InvalidArgumentException;
+use stdClass;
 use Zephyrus\Application\Configuration;
 
 class Cryptography
@@ -174,7 +175,7 @@ class Cryptography
     {
         $algorithm = self::getEncryptionAlgorithm();
         $initializationVector = self::randomBytes(openssl_cipher_iv_length($algorithm));
-        $keys = self::deriveKeyFromPassword($key, $initializationVector); // password is the encryption key
+        $keys = self::deriveEncryptionKey($key, $initializationVector); // password is the encryption key
         $encryptionKey  = mb_substr($keys, 0, 32, '8bit');
         $hashAuthenticationKey = mb_substr($keys, 32, null, '8bit');
         $cipher = openssl_encrypt($plainText, $algorithm, $encryptionKey, OPENSSL_RAW_DATA, $initializationVector);
@@ -202,7 +203,7 @@ class Cryptography
         $hmac = mb_substr($cipherText, 0, 64, '8bit');
         $initializationVector = mb_substr($cipherText, 64, 16, '8bit');
         $cipher = mb_substr($cipherText, 80, null, '8bit');
-        $keys = self::deriveKeyFromPassword($key, $initializationVector); // password is the encryption key
+        $keys = self::deriveEncryptionKey($key, $initializationVector); // password is the encryption key
         $encryptionKey  = mb_substr($keys, 0, 32, '8bit');
         $hashAuthenticationKey = mb_substr($keys, 32, null, '8bit');
         $hmacValidation = hash_hmac('sha256', $initializationVector . $cipher, $hashAuthenticationKey);
@@ -218,6 +219,36 @@ class Cryptography
     }
 
     /**
+     * The aad argument (additional authenticated data) contains cleartext information that should be tested to
+     * ensure there has been no alteration.
+     *
+     * @param string $plainText
+     * @param string $key
+     * @param string $aad
+     * @return string
+     */
+    public static function authEncrypt(string $plainText, string $key, string $aad = ""): stdClass
+    {
+        $initializationVector = self::randomBytes(openssl_cipher_iv_length('aes-256-gcm'));
+        $cipher = openssl_encrypt($plainText, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $initializationVector, $tag, $aad);
+        return (object) [
+            'cipher' => base64_encode($initializationVector) . ':' . base64_encode($cipher),
+            'tag' => $tag,
+        ];
+    }
+
+    public static function authDecrypt(string $cipher, string $key, string $tag, string $aad = "")
+    {
+        if (strpos($cipher, ':') === false) {
+            throw new \InvalidArgumentException("Invalid cipher to decrypt");
+        }
+        list($initializationVector, $cipher) = explode(':', $cipher);
+        $cipher = base64_decode($cipher);
+        $initializationVector = base64_decode($initializationVector);
+        return openssl_decrypt($cipher, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $initializationVector, $tag, $aad);
+    }
+
+    /**
      * Generates a key from a password based key derivation function (PBKDF) as defined in RFC2898. Uses the SHA256
      * hashing algorithm. This method is useful to attach an encryption key to a user based on his password.
      *
@@ -227,7 +258,7 @@ class Cryptography
      * @param int $length
      * @return string
      */
-    public static function deriveKeyFromPassword(string $password, string $salt, int $length = 64): string
+    public static function deriveEncryptionKey(string $password, string $salt, int $length = 64): string
     {
         return hash_pbkdf2('sha256', $password, $salt, 80000, $length, true);
     }
