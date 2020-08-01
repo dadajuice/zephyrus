@@ -13,18 +13,11 @@ class CryptographyTest extends TestCase
         self::assertEquals('test', $message);
     }
 
-    public function testFailedDecryptionHmac()
+    public function testFailedDecryption()
     {
         $cipher = Cryptography::encrypt('test', 'batman');
-        $cipher[0] = $cipher[0] ^ chr(1); // change bit in hmac part
-        $message = Cryptography::decrypt($cipher, 'batman');
-        self::assertNull($message);
-    }
-
-    public function testFailedDecryptionCipher()
-    {
-        $cipher = Cryptography::encrypt('test', 'batman');
-        $cipher[85] = $cipher[85] ^ chr(1); // change bit in cipher part
+        $i = rand(0, mb_strlen($cipher, '8bit') - 1);
+        $cipher[$i] = $cipher[$i] ^ chr(1); // random changes
         $message = Cryptography::decrypt($cipher, 'batman');
         self::assertNull($message);
     }
@@ -89,5 +82,17 @@ class CryptographyTest extends TestCase
     {
         $hash = Cryptography::hashFile(ROOT_DIR . '/lib/images/batlike.jpg');
         self::assertEquals('6a7022c3626487d202bfb593b3d7db3d', $hash);
+    }
+
+    public function testInvalidFileHash()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        Cryptography::hashFile(ROOT_DIR . '/lib/images/batjsdhfkdshfkhjfsdlike.jpg');
+    }
+
+    public function testInvalidFileHashAlgorithm()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        Cryptography::hashFile(ROOT_DIR . '/lib/images/batlike.jpg', 'non_existing_algorithm');
     }
 }

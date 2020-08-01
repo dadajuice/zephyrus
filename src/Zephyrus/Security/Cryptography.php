@@ -212,7 +212,7 @@ class Cryptography
         }
         $plainText = openssl_decrypt($cipher, $algorithm, $encryptionKey, OPENSSL_RAW_DATA, $initializationVector);
         if ($plainText === false) {
-            return null;
+            return null; // @codeCoverageIgnore
         }
         return $plainText;
     }
