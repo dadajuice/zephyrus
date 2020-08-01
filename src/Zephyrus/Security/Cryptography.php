@@ -217,6 +217,46 @@ class Cryptography
     }
 
     /**
+     * Encrypts the given plain text with the specified encryption key as usual but also authenticate with an hmac using
+     * the Encrypt-then-MAC approach for authenticated encryption. The result contains the cipher, the hmac and salt.
+     *
+     * @param string $plainText
+     * @param string $encryptionKey
+     * @param string $authenticationKey
+     * @return string
+     */
+    public static function authEncrypt(string $plainText, string $encryptionKey, string $authenticationKey): string
+    {
+        $cipher = self::encrypt($plainText, $encryptionKey);
+        $salt = self::randomBytes(32);
+        $hmac = hash_hmac('sha256', $cipher . $salt, $authenticationKey);
+        return base64_encode($cipher . '/+' . $hmac . '/+' . $salt);
+    }
+
+    /**
+     * Decrypts the given cipher text using the encryption key after authenticating the hmac with the given
+     * authentication key. Returns null if decryption fails.
+     *
+     * @param string $cipherText
+     * @param string $encryptionKey
+     * @param string $authenticationKey
+     * @return string
+     */
+    public static function authDecrypt(string $cipherText, string $encryptionKey, string $authenticationKey): ?string
+    {
+        $rawCipherText = base64_decode($cipherText);
+        if (substr_count($rawCipherText, '/+') != 2) {
+            return null;
+        }
+        list($cipher, $hmac, $salt) = explode('/+', $rawCipherText);
+        $hmacNow = hash_hmac('sha256', $cipher . $salt, $authenticationKey);
+        if (!hash_equals($hmac, $hmacNow)) {
+            return null;
+        }
+        return self::decrypt($cipher, $encryptionKey);
+    }
+
+    /**
      * Generates a key from a password based key derivation function (PBKDF) as defined in RFC2898. Uses the SHA256
      * hashing algorithm. This method is useful to attach an encryption key to a user based on his password.
      *

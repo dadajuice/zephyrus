@@ -28,6 +28,27 @@ class CryptographyTest extends TestCase
         self::assertNull($message);
     }
 
+    public function testSuccessfulAuthDecryption()
+    {
+        $cipher = Cryptography::authEncrypt("i am a secret", "ksd34289esfnfs93wjnes920", "batman");
+        $message = Cryptography::authDecrypt($cipher, "ksd34289esfnfs93wjnes920", "batman");
+        self::assertEquals("i am a secret", $message);
+    }
+
+    public function testFailedAuthDecryptionStructure()
+    {
+        $cipher = base64_encode('ljsdhfkdsfkdsfhfd');
+        $message = Cryptography::authDecrypt($cipher, "ksd34289esfnfs93wjnes920", "batman");
+        self::assertNull($message);
+    }
+
+    public function testFailedAuthDecryptionByHmac()
+    {
+        $cipher = base64_encode('ljsdhfkdsfkdsfhfds/+jdfhkjgkhdfg/+lkdsjfjksdf');
+        $message = Cryptography::authDecrypt($cipher, "ksd34289esfnfs93wjnes920", "batman");
+        self::assertNull($message);
+    }
+
     public function testInvalidRandomInt()
     {
         $this->expectException(InvalidArgumentException::class);
