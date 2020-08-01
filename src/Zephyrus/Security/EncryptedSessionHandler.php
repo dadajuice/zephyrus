@@ -5,21 +5,17 @@ class EncryptedSessionHandler extends \SessionHandler
     /**
      * @var string Encryption symmetric key created using the specified algorithm
      */
-    private $cryptKey;
+    private $encryptionKey;
 
     /**
-     * @var string HMac hash authentication key
-     */
-    private $cryptAuth;
-
-    /**
-     * @var string Cookie name that will store the encryption data (hmac and
-     * symmetric key).
+     * @var string Cookie name that will store the encryption data (hmac and symmetric key).
      */
     private $cookieKeyName;
 
     /**
-     * Called on session_start, this method create the.
+     * Called on session_start, this method creates the cookie that will allow the session unlocking. Meaning, only the
+     * authenticated user with the proper cookie will be able to read the session ensuring that if the server is somehow
+     * compromised, the active session data wont be readable.
      *
      * @param string $savePath
      * @param string $sessionName
@@ -30,31 +26,43 @@ class EncryptedSessionHandler extends \SessionHandler
     {
         parent::open($savePath, $sessionName);
         $this->cookieKeyName = "key_$sessionName";
-        if (empty($_COOKIE[$this->cookieKeyName]) || strpos($_COOKIE[$this->cookieKeyName], ':') === false) {
+        if (!isset($_COOKIE[$this->cookieKeyName])) {
             $this->createEncryptionCookie();
             return true;
         }
-        list($this->cryptKey, $this->cryptAuth) = explode(':', $_COOKIE[$this->cookieKeyName]);
-        $this->cryptKey = base64_decode($this->cryptKey);
-        $this->cryptAuth = base64_decode($this->cryptAuth);
+        $this->encryptionKey = base64_decode($_COOKIE[$this->cookieKeyName]);
         return true;
     }
 
+    /**
+     * Overrides the session handler read method to make sure to properly decrypt the data contained within using the
+     * encryption key store in the user's cookies.
+     *
+     * @param string $sessionId
+     * @return string|null
+     */
     public function read($sessionId)
     {
         $data = parent::read($sessionId);
-        return (!$data) ? "" : $this->decrypt($data);
-    }
-
-    public function write($sessionId, $data)
-    {
-        $data = $this->encrypt($data);
-        return parent::write($sessionId, $data);
+        return (!$data) ? "" : Cryptography::decrypt(base64_decode($data), $this->encryptionKey);
     }
 
     /**
-     * Destroy session file on disk and delete encryption cookie if no session
-     * is active after deletion.
+     * Overrides the session handler write method to make sure to properly encrypt the data before saving it using the
+     * encryption key store in the user's cookies.
+     *
+     * @param string $sessionId
+     * @param string $data
+     * @return bool
+     */
+    public function write($sessionId, $data)
+    {
+        $data = Cryptography::encrypt($data, $this->encryptionKey);
+        return parent::write($sessionId, base64_encode($data));
+    }
+
+    /**
+     * Destroy session file on disk and delete encryption cookie if no session is active after deletion.
      *
      * @param string $sessionId
      * @return bool
@@ -70,62 +78,20 @@ class EncryptedSessionHandler extends \SessionHandler
     }
 
     /**
-     * @throws \Exception
+     * Sends the cookie with the encryption key.
      */
     private function createEncryptionCookie()
     {
-        $keyLength = Cryptography::getEncryptionIvLength();
-        $this->cryptKey = Cryptography::randomBytes($keyLength);
-        $this->cryptAuth = Cryptography::randomBytes(32);
+        $this->encryptionKey = Cryptography::randomBytes(16);
         $cookieSettings = session_get_cookie_params();
         setcookie(
             $this->cookieKeyName,
-            base64_encode($this->cryptKey) . ':' . base64_encode($this->cryptAuth),
+            base64_encode($this->encryptionKey),
             ($cookieSettings['lifetime'] > 0) ? time() + $cookieSettings['lifetime'] : 0,
             $cookieSettings['path'],
             $cookieSettings['domain'],
             $cookieSettings['secure'],
             $cookieSettings['httponly']
         );
-    }
-
-    /**
-     * Encrypt the specified data using the defined algorithm. Also create an
-     * Hmac authentication hash.
-     *
-     * @param string $data
-     * @return string
-     */
-    private function encrypt(string $data): string
-    {
-        $cipher = Cryptography::encrypt($data, $this->cryptKey);
-        list($initializationVector, $cipher) = explode(':', $cipher);
-        $initializationVector = base64_decode($initializationVector);
-        $cipher = base64_decode($cipher);
-        $content = $initializationVector . Cryptography::getEncryptionAlgorithm() . $cipher;
-        $hmac = hash_hmac('sha256', $content, $this->cryptAuth);
-        return $hmac . ':' . base64_encode($initializationVector) . ':' . base64_encode($cipher);
-    }
-
-    /**
-     * Decrypt the specified data using the defined algorithm. Also verify the
-     * Hmac authentication hash. Returns false if Hmac validation fails.
-     *
-     * @param string $data
-     * @throws \Exception
-     * @return string
-     */
-    private function decrypt(string $data): string
-    {
-        list($hmac, $initializationVector, $cipher) = explode(':', $data);
-        $ivReal = base64_decode($initializationVector);
-        $cipherReal = base64_decode($cipher);
-        $validHash = $ivReal . Cryptography::getEncryptionAlgorithm() . $cipherReal;
-        $newHmac = hash_hmac('sha256', $validHash, $this->cryptAuth);
-        if ($hmac !== $newHmac) {
-            throw new \RuntimeException("Invalid decryption key");
-        }
-        $decrypt = Cryptography::decrypt($initializationVector . ':' . $cipher, $this->cryptKey);
-        return $decrypt;
     }
 }
