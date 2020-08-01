@@ -219,36 +219,6 @@ class Cryptography
     }
 
     /**
-     * The aad argument (additional authenticated data) contains cleartext information that should be tested to
-     * ensure there has been no alteration.
-     *
-     * @param string $plainText
-     * @param string $key
-     * @param string $aad
-     * @return string
-     */
-    public static function authEncrypt(string $plainText, string $key, string $aad = ""): stdClass
-    {
-        $initializationVector = self::randomBytes(openssl_cipher_iv_length('aes-256-gcm'));
-        $cipher = openssl_encrypt($plainText, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $initializationVector, $tag, $aad);
-        return (object) [
-            'cipher' => base64_encode($initializationVector) . ':' . base64_encode($cipher),
-            'tag' => $tag,
-        ];
-    }
-
-    public static function authDecrypt(string $cipher, string $key, string $tag, string $aad = "")
-    {
-        if (strpos($cipher, ':') === false) {
-            throw new \InvalidArgumentException("Invalid cipher to decrypt");
-        }
-        list($initializationVector, $cipher) = explode(':', $cipher);
-        $cipher = base64_decode($cipher);
-        $initializationVector = base64_decode($initializationVector);
-        return openssl_decrypt($cipher, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $initializationVector, $tag, $aad);
-    }
-
-    /**
      * Generates a key from a password based key derivation function (PBKDF) as defined in RFC2898. Uses the SHA256
      * hashing algorithm. This method is useful to attach an encryption key to a user based on his password.
      *
