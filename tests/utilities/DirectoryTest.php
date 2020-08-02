@@ -17,18 +17,16 @@ class DirectoryTest extends TestCase
 
     /**
      * @depends testCreate
-     * @expectedException \InvalidArgumentException
      */
     public function testInvalidCreate()
     {
+        $this->expectException(\InvalidArgumentException::class);
         Directory::create(ROOT_DIR . '/lib/filesystem/new_dir');
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testInvalidConstruct()
     {
+        $this->expectException(\InvalidArgumentException::class);
         new Directory(ROOT_DIR . '/lib/filesystem/test_subdirectory/bob.dat');
     }
 

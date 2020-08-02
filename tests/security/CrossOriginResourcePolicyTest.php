@@ -5,7 +5,7 @@ use Zephyrus\Security\CrossOriginResourcePolicy;
 
 class CrossOriginResourcePolicyTest extends TestCase
 {
-    protected function tearDown()
+    protected function tearDown(): void
     {
         header_remove(); // reset headers
     }

@@ -53,10 +53,10 @@ class AuthorizationTest extends TestCase
 
     /**
      * @depends testSessionRule
-     * @expectedException \Exception
      */
     public function testSessionRuleAlreadyDefined()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $req = new Request('http://test.local', 'GET');
         $auth = new Authorization($req);
         $auth->addSessionRule('admin', 'level', '777');
@@ -65,10 +65,10 @@ class AuthorizationTest extends TestCase
 
     /**
      * @depends testSessionRule
-     * @expectedException \Exception
      */
     public function testSessionRuleAlreadyDefined2()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $req = new Request('http://test.local', 'GET');
         $auth = new Authorization($req);
         $auth->addSessionRule('admin', 'level', '777');
@@ -77,10 +77,10 @@ class AuthorizationTest extends TestCase
 
     /**
      * @depends testSessionRule
-     * @expectedException \Exception
      */
     public function testSessionRuleAlreadyDefined3()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $req = new Request('http://test.local', 'GET');
         $auth = new Authorization($req);
         $auth->addSessionRule('admin', 'level', '777');
@@ -91,10 +91,10 @@ class AuthorizationTest extends TestCase
 
     /**
      * @depends testSessionRule
-     * @expectedException \Exception
      */
     public function testSessionRuleDefined()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $req = new Request('http://test.local', 'GET');
         $auth = new Authorization($req);
         $auth->protect('/users/*', Authorization::GET, 'admin');
@@ -103,10 +103,10 @@ class AuthorizationTest extends TestCase
 
     /**
      * @depends testSessionRule
-     * @expectedException \Exception
      */
     public function testRequirementUndefined()
     {
+        $this->expectException(\RuntimeException::class);
         $req = new Request('http://test.local', 'GET');
         $auth = new Authorization($req);
         $auth->protect('/logs', Authorization::GET, 'invalid');

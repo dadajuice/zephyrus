@@ -133,11 +133,9 @@ class FormatterTest extends TestCase
         self::assertEquals('120,10 m<sup>3</sup>', $result);
     }
 
-    /**
-     * @expectedException \BadMethodCallException
-     */
     public function testInvalidCustomFormat()
     {
+        $this->expectException(\BadMethodCallException::class);
         format('temperature', -5);
     }
 }

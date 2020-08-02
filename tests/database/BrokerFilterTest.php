@@ -14,7 +14,7 @@ class BrokerFilterTest extends TestCase
      */
     private static $database;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$database = DatabaseFactory::buildFromConfigurations(['dbms' => 'sqlite']);
         self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');

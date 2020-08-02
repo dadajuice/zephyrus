@@ -111,11 +111,9 @@ class FileTest extends TestCase
         self::assertEquals("One ring to rule them all", ob_get_clean());
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testInvalidPath()
     {
+        $this->expectException(\InvalidArgumentException::class);
         new File(ROOT_DIR . '/lib/filesystem/lksdfkjdshfksdf.txt');
     }
 

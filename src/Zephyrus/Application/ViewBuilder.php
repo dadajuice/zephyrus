@@ -29,7 +29,7 @@ class ViewBuilder
     {
         $path = realpath(ROOT_DIR . '/app/Views/' . $pageToRender . '.pug');
         if (!file_exists($path) || !is_readable($path)) {
-            throw new \Exception("The specified view file [$path] is not available (not readable or does not exists)");
+            throw new \InvalidArgumentException("The specified view file [$path] is not available (not readable or does not exists)");
         }
         return new View($this->pug, $path);
     }

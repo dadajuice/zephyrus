@@ -61,11 +61,9 @@ class ConfigurationFileTest extends TestCase
         @unlink(ROOT_DIR . '/test.ini');
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testLock()
     {
+        $this->expectException(\RuntimeException::class);
         $ini = new ConfigurationFile('/etc/lock.ini');
         $ini->write([
             'test' => 5

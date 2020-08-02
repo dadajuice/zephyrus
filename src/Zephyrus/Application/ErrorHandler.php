@@ -51,7 +51,6 @@ class ErrorHandler
      * E_NOTICE, E_DEPRECATED, E_USER_DEPRECATED).
      *
      * @param callable $callback
-     * @throws \Exception
      */
     public function notice(callable $callback)
     {
@@ -68,7 +67,6 @@ class ErrorHandler
      * E_COMPILE_WARNING).
      *
      * @param callable $callback
-     * @throws \Exception
      */
     public function warning(callable $callback)
     {
@@ -82,7 +80,6 @@ class ErrorHandler
      * occurs.
      *
      * @param callable $callback
-     * @throws \Exception
      */
     public function error(callable $callback)
     {
@@ -99,7 +96,6 @@ class ErrorHandler
      * the default Exception behavior must be overridden).
      *
      * @param callable $callback
-     * @throws \InvalidArgumentException
      */
     public function exception(callable $callback)
     {
@@ -132,14 +128,17 @@ class ErrorHandler
      *
      * @param int $level
      * @param callable $callback
-     * @throws \Exception
      */
     public function registerError($level, callable $callback)
     {
-        $reflection = new \ReflectionFunction($callback);
-        $parameters = $reflection->getParameters();
-        if (count($parameters) > 4) {
-            throw new \Exception("Specified callback cannot have more than 4 arguments (message, file, line, context)");
+        try {
+            $reflection = new \ReflectionFunction($callback);
+            $parameters = $reflection->getParameters();
+            if (count($parameters) > 4) {
+                throw new \InvalidArgumentException("Specified callback cannot have more than 4 arguments (message, file, line, context)");
+            }
+        } catch (\ReflectionException $e) {
+            throw new \InvalidArgumentException("Specified callback is invalid : " . $e->getMessage()); // @codeCoverageIgnore
         }
         $this->registeredErrorCallbacks[$level] = $callback;
     }

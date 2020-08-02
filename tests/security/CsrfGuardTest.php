@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Session;
+use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 use Zephyrus\Security\CsrfGuard;
@@ -75,62 +76,50 @@ class CsrfGuardTest extends TestCase
         self::assertTrue($csrf->isPatchSecured());
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\InvalidCsrfException
-     */
     public function testGuardException()
     {
+        $this->expectException(InvalidCsrfException::class);
         $req = new Request('http://test.local/test', 'POST');
         $csrf = new CsrfGuard($req);
         $csrf->guard();
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\InvalidCsrfException
-     */
     public function testInvalidToken()
     {
+        $this->expectException(InvalidCsrfException::class);
         $req = new Request('http://test.local/test', 'PUT', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
         $csrf = new CsrfGuard($req);
         $csrf->guard();
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\InvalidCsrfException
-     */
     public function testInvalidToken2()
     {
+        $this->expectException(InvalidCsrfException::class);
         $req = new Request('http://test.local/test', 'PATCH', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
         $csrf = new CsrfGuard($req);
         $csrf->guard();
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\InvalidCsrfException
-     */
     public function testInvalidGuard()
     {
+        $this->expectException(InvalidCsrfException::class);
         $req = new Request('http://test.local/test', 'POST', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
         $csrf = new CsrfGuard($req);
         $csrf->guard();
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\InvalidCsrfException
-     */
     public function testInvalidGetGuard()
     {
+        $this->expectException(InvalidCsrfException::class);
         $req = new Request('http://test.local/test', 'GET');
         $csrf = new CsrfGuard($req);
         $csrf->setGetSecured(true);
         $csrf->guard();
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\InvalidCsrfException
-     */
     public function testNoStorageGuard()
     {
+        $this->expectException(InvalidCsrfException::class);
         $req = new Request('http://test.local/test', 'GET');
         $csrf = new CsrfGuard($req);
         $csrf->setGetSecured(false);

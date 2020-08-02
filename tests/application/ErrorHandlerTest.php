@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Tests;
 
 use Exception;
+use InvalidArgumentException;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use UnderflowException;
@@ -14,35 +15,29 @@ use Zephyrus\Exceptions\RouteNotFoundException;
 
 class ErrorHandlerTest extends TestCase
 {
-    protected function tearDown()
+    protected function tearDown(): void
     {
         set_exception_handler(null);
         set_error_handler(null);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testInvalidArgument()
     {
+        $this->expectException(InvalidArgumentException::class);
         $handler = ErrorHandler::getInstance();
         $handler->exception(function() {});
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testInvalidArgumentType()
     {
+        $this->expectException(InvalidArgumentException::class);
         $handler = ErrorHandler::getInstance();
         $handler->exception(function(Database $e) {});
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testInvalidErrorTooMuchArgument()
     {
+        $this->expectException(InvalidArgumentException::class);
         $handler = ErrorHandler::getInstance();
         $handler->notice(function ($message, $a, $b, $c, $d) {
             echo "test: $message" ;

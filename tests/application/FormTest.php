@@ -9,7 +9,7 @@ use Zephyrus\Utilities\Validations\ValidationCallback;
 
 class FormTest extends TestCase
 {
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         Session::getInstance()->destroy();
         Session::kill();

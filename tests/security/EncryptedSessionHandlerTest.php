@@ -16,7 +16,7 @@ class EncryptedSessionHandlerTest extends TestCase
      */
     private $sessionId;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         if (isset($_COOKIE['key_phpsessid'])) {
             unset($_COOKIE['key_phpsessid']);
@@ -31,7 +31,7 @@ class EncryptedSessionHandlerTest extends TestCase
         $this->setupCookie();
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         Session::kill();
         $this->handler->destroy($this->sessionId);

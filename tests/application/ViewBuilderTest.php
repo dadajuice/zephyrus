@@ -19,11 +19,9 @@ class ViewBuilderTest extends TestCase
         self::assertEquals('<p>Bob Lewis</p>', $output);
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testViewRenderInvalidFromFile()
     {
+        $this->expectException(\InvalidArgumentException::class);
         ViewBuilder::getInstance()->build('dsfdfg');
     }
 

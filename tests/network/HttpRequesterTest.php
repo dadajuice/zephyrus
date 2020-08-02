@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Exceptions\HttpRequesterException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\HttpRequester;
 use Zephyrus\Utilities\FileSystem\File;
@@ -36,12 +37,11 @@ class HttpRequesterTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\HttpRequesterException
-     */
     public function testInvalidRequest()
     {
+        $this->expectException(HttpRequesterException::class);
         $request = HttpRequester::get("https://lkjdsflkjsdf.msdfe.sdf.sdf");
+        $request->setConnectionTimeout(1);
         $content = $request->execute();
     }
 
@@ -58,11 +58,9 @@ class HttpRequesterTest extends TestCase
         self::assertFalse(file_exists($filePath));
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\HttpRequesterException
-     */
     public function testInvalidDownloadFile()
     {
+        $this->expectException(HttpRequesterException::class);
         $request = HttpRequester::get("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/existing.txt");
         $filePath = $request->executeDownload([], '/etc/new_files.txt');
     }
@@ -74,11 +72,9 @@ class HttpRequesterTest extends TestCase
         $request->execute(['file' => $file, 'test' => ['name' => 't', 'age' => 3, 'classes' => ['nest', 'nest 2']]]);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testInvalidUpload()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $file = HttpRequester::prepareUploadFile(ROOT_DIR . '/lib/filesystem/existidsfsdfdsfdsdfdsfsdfsdfng.txt', 'test.txt');
     }
 }

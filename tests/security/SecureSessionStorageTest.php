@@ -128,6 +128,7 @@ class SecureSessionStorageTest extends TestCase
         $storage->start();
         $oldId = $storage->getId();
 
+
         $storage->start();
         $newId = $storage->getId();
         self::assertNotEquals($newId, $oldId);
@@ -172,11 +173,9 @@ class SecureSessionStorageTest extends TestCase
         $storage->destroy();
     }
 
-    /**
-     * @expectedException \RangeException
-     */
     public function testInvalidProbability()
     {
+        $this->expectException(\RangeException::class);
         $config = [
             'name' => 'bob',
             'encryption_enabled' => false,

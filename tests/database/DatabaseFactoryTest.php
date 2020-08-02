@@ -2,32 +2,27 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Database\DatabaseFactory;
+use Zephyrus\Exceptions\DatabaseException;
 
 class DatabaseFactoryTest extends TestCase
 {
-    /**
-     * @expectedException \Zephyrus\Exceptions\DatabaseException
-     */
     public function testMySql()
     {
+        $this->expectException(DatabaseException::class);
         $database = DatabaseFactory::buildFromConfigurations(['dbms' => 'mysql']);
         self::assertEquals("mysql", $database->getAdapter()->getDatabaseManagementSystem());
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\DatabaseException
-     */
     public function testPostgres()
     {
+        $this->expectException(DatabaseException::class);
         $database = DatabaseFactory::buildFromConfigurations(['dbms' => 'pgsql']);
         self::assertEquals("pgsql", $database->getAdapter()->getDatabaseManagementSystem());
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testInvalid()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $database = DatabaseFactory::buildFromConfigurations([]);
     }
 }

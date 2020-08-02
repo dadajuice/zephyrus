@@ -4,6 +4,7 @@ use PHPUnit\Framework\TestCase;
 use Zephyrus\Database\Core\Database;
 use Zephyrus\Database\DatabaseBroker;
 use Zephyrus\Database\DatabaseFactory;
+use Zephyrus\Exceptions\DatabaseException;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 
@@ -14,7 +15,7 @@ class BrokerTest extends TestCase
      */
     private static $database;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$database = DatabaseFactory::buildFromConfigurations(['dbms' => 'sqlite']);
         self::$database->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT);');
@@ -165,11 +166,9 @@ class BrokerTest extends TestCase
         self::assertEquals(4, count($rows));
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\DatabaseException
-     */
     public function testInvalidTransaction()
     {
+        $this->expectException(DatabaseException::class);
         $class = new class(self::$database) extends DatabaseBroker
         {
             public function insert()

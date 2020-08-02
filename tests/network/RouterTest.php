@@ -11,12 +11,10 @@ use Zephyrus\Network\Router;
 
 class RouterTest extends TestCase
 {
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionCode 501
-     */
     public function testSimpleGetHome()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(501);
         $req = new Request('http://test.local/', 'GET');
         $router = new Router();
         $ref = $this;
@@ -41,12 +39,10 @@ class RouterTest extends TestCase
         $this->assertEquals('test', $output);
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionCode 500
-     */
     public function testSimpleGet()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(500);
         $req = new Request('http://test.local/bob', 'GET');
         $router = new Router();
         $router->get('/bob', function() {
@@ -105,12 +101,10 @@ class RouterTest extends TestCase
         $router->run($req);
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionCode 500
-     */
     public function testAccept()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(500);
         $server = [];
         $server['HTTP_ACCEPT'] = ContentType::JSON;
         $req = new Request('http://test.local/bob', 'GET', [
@@ -123,11 +117,9 @@ class RouterTest extends TestCase
         $router->run($req);
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\RouteNotAcceptedException
-     */
     public function testRouteNotAcceptedException()
     {
+        $this->expectException(RouteNotAcceptedException::class);
         $server = [];
         $server['HTTP_ACCEPT'] = ContentType::HTML;
         $req = new Request('http://test.local/bob', 'GET', [
@@ -158,12 +150,10 @@ class RouterTest extends TestCase
         }
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionCode 500
-     */
     public function testMultipleRouteNotAcceptedException()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionCode(500);
         $server = [];
         $server['HTTP_ACCEPT'] = ContentType::HTML;
         $req = new Request('http://test.local/bob', 'GET', [
@@ -176,11 +166,9 @@ class RouterTest extends TestCase
         $router->run($req);
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\RouteMethodUnsupportedException
-     */
     public function testInvalidRouteMethod()
     {
+        $this->expectException(RouteMethodUnsupportedException::class);
         $req = new Request('http://test.local/bob/3', 'INV');
         $router = new Router();
         $router->run($req);
@@ -197,11 +185,9 @@ class RouterTest extends TestCase
         }
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\RouteNotFoundException
-     */
     public function testInvalidRoute()
     {
+        $this->expectException(RouteNotFoundException::class);
         $req = new Request('http://test.local/bob/3', 'GET');
         $router = new Router();
         $router->run($req);
@@ -219,11 +205,9 @@ class RouterTest extends TestCase
         }
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testInvalidRouteDefinition()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $req = new Request('http://test.local/bob/3/5', 'GET');
         $router = new Router();
         $router->get('/bob/{id}/{id}', function() {
@@ -232,11 +216,9 @@ class RouterTest extends TestCase
         $router->run($req);
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\RouteNotFoundException
-     */
     public function testRouteNotFoundException()
     {
+        $this->expectException(RouteNotFoundException::class);
         $req = new Request('http://test.local/sdfgg', 'GET');
         $router = new Router();
         $router->get('/bob', function() {

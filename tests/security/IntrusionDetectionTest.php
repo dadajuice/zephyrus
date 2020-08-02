@@ -21,11 +21,9 @@ class IntrusionDetectionTest extends TestCase
         self::assertEquals("5", $_GET['test']);
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\IntrusionDetectionException
-     */
     public function testDetectionInjection()
     {
+        $this->expectException(IntrusionDetectionException::class);
         $ids = IntrusionDetection::getInstance();
         $ids->setSurveillance(IntrusionDetection::GET);
         $_GET['test'] = "' AND 1=1#";
@@ -43,11 +41,9 @@ class IntrusionDetectionTest extends TestCase
         self::assertTrue($ids->isMonitoringRequest());
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\IntrusionDetectionException
-     */
     public function testDetection()
     {
+        $this->expectException(IntrusionDetectionException::class);
         $ids = IntrusionDetection::getInstance();
         $ids->setSurveillance(IntrusionDetection::GET | IntrusionDetection::POST | IntrusionDetection::REQUEST
             | IntrusionDetection::COOKIE);
@@ -60,11 +56,9 @@ class IntrusionDetectionTest extends TestCase
         }
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testNothingToMonitorException()
     {
+        $this->expectException(\RuntimeException::class);
         $ids = IntrusionDetection::getInstance();
         $ids->setSurveillance(0);
         $_GET['test'] = "' AND 1=1#";

@@ -6,6 +6,7 @@ use Zephyrus\Database\Core\Adapters\MysqlAdapter;
 use Zephyrus\Database\Core\Adapters\PostgresqlAdapter;
 use Zephyrus\Database\Core\Adapters\SqliteAdapter;
 use Zephyrus\Database\Core\Database;
+use Zephyrus\Exceptions\DatabaseException;
 
 class DatabaseAdapterTest extends TestCase
 {
@@ -53,11 +54,9 @@ class DatabaseAdapterTest extends TestCase
         self::assertEquals(ROOT_DIR . '/lib/db.sqlite', $adapter->getDatabaseName());
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\DatabaseException
-     */
     public function testFileSqliteError()
     {
+        $this->expectException(DatabaseException::class);
         $adapter = new SqliteAdapter([
             'dbms' => 'mysql',
             'database' => ROOT_DIR . '/lib/db.sqlidfljsdfkjlsdkfjlte'
@@ -76,28 +75,22 @@ class DatabaseAdapterTest extends TestCase
         self::assertEquals(" LIMIT 50 OFFSET 4", $adapter->getLimitClause(4, 50));
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testInvalidDbms()
     {
+        $this->expectException(\InvalidArgumentException::class);
         new MysqlAdapter(['test' => 'kjdshfkhdsf']);
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\DatabaseException
-     */
     public function testDriverNotInstalled()
     {
+        $this->expectException(DatabaseException::class);
         $adapter = new MysqlAdapter(['dbms' => 'batman']);
         $adapter->buildHandle();
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\DatabaseException
-     */
     public function testConnectionFailed()
     {
+        $this->expectException(DatabaseException::class);
         $adapter = new MysqlAdapter(['dbms' => 'mysql', 'host' => 'localhost', 'port' => '9999', 'username' => 'bob', 'password' => 'bubu', 'database' => 'jksdhfkjhsdf']);
         $adapter->buildHandle();
     }

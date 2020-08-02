@@ -346,11 +346,9 @@ class ControllerTest extends TestCase
         self::assertTrue(strpos($output, '<root><test><a>2</a><b>bob</b><node3>t</node3></test></root>') !== false);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testXmlException()
     {
+        $this->expectException(\RuntimeException::class);
         $router = new Router();
         $controller = new class($router) extends Controller {
 

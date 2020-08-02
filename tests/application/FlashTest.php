@@ -6,13 +6,13 @@ use Zephyrus\Application\Session;
 
 class FlashTest extends TestCase
 {
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $session = Session::getInstance();
         $session->start();
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         $session = Session::getInstance();
         $session->destroy();

@@ -13,7 +13,7 @@ class DatabaseTest extends TestCase
      */
     private static $database;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$database = DatabaseFactory::buildFromConfigurations(['dbms' => 'sqlite']);
     }
@@ -125,37 +125,29 @@ class DatabaseTest extends TestCase
         self::assertEquals(2, $i);
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\DatabaseException
-     */
     public function testErrorCommit()
     {
+        $this->expectException(DatabaseException::class);
         $db = DatabaseFactory::buildFromConfigurations(['dbms' => 'sqlite']);
         $db->commit();
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\DatabaseException
-     */
     public function testErrorRollback()
     {
+        $this->expectException(DatabaseException::class);
         $db = DatabaseFactory::buildFromConfigurations(['dbms' => 'sqlite']);
         $db->rollback();
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\DatabaseException
-     */
     public function testInvalidDsn()
     {
+        $this->expectException(DatabaseException::class);
         DatabaseFactory::buildFromConfigurations(['dbms' => 'lkdslkjsdfjklsdf']);
     }
 
-    /**
-     * @expectedException \Zephyrus\Exceptions\DatabaseException
-     */
     public function testUnavailableDbms()
     {
+        $this->expectException(DatabaseException::class);
         DatabaseFactory::buildFromConfigurations([
             'dbms' => 'batman',
             'host' => 'localhost',

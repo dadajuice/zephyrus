@@ -41,6 +41,7 @@ class Session
      * Obtain the single allowed instance for Session through singleton pattern
      * method.
      *
+     * @param array|null $configurations
      * @return Session
      */
     final public static function getInstance(?array $configurations = null): self
@@ -124,11 +125,11 @@ class Session
      */
     public function start()
     {
-        session_name($this->name);
-        session_set_save_handler(is_null($this->handler)
-            ? new \SessionHandler()
-            : $this->handler, true);
         if (session_status() == PHP_SESSION_NONE) {
+            session_name($this->name);
+            session_set_save_handler(is_null($this->handler)
+                ? new \SessionHandler()
+                : $this->handler, true);
             session_start();
         }
         $this->sessionId = session_id();
@@ -188,12 +189,12 @@ class Session
      * exception. Also make sure the cookie is always accessible through HTTP
      * only and automatically make it secure when HTTPS connection is used.
      *
-     * @throws \Exception
+     * @param array|null $configurations
      */
     private function __construct(?array $configurations = null)
     {
         if (!ini_get('session.use_cookies') || !ini_get('session.use_only_cookies')) {
-            throw new \Exception("Session configurations are not secure.
+            throw new \InvalidArgumentException("Session configurations are not secure.
             Fixation may be possible. Please review your php.ini or local
             settings (eg. .htaccess) for directive session.use_cookies and
             session.use_only_cookies.");
