@@ -268,7 +268,7 @@ class Cryptography
      */
     public static function deriveEncryptionKey(string $password, string $salt, int $length = 64): string
     {
-        return hash_pbkdf2('sha256', $password, $salt, 80000, $length, true);
+        return hash_pbkdf2('sha256', $password, $salt, 80000, $length);
     }
 
     /**
