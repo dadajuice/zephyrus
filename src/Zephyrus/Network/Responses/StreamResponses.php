@@ -6,7 +6,15 @@ use Zephyrus\Network\Response;
 
 trait StreamResponses
 {
-    public function buildPollingSse($data, $eventId = 'stream', $retry = 1000): Response
+    /**
+     * Does a simple server-sent event response which will do a simple polling.
+     *
+     * @param mixed $data
+     * @param string $eventId
+     * @param int $retry
+     * @return Response
+     */
+    public function ssePolling($data, $eventId = 'stream', $retry = 1000): Response
     {
         $response = new Response(ContentType::SSE);
         $response->addHeader('Cache-Control', 'no-cache');
@@ -16,7 +24,17 @@ trait StreamResponses
         return $response;
     }
 
-    public function buildStreamingSse($callback, $eventId, $sleep = 1): Response
+    /**
+     * Does a streaming server-sent event response which will loop and execute
+     * the specified callback indefinitely and update the client only when
+     * needed.
+     *
+     * @param $callback
+     * @param string $eventId
+     * @param int $sleep
+     * @return Response
+     */
+    public function sseStreaming($callback, $eventId = 'stream', $sleep = 1): Response
     {
         $response = new Response(ContentType::SSE);
         $that = $this;
@@ -30,7 +48,7 @@ trait StreamResponses
                     break;
                 }
                 if (!empty($data)) {
-                    $that->buildPollingSse($data, $eventId, $sleep * 1000)->sendContent();
+                    $that->ssePolling($data, $eventId, $sleep * 1000)->sendContent();
                 }
                 @flush();
                 sleep($sleep);
@@ -46,7 +64,15 @@ trait StreamResponses
         return $response;
     }
 
-    public function buildFlowSse($callback)
+    /**
+     * Used to implement a manual SSE flow (e.g. progressbar). Requires a callback
+     * which receives a specific function destined to be used when sending an SSE
+     * message to the client side.
+     *
+     * @param $callback
+     * @return Response
+     */
+    public function sseFlow($callback)
     {
         $response = new Response(ContentType::SSE);
         $that = $this;

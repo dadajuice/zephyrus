@@ -9,28 +9,41 @@ use Zephyrus\Network\Response;
 
 trait RenderResponses
 {
-    public function buildView($page, $args = []): Response
+    /**
+     * Renders the specified Pug view with corresponding arguments.
+     *
+     * @param string $page
+     * @param array $args
+     * @return Response
+     */
+    public function render(string $page, array $args = []): Response
     {
         $response = $this->tryToBuildPhpView($page, $args);
         if (!is_null($response)) {
             return $response;
         }
-        $response = new Response(ContentType::HTML);
+        $response = new Response(ContentType::HTML, 200);
         $view = ViewBuilder::getInstance()->build($page);
         $response->setContent($view->render($args));
         return $response;
     }
 
-    public function buildHtml(string $data): Response
+    /**
+     * Renders the given data as HTML. Default behavior of any direct input.
+     *
+     * @param string $data
+     * @return Response
+     */
+    public function html(string $data): Response
     {
-        $response = new Response(ContentType::HTML);
+        $response = new Response(ContentType::HTML, 200);
         $response->setContent($data);
         return $response;
     }
 
-    private function tryToBuildPhpView($page, $args = []): ?Response
+    private function tryToBuildPhpView(string $page, array $args = []): ?Response
     {
-        $response = new Response(ContentType::HTML);
+        $response = new Response(ContentType::HTML, 200);
         $path = realpath(ROOT_DIR . '/app/Views/' . $page . '.php');
         if (file_exists($path) && is_readable($path)) {
             ob_start();

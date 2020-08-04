@@ -5,7 +5,16 @@ use Zephyrus\Network\Response;
 
 trait XmlResponses
 {
-    public function buildXml($data, $root = ""): Response
+    /**
+     * Renders the given data as XML. The data can be a direct SimpleXMLElement
+     * or simply an associative array. If an array is provided, the root
+     * element must be explicitly given.
+     *
+     * @param array | \SimpleXMLElement $data
+     * @param string $root
+     * @return Response
+     */
+    public function xml($data, $root = ""): Response
     {
         $response = new Response(ContentType::XML);
         if ((!$data instanceof \SimpleXMLElement) && !is_array($data)) {

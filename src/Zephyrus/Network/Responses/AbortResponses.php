@@ -10,40 +10,85 @@ use Zephyrus\Network\Response;
  */
 trait AbortResponses
 {
-    public function buildAbort(int $httpStatusCode, string $content = "", string $contentType = ContentType::PLAIN): Response
+    public function abort(int $httpStatusCode, string $content = "", string $contentType = ContentType::PLAIN): Response
     {
         $response = new Response($contentType, $httpStatusCode);
         $response->setContent($content);
         return $response;
     }
 
-    public function buildAbortBadRequest(string $content = "", string $contentType = ContentType::PLAIN): Response
+    public function abortBadRequest(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return $this->buildAbort(400, $content, $contentType);
+        return $this->abort(400, $content, $contentType);
     }
 
-    public function buildAbortNotFound(string $content = "", string $contentType = ContentType::PLAIN): Response
+    public function abortUnauthorized(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return $this->buildAbort(404, $content, $contentType);
+        return $this->abort(401, $content, $contentType);
     }
 
-    public function buildAbortForbidden(string $content = "", string $contentType = ContentType::PLAIN): Response
+    public function abortPaymentRequired(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return $this->buildAbort(403, $content, $contentType);
+        return $this->abort(402, $content, $contentType);
     }
 
-    public function buildAbortMethodNotAllowed(string $content = "", string $contentType = ContentType::PLAIN): Response
+    public function abortForbidden(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return $this->buildAbort(405, $content, $contentType);
+        return $this->abort(403, $content, $contentType);
     }
 
-    public function buildAbortNotAcceptable(string $content = "", string $contentType = ContentType::PLAIN): Response
+    public function abortNotFound(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return $this->buildAbort(406, $content, $contentType);
+        return $this->abort(404, $content, $contentType);
     }
 
-    public function buildAbortInternalError(string $content = "", string $contentType = ContentType::PLAIN): Response
+    public function abortMethodNotAllowed(string $content = "", string $contentType = ContentType::PLAIN): Response
     {
-        return $this->buildAbort(500, $content, $contentType);
+        return $this->abort(405, $content, $contentType);
+    }
+
+    public function abortNotAcceptable(string $content = "", string $contentType = ContentType::PLAIN): Response
+    {
+        return $this->abort(406, $content, $contentType);
+    }
+
+    public function abortRequestTimeout(string $content = "", string $contentType = ContentType::PLAIN): Response
+    {
+        return $this->abort(408, $content, $contentType);
+    }
+
+    public function abortConflict(string $content = "", string $contentType = ContentType::PLAIN): Response
+    {
+        return $this->abort(409, $content, $contentType);
+    }
+
+    public function abortUnprocessableEntity(string $content = "", string $contentType = ContentType::PLAIN): Response
+    {
+        return $this->abort(422, $content, $contentType);
+    }
+
+    public function abortInternalError(string $content = "", string $contentType = ContentType::PLAIN): Response
+    {
+        return $this->abort(500, $content, $contentType);
+    }
+
+    public function abortNotImplemented(string $content = "", string $contentType = ContentType::PLAIN): Response
+    {
+        return $this->abort(501, $content, $contentType);
+    }
+
+    public function abortBadGateway(string $content = "", string $contentType = ContentType::PLAIN): Response
+    {
+        return $this->abort(502, $content, $contentType);
+    }
+
+    public function abortServiceUnavailable(string $content = "", string $contentType = ContentType::PLAIN): Response
+    {
+        return $this->abort(503, $content, $contentType);
+    }
+
+    public function abortGatewayTimeout(string $content = "", string $contentType = ContentType::PLAIN): Response
+    {
+        return $this->abort(504, $content, $contentType);
     }
 }
