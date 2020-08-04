@@ -17,19 +17,19 @@ class Route
      */
     private $parameters = [];
 
-    public function __construct(string $uri)
+    public function __construct(string $routeDefinition)
     {
-        if ($uri != '/') {
-            $uri = rtrim($uri, '/');
+        if ($routeDefinition != '/') {
+            $routeDefinition = rtrim($routeDefinition, '/');
         }
-        $this->parameters = $this->getUriParameters($uri);
+        $this->parameters = $this->getUriParameters($routeDefinition);
         if (!empty($this->parameters) && count($this->parameters) != count(array_unique($this->parameters))) {
-            throw new \InvalidArgumentException("Route [{$uri}] cannot be added since you have at
+            throw new \InvalidArgumentException("Route [{$routeDefinition}] cannot be added since you have at
                                                  least one duplicate parameter. Each parameter must 
                                                  have a unique identifier.");
         }
-        $this->uri = $uri;
-        $this->regex = $this->getUriRegexFromParameters($uri, $this->parameters);
+        $this->uri = $routeDefinition;
+        $this->regex = $this->getUriRegexFromParameters($routeDefinition, $this->parameters);
     }
 
     /**
@@ -77,6 +77,11 @@ class Route
     public function getUri(): string
     {
         return $this->uri;
+    }
+
+    public function getParameters(): array
+    {
+        return $this->parameters;
     }
 
     /**

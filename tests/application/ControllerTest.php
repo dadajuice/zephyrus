@@ -4,13 +4,12 @@ use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Controller;
 use Zephyrus\Application\Feedback;
 use Zephyrus\Application\Flash;
+use Zephyrus\Application\Router;
 use Zephyrus\Application\Session;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 use Zephyrus\Network\Response;
-use Zephyrus\Network\ResponseFactory;
-use Zephyrus\Network\Router;
 use Zephyrus\Utilities\FileSystem\File;
 
 class ControllerTest extends TestCase
@@ -50,7 +49,7 @@ class ControllerTest extends TestCase
 
             public function before(): ?Response
             {
-                return ResponseFactory::getInstance()->buildJson(['test' => 'success']);
+                return $this->json(['test' => 'success']);
             }
 
             public function index()
@@ -78,7 +77,7 @@ class ControllerTest extends TestCase
 
             public function after(?Response $response): ?Response
             {
-                return ResponseFactory::getInstance()->buildJson(['test' => 'success']);
+                return $this->json(['test' => 'success']);
             }
 
             public function index()

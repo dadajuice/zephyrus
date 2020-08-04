@@ -2,10 +2,9 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Bootstrap;
+use Zephyrus\Application\Router;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
-use Zephyrus\Network\RequestFactory;
-use Zephyrus\Network\Router;
 
 class BootstrapTest extends TestCase
 {

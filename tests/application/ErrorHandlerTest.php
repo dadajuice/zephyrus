@@ -1,17 +1,12 @@
 <?php namespace Zephyrus\Tests;
 
-use Exception;
 use InvalidArgumentException;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use UnderflowException;
 use Zephyrus\Application\ErrorHandler;
-use Zephyrus\Database\Core\Adapters\MysqlAdapter;
 use Zephyrus\Database\Core\Database;
 use Zephyrus\Exceptions\DatabaseException;
-use Zephyrus\Exceptions\InvalidCsrfException;
-use Zephyrus\Exceptions\LocalizationException;
-use Zephyrus\Exceptions\RouteNotFoundException;
 
 class ErrorHandlerTest extends TestCase
 {

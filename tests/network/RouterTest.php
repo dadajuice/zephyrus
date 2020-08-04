@@ -1,13 +1,13 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Application\Router;
 use Zephyrus\Exceptions\RouteMethodUnsupportedException;
 use Zephyrus\Exceptions\RouteNotAcceptedException;
 use Zephyrus\Exceptions\RouteNotFoundException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
-use Zephyrus\Network\Router;
 
 class RouterTest extends TestCase
 {

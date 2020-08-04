@@ -1,13 +1,12 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Zephyrus\Application\Configuration;
+use Zephyrus\Application\Router;
 use Zephyrus\Exceptions\IntrusionDetectionException;
 use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Exceptions\UnauthorizedAccessException;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
-use Zephyrus\Network\Router;
 use Zephyrus\Security\Authorization;
 use Zephyrus\Security\ContentSecurityPolicy;
 use Zephyrus\Security\Controller;
