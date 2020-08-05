@@ -2,7 +2,6 @@
 
 use Zephyrus\Application\Rule;
 use Zephyrus\Utilities\Validation;
-use Zephyrus\Utilities\Validations\ValidationCallback;
 
 trait BaseRules
 {

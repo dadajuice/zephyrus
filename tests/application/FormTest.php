@@ -5,7 +5,6 @@ use Zephyrus\Application\Feedback;
 use Zephyrus\Application\Form;
 use Zephyrus\Application\Rule;
 use Zephyrus\Application\Session;
-use Zephyrus\Utilities\Validations\ValidationCallback;
 
 class FormTest extends TestCase
 {

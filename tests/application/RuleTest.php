@@ -2,7 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Rule;
-use Zephyrus\Utilities\Validations\ValidationCallback;
 
 class RuleTest extends TestCase
 {
