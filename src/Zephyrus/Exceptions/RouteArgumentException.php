@@ -15,12 +15,12 @@ class RouteArgumentException extends \Exception
     /**
      * @var string
      */
-    private $ruleError;
+    private $errorMessage;
 
-    public function __construct(string $argumentName, $value, string $message)
+    public function __construct(string $argumentName, $value, string $errorMessage)
     {
-        parent::__construct($message);
-        $this->ruleError = $message;
+        parent::__construct("The route argument {{$argumentName}} with value {{$value}} did not comply with defined rule and returned the following message : $errorMessage");
+        $this->errorMessage = $errorMessage;
         $this->argumentName = $argumentName;
         $this->value = $value;
     }
@@ -44,9 +44,9 @@ class RouteArgumentException extends \Exception
     /**
      * @return string
      */
-    public function getError(): string
+    public function getErrorMessage(): string
     {
-        return $this->ruleError;
+        return $this->errorMessage;
     }
 
 

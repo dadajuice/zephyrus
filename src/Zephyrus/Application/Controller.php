@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Application;
 
+use Zephyrus\Exceptions\RouteArgumentException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
@@ -119,6 +120,21 @@ abstract class Controller implements Routable
     public function getOverriddenArguments(): array
     {
         return $this->overrideArguments;
+    }
+
+    /**
+     * Provides a way to handle exception thrown if a route argument doesn't match the defined rules before reaching the
+     * main script (index). Default behavior is to throw the received exception to the caller. Should be redefined to
+     * add application logic (send a generic error response, redirect to another url, log error, etc.) and thus always
+     * return a proper Response or simply throw the exception.
+     *
+     * @param RouteArgumentException $exception
+     * @throws RouteArgumentException
+     * @return Response
+     */
+    public function handleRouteArgumentException(RouteArgumentException $exception): Response
+    {
+        throw $exception;
     }
 
     /**

@@ -2,6 +2,8 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Controller;
+use Zephyrus\Exceptions\RouteArgumentException;
+use Zephyrus\Network\Response;
 use Zephyrus\Network\Router;
 use Zephyrus\Network\Request;
 
@@ -36,6 +38,45 @@ class ControllerOverrideTest extends TestCase
         $router->run($req);
         $output = ob_get_clean();
         self::assertEquals('msandwich44', $output);
+    }
+
+    public function testOverrideArgumentsWithThrow()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+                parent::get('/users/{user}', 'read');
+
+                parent::overrideArgument('user', function ($value) {
+                    if ($value != 4) { // simulate not found
+                        throw new RouteArgumentException("user", $value, "user not found");
+                    }
+                    return (object) [
+                        'id' => $value,
+                        'username' => 'msandwich'
+                    ];
+                });
+            }
+
+            public function handleRouteArgumentException(RouteArgumentException $exception): Response
+            {
+                return $this->plain("User not found");
+            }
+
+            public function read(\stdClass $user)
+            {
+                $id = $this->request->getParameter('user')->id; // request should be overridden too
+                return $this->plain($user->username . $id . $user->id);
+            }
+        };
+        $controller->initializeRoutes();
+        $req = new Request('http://test.local/users/5', 'get');
+        ob_start();
+        $router->run($req);
+        $output = ob_get_clean();
+        self::assertEquals('User not found', $output);
     }
 
     public function testOverrideNullArgument()

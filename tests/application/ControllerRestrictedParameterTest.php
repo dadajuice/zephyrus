@@ -4,6 +4,7 @@ use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Controller;
 use Zephyrus\Application\Rule;
 use Zephyrus\Exceptions\RouteArgumentException;
+use Zephyrus\Network\Response;
 use Zephyrus\Network\Router;
 use Zephyrus\Network\Request;
 
@@ -64,7 +65,7 @@ class ControllerRestrictedParameterTest extends TestCase
             $router->run($req);
             self::assertEquals('yes', 'no'); // should never reach
         } catch (RouteArgumentException $exception) {
-            self::assertEquals('Date too far', $exception->getMessage());
+            self::assertEquals('Date too far', $exception->getErrorMessage());
         }
     }
 
@@ -96,6 +97,7 @@ class ControllerRestrictedParameterTest extends TestCase
     public function testUnhandledErrorRestrictedArguments()
     {
         $this->expectException(RouteArgumentException::class);
+        $this->expectExceptionMessage("The route argument {id} with value {jdsfjdsf} did not comply with defined rule and returned the following message : Invalid route argument");
         $router = new Router();
         $controller = new class($router) extends Controller {
 
@@ -113,5 +115,34 @@ class ControllerRestrictedParameterTest extends TestCase
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users/jdsfjdsf', 'get');
         $router->run($req);
+    }
+
+    public function testHandledErrorRestrictedArguments()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+                parent::get('/users/{id}', 'read');
+                parent::restrictArgument('id', [Rule::integer("Invalid route argument")]);
+            }
+
+            public function handleRouteArgumentException(RouteArgumentException $exception): Response
+            {
+                return $this->plain("An error occurred for field " . $exception->getArgumentName() . " with value " . $exception->getValue() . " producing error " . $exception->getErrorMessage());
+            }
+
+            public function read(int $userId)
+            {
+                return $this->plain($userId);
+            }
+        };
+        $controller->initializeRoutes();
+        $req = new Request('http://test.local/users/jdsfjdsf', 'get');
+        ob_start();
+        $router->run($req);
+        $output = ob_get_clean();
+        self::assertEquals('An error occurred for field id with value jdsfjdsf producing error Invalid route argument', $output);
     }
 }

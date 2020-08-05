@@ -251,8 +251,12 @@ class Router
         $controller = $this->getRouteControllerInstance($route);
         $responseBefore = $this->beforeMiddleware($controller);
         if (!is_null($controller) && !empty($arguments)) {
-            $this->restrictParameters($controller, $arguments);
-            $this->overrideParameters($controller, $arguments);
+            try {
+                $this->restrictArguments($controller, $arguments);
+                $this->overrideArguments($controller, $arguments);
+            } catch (RouteArgumentException $exception) {
+                return $controller->handleRouteArgumentException($exception);
+            }
         }
         $response = $this->executeRoute($route, $arguments, $responseBefore);
         return $this->afterMiddleware($controller, $response);
@@ -263,7 +267,7 @@ class Router
      * @param array $arguments
      * @throws RouteArgumentException
      */
-    private function restrictParameters(Controller $controller, array $arguments)
+    private function restrictArguments(Controller $controller, array $arguments)
     {
         $parameterNames = array_keys($arguments);
         foreach ($controller->getRestrictedArguments() as $name => $rules) {
@@ -282,7 +286,7 @@ class Router
      * @param Controller $controller
      * @param array $arguments
      */
-    private function overrideParameters(Controller $controller, array &$arguments)
+    private function overrideArguments(Controller $controller, array &$arguments)
     {
         $parameterNames = array_keys($arguments);
         foreach ($controller->getOverriddenArguments() as $name => $callback) {
