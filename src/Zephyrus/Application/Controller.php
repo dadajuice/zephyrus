@@ -91,7 +91,7 @@ abstract class Controller implements Routable
     /**
      * Applies the given list of rules to a route argument (e.g. {id}) to make sure it is compliant before reaching a
      * method within the controller. Used to ensure argument sanitization. If there's already a set of rules applies
-     * for the specified argument name, they will be overwritten.
+     * for the specified argument name, they will be merged.
      *
      * @param string $parameterName
      * @param Rule[] $rules
@@ -103,7 +103,9 @@ abstract class Controller implements Routable
                 throw new \InvalidArgumentException("Specified rules for argument restrictions should be instance of Rule class");
             }
         }
-        $this->restrictedArguments[$parameterName] = $rules;
+        $this->restrictedArguments[$parameterName] = (isset($this->restrictedArguments[$parameterName]))
+            ? array_merge($this->restrictedArguments[$parameterName], $rules)
+            : $rules;
     }
 
     /**
