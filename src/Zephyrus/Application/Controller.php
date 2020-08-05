@@ -13,7 +13,6 @@ use Zephyrus\Network\Router;
 
 abstract class Controller implements Routable
 {
-
     /**
      * @var Request;
      */
@@ -27,7 +26,7 @@ abstract class Controller implements Routable
     /**
      * @var array
      */
-    private $boundParameters = [];
+    private $overrideParameters = [];
 
     use AbortResponses;
     use RenderResponses;
@@ -65,6 +64,29 @@ abstract class Controller implements Routable
     public function after(?Response $response): ?Response
     {
         return $response;
+    }
+
+    // will override if exists
+    public function overrideParameter(string $parameterName, $callback)
+    {
+        $this->overrideParameters[$parameterName] = $callback;
+    }
+
+    public function restrictParameter(string $parameterName, Rule $rule)
+    {
+
+    }
+
+    public function getRouteRules(): array
+    {
+        return [
+            ''
+        ];
+    }
+
+    public function getOverriddenParameters(): array
+    {
+        return $this->overrideParameters;
     }
 
     /**

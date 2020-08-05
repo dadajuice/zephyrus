@@ -250,8 +250,23 @@ class Router
     {
         $controller = $this->getRouteControllerInstance($route);
         $responseBefore = $this->beforeMiddleware($controller);
-        $response = $this->executeRoute($route, $responseBefore);
+        $this->overrideParameters($controller, $arguments);
+        $response = $this->executeRoute($route, $arguments, $responseBefore);
         return $this->afterMiddleware($controller, $response);
+    }
+
+    private function overrideParameters(?Controller $controller, array &$arguments)
+    {
+        if (is_null($controller) || empty($arguments)) {
+            return;
+        }
+        $parameterNames = array_keys($arguments);
+        foreach ($controller->getOverriddenParameters() as $name => $callback) {
+            if (in_array($name, $parameterNames)) {
+                $arguments[$name] = $callback($arguments[$name]);
+                $this->request->addParameter($name, $arguments[$name]);
+            }
+        }
     }
 
     /**
