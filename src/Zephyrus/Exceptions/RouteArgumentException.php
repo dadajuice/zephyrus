@@ -48,6 +48,4 @@ class RouteArgumentException extends \Exception
     {
         return $this->errorMessage;
     }
-
-
 }
