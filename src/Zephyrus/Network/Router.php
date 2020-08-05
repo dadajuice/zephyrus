@@ -273,9 +273,9 @@ class Router
         foreach ($controller->getRestrictedArguments() as $name => $rules) {
             if (in_array($name, $parameterNames)) {
                 $value = $arguments[$name];
-                foreach ($rules as $rule) {
+                foreach ($rules as $ruleId => $rule) {
                     if (!$rule->isValid($value)) {
-                        throw new RouteArgumentException($name, $value, $rule->getErrorMessage());
+                        throw new RouteArgumentException($name, $value, $ruleId, $rule->getErrorMessage());
                     }
                 }
             }

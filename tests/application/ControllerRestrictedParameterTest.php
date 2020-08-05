@@ -34,6 +34,36 @@ class ControllerRestrictedParameterTest extends TestCase
         self::assertEquals('4', $output);
     }
 
+    public function testSuccessfulRestrictedArgumentsMerge()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+                parent::get('/users/{id}', 'read');
+                parent::restrictArgument('id', [Rule::integer("Invalid route argument")]);
+                parent::restrictArgument('id', [Rule::range(1, 10, "Invalid route range")]);
+            }
+
+            public function handleRouteArgumentException(RouteArgumentException $exception): Response
+            {
+                return $this->plain("failed!" . $exception->getRuleId());
+            }
+
+            public function read(int $userId)
+            {
+                return $this->plain($userId);
+            }
+        };
+        $controller->initializeRoutes();
+        $req = new Request('http://test.local/users/40', 'get');
+        ob_start();
+        $router->run($req);
+        $output = ob_get_clean();
+        self::assertEquals('failed!1', $output);
+    }
+
     public function testSuccessfulMultipleRestrictedArguments()
     {
         $router = new Router();
@@ -131,6 +161,38 @@ class ControllerRestrictedParameterTest extends TestCase
             public function handleRouteArgumentException(RouteArgumentException $exception): Response
             {
                 return $this->plain("An error occurred for field " . $exception->getArgumentName() . " with value " . $exception->getValue() . " producing error " . $exception->getErrorMessage());
+            }
+
+            public function read(int $userId)
+            {
+                return $this->plain($userId);
+            }
+        };
+        $controller->initializeRoutes();
+        $req = new Request('http://test.local/users/jdsfjdsf', 'get');
+        ob_start();
+        $router->run($req);
+        $output = ob_get_clean();
+        self::assertEquals('An error occurred for field id with value jdsfjdsf producing error Invalid route argument', $output);
+    }
+
+    public function testHandledErrorRestrictedArgumentsWithId()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+                parent::get('/users/{id}', 'read');
+                parent::restrictArgument('id', ['BAD' => Rule::integer("Invalid route argument")]);
+            }
+
+            public function handleRouteArgumentException(RouteArgumentException $exception): Response
+            {
+                if ($exception->getRuleId() == "BAD") {
+                    return $this->plain("An error occurred for field " . $exception->getArgumentName() . " with value " . $exception->getValue() . " producing error " . $exception->getErrorMessage());
+                }
+                return $this->plain("no");
             }
 
             public function read(int $userId)

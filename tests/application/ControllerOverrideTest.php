@@ -51,7 +51,7 @@ class ControllerOverrideTest extends TestCase
 
                 parent::overrideArgument('user', function ($value) {
                     if ($value != 4) { // simulate not found
-                        throw new RouteArgumentException("user", $value, "user not found");
+                        throw new RouteArgumentException("user", $value, 0, "user not found");
                     }
                     return (object) [
                         'id' => $value,
