@@ -1,4 +1,6 @@
-<?php namespace Zephyrus\Application;
+<?php namespace Zephyrus\Network;
+
+use Zephyrus\Application\Callback;
 
 class Route
 {

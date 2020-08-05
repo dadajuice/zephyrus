@@ -4,8 +4,8 @@ use InvalidArgumentException;
 use ReflectionFunctionAbstract;
 use RuntimeException;
 use Zephyrus\Application\Callback;
-use Zephyrus\Application\Route;
 use Zephyrus\Network\Request;
+use Zephyrus\Network\Route;
 
 class Authorization
 {

@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Bootstrap;
-use Zephyrus\Application\Router;
+use Zephyrus\Network\Router;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
 

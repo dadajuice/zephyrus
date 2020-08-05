@@ -1,12 +1,12 @@
 <?php namespace Zephyrus\Security;
 
 use Zephyrus\Application\Configuration;
-use Zephyrus\Application\Router;
 use Zephyrus\Exceptions\IntrusionDetectionException;
 use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Exceptions\UnauthorizedAccessException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Response;
+use Zephyrus\Network\Router;
 
 abstract class Controller extends \Zephyrus\Application\Controller
 {

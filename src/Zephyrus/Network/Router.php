@@ -1,13 +1,12 @@
-<?php namespace Zephyrus\Application;
+<?php namespace Zephyrus\Network;
 
 use ReflectionFunctionAbstract;
 use stdClass;
+use Zephyrus\Application\Callback;
+use Zephyrus\Application\Controller;
 use Zephyrus\Exceptions\RouteMethodUnsupportedException;
 use Zephyrus\Exceptions\RouteNotAcceptedException;
 use Zephyrus\Exceptions\RouteNotFoundException;
-use Zephyrus\Network\ContentType;
-use Zephyrus\Network\Request;
-use Zephyrus\Network\Response;
 
 class Router
 {
@@ -230,7 +229,9 @@ class Router
     private function prepareResponse(stdClass $route)
     {
         //$this->beforeCallback($route);
-        $response = $this->createResponse($route);
+        $arguments = $route->route->getArguments($this->requestedUri);
+        $this->loadRequestParameters($arguments);
+        $response = $this->createResponse($route, $arguments);
         if (!is_null($response)) {
             $response->send();
         }
@@ -242,9 +243,10 @@ class Router
      * corresponding controller class.
      *
      * @param stdClass $route
+     * @param array $arguments
      * @return Response | null
      */
-    private function createResponse(stdClass $route): ?Response
+    private function createResponse(stdClass $route, array $arguments): ?Response
     {
         $controller = $this->getRouteControllerInstance($route);
         $responseBefore = $this->beforeMiddleware($controller);
@@ -276,23 +278,23 @@ class Router
      * previous response.
      *
      * @param stdClass $route
+     * @param array $arguments
      * @param Response | null $previousResponse
      * @return Response | null
      */
-    private function executeRoute(stdClass $route, ?Response $previousResponse): ?Response
+    private function executeRoute(stdClass $route, array $arguments, ?Response $previousResponse): ?Response
     {
         if ($previousResponse instanceof Response) {
             return $previousResponse;
         }
-        $values = $route->route->getArguments($this->requestedUri);
-        $this->loadRequestParameters($values);
         $callback = new Callback($route->callback);
-        $arguments = $this->getFunctionArguments($callback->getReflection(), array_values($values));
+        $arguments = $this->getFunctionArguments($callback->getReflection(), array_values($arguments));
         return $callback->executeArray($arguments);
     }
 
     /**
-     * Executes the after method of the given controller class.
+     * Executes the after method of the given controller class. Previous response can be null if the route callback
+     * doesn't produce any proper response. E.g. doing only echo or var_dump, etc.
      *
      * @param Controller|null $controller
      * @param Response $previousResponse

@@ -1,7 +1,7 @@
 <?php namespace Zephyrus\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Zephyrus\Application\Route;
+use Zephyrus\Network\Route;
 
 class RouteTest extends TestCase
 {

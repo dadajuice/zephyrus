@@ -9,18 +9,25 @@ use Zephyrus\Network\Responses\StreamResponses;
 use Zephyrus\Network\Responses\SuccessResponse;
 use Zephyrus\Network\Responses\XmlResponses;
 use Zephyrus\Network\Routable;
+use Zephyrus\Network\Router;
 
 abstract class Controller implements Routable
 {
+
+    /**
+     * @var Request;
+     */
+    protected $request;
+
     /**
      * @var Router
      */
     private $router;
 
     /**
-     * @var Request;
+     * @var array
      */
-    protected $request;
+    private $boundParameters = [];
 
     use AbortResponses;
     use RenderResponses;

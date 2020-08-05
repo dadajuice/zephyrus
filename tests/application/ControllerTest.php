@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Controller;
 use Zephyrus\Application\Feedback;
 use Zephyrus\Application\Flash;
-use Zephyrus\Application\Router;
+use Zephyrus\Network\Router;
 use Zephyrus\Application\Session;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
