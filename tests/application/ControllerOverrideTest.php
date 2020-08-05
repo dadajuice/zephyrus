@@ -26,7 +26,8 @@ class ControllerOverrideTest extends TestCase
 
             public function read(\stdClass $user)
             {
-                return $this->plain($user->username . $user->id);
+                $id = $this->request->getParameter('user')->id; // request should be overridden too
+                return $this->plain($user->username . $id . $user->id);
             }
         };
         $controller->initializeRoutes();
@@ -34,6 +35,6 @@ class ControllerOverrideTest extends TestCase
         ob_start();
         $router->run($req);
         $output = ob_get_clean();
-        self::assertEquals('msandwich4', $output);
+        self::assertEquals('msandwich44', $output);
     }
 }
