@@ -7,7 +7,7 @@ use Zephyrus\Network\Request;
 
 class ControllerOverrideTest extends TestCase
 {
-    public function testOverrideParameters()
+    public function testOverrideArguments()
     {
         $router = new Router();
         $controller = new class($router) extends Controller {
@@ -16,7 +16,7 @@ class ControllerOverrideTest extends TestCase
             {
                 parent::get('/users/{user}', 'read');
 
-                parent::overrideParameter('user', function ($value) {
+                parent::overrideArgument('user', function ($value) {
                     return (object) [
                         'id' => $value,
                         'username' => 'msandwich'
@@ -38,7 +38,7 @@ class ControllerOverrideTest extends TestCase
         self::assertEquals('msandwich44', $output);
     }
 
-    public function testOverrideNullParameters()
+    public function testOverrideNullArgument()
     {
         $router = new Router();
         $controller = new class($router) extends Controller {
@@ -47,7 +47,7 @@ class ControllerOverrideTest extends TestCase
             {
                 parent::get('/users/{user}', 'read');
 
-                parent::overrideParameter('user', function ($value) {
+                parent::overrideArgument('user', function ($value) {
                     if ($value == 4) {
                         return (object) [
                             'id' => $value,
@@ -73,5 +73,63 @@ class ControllerOverrideTest extends TestCase
         $router->run($req);
         $output = ob_get_clean();
         self::assertEquals('entity not found', $output);
+    }
+
+    public function testInvalidOverrideNotEnough()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+                parent::get('/users/{user}', 'read');
+
+                parent::overrideArgument('user', function () {
+                    return "bob";
+                });
+            }
+
+            public function read(\stdClass $user)
+            {
+                $id = $this->request->getParameter('user')->id; // request should be overridden too
+                return $this->plain($user->username . $id . $user->id);
+            }
+        };
+
+        try {
+            $controller->initializeRoutes();
+            self::assertEquals('yes', 'no'); // should never reach
+        } catch (\InvalidArgumentException $exception) {
+            self::assertEquals("Override callback should have only one argument which will contain the value of the associated argument name", $exception->getMessage());
+        }
+    }
+
+    public function testInvalidOverrideTooMuch()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+                parent::get('/users/{user}', 'read');
+
+                parent::overrideArgument('user', function ($value, $bob, $lewis) {
+                    return "bob";
+                });
+            }
+
+            public function read(\stdClass $user)
+            {
+                $id = $this->request->getParameter('user')->id; // request should be overridden too
+                return $this->plain($user->username . $id . $user->id);
+            }
+        };
+
+        try {
+            $controller->initializeRoutes();
+            self::assertEquals('yes', 'no'); // should never reach
+        } catch (\InvalidArgumentException $exception) {
+            self::assertEquals("Override callback should have only one argument which will contain the value of the associated argument name", $exception->getMessage());
+        }
     }
 }

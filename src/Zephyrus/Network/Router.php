@@ -4,6 +4,7 @@ use ReflectionFunctionAbstract;
 use stdClass;
 use Zephyrus\Application\Callback;
 use Zephyrus\Application\Controller;
+use Zephyrus\Exceptions\RouteArgumentException;
 use Zephyrus\Exceptions\RouteMethodUnsupportedException;
 use Zephyrus\Exceptions\RouteNotAcceptedException;
 use Zephyrus\Exceptions\RouteNotFoundException;
@@ -45,7 +46,7 @@ class Router
      * @throws RouteNotFoundException
      * @throws RouteMethodUnsupportedException
      * @throws RouteNotAcceptedException
-     * @throws RouteParameterBindException
+     * @throws RouteArgumentException
      */
     final public function run(Request $request)
     {
@@ -56,7 +57,6 @@ class Router
         $this->requestedRepresentations = $this->request->getAcceptedRepresentations();
         $this->verifyRequestMethod();
         $route = $this->findRouteFromRequest();
-        //$this->request->setRoute($route['route']);
         $this->prepareResponse($route);
     }
 
@@ -225,17 +225,16 @@ class Router
      * been executed. Makes sure to load the route parameters which could be used inside the callback function.
      *
      * @param stdClass $route
+     * @throws RouteArgumentException
      */
     private function prepareResponse(stdClass $route)
     {
-        //$this->beforeCallback($route);
         $arguments = $route->route->getArguments($this->requestedUri);
         $this->loadRequestParameters($arguments);
         $response = $this->createResponse($route, $arguments);
         if (!is_null($response)) {
             $response->send();
         }
-        //$this->afterCallback($route);
     }
 
     /**
@@ -244,24 +243,49 @@ class Router
      *
      * @param stdClass $route
      * @param array $arguments
+     * @throws RouteArgumentException
      * @return Response | null
      */
     private function createResponse(stdClass $route, array $arguments): ?Response
     {
         $controller = $this->getRouteControllerInstance($route);
         $responseBefore = $this->beforeMiddleware($controller);
-        $this->overrideParameters($controller, $arguments);
+        if (!is_null($controller) && !empty($arguments)) {
+            $this->restrictParameters($controller, $arguments);
+            $this->overrideParameters($controller, $arguments);
+        }
         $response = $this->executeRoute($route, $arguments, $responseBefore);
         return $this->afterMiddleware($controller, $response);
     }
 
-    private function overrideParameters(?Controller $controller, array &$arguments)
+    /**
+     * @param Controller $controller
+     * @param array $arguments
+     * @throws RouteArgumentException
+     */
+    private function restrictParameters(Controller $controller, array $arguments)
     {
-        if (is_null($controller) || empty($arguments)) {
-            return;
-        }
         $parameterNames = array_keys($arguments);
-        foreach ($controller->getOverriddenParameters() as $name => $callback) {
+        foreach ($controller->getRestrictedArguments() as $name => $rules) {
+            if (in_array($name, $parameterNames)) {
+                $value = $arguments[$name];
+                foreach ($rules as $rule) {
+                    if (!$rule->isValid($value)) {
+                        throw new RouteArgumentException($name, $value, $rule->getErrorMessage());
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param Controller $controller
+     * @param array $arguments
+     */
+    private function overrideParameters(Controller $controller, array &$arguments)
+    {
+        $parameterNames = array_keys($arguments);
+        foreach ($controller->getOverriddenArguments() as $name => $callback) {
             if (in_array($name, $parameterNames)) {
                 $arguments[$name] = $callback($arguments[$name]);
                 $this->request->addParameter($name, $arguments[$name]);

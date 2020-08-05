@@ -26,7 +26,12 @@ abstract class Controller implements Routable
     /**
      * @var array
      */
-    private $overrideParameters = [];
+    private $overrideArguments = [];
+
+    /**
+     * @var array
+     */
+    private $restrictedArguments = [];
 
     use AbortResponses;
     use RenderResponses;
@@ -66,27 +71,54 @@ abstract class Controller implements Routable
         return $response;
     }
 
-    // will override if exists
-    public function overrideParameter(string $parameterName, $callback)
+    /**
+     * Modifies a specified route argument value (e.g. {user}) according to the given callback. The callback should
+     * have one parameter that will be the actual argument value before doing the modification. If there's already an
+     * override defined for the specified argument name, it will be overwritten.
+     *
+     * @param string $argumentName
+     * @param callable $callback
+     */
+    public function overrideArgument(string $argumentName, callable $callback)
     {
-        $this->overrideParameters[$parameterName] = $callback;
+        if (count((new Callback($callback))->getReflection()->getParameters()) != 1) {
+            throw new \InvalidArgumentException("Override callback should have only one argument which will contain the value of the associated argument name");
+        }
+        $this->overrideArguments[$argumentName] = $callback;
     }
 
-    public function restrictParameter(string $parameterName, Rule $rule)
+    /**
+     * Applies the given list of rules to a route argument (e.g. {id}) to make sure it is compliant before reaching a
+     * method within the controller. Used to ensure argument sanitization. If there's already a set of rules applies
+     * for the specified argument name, they will be overwritten.
+     *
+     * @param string $parameterName
+     * @param Rule[] $rules
+     */
+    public function restrictArgument(string $parameterName, array $rules)
     {
-
+        foreach ($rules as $rule) {
+            if (!($rule instanceof Rule)) {
+                throw new \InvalidArgumentException("Specified rules for argument restrictions should be instance of Rule class");
+            }
+        }
+        $this->restrictedArguments[$parameterName] = $rules;
     }
 
-    public function getRouteRules(): array
+    /**
+     * @return array
+     */
+    public function getRestrictedArguments(): array
     {
-        return [
-            ''
-        ];
+        return $this->restrictedArguments;
     }
 
-    public function getOverriddenParameters(): array
+    /**
+     * @return array
+     */
+    public function getOverriddenArguments(): array
     {
-        return $this->overrideParameters;
+        return $this->overrideArguments;
     }
 
     /**
