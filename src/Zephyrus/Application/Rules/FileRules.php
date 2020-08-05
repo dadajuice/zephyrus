@@ -8,7 +8,7 @@ trait FileRules
 {
     public static function fileUpload(string $errorMessage = ""): Rule
     {
-        return new Rule(ValidationCallback::UPLOAD, $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isUpload'], $errorMessage);
     }
 
     public static function fileMimeType(string $errorMessage = "", array $allowedMimeTypes = ['image/gif', 'image/jpeg', 'image/png']): Rule
@@ -41,6 +41,6 @@ trait FileRules
 
     public static function imageAuthentic(string $errorMessage = ""): Rule
     {
-        return new Rule(ValidationCallback::IMAGE, $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isImageAuthentic'], $errorMessage);
     }
 }

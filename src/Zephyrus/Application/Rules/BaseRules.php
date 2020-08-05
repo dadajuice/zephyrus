@@ -8,12 +8,12 @@ trait BaseRules
 {
     public static function decimal(string $errorMessage = "", $allowSigned = false): Rule
     {
-        return new Rule((!$allowSigned) ? ValidationCallback::DECIMAL : ValidationCallback::DECIMAL_SIGNED, $errorMessage);
+        return new Rule((!$allowSigned) ? ['Zephyrus\Utilities\Validation', 'isDecimal'] : ['Zephyrus\Utilities\Validation', 'isSignedDecimal'], $errorMessage);
     }
 
     public static function integer(string $errorMessage = "", $allowSigned = false): Rule
     {
-        return new Rule((!$allowSigned) ? ValidationCallback::INTEGER : ValidationCallback::INTEGER_SIGNED, $errorMessage);
+        return new Rule((!$allowSigned) ? ['Zephyrus\Utilities\Validation', 'isInteger'] : ['Zephyrus\Utilities\Validation', 'isSignedInteger'], $errorMessage);
     }
 
     public static function range($min, $max, string $errorMessage = ""): Rule
@@ -53,7 +53,7 @@ trait BaseRules
 
     public static function boolean(string $errorMessage = ""): Rule
     {
-        return new Rule(ValidationCallback::BOOLEAN, $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isBoolean'], $errorMessage);
     }
 
     public static function regex(string $pattern, string $errorMessage = ""): Rule

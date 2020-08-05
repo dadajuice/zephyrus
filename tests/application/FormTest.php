@@ -76,12 +76,12 @@ class FormTest extends TestCase
         $form->addField('name', '');
         $form->addField('name2', 'bob*');
         $form->addField('price', '12.50e');
-        $form->validate('name', new Rule(ValidationCallback::NOT_EMPTY, 'err_1'));
+        $form->validate('name', Rule::notEmpty('err_1'));
         $form->validateWhenFieldHasNoError('name', Rule::alphanumeric('err_2'));
-        $form->validate('name2', new Rule(ValidationCallback::NOT_EMPTY, 'err_11'));
+        $form->validate('name2', Rule::notEmpty('err_11'));
         $form->validateWhenFieldHasNoError('name2', Rule::alphanumeric('err_22'));
-        $form->validate('price', new Rule(ValidationCallback::NOT_EMPTY, 'err_3'));
-        $form->validateWhenFormHasNoError('price', new Rule(ValidationCallback::DECIMAL, 'err_4'));
+        $form->validate('price', Rule::notEmpty('err_3'));
+        $form->validateWhenFormHasNoError('price', Rule::decimal('err_4'));
         $form->verify();
         $errors = $form->getErrorMessages();
         self::assertEquals('err_1', $errors[0]);
@@ -235,7 +235,7 @@ class FormTest extends TestCase
         Form::removeMemorizedValue();
         $form = new Form();
         $form->addField('name', 'bob');
-        $form->validate('name', new Rule(ValidationCallback::NOT_EMPTY, 'err_1'));
+        $form->validate('name', Rule::notEmpty('err_1'));
         $form->verify();
         self::assertEquals('bob', Form::readMemorizedValue('name'));
         self::assertEquals('bob', val('name'));
@@ -248,7 +248,7 @@ class FormTest extends TestCase
         Form::removeMemorizedValue();
         $form = new Form();
         $form->addField('name', 'bob');
-        $form->validate('name', new Rule(ValidationCallback::NOT_EMPTY, 'err_1'));
+        $form->validate('name', Rule::notEmpty('err_1'));
         $form->verify();
         Session::getInstance()->destroy();
         self::assertEquals('failed', Form::readMemorizedValue('name', 'failed'));

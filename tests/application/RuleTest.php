@@ -15,9 +15,26 @@ class RuleTest extends TestCase
         self::assertEquals('failed', $rule->getErrorMessage());
     }
 
+    public function testIsOnlyWithin()
+    {
+        $rule = Rule::onlyWithin(['a', 'b', 'c']);
+        self::assertTrue($rule->isValid(['a']));
+        self::assertTrue($rule->isValid(['a', 'b']));
+        self::assertTrue($rule->isValid(['a', 'b', 'c']));
+        self::assertTrue($rule->isValid(['a', 'a']));
+        self::assertTrue($rule->isValid('a'));
+        self::assertTrue($rule->isValid('c'));
+        self::assertFalse($rule->isValid(['a', 'b', 'c', 'd']));
+        self::assertFalse($rule->isValid(['d', 'c', 'b', 'a']));
+        self::assertFalse($rule->isValid(['g']));
+        self::assertFalse($rule->isValid(['g', 'a']));
+        self::assertFalse($rule->isValid(['a', 'g']));
+        self::assertFalse($rule->isValid('d'));
+    }
+
     public function testIsValidOptionalMessage()
     {
-        $rule = new Rule(ValidationCallback::EMAIL);
+        $rule = Rule::email();
         $rule->setErrorMessage("failed");
         self::assertTrue($rule->isValid('allo@bob.com'));
         self::assertEquals('failed', $rule->getErrorMessage());

@@ -8,7 +8,7 @@ trait TimeRules
 {
     public static function date(string $errorMessage = ""): Rule
     {
-        return new Rule(ValidationCallback::DATE_ISO, $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isDate'], $errorMessage);
     }
 
     public static function time12Hours(string $errorMessage = "", bool $includeSeconds = false): Rule

@@ -8,7 +8,7 @@ trait SpecializedRules
 {
     public static function url(string $errorMessage = ""): Rule
     {
-        return new Rule(ValidationCallback::URL, $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isUrl'], $errorMessage);
     }
 
     public static function liveUrl(string $errorMessage = "", array $acceptedValidCodes = [200, 201, 202, 204, 301, 302]): Rule
@@ -20,32 +20,32 @@ trait SpecializedRules
 
     public static function youtubeUrl(string $errorMessage = ""): Rule
     {
-        return new Rule(ValidationCallback::URL_YOUTUBE, $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isYoutubeUrl'], $errorMessage);
     }
 
     public static function json(string $errorMessage = ""): Rule
     {
-        return new Rule(ValidationCallback::JSON, $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isJson'], $errorMessage);
     }
 
     public static function xml(string $errorMessage = ""): Rule
     {
-        return new Rule(ValidationCallback::XML, $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isXml'], $errorMessage);
     }
 
     public static function phone(string $errorMessage = ""): Rule
     {
-        return new Rule(ValidationCallback::PHONE, $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isPhone'], $errorMessage);
     }
 
     public static function zipCode(string $errorMessage = ""): Rule
     {
-        return new Rule(ValidationCallback::ZIP_CODE, $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isZipCode'], $errorMessage);
     }
 
     public static function postalCode(string $errorMessage = ""): Rule
     {
-        return new Rule(ValidationCallback::POSTAL_CODE, $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isPostalCode'], $errorMessage);
     }
 
     public static function IPv4(string $errorMessage = "", bool $includeReserved = true, bool $includePrivate = true): Rule
