@@ -75,4 +75,11 @@ trait BaseRules
             return count($filteredArray) == count($data);
         }, $errorMessage);
     }
+
+    public static function onlyWithin(array $possibleValues, string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data) use ($possibleValues) {
+            return Validation::isOnlyWithin($data, $possibleValues);
+        }, $errorMessage);
+    }
 }

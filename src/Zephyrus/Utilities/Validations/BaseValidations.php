@@ -35,4 +35,12 @@ trait BaseValidations
             || (is_int($data) && $data == 0)
             || (is_int($data) && $data == 1);
     }
+
+    public static function isOnlyWithin($data, array $allPossibleValues)
+    {
+        if (!is_array($data)) {
+            return in_array($data, $allPossibleValues);
+        }
+        return !array_diff($data, $allPossibleValues);
+    }
 }
