@@ -211,13 +211,13 @@ class Router
         $acceptedFormats = $route->acceptedRequestFormats;
         if (is_array($acceptedFormats)) {
             foreach ($acceptedFormats as $format) {
-                if (in_array($format, $this->requestedRepresentations)) {
+                if ($format == ContentType::ANY || in_array($format, $this->requestedRepresentations)) {
                     return true;
                 }
             }
             return false;
         }
-        return in_array($acceptedFormats, $this->requestedRepresentations);
+        return $acceptedFormats == ContentType::ANY || in_array($acceptedFormats, $this->requestedRepresentations);
     }
 
     /**
