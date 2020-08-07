@@ -174,7 +174,7 @@ class Request
     }
 
     /**
-     * Retrieves the entire body parameters
+     * Retrieves the entire body parameters.
      *
      * @return array
      */
