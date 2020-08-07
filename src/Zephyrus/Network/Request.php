@@ -3,9 +3,14 @@
 class Request
 {
     /**
-     * @var mixed[] every parameters included in the request
+     * @var array every body parameters included in the request
      */
     private $parameters = [];
+
+    /**
+     * @var array every route parameters found from the routing process
+     */
+    private $arguments = [];
 
     /**
      * @var string HTTP method used by client
@@ -33,7 +38,7 @@ class Request
     private $referer;
 
     /**
-     * @var string requested uri as it was received (e.g /users/1)
+     * @var string requested uri as it was received (e.g demo.local/users/1)
      */
     private $requestedUri;
 
@@ -169,19 +174,68 @@ class Request
     }
 
     /**
-     * @return mixed[]
+     * Retrieves the entire body parameters
+     *
+     * @return array
      */
-    public function getParameters()
+    public function getParameters(): array
     {
         return $this->parameters;
     }
 
+    /**
+     * Retrieves one specific parameter from the body data. If the specified parameter doesn't exists, the method
+     * returns the given default value (default to null).
+     *
+     * @param string $name
+     * @param mixed | null $default
+     * @return mixed | null
+     */
     public function getParameter(string $name, $default = null)
     {
         if (isset($this->parameters[$name])) {
             return $this->parameters[$name];
         }
         return $default;
+    }
+
+    /**
+     * Retrieves the parameters used within the route resolution. In example, the route "/users/{userId}/logs/{logId}"
+     * would produce two arguments : userId and logId with their values assigned.
+     *
+     * @return array
+     */
+    public function getArguments(): array
+    {
+        return $this->arguments;
+    }
+
+    /**
+     * Retrieves one specific parameter from the route resolution. If the specified parameter doesn't exists, the method
+     * returns the given default value (default to null).
+     *
+     * @param string $name
+     * @param mixed | null $default
+     * @return mixed | null
+     */
+    public function getArgument(string $name, $default = null)
+    {
+        if (isset($this->arguments[$name])) {
+            return $this->arguments[$name];
+        }
+        return $default;
+    }
+
+    /**
+     * Adds a route resolution parameter. Done automatically by the Router class when evaluating controller method to
+     * execute.
+     *
+     * @param string $name
+     * @param mixed $value
+     */
+    public function addArgument(string $name, $value)
+    {
+        $this->arguments[$name] = $value;
     }
 
     /**
@@ -201,9 +255,8 @@ class Request
     }
 
     /**
-     * Retrieves the defined accepted representations order by specified
-     * priority using the standard parameter "q" which should range from
-     * 0 (lowest) to 1 (highest).
+     * Retrieves the defined accepted representations order by specified priority using the standard parameter "q" which
+     * should range from 0 (lowest) to 1 (highest).
      *
      * @return array
      */

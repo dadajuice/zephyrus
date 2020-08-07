@@ -229,4 +229,32 @@ class ControllerTest extends TestCase
         $output = ob_get_clean();
         self::assertEquals('test4', $output);
     }
+
+    public function testBuildFormWithArguments()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+                parent::get('/users/{id}', 'read');
+            }
+
+            public function read($userId)
+            {
+                $form = parent::buildForm(true);
+                $t = $form->getValue('t');
+                $id = $form->getValue('id');
+                echo 'test' . $t . $id;
+            }
+        };
+        $controller->initializeRoutes();
+        $req = new Request('http://test.local/users/99?t=4', 'get', [
+            'parameters' => ['t' => '4']
+        ]);
+        ob_start();
+        $router->run($req);
+        $output = ob_get_clean();
+        self::assertEquals('test499', $output);
+    }
 }

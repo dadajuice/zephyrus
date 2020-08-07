@@ -219,15 +219,20 @@ abstract class Controller implements Routable
     }
 
     /**
-     * Builds a Form class instance automatically filled with all the request parameters. Should be used to add
+     * Builds a Form class instance automatically filled with all the request body parameters. Should be used to add
      * validations.
      *
+     * @param bool $includeRouteArguments
      * @return Form
      */
-    protected function buildForm(): Form
+    protected function buildForm(bool $includeRouteArguments = false): Form
     {
         $form = new Form();
-        $form->addFields($this->request->getParameters());
+        $parameters = $this->request->getParameters();
+        if ($includeRouteArguments) {
+            $parameters = array_merge($this->request->getArguments(), $parameters);
+        }
+        $form->addFields($parameters);
         return $form;
     }
 }

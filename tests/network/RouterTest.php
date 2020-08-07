@@ -58,7 +58,7 @@ class RouterTest extends TestCase
         $ref = $this;
         $router->get('/bob/{id}', function($id) use ($ref, $req) {
             $ref->assertEquals('3', $id);
-            $ref->assertEquals('3', $req->getParameter('id'));
+            $ref->assertEquals('3', $req->getArgument('id'));
         });
         $router->run($req);
     }
@@ -70,7 +70,7 @@ class RouterTest extends TestCase
         $ref = $this;
         $router->get('/bob/{id}', function($id) use ($ref, $router) {
             $ref->assertEquals('3', $id);
-            $ref->assertEquals('3', $router->getRequest()->getParameter('id'));
+            $ref->assertEquals('3', $router->getRequest()->getArgument('id'));
         });
         $router->run($req);
     }
@@ -82,7 +82,7 @@ class RouterTest extends TestCase
         $ref = $this;
         $router->get('/bob/{id}', function($id) use ($ref, $router) {
             $ref->assertEquals('3', $id);
-            $ref->assertEquals('3', $router->getRequest()->getParameter('id'));
+            $ref->assertEquals('3', $router->getRequest()->getArgument('id'));
         });
         $router->run($req);
     }
@@ -95,8 +95,8 @@ class RouterTest extends TestCase
         $router->get('/bob/{id}/{id2}', function($id, $id2) use ($ref, $router) {
             $ref->assertEquals('3', $id);
             $ref->assertEquals('8', $id2);
-            $ref->assertEquals('3', $router->getRequest()->getParameter('id'));
-            $ref->assertEquals('8', $router->getRequest()->getParameter('id2'));
+            $ref->assertEquals('3', $router->getRequest()->getArgument('id'));
+            $ref->assertEquals('8', $router->getRequest()->getArgument('id2'));
         });
         $router->run($req);
     }

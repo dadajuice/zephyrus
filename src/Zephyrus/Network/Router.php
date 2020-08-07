@@ -230,7 +230,7 @@ class Router
     private function prepareResponse(stdClass $route)
     {
         $arguments = $route->route->getArguments($this->requestedUri);
-        $this->loadRequestParameters($arguments);
+        $this->loadRequestArguments($arguments);
         $response = $this->createResponse($route, $arguments);
         if (!is_null($response)) {
             $response->send();
@@ -384,14 +384,14 @@ class Router
     }
 
     /**
-     * Load parameters located inside the request object.
+     * Load arguments obtained from the route resolution as part of the request.
      *
      * @param array $values
      */
-    private function loadRequestParameters(array $values)
+    private function loadRequestArguments(array $values)
     {
         foreach ($values as $param => $value) {
-            $this->request->prependParameter($param, $value);
+            $this->request->addArgument($param, $value);
         }
     }
 
