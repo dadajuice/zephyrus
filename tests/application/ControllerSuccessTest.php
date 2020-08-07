@@ -66,4 +66,22 @@ class ControllerSuccessTest extends TestCase
         $headers = xdebug_get_headers();
         self::assertTrue(in_array('Location:/test', $headers));
     }
+
+    public function testNoContent()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index()
+            {
+                return parent::noContent();
+            }
+        };
+        $controller->index()->send();
+        self::assertEquals(204, http_response_code());
+    }
 }
