@@ -10,4 +10,10 @@ class ResponseFactoryTest extends TestCase
         $response = ResponseFactory::getInstance()->plain("hello world");
         self::assertEquals("hello world", $response->getContent());
     }
+
+    public function testInvalidDownload()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        ResponseFactory::getInstance()->download("non-present-file.bob");
+    }
 }
