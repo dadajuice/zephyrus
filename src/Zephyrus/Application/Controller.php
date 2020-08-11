@@ -119,7 +119,7 @@ abstract class Controller implements Routable
     /**
      * @return array
      */
-    public function getOverriddenArguments(): array
+    public function getOverrideCallbacks(): array
     {
         return $this->overrideArguments;
     }

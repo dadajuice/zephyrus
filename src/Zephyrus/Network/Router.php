@@ -288,11 +288,11 @@ class Router
      */
     private function overrideArguments(Controller $controller, array &$arguments)
     {
-        $parameterNames = array_keys($arguments);
-        foreach ($controller->getOverriddenArguments() as $name => $callback) {
-            if (in_array($name, $parameterNames)) {
+        $argumentNames = array_keys($arguments);
+        foreach ($controller->getOverrideCallbacks() as $name => $callback) {
+            if (in_array($name, $argumentNames)) {
                 $arguments[$name] = $callback($arguments[$name]);
-                $this->request->addParameter($name, $arguments[$name]);
+                $this->request->addArgument($name, $arguments[$name]);
             }
         }
     }

@@ -28,7 +28,7 @@ class ControllerOverrideTest extends TestCase
 
             public function read(\stdClass $user)
             {
-                $id = $this->request->getParameter('user')->id; // request should be overridden too
+                $id = $this->request->getArgument('user')->id; // request should be overridden too
                 return $this->plain($user->username . $id . $user->id);
             }
         };
@@ -67,7 +67,7 @@ class ControllerOverrideTest extends TestCase
 
             public function read(\stdClass $user)
             {
-                $id = $this->request->getParameter('user')->id; // request should be overridden too
+                $id = $this->request->getArgument('user')->id; // request should be overridden too
                 return $this->plain($user->username . $id . $user->id);
             }
         };
@@ -104,7 +104,7 @@ class ControllerOverrideTest extends TestCase
                 if (is_null($user)) {
                     return $this->plain("entity not found");
                 }
-                $id = $this->request->getParameter('user')->id; // request should be overridden too
+                $id = $this->request->getArgument('user')->id; // request should be overridden too
                 return $this->plain($user->username . $id . $user->id);
             }
         };
@@ -132,7 +132,7 @@ class ControllerOverrideTest extends TestCase
 
             public function read(\stdClass $user)
             {
-                $id = $this->request->getParameter('user')->id; // request should be overridden too
+                $id = $this->request->getArgument('user')->id; // request should be overridden too
                 return $this->plain($user->username . $id . $user->id);
             }
         };
@@ -161,7 +161,7 @@ class ControllerOverrideTest extends TestCase
 
             public function read(\stdClass $user)
             {
-                $id = $this->request->getParameter('user')->id; // request should be overridden too
+                $id = $this->request->getArgument('user')->id; // request should be overridden too
                 return $this->plain($user->username . $id . $user->id);
             }
         };
