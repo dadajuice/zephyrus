@@ -93,6 +93,27 @@ trait SuccessResponse
     }
 
     /**
+     * Creates a response as a downloadable file with the specified content. By default, will send it as content type
+     * application/octet-stream, but can be changed to reflect the content's nature more closely (e.g. calendar, json,
+     * etc.).
+     *
+     * @param string $content
+     * @param string $filename
+     * @param string $contentType
+     * @return Response
+     */
+    public function downloadContent(string $content, string $filename, string $contentType = ContentType::APPLICATION): Response
+    {
+        $contentLength = strlen($content);
+        $response = new Response($contentType, 200);
+        $response->setContent($content);
+        $this->addFileTransferHeaders($response);
+        $response->addHeader("Content-Disposition", 'attachment; filename="' . $filename . '"');
+        $response->addHeader("Content-Length", $contentLength);
+        return $response;
+    }
+
+    /**
      * Redirect user to specified URL. Throws an HTTP "303 See Other" header instead of the default 301. This indicates,
      * more precisely, that the response is elsewhere.
      *
