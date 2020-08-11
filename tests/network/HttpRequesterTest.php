@@ -42,7 +42,7 @@ class HttpRequesterTest extends TestCase
         $this->expectException(HttpRequesterException::class);
         $request = HttpRequester::get("https://lkjdsflkjsdf.msdfe.sdf.sdf");
         $request->setConnectionTimeout(1);
-        $content = $request->execute();
+        $request->execute();
     }
 
     public function testDownload()
@@ -62,19 +62,21 @@ class HttpRequesterTest extends TestCase
     {
         $this->expectException(HttpRequesterException::class);
         $request = HttpRequester::get("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/existing.txt");
-        $filePath = $request->executeDownload([], '/etc/new_files.txt');
+        $request->executeDownload([], '/etc/new_files.txt');
     }
 
     public function testUpload()
     {
         $request = HttpRequester::post("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/sdfdgdfdgfdfg.txt");
         $file = HttpRequester::prepareUploadFile(ROOT_DIR . '/lib/filesystem/existing.txt', 'test.txt');
+        self::assertTrue($file instanceof \CURLFile);
+        self::assertEquals(ROOT_DIR . '/lib/filesystem/existing.txt', $file->getFilename());
         $request->execute(['file' => $file, 'test' => ['name' => 't', 'age' => 3, 'classes' => ['nest', 'nest 2']]]);
     }
 
     public function testInvalidUpload()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $file = HttpRequester::prepareUploadFile(ROOT_DIR . '/lib/filesystem/existidsfsdfdsfdsdfdsfsdfsdfng.txt', 'test.txt');
+        HttpRequester::prepareUploadFile(ROOT_DIR . '/lib/filesystem/existidsfsdfdsfdsdfdsfsdfsdfng.txt', 'test.txt');
     }
 }
