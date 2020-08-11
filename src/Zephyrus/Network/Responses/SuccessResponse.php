@@ -50,9 +50,14 @@ trait SuccessResponse
         return $response;
     }
 
-    public function noContent(string $contentType = ContentType::PLAIN): Response
+    /**
+     * Creates a simple no content response (204) that should be sent in response to a PUT request.
+     *
+     * @return Response
+     */
+    public function noContent(): Response
     {
-        return new Response($contentType, 204);
+        return new Response(ContentType::PLAIN, 204);
     }
 
     /**
