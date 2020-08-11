@@ -21,6 +21,26 @@ class FileTest extends TestCase
     /**
      * @depends testCreate
      */
+    public function testCreateFailed()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        File::create(ROOT_DIR . '/lib/filesystem/newly.txt');
+    }
+
+    public function testCreateOverride()
+    {
+        $file = File::create(ROOT_DIR . '/lib/filesystem/newly999.txt');
+        $file->write("yes");
+        $file = File::create(ROOT_DIR . '/lib/filesystem/newly999.txt', true);
+        $file->write("no");
+        $file = new File(ROOT_DIR . '/lib/filesystem/newly999.txt');
+        self::assertEquals("no", $file->read());
+        $file->remove();
+    }
+
+    /**
+     * @depends testCreate
+     */
     public function testWrite()
     {
         $file = new File(ROOT_DIR . '/lib/filesystem/newly.txt');
