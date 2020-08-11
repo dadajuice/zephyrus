@@ -61,9 +61,8 @@ trait SuccessResponse
     }
 
     /**
-     * Renders a given file as a downloadable content with application/octet-stream
-     * content type. If no filename is given, it will automatically use the actual
-     * file basename. If the deleteAfter argument is set to true, it will
+     * Renders a given file as a downloadable content with application/octet-stream content type. If no filename is
+     * given, it will automatically use the actual file basename. If the deleteAfter argument is set to true, it will
      * automatically remove the file after sending it. Useful for temporary files.
      *
      * @param string $filePath
@@ -73,18 +72,16 @@ trait SuccessResponse
      */
     public function download(string $filePath, ?string $filename = null, bool $deleteAfter = false): Response
     {
+        if (!file_exists($filePath)) {
+            throw new \InvalidArgumentException("Specified file doesn't exists");
+        }
         if (is_null($filename)) {
             $filename = basename($filePath);
         }
         $contentLength = filesize($filePath);
         $response = new Response(ContentType::APPLICATION, 200);
-        $response->addHeader("Pragma", "public");
-        $response->addHeader("Expires", "0");
-        $response->addHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
-        $response->addHeader("Cache-Control", "public");
-        $response->addHeader("Content-Description", "File Transfer");
+        $this->addFileTransferHeaders($response);
         $response->addHeader("Content-Disposition", 'attachment; filename="' . $filename . '"');
-        $response->addHeader("Content-Transfer-Encoding", "binary");
         $response->addHeader("Content-Length", $contentLength);
         $response->setContentCallback(function () use ($filePath, $deleteAfter) {
             @readfile($filePath);
@@ -96,9 +93,8 @@ trait SuccessResponse
     }
 
     /**
-     * Redirect user to specified URL. Throws an HTTP "303 See Other" header
-     * instead of the default 301. This indicates, more precisely, that the
-     * response if elsewhere.
+     * Redirect user to specified URL. Throws an HTTP "303 See Other" header instead of the default 301. This indicates,
+     * more precisely, that the response is elsewhere.
      *
      * @param string $url
      * @return Response
@@ -108,5 +104,20 @@ trait SuccessResponse
         $response = new Response(ContentType::PLAIN, 303);
         $response->addHeader('Location', $url);
         return $response;
+    }
+
+    /**
+     * Adds the required basic file transfer HTTP headers such as expires, pragma, cache-control, encoding, etc.
+     *
+     * @param Response $response
+     */
+    private function addFileTransferHeaders(Response $response)
+    {
+        $response->addHeader("Pragma", "public");
+        $response->addHeader("Expires", "0");
+        $response->addHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+        $response->addHeader("Cache-Control", "public");
+        $response->addHeader("Content-Description", "File Transfer");
+        $response->addHeader("Content-Transfer-Encoding", "binary");
     }
 }
