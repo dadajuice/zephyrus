@@ -82,8 +82,7 @@ class CalendarEvent
      */
     public function buildResponse(): Response
     {
-        ob_start();
-?>
+        ob_start(); ?>
 BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//hacksw/handcal//NONSGML v1.0//EN
@@ -92,18 +91,18 @@ BEGIN:VEVENT
 DTEND:<?= $this->formatCalendarDate($this->endDate) . PHP_EOL ?>
 UID:<?= $this->uid . PHP_EOL ?>
 DTSTAMP:<?= $this->formatCalendarDate(time()) . PHP_EOL ?>
-<?php if (!is_null($this->location)): ?>
+<?php if (!is_null($this->location)) { ?>
 LOCATION:<?= $this->escapeString($this->location) . PHP_EOL ?>
-<?php endif; ?>
-<?php if (!is_null($this->description)): ?>
+<?php } ?>
+<?php if (!is_null($this->description)) { ?>
 DESCRIPTION:<?= $this->escapeString($this->description) . PHP_EOL ?>
-<?php endif; ?>
-<?php if (!is_null($this->uri)): ?>
+<?php } ?>
+<?php if (!is_null($this->uri)) { ?>
 URL;VALUE=URI:<?= $this->escapeString($this->uri) . PHP_EOL ?>
-<?php endif; ?>
-<?php if (!is_null($this->summary)): ?>
+<?php } ?>
+<?php if (!is_null($this->summary)) { ?>
 SUMMARY:<?= $this->escapeString($this->summary) . PHP_EOL ?>
-<?php endif; ?>
+<?php } ?>
 DTSTART:<?= $this->formatCalendarDate($this->startDate) . PHP_EOL ?>
 END:VEVENT
 END:VCALENDAR<?php
@@ -235,6 +234,6 @@ END:VCALENDAR<?php
      */
     private function escapeString(string $string): string
     {
-        return preg_replace('/([,;])/','\\\$1', $string);
+        return preg_replace('/([,;])/', '\\\$1', $string);
     }
 }
