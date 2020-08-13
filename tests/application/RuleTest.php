@@ -435,6 +435,13 @@ class RuleTest extends TestCase
         self::assertFalse($rule->isValid("e"));
     }
 
+    public function testIsNotInArray()
+    {
+        $rule = Rule::notInArray(["a", "b", "c"], "err");
+        self::assertTrue($rule->isValid("d"));
+        self::assertFalse($rule->isValid("b"));
+    }
+
     public function testIsSameAs()
     {
         $rule = Rule::sameAs("password", "err");

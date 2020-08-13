@@ -29,6 +29,13 @@ trait BaseRules
         }, $errorMessage);
     }
 
+    public static function notInArray(array $array, string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data) use ($array) {
+            return !in_array($data, $array);
+        }, $errorMessage);
+    }
+
     public static function sameAs(string $comparedFieldName, string $errorMessage = ""): Rule
     {
         return new Rule(function ($data, $values) use ($comparedFieldName) {
