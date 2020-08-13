@@ -52,7 +52,9 @@ class ControllerOverrideTest extends TestCase
 
                 parent::overrideArgument('user', function ($value) {
                     if ($value != 4) { // simulate not found
-                        throw new RouteArgumentException("user", $value, 0, "user not found");
+                        $e = new RouteArgumentException("user", $value, 0, "user not found");
+                        $e->addOption('something', 'yes');
+                        throw $e;
                     }
                     return (object) [
                         'id' => $value,
@@ -63,7 +65,9 @@ class ControllerOverrideTest extends TestCase
 
             public function handleRouteArgumentException(RouteArgumentException $exception): Response
             {
-                return $this->plain("User not found");
+                $options = $exception->getOptions();
+                assert(key_exists('something', $options));
+                return $this->plain("user not found" . $exception->getOption('something'));
             }
 
             public function read(\stdClass $user)
@@ -77,7 +81,7 @@ class ControllerOverrideTest extends TestCase
         ob_start();
         $router->run($req);
         $output = ob_get_clean();
-        self::assertEquals('User not found', $output);
+        self::assertEquals('user not foundyes', $output);
     }
 
     public function testOverrideNullArgument()
