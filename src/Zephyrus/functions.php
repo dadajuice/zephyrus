@@ -1,5 +1,6 @@
 <?php
 
+use Zephyrus\Application\Configuration;
 use Zephyrus\Application\Form;
 use Zephyrus\Application\Localization;
 use Zephyrus\Application\Session;
@@ -51,6 +52,20 @@ function format(string $type, ...$args)
 function sess(string $key, $defaultValue = null)
 {
     return Session::getInstance()->read($key, $defaultValue);
+}
+
+/**
+ * Simple alias function to directly retrieve a configuration property from the config.ini file to simplify usage within
+ * view files.
+ *
+ * @param string $section
+ * @param string $property
+ * @param string|null $defaultValue
+ * @return mixed
+ */
+function config(string $section, string $property, string $defaultValue = null)
+{
+    return Configuration::getConfiguration($section, $property, $defaultValue);
 }
 
 /**

@@ -32,6 +32,13 @@ class ViewBuilderTest extends TestCase
         self::assertEquals('<p>Example Bob Lewis is 12,30 $</p>', $output);
     }
 
+    public function testViewRenderWithConfig()
+    {
+        $view = ViewBuilder::getInstance()->buildFromString('p Example is #{config(\'application\', \'project\')}');
+        $output = $view->render();
+        self::assertEquals('<p>Example is zephyrus</p>', $output);
+    }
+
     public function testViewRenderWithMoneyFormatArgs()
     {
         $view = ViewBuilder::getInstance()->buildFromString('p Example #{item.name} is #{format(\'money\', item.price, 3)}');
