@@ -65,6 +65,9 @@ class ListView
      */
     public function mark(?string $data): string
     {
+        if (empty($data)) {
+            return "";
+        }
         $pattern = "/" . preg_quote($this->filter->getSearch(), '/') . "/i";
         return (!$this->filter->getSearch()) ? $data : preg_replace($pattern, "<mark>$0</mark>", $data);
     }
