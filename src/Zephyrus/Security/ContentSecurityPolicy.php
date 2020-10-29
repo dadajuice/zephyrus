@@ -35,8 +35,8 @@ class ContentSecurityPolicy
     ];
 
     /**
-     * Define script execution by requiring the presence of the specified nonce
-     * on script elements. Must be used in script tag: <script nonce=...>.
+     * Define script execution by requiring the presence of the specified nonce on script elements. Must be used in
+     * script tag: <script nonce=...>.
      *
      * @var string
      */
@@ -50,27 +50,24 @@ class ContentSecurityPolicy
     private $headers = [];
 
     /**
-     * The policy specified in report-only mode won’t block restricted
-     * resources, but it will send violation reports to the location you
-     * specify. You can even send both headers, enforcing one policy while
-     * monitoring another. To do so, instantiate two object and set one as
-     * report only.
+     * The policy specified in report-only mode won’t block restricted resources, but it will send violation reports to
+     * the location you specify. You can even send both headers, enforcing one policy while monitoring another. To do
+     * so, instantiate two object and set one as report only.
      *
      * @var bool
      */
     private $reportOnly = false;
 
     /**
-     * Specify to send the X-Content-Security-Policy along with the standard
-     * one. Currently only for IE 11.
+     * Specify to send the X-Content-Security-Policy along with the standard one. Currently only for IE 11.
      *
      * @var bool
      */
     private $compatible = false;
 
     /**
-     * Specifies a URL where a browser will send reports when a content security
-     * policy is violated. This directive cant be used in <meta> tags.
+     * Specifies a URL where a browser will send reports when a content security policy is violated. This directive
+     * cant be used in <meta> tags.
      *
      * @var string
      */
@@ -95,8 +92,7 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Build and send the complete CSP security header according to the object
-     * specified data.
+     * Build and send the complete CSP security header according to the object specified data.
      */
     public function send()
     {
@@ -117,9 +113,8 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Defines the defaults for most directives left unspecified. Generally, this
-     * applies to any directive that ends with -src. The following directives don’t
-     * use default-src as a fallback : base-uri, form-action, frame-ancestors,
+     * Defines the defaults for most directives left unspecified. Generally, this applies to any directive that ends
+     * with -src. The following directives don’t use default-src as a fallback : base-uri, form-action, frame-ancestors,
      * plugin-types, report-uri, sandbox.
      *
      * @param string[] $defaultSources
@@ -190,9 +185,8 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Lists the URLs for workers and embedded frame contents. For example:
-     * child-src https://youtube.com would enable embedding videos from YouTube
-     * but not from other origins. Use this in place of the deprecated frame-src
+     * Lists the URLs for workers and embedded frame contents. For example: child-src https://youtube.com would enable
+     * embedding videos from YouTube but not from other origins. Use this in place of the deprecated frame-src
      * directive.
      *
      * @param string[] $childSources
@@ -203,10 +197,8 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Specifies the sources that can embed the current page. This directive
-     * applies to <frame>, <iframe>, <embed>, and <applet> tags. This
-     * directive cant be used in <meta> tags and applies only to non-HTML
-     * resources.
+     * Specifies the sources that can embed the current page. This directive applies to <frame>, <iframe>, <embed>,
+     * and <applet> tags. This directive cant be used in <meta> tags and applies only to non-HTML resources.
      *
      * @param string[] $frameAncestors
      */
@@ -216,8 +208,8 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Specifies the origins that can serve web fonts. Google’s Web Fonts could
-     * be enabled via font-src https://themes.googleusercontent.com.
+     * Specifies the origins that can serve web fonts. Google’s Web Fonts could be enabled via the directive
+     * font-src https://themes.googleusercontent.com.
      *
      * @param string[] $fontSources
      */
@@ -227,8 +219,7 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Limits the origins to which you can connect (via XHR, WebSockets, and
-     * EventSource).
+     * Limits the origins to which you can connect (via XHR, WebSockets, and EventSource).
      *
      * @param string[] $connectSources
      */
@@ -280,9 +271,8 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Places restrictions on actions the page can take, rather than on resources
-     * that the page can load. If the sandbox directive is present, the page will
-     * be treated as though it was loaded inside of an iframe with a sandbox
+     * Places restrictions on actions the page can take, rather than on resources that the page can load. If the sandbox
+     * directive is present, the page will be treated as though it was loaded inside of an iframe with a sandbox
      * attribute.
      *
      * @param string[] $sandbox
