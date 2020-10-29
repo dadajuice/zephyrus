@@ -176,10 +176,33 @@ class Localization
      *
      * @param string $name
      * @param string $value
+     * @throws LocalizationException
      * @return string
      */
     private function addConstant(string $name, string $value)
     {
+        $reservedKeywords = [
+            '__halt_compiler', 'abstract', 'and', 'array', 'as', 'break', 'callable', 'case', 'catch', 'class', 'clone',
+            'const', 'continue', 'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 'empty', 'enddeclare',
+            'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile', 'eval', 'exit', 'extends', 'final', 'finally',
+            'fn', 'for', 'foreach', 'function', 'global', 'goto', 'if', 'implements', 'include', 'include_once',
+            'instanceof', 'insteadof', 'interface', 'isset', 'list', 'namespace', 'new', 'or', 'print', 'private',
+            'protected', 'public', 'require', 'require_once', 'return', 'static', 'switch', 'throw', 'trait', 'try',
+            'unset', 'use', 'var', 'while', 'xor', 'yield', 'yield from'
+        ];
+        $compileConstants = [
+            '__CLASS__', '__DIR__', '__FILE__', '__FUNCTION__', '__LINE__', '__METHOD__', '__NAMESPACE__',
+            '__TRAIT__'
+        ];
+        if (in_array(strtolower($name), $reservedKeywords)) {
+            throw new LocalizationException(LocalizationException::ERROR_RESERVED_WORD, "", $name);
+        }
+        if (in_array(strtoupper($name), $compileConstants)) {
+            throw new LocalizationException(LocalizationException::ERROR_RESERVED_WORD, "", $name);
+        }
+        if (!preg_match('/^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*$/', $name)) {
+            throw new LocalizationException(LocalizationException::ERROR_INVALID_NAMING, "", $name);
+        }
         $value = str_replace('"', '&quot;', $value);
         $value = str_replace('$', '&#36;', $value);
         return "\tpublic const $name = \"$value\";" . PHP_EOL;

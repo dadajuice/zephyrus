@@ -2,14 +2,23 @@
 
 class LocalizationException extends \Exception
 {
+    const ERROR_RESERVED_WORD = 901;
+    const ERROR_INVALID_NAMING = 902;
+
     /**
      * @var string
      */
     private $jsonFile = "";
 
-    public function __construct(int $code, string $jsonFile = "")
+    /**
+     * @var string
+     */
+    private $additionalInformation = null;
+
+    public function __construct(int $code, string $jsonFile = "", ?string $additionalInformation = null)
     {
         $this->jsonFile = $jsonFile;
+        $this->additionalInformation = $additionalInformation;
         $message = $this->codeToMessage($code);
         if (!empty($jsonFile)) {
             $message .= " in localization json file [$jsonFile].";
@@ -29,6 +38,12 @@ class LocalizationException extends \Exception
     private function codeToMessage($code)
     {
         switch ($code) {
+            case self::ERROR_RESERVED_WORD:
+                $message = "Cannot use the detected PHP reserved word [" . $this->additionalInformation . "] as localize key";
+                break;
+            case self::ERROR_INVALID_NAMING:
+                $message = "Cannot use the word [" . $this->additionalInformation . "] as localize key since it doesn't respect the PHP constant definition";
+                break;
             case JSON_ERROR_SYNTAX:
                 $message = "Syntax error";
                 break;
