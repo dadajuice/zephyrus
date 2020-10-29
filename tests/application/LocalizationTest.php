@@ -88,6 +88,13 @@ class LocalizationTest extends TestCase
         unlink(ROOT_DIR . '/locale/fr_CA/routes.json');
     }
 
+    public function testInvalidLocalization()
+    {
+        // Shall not break
+        $result = Localization::getInstance()->localize('bob/3');
+        self::assertEquals('bob/3', $result);
+    }
+
     public function testInstalledLanguages()
     {
         $languages = Localization::getInstalledLanguages();

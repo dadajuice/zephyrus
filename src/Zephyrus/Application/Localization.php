@@ -90,6 +90,11 @@ class Localization
         } catch (\Error $e) {
             return $key;
         }
+
+        if (is_null($object)) { // Localize class not found
+            return $key;
+        }
+
         $constant = sprintf('%s::%s', get_class($object), $lastConstant);
         if (!defined($constant)) {
             return $key;
