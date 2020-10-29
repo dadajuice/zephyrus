@@ -40,6 +40,7 @@ EOT;
         $csp->setMediaSources(['http://test.local']);
         $csp->setPluginTypes(['http://test.local']);
         $csp->setBaseUri(['http://test.local']);
+        $csp->setWorkerSources(['http://test.local']);
         $csp->setObjectSources(['http://test.local']);
         $csp->setSandbox(['http://test.local']);
         $csp->setCompatible(true);
@@ -51,7 +52,19 @@ EOT;
         $csp->send();
         $headers = xdebug_get_headers();
         $result = <<<EOT
-X-Content-Security-Policy-Report-Only: default-src 'self';base-uri http://test.local;connect-src http://test.local;form-action http://test.local;frame-ancestors http://test.local;media-src http://test.local;object-src http://test.local;plugin-types http://test.local;sandbox http://test.local;report-uri http://test.local/report;
+X-Content-Security-Policy-Report-Only: default-src 'self';worker-src http://test.local;base-uri http://test.local;connect-src http://test.local;form-action http://test.local;frame-ancestors http://test.local;media-src http://test.local;object-src http://test.local;plugin-types http://test.local;sandbox http://test.local;report-uri http://test.local/report;
+EOT;
+        self::assertTrue(in_array($result, $headers));
+    }
+
+    public function testCustomHeaders()
+    {
+        $csp = new ContentSecurityPolicy();
+        $csp->setSourceType('zephy-sources', ["http://test.local"]);
+        $csp->send();
+        $headers = xdebug_get_headers();
+        $result = <<<EOT
+Content-Security-Policy: zephy-sources http://test.local;
 EOT;
         self::assertTrue(in_array($result, $headers));
     }
