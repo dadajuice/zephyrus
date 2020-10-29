@@ -268,6 +268,18 @@ class ContentSecurityPolicy
     }
 
     /**
+     * Manually set any source type. Helpful for any source type that may be missing from this class or any iterative
+     * processing of a subset of source types.
+     *
+     * @param string $sourceType
+     * @param string[] $sources
+     */
+    public function setSourceType(string $sourceType, array $sources)
+    {
+        $this->headers[$sourceType] = $sources;
+    }
+
+    /**
      * Places restrictions on actions the page can take, rather than on resources
      * that the page can load. If the sandbox directive is present, the page will
      * be treated as though it was loaded inside of an iframe with a sandbox
