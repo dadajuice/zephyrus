@@ -18,6 +18,7 @@ class ContentSecurityPolicy
     private $sourceTypes = [
         'default-src',
         'script-src',
+        'worker-src',
         'style-src',
         'font-src',
         'img-src',
@@ -165,6 +166,16 @@ class ContentSecurityPolicy
     public function setImageSources(array $imageSources)
     {
         $this->headers['img-src'] = $imageSources;
+    }
+
+    /**
+     * Defines the origins from which workers can be started.
+     *
+     * @param string[] $workerSources
+     */
+    public function setWorkerSources(array $workerSources)
+    {
+        $this->headers['worker-src'] = $workerSources;
     }
 
     /**
