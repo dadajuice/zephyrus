@@ -6,6 +6,7 @@ class ContentSecurityPolicy
     const UNSAFE_INLINE = "'unsafe-inline'";
     const UNSAFE_EVAL = "'unsafe-eval'";
     const BASE64 = "data:";
+    const BLOB = "blob:";
     const NONE = "'none'";
     const ANY = "*";
     const HTTPS_ONLY = "https:";
