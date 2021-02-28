@@ -103,4 +103,36 @@ class OperatingSystem
     {
         return memory_get_peak_usage(true);
     }
+
+    /**
+     * Retrieves the process owner of the running script (e.g www-data).
+     *
+     * @return string
+     */
+    public static function getProcessOwner(): string
+    {
+        return posix_getpwuid(posix_geteuid())['name'];
+    }
+
+    /**
+     * Retrieves the owner of the given path (either directory or file).
+     *
+     * @param string $path
+     * @return string
+     */
+    public static function getOwner(string $path): string
+    {
+        return posix_getpwuid(fileowner($path))['name'];
+    }
+
+    /**
+     * Retrieves the group of the given path (either directory or file).
+     *
+     * @param string $path
+     * @return string
+     */
+    public static function getGroup(string $path): string
+    {
+        return posix_getpwuid(filegroup($path))['name'];
+    }
 }
