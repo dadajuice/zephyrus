@@ -2,6 +2,8 @@
 
 class RequestFactory
 {
+    public const CUSTOM_METHOD_PARAMETER = '__method';
+
     /**
      * @var Request
      */
@@ -40,8 +42,8 @@ class RequestFactory
         $uri = self::getCompleteRequestUri($server);
         $method = strtoupper($server['REQUEST_METHOD']);
         $parameters = self::getParametersFromContentType($server['CONTENT_TYPE'] ?? ContentType::PLAIN);
-        if (isset($parameters['__method'])) {
-            $method = strtoupper($parameters['__method']);
+        if (isset($parameters[self::CUSTOM_METHOD_PARAMETER])) {
+            $method = strtoupper($parameters[self::CUSTOM_METHOD_PARAMETER]);
         }
         self::$httpRequest = new Request($uri, $method, [
             'parameters' => $parameters,
