@@ -13,6 +13,16 @@ class CryptographyTest extends TestCase
         self::assertEquals('test', $message);
     }
 
+    public function testSuccessfulFileDecryption()
+    {
+        Cryptography::encryptFile(ROOT_DIR . '/secrets.txt', 'secretlock', ROOT_DIR . '/secrets-temp.txt');
+        self::assertTrue(file_exists(ROOT_DIR . '/secrets-temp.txt'));
+        self::assertNotEquals('im batman', file_get_contents(ROOT_DIR . '/secrets-temp.txt'));
+        Cryptography::decryptFile(ROOT_DIR . '/secrets-temp.txt', 'secretlock');
+        self::assertEquals('im batman', file_get_contents(ROOT_DIR . '/secrets-temp.txt'));
+        unlink(ROOT_DIR . '/secrets-temp.txt');
+    }
+
     public function testFailedDecryption()
     {
         $cipher = Cryptography::encrypt('test', 'batman');
