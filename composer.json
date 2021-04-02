@@ -10,7 +10,7 @@
   ],
   "license": "MIT",
   "require": {
-    "php": ">=7.1",
+    "php": ">=7.3",
     "pug-php/pug": "2.*",
     "enygma/expose": "^3.0",
     "ext-pdo": "*",
@@ -25,7 +25,7 @@
   },
   "require-dev": {
     "php": ">=7.3",
-    "phpunit/phpunit": "9.*",
+    "phpunit/phpunit": "9.*.*",
     "codeclimate/php-test-reporter": "dev-master",
     "ext-xdebug": "*"
   },
