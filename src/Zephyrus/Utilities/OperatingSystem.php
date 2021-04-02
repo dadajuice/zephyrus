@@ -107,6 +107,7 @@ class OperatingSystem
     /**
      * Retrieves the process owner of the running script (e.g www-data).
      *
+     * @codeCoverageIgnore
      * @return string
      */
     public static function getProcessOwner(): string
@@ -117,6 +118,7 @@ class OperatingSystem
     /**
      * Retrieves the owner of the given path (either directory or file).
      *
+     * @codeCoverageIgnore
      * @param string $path
      * @return string
      */
@@ -128,6 +130,7 @@ class OperatingSystem
     /**
      * Retrieves the group of the given path (either directory or file).
      *
+     * @codeCoverageIgnore
      * @param string $path
      * @return string
      */
