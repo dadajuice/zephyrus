@@ -16,9 +16,9 @@ class LocalizationTest extends TestCase
         self::assertEquals("not.found", Localization::getInstance()->localize("not.found"));
         self::assertEquals("messages.success.bob", Localization::getInstance()->localize("messages.success.bob"));
         self::assertEquals("/connexion", Localization::getInstance()->localize("routes.login"));
+        self::assertEquals("/admin", Localization::getInstance()->localize("routes.administration")); // subfolder test
         self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", localize("messages.success.add_user", "martin"));
         self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", __("L'utilisateur [%s] a été ajouté avec succès", 'martin'));
-        //unlink(ROOT_DIR . '/locale/fr_CA/routes.json');
     }
 
     /**

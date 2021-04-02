@@ -279,7 +279,14 @@ class Localization
             if ($jsonLastError > JSON_ERROR_NONE) {
                 throw new LocalizationException($jsonLastError, $file);
             }
-            $globalArray = array_merge($globalArray, $jsonAssociativeArray);
+
+            // Merge values if key exists from another file. Allows to have the same localization key in multiple files
+            // and merge them at generation time.
+            foreach ($jsonAssociativeArray as $key => $values) {
+                $globalArray[$key] = (key_exists($key, $globalArray))
+                    ? array_merge($globalArray[$key], $values)
+                    : $values;
+            }
         }
         return $globalArray;
     }
