@@ -217,6 +217,47 @@ class Cryptography
     }
 
     /**
+     * Encrypts the entire content of the given file with the specified key. This method overrides the original if no
+     * destination is specified. Use the same algorithm as the encrypt function. This method makes sure to validate the
+     * existence of the file and the support of the algorithm. Throws InvalidArgumentException otherwise. Warning! Make
+     * sure to not loose the key because the file will forever be encrypted.
+     *
+     * @see encrypt
+     * @param string $plainTextFilename
+     * @param string $key
+     * @param string $destination
+     */
+    public static function encryptFile(string $plainTextFilename, string $key, ?string $destination = null)
+    {
+        if (!file_exists($plainTextFilename)) {
+            throw new InvalidArgumentException("Specified file to encrypt does not exist");
+        }
+        $originalContent = file_get_contents($plainTextFilename);
+        $cipherText = self::encrypt($originalContent, $key);
+        file_put_contents($destination ?? $plainTextFilename, $cipherText);
+    }
+
+    /**
+     * Decrypts the entire content of the given file with the specified key. This method overrides the original if no
+     * destination is specified. Use the same algorithm as the decrypt function. This method makes sure to validate the
+     * existence of the file and the support of the algorithm. Throws InvalidArgumentException otherwise.
+     *
+     * @see encrypt
+     * @param string $cipherTextFilename
+     * @param string $key
+     * @param string $destination
+     */
+    public static function decryptFile(string $cipherTextFilename, string $key, ?string $destination = null)
+    {
+        if (!file_exists($cipherTextFilename)) {
+            throw new InvalidArgumentException("Specified file to decrypt does not exist");
+        }
+        $cipherText = file_get_contents($cipherTextFilename);
+        $originalContent = self::decrypt($cipherText, $key);
+        file_put_contents($destination ?? $cipherTextFilename, $originalContent);
+    }
+
+    /**
      * Encrypts the given plain text with the specified encryption key as usual but also authenticate with an hmac using
      * the Encrypt-then-MAC approach for authenticated encryption. The result contains the cipher, the hmac and salt.
      *
