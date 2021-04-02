@@ -56,6 +56,13 @@ class ListViewTest extends TestCase
         self::assertEquals('bat<mark>man</mark>', $list->mark('batman'));
     }
 
+    public function testMarkGuard()
+    {
+        $list = $this->buildList();
+        // safety guard if the value is null wont provoke error
+        self::assertEquals('', $list->mark(null));
+    }
+
     public function testAdditionalData()
     {
         $list = $this->buildList();
