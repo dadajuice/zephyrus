@@ -284,7 +284,7 @@ class Localization
             // and merge them at generation time.
             foreach ($jsonAssociativeArray as $key => $values) {
                 $globalArray[$key] = (key_exists($key, $globalArray))
-                    ? array_merge($globalArray[$key], $values)
+                    ? array_replace_recursive($globalArray[$key], $values)
                     : $values;
             }
         }
