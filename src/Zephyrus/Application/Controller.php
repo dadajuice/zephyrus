@@ -233,6 +233,7 @@ abstract class Controller implements Routable
             $parameters = array_merge($this->request->getArguments(), $parameters);
         }
         $form->addFields($parameters);
+        $form->addFields($this->request->getFiles());
         return $form;
     }
 }
