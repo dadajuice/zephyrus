@@ -115,7 +115,8 @@ class ErrorHandler
             throw new \InvalidArgumentException("Specified callback must only have one argument hinted as a 
                 Throwable class");
         }
-        $argumentClass = $parameters[0]->getClass();
+        $argumentType = $parameters[0]->getType();
+        $argumentClass = new \ReflectionClass($argumentType->getName());
         if (!$argumentClass->isSubclassOf('Throwable')) {
             throw new \InvalidArgumentException("Specified callback argument must be hinted child of a 
                 Throwable class");
