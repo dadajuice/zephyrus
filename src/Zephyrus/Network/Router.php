@@ -253,7 +253,10 @@ class Router
         if (!is_null($controller) && !empty($arguments)) {
             try {
                 $this->restrictArguments($controller, $arguments);
-                $this->overrideArguments($controller, $arguments);
+                $response = $this->overrideArguments($controller, $arguments);
+                if (!is_null($response)) {
+                    $responseBefore = $response;
+                }
             } catch (RouteArgumentException $exception) {
                 return $controller->handleRouteArgumentException($exception);
             }
@@ -286,15 +289,19 @@ class Router
      * @param Controller $controller
      * @param array $arguments
      */
-    private function overrideArguments(Controller $controller, array &$arguments)
+    private function overrideArguments(Controller $controller, array &$arguments): ?Response
     {
         $argumentNames = array_keys($arguments);
         foreach ($controller->getOverrideCallbacks() as $name => $callback) {
             if (in_array($name, $argumentNames)) {
                 $arguments[$name] = $callback($arguments[$name]);
+                if ($arguments[$name] instanceof Response) {
+                    return $arguments[$name];
+                }
                 $this->request->addArgument($name, $arguments[$name]);
             }
         }
+        return null;
     }
 
     /**
