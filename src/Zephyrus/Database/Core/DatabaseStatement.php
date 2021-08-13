@@ -81,7 +81,7 @@ class DatabaseStatement
 
     private function sanitize($value)
     {
-        return htmlspecialchars($value);
+        return htmlspecialchars($value, ENT_NOQUOTES);
     }
 
     private function initializeTypeConversion()
