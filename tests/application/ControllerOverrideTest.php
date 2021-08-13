@@ -84,6 +84,41 @@ class ControllerOverrideTest extends TestCase
         self::assertEquals('user not foundyes', $output);
     }
 
+    public function testOverrideArgumentsWithResponse()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+                parent::get('/users/{user}', 'read');
+
+                parent::overrideArgument('user', function ($value) {
+                    if ($value != 4) { // simulate not found
+                        return $this->plain("it worked");
+                    }
+                    return (object) [
+                        'id' => $value,
+                        'username' => 'msandwich'
+                    ];
+                });
+            }
+
+            public function read(\stdClass $user)
+            {
+                $id = $this->request->getArgument('user')->id; // request should be overridden too
+                return $this->plain($user->username . $id . $user->id);
+            }
+        };
+        $controller->initializeRoutes();
+        $req = new Request('http://test.local/users/5', 'get');
+        ob_start();
+        $router->run($req);
+        $output = ob_get_clean();
+
+        self::assertEquals('it worked', $output);
+    }
+
     public function testOverrideNullArgument()
     {
         $router = new Router();
