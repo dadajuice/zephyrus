@@ -72,37 +72,6 @@ abstract class DatabaseBroker
         $this->query($this->database->getAdapter()->getAddEnvironmentVariableClause($name, $value));
     }
 
-    /**
-     * Defines a set of HTML tags that are allowed to be processed by queries. The string should be defined as a
-     * sequence of fully formed tags (e.g. <p><a>). Consider using markdown for basic styling instead of direct HTML to
-     * limit risks of injection. This feature is available since many WYSIWYG editors still uses HTML tags for style
-     * definition.
-     *
-     * @param string $allowedTags
-     */
-    protected function setAllowedHtmlTags(string $allowedTags)
-    {
-        $this->allowedHtmlTags = $allowedTags;
-    }
-
-    /**
-     * Retrieves the previously allowed HTML tags that can be processed by queries.
-     *
-     * @return string
-     */
-    protected function getAllowedHtmlTags(): string
-    {
-        return $this->allowedHtmlTags;
-    }
-
-    /**
-     * Get rid of all previously set allowed HTML tags.
-     */
-    protected function removeAllowedHtmlTags()
-    {
-        $this->allowedHtmlTags = "";
-    }
-
     public function isFieldEncrypted(string $field): bool
     {
         return in_array($field, $this->encryptedFields);
@@ -148,7 +117,6 @@ abstract class DatabaseBroker
     protected function selectSingle(string $query, array $parameters = []): ?stdClass
     {
         $statement = $this->query($query, $parameters);
-        $statement->setAllowedHtmlTags($this->allowedHtmlTags);
         $row = $statement->next();
         $this->decryptSensitiveFields($row);
         return $row;
@@ -166,7 +134,6 @@ abstract class DatabaseBroker
     protected function select(string $query, array $parameters = [], ?callable $callback = null): array
     {
         $statement = $this->query($query, $parameters);
-        $statement->setAllowedHtmlTags($this->allowedHtmlTags);
         $results = [];
         while ($row = $statement->next()) {
             $this->decryptSensitiveFields($row);

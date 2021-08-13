@@ -61,46 +61,6 @@ class DatabaseStatement
         return $this->statement->rowCount();
     }
 
-    /**
-     * @return string
-     */
-    public function getAllowedHtmlTags()
-    {
-        return $this->allowedHtmlTags;
-    }
-
-    /**
-     * @param string $allowedHtmlTags
-     */
-    public function setAllowedHtmlTags($allowedHtmlTags)
-    {
-        $this->allowedHtmlTags = $allowedHtmlTags;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDirectHtmlTagsAllowed()
-    {
-        return !empty($this->allowedHtmlTags);
-    }
-
-    /**
-     * @param string $tag
-     */
-    public function addAllowedHtmlTag($tag)
-    {
-        $this->allowedHtmlTags .= $tag;
-    }
-
-    /**
-     * Clear allowed tags.
-     */
-    public function disallowDirectHtmlTags()
-    {
-        $this->allowedHtmlTags = "";
-    }
-
     private function convertRowTypes(&$row)
     {
         foreach (get_object_vars($row) as $column => $value) {
@@ -121,7 +81,7 @@ class DatabaseStatement
 
     private function sanitize($value)
     {
-        return strip_tags($value, $this->allowedHtmlTags);
+        return htmlspecialchars($value);
     }
 
     private function initializeTypeConversion()

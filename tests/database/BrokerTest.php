@@ -85,21 +85,7 @@ class BrokerTest extends TestCase
         self::assertEquals('Superman', $row->name);
     }
 
-    public function testFindByIdWithHtml()
-    {
-        $class = new class(self::$database) extends DatabaseBroker
-        {
-            public function findById($id)
-            {
-                $this->setAllowedHtmlTags("<b>");
-                return $this->selectSingle("SELECT * FROM heroes WHERE id = ?", [$id]);
-            }
-        };
-        $row = $class->findById(3);
-        self::assertEquals('<b>Flash</b>', $row->name);
-    }
-
-    public function testFindByIdWithoutHtml()
+    public function testFindByIdWithSanitizeHtml()
     {
         $class = new class(self::$database) extends DatabaseBroker
         {
@@ -109,7 +95,7 @@ class BrokerTest extends TestCase
             }
         };
         $row = $class->findById(3);
-        self::assertEquals('Flash', $row->name);
+        self::assertEquals('&lt;b&gt;Flash&lt;/b&gt;', $row->name);
     }
 
     public function testFindAll()
@@ -127,22 +113,17 @@ class BrokerTest extends TestCase
         self::assertEquals('Batman', $rows[0]->name);
     }
 
-    public function testFindAllWithHtml()
+    public function testFindAllWithSanitizeHtml()
     {
         $class = new class(self::$database) extends DatabaseBroker
         {
             public function findAll()
             {
-                $this->setAllowedHtmlTags("<b>");
-                $before = $this->getAllowedHtmlTags();
-                $results = $this->select("SELECT * FROM heroes", []);
-                $this->removeAllowedHtmlTags();
-                $after = $this->getAllowedHtmlTags();
-                return ($before == $after) ? [] : $results;
+                return $this->select("SELECT * FROM heroes", []);
             }
         };
         $rows = $class->findAll();
-        self::assertEquals('<b>Flash</b>', $rows[2]->name);
+        self::assertEquals('&lt;b&gt;Flash&lt;/b&gt;', $rows[2]->name);
     }
 
     public function testTransaction()
