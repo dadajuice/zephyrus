@@ -91,11 +91,14 @@ class BrokerTest extends TestCase
         {
             public function findById($id)
             {
+                $this->setSanitizeCallback(function ($value) {
+                    return strip_tags($value);
+                });
                 return $this->selectSingle("SELECT * FROM heroes WHERE id = ?", [$id]);
             }
         };
         $row = $class->findById(3);
-        self::assertEquals('&lt;b&gt;Flash&lt;/b&gt;', $row->name);
+        self::assertEquals('Flash', $row->name);
     }
 
     public function testFindAll()
@@ -119,6 +122,9 @@ class BrokerTest extends TestCase
         {
             public function findAll()
             {
+                $this->setSanitizeCallback(function ($value) {
+                    return htmlspecialchars($value, ENT_NOQUOTES);
+                });
                 return $this->select("SELECT * FROM heroes", []);
             }
         };

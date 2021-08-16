@@ -16,14 +16,14 @@ class DatabaseStatement
     private $statement = null;
 
     /**
-     * @var string
-     */
-    private $allowedHtmlTags = "";
-
-    /**
      * @var array
      */
     private $fetchColumnTypes = [];
+
+    /**
+     * @var callable
+     */
+    private $sanitizeCallback = null;
 
     public function __construct(PDOStatement $statement)
     {
@@ -34,7 +34,7 @@ class DatabaseStatement
     }
 
     /**
-     * Return the next row from the current result set obtained from the last
+     * Returns the next row from the current result set obtained from the last
      * executed query. Automatically strip slashes that would have been stored
      * in database as escaping.
      *
@@ -49,7 +49,9 @@ class DatabaseStatement
         if (!empty($this->fetchColumnTypes)) {
             $this->convertRowTypes($row);
         }
-        $this->sanitizeOutput($row);
+        if (!is_null($this->sanitizeCallback)) {
+            $this->sanitizeOutput($row);
+        }
         return $row;
     }
 
@@ -59,6 +61,14 @@ class DatabaseStatement
     public function count()
     {
         return $this->statement->rowCount();
+    }
+
+    /**
+     * Defines the function to be executed to sanitize any output from the Database responses.
+     */
+    public function setSanitizeCallback($callback)
+    {
+        $this->sanitizeCallback = $callback;
     }
 
     private function convertRowTypes(&$row)
@@ -74,14 +84,9 @@ class DatabaseStatement
     {
         foreach (get_object_vars($row) as $column => $value) {
             if (!is_null($value) && is_string($value)) {
-                $row->{$column} = $this->sanitize($value);
+                $row->{$column} = ($this->sanitizeCallback)($value);
             }
         }
-    }
-
-    private function sanitize($value)
-    {
-        return htmlspecialchars($value, ENT_NOQUOTES);
     }
 
     private function initializeTypeConversion()

@@ -22,7 +22,10 @@ class DatabaseStatementTest extends TestCase
     {
         self::$database->query("INSERT INTO heroes(id, name) VALUES (2, '<p>superman</p>');");
         $result = self::$database->query("SELECT * FROM heroes WHERE id = 2");
+        $result->setSanitizeCallback(function ($value) {
+            return strip_tags($value);
+        });
         $row = $result->next();
-        self::assertEquals('&lt;p&gt;superman&lt;/p&gt;', $row->name);
+        self::assertEquals('superman', $row->name);
     }
 }

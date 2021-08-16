@@ -17,9 +17,9 @@ abstract class DatabaseBroker
     private $database;
 
     /**
-     * @var string
+     * @var callable
      */
-    private $allowedHtmlTags = "";
+    private $sanitizeCallback = null;
 
     /**
      * @var array
@@ -85,6 +85,16 @@ abstract class DatabaseBroker
         return $this->encryptedFields;
     }
 
+    public function setSanitizeCallback(?callable $callback)
+    {
+        $this->sanitizeCallback = $callback;
+    }
+
+    public function getSanitizeCallback(): ?callable
+    {
+        return $this->sanitizeCallback;
+    }
+
     /**
      * @param array $fields
      */
@@ -103,7 +113,7 @@ abstract class DatabaseBroker
      */
     protected function query(string $query, array $parameters = []): DatabaseStatement
     {
-        return $this->database->query($query, $parameters);
+        return $this->prepareStatement($query, $parameters);
     }
 
     /**
@@ -116,7 +126,7 @@ abstract class DatabaseBroker
      */
     protected function selectSingle(string $query, array $parameters = []): ?stdClass
     {
-        $statement = $this->query($query, $parameters);
+        $statement = $this->prepareStatement($query, $parameters);
         $row = $statement->next();
         $this->decryptSensitiveFields($row);
         return $row;
@@ -133,7 +143,7 @@ abstract class DatabaseBroker
      */
     protected function select(string $query, array $parameters = [], ?callable $callback = null): array
     {
-        $statement = $this->query($query, $parameters);
+        $statement = $this->prepareStatement($query, $parameters);
         $results = [];
         while ($row = $statement->next()) {
             $this->decryptSensitiveFields($row);
@@ -239,5 +249,14 @@ abstract class DatabaseBroker
                 $row->{$column} = $plainText;
             }
         }
+    }
+
+    private function prepareStatement(string $query, array $parameters = []): DatabaseStatement
+    {
+        $statement = $this->database->query($query, $parameters);
+        if (!is_null($this->sanitizeCallback)) {
+            $statement->setSanitizeCallback($this->sanitizeCallback);
+        }
+        return $statement;
     }
 }
