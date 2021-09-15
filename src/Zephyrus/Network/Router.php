@@ -250,7 +250,7 @@ class Router
     {
         $controller = $this->getRouteControllerInstance($route);
         $responseBefore = $this->beforeMiddleware($controller);
-        if (!is_null($controller) && !empty($arguments)) {
+        if (!is_null($controller) && !empty($arguments) && is_null($responseBefore)) {
             try {
                 $this->restrictArguments($controller, $arguments);
                 $response = $this->overrideArguments($controller, $arguments);
