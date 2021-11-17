@@ -18,6 +18,11 @@ class Uri
     private $host;
 
     /**
+     * @var string port used for the requested uri (e.g. 8080)
+     */
+    private $port;
+
+    /**
      * @var string specified username of requested uri
      */
     private $username;
@@ -49,6 +54,7 @@ class Uri
         $this->scheme = $urlParts['scheme'] ?? null;
         $this->isSecure = $this->scheme == 'https';
         $this->username = $urlParts['user'] ?? null;
+        $this->port = $urlParts['port'] ?? null;
         $this->password = $urlParts['pass'] ?? null;
         $this->path = $urlParts['path'] ?? null;
         $this->query = $urlParts['query'] ?? null;
@@ -117,5 +123,13 @@ class Uri
     public function getQuery()
     {
         return $this->query;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPort()
+    {
+        return $this->port;
     }
 }
