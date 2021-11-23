@@ -48,6 +48,24 @@ class SessionTest extends TestCase
     /**
      * @depends testNotSecure
      */
+    public function testSetAll()
+    {
+        ini_set('session.use_cookies', 1);
+        ini_set('session.use_only_cookies', 1);
+        $session = Session::getInstance();
+        $session->start();
+        $session->setAll(['val' => '4567', 'val2' => '123']);
+        self::assertEquals('123', $_SESSION['val2']);
+        self::assertEquals('123', session('val2'));
+        session(['test' => 'allo', 'val2' => '999']);
+        self::assertEquals('allo', $_SESSION['test']);
+        self::assertEquals('999', session('val2'));
+        $session->destroy();
+    }
+
+    /**
+     * @depends testNotSecure
+     */
     public function testRead()
     {
         ini_set('session.use_cookies', 1);
