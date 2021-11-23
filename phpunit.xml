@@ -1,32 +1,23 @@
-<phpunit
-        bootstrap="tests/lib/init.php"
-        colors="true"
-        backupGlobals="false"
-        backupStaticAttributes="false"
-        processIsolation="false"
-        stopOnFailure="false"
-        convertErrorsToExceptions="true"
-        convertNoticesToExceptions="true"
-        convertWarningsToExceptions="true">
-    <testsuites>
-        <testsuite name="application">
-            <directory>tests/application</directory>
-            <directory>tests/utilities</directory>
-            <directory>tests/network</directory>
-            <directory>tests/security</directory>
-            <directory>tests/database</directory>
-        </testsuite>
-    </testsuites>
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src</directory>
-            <exclude>
-
-            </exclude>
-        </whitelist>
-    </filter>
-    <logging>
-        <log type="coverage-clover" target="tests/coverage/result.xml" />
-        <log type="coverage-html" target="tests/coverage/result" />
-    </logging>
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="tests/lib/init.php" colors="true" backupGlobals="false" backupStaticAttributes="false" processIsolation="false" stopOnFailure="false" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+  <coverage processUncoveredFiles="true">
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+    <exclude/>
+    <report>
+      <clover outputFile="tests/coverage/result.xml"/>
+      <html outputDirectory="tests/coverage/result"/>
+    </report>
+  </coverage>
+  <testsuites>
+    <testsuite name="application">
+      <directory>tests/application</directory>
+      <directory>tests/utilities</directory>
+      <directory>tests/network</directory>
+      <directory>tests/security</directory>
+      <directory>tests/database</directory>
+    </testsuite>
+  </testsuites>
+  <logging/>
 </phpunit>
