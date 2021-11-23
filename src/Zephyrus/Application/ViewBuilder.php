@@ -44,14 +44,25 @@ class ViewBuilder
         $this->pug->share([$name => $action]);
     }
 
+    public function generateCache(): array
+    {
+        $cacheDirectory = Configuration::getConfiguration('pug', 'cache_directory');
+        $cacheEnabled = Configuration::getConfiguration('pug', 'cache_enabled');
+        if (!$cacheEnabled) {
+            throw new \InvalidArgumentException("The cache_enabled property has not been enabled in the configuration file");
+        }
+        return $this->pug->cacheDirectory($cacheDirectory);
+    }
+
     private function buildPug()
     {
         $cacheEnabled = Configuration::getConfiguration('pug', 'cache_enabled');
         $cacheDirectory = Configuration::getConfiguration('pug', 'cache_directory');
+        $upToDateCheck = Configuration::getConfiguration('pug', 'up_to_date_check', true);
         $options = [
             'basedir' => realpath(ROOT_DIR . '/public'),
             'expressionLanguage' => 'js',
-            'upToDateCheck' => true,
+            'upToDateCheck' => $upToDateCheck,
             'cache' => $cacheEnabled ? $cacheDirectory : null
         ];
         $this->pug = new Pug($options);
