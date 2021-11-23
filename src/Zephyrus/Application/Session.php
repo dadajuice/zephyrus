@@ -94,6 +94,18 @@ class Session
     }
 
     /**
+     * Adds of modifies multiple session values at once.
+     *
+     * @param array $values
+     */
+    public function setAll(array $values)
+    {
+        foreach ($values as $key => $value) {
+            $_SESSION[$key] = $value;
+        }
+    }
+
+    /**
      * Removes the session data associated with the provided key.
      * @param string $key
      */
