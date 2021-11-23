@@ -58,10 +58,11 @@ class ViewBuilder
     {
         $cacheEnabled = Configuration::getConfiguration('pug', 'cache_enabled');
         $cacheDirectory = Configuration::getConfiguration('pug', 'cache_directory');
+        $upToDateCheck = Configuration::getConfiguration('pug', 'up_to_date_check', true);
         $options = [
             'basedir' => realpath(ROOT_DIR . '/public'),
             'expressionLanguage' => 'js',
-            'upToDateCheck' => true,
+            'upToDateCheck' => $upToDateCheck,
             'cache' => $cacheEnabled ? $cacheDirectory : null
         ];
         $this->pug = new Pug($options);
