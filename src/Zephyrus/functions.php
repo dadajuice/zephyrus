@@ -11,6 +11,23 @@ define('FORMAT_TIME', "H:i:s");
 define('FORMAT_DATE_TIME', FORMAT_DATE . " " . FORMAT_TIME);
 
 /**
+ * Shorthand function to quickly access session data. If the given parameter is an associative array, it will set the
+ * key / values to the current session. Otherwise, it will try to read the value.
+ *
+ * @param array|string $data
+ * @param mixed|null $defaultValue
+ * @return mixed|void
+ */
+function session($data, $defaultValue = null)
+{
+    if (is_array($data)) {
+        Session::getInstance()->setAll($data);
+        return;
+    }
+    return Session::getInstance()->read($data, $defaultValue);
+}
+
+/**
  * Performs a normal glob pattern search, but enters directories recursively.
  *
  * @param string $pattern
@@ -51,7 +68,7 @@ function format(string $type, ...$args)
  */
 function sess(string $key, $defaultValue = null)
 {
-    return Session::getInstance()->read($key, $defaultValue);
+    return session($key, $defaultValue);
 }
 
 /**
