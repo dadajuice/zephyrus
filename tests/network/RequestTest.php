@@ -174,16 +174,17 @@ class RequestTest extends TestCase
 
     public function testUri()
     {
-        $uri = 'http://bob:omega123@127.0.0.1/test/3?sort=4&filter[]=a&filter[]=b#section';
+        $uri = 'http://bob:omega123@127.0.0.1:8080/test/3?sort=4&filter[]=a&filter[]=b#section';
         $method = 'GET';
         $request = new Request($uri, $method);
 
         self::assertEquals("/test/3", $request->getRoute());
         self::assertEquals('127.0.0.1', $request->getUri()->getHost());
-        self::assertEquals('http://127.0.0.1', $request->getBaseUrl());
+        self::assertEquals('8080', $request->getUri()->getPort());
+        self::assertEquals('http://127.0.0.1:8080', $request->getBaseUrl());
         self::assertEquals('GET', $request->getMethod());
         self::assertEquals('sort=4&filter[]=a&filter[]=b', $request->getUri()->getQuery());
-        self::assertEquals('http://bob:omega123@127.0.0.1/test/3?sort=4&filter[]=a&filter[]=b#section', $request->getRequestedUri());
+        self::assertEquals('http://bob:omega123@127.0.0.1:8080/test/3?sort=4&filter[]=a&filter[]=b#section', $request->getRequestedUri());
         self::assertEquals('http', $request->getUri()->getScheme());
         self::assertEquals('section', $request->getUri()->getFragment());
         self::assertEquals('/test/3', $request->getUri()->getPath());

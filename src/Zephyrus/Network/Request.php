@@ -378,7 +378,6 @@ class Request
 
     private function initializeBaseUrl()
     {
-        $this->baseUrl = ($this->uri->isSecure()) ? 'https://' : 'http://';
-        $this->baseUrl .= $this->uri->getHost();
+        $this->baseUrl = $this->uri->getBaseUrl();
     }
 }

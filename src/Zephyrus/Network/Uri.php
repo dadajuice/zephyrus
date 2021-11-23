@@ -61,6 +61,14 @@ class Uri
         $this->fragment = $urlParts['fragment'] ?? null;
     }
 
+    public function getBaseUrl()
+    {
+        $defaultPorts = ['http' => 80, 'https' => 443];
+        return $this->getScheme() . '://'
+            . $this->getHost()
+            . (($this->getPort() != $defaultPorts[$this->getScheme()]) ? ":" . $this->getPort() : "");
+    }
+
     /**
      * @return string
      */
