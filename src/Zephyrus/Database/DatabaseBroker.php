@@ -69,7 +69,12 @@ abstract class DatabaseBroker
      */
     protected function addSessionVariable(string $name, string $value)
     {
-        $this->query($this->database->getAdapter()->getAddEnvironmentVariableClause($name, $value));
+        $sql = $this->database->getAdapter()->getAddEnvironmentVariableClause($name, $value);
+        if (empty($sql)) {
+            // Guard for non existant session environnement feature (e.g. sqlite).
+            return;
+        }
+        $this->query($sql);
     }
 
     public function isFieldEncrypted(string $field): bool
