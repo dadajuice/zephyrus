@@ -197,6 +197,17 @@ class File extends FileSystemNode
     }
 
     /**
+     * Obtains the last access timestamp of the path/file defined in the constructor. If its a directory, it will
+     * automatically fetch the latest accessed time.
+     *
+     * @return int
+     */
+    public function getLastAccessedTime(): int
+    {
+        return fileatime($this->path);
+    }
+
+    /**
      * Updates the modification time of the file to the given timestamp or simply the current time if none is supplied.
      *
      * @param int|null $timestamp
