@@ -13,7 +13,7 @@ class TransactionPDO extends \PDO
      * PDO begin transaction override to work with savepoint capabilities for
      * supported SGBD. Allows nested transactions.
      */
-    public function beginTransaction()
+    public function beginTransaction(): bool
     {
         if ($this->currentTransactionLevel == 0 || !$this->nestable()) {
             parent::beginTransaction();
@@ -28,13 +28,13 @@ class TransactionPDO extends \PDO
      * PDO commit override to work with savepoint capabilities for supported
      * SGBD. Allows nested transactions.
      */
-    public function commit()
+    public function commit(): bool
     {
         --$this->currentTransactionLevel;
         if ($this->currentTransactionLevel == 0 || !$this->nestable()) {
-            parent::commit();
+            return parent::commit();
         } else {
-            $this->exec("RELEASE SAVEPOINT LEVEL{$this->currentTransactionLevel}");
+            return $this->exec("RELEASE SAVEPOINT LEVEL{$this->currentTransactionLevel}");
         }
     }
 
@@ -42,13 +42,13 @@ class TransactionPDO extends \PDO
      * PDO rollback override to work with savepoint capabilities for
      * supported SGBD. Allows nested transactions.
      */
-    public function rollBack()
+    public function rollBack(): bool
     {
         --$this->currentTransactionLevel;
         if ($this->currentTransactionLevel == 0 || !$this->nestable()) {
-            parent::rollBack();
+            return parent::rollBack();
         } else {
-            $this->exec("ROLLBACK TO SAVEPOINT LEVEL{$this->currentTransactionLevel}");
+            return $this->exec("ROLLBACK TO SAVEPOINT LEVEL{$this->currentTransactionLevel}");
         }
     }
 
