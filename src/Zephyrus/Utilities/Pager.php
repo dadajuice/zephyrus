@@ -52,7 +52,7 @@ class Pager
         $this->currentPage = (!is_numeric($page) || $page < 0) ? 1 : $page;
         $this->maxPage = ceil($recordCount / $maxEntities);
         $this->pageUrl = $request->getUri()->getPath();
-        $this->pageQuery = $this->getQueryString($request->getUri()->getQuery());
+        $this->pageQuery = $this->getQueryString($request->getUri()->getQuery() ?? "");
         $this->offset = $this->maxEntities * ($this->currentPage - 1);
         $this->validate();
     }
