@@ -87,7 +87,7 @@ class FormatterTest extends TestCase
     public function testFormatDate()
     {
         $result = Formatter::date('2016-01-01 23:15:00');
-        self::assertEquals(' 1 janvier 2016', $result);
+        self::assertEquals('1 janvier 2016', $result);
     }
 
     public function testFormatDateTime()
