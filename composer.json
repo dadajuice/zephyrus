@@ -8,11 +8,17 @@
       "role": "Developer"
     }
   ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url":  "git@github.com:Lacni135/expose.git"
+    }
+  ],
   "license": "MIT",
   "require": {
     "php": ">=7.3",
     "pug-php/pug": "2.*",
-    "enygma/expose": "^3.0",
+    "enygma/expose": "dev-php8.1-compatibility",
     "ext-pdo": "*",
     "ext-json": "*",
     "ext-simplexml": "*",
@@ -24,7 +30,6 @@
     "ext-openssl": "*"
   },
   "require-dev": {
-    "php": ">=7.3",
     "phpunit/phpunit": "9.*.*",
     "ext-xdebug": "*"
   },
