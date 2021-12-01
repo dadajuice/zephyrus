@@ -60,10 +60,10 @@ class ListView
     /**
      * Highlights matching search into the given data string.
      *
-     * @param string|null $data
+     * @param string $data
      * @return string
      */
-    public function mark(?string $data): string
+    public function mark(string $data): string
     {
         if (empty($data)) {
             return "";
