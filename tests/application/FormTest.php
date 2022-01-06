@@ -22,6 +22,7 @@ class FormTest extends TestCase
         ]);
         $form->validate('username', Rule::notEmpty('username not empty'));
         self::assertTrue($form->verify());
+        self::assertFalse($form->hasError());
     }
 
     public function testUnregistered()
@@ -31,11 +32,14 @@ class FormTest extends TestCase
             'username' => 'blewis'
         ]);
         // simulate unchecked checkbox
-        $form->validate('understand', Rule::notEmpty('you need to understand'));
-        self::assertFalse($form->isRegistered('understand'));
         self::assertTrue($form->isRegistered('username'));
+        self::assertFalse($form->isRegistered('understand'));
+        $form->validate('understand', Rule::notEmpty('you need to understand'));
+        self::assertTrue($form->isRegistered('understand'));
         $form->verify();
         self::assertEquals('you need to understand', $form->getErrors()['understand'][0]);
+        self::assertFalse($form->hasError('username'));
+        self::assertTrue($form->hasError());
     }
 
     public function testErrors()
@@ -96,6 +100,7 @@ class FormTest extends TestCase
         ]);
         self::assertEquals('blewis', $form->getValue('username'));
         self::assertEquals('bob', $form->getFields()['firstname']);
+        self::assertEquals('test', $form->getValue('test', 'test'));
     }
 
     public function testInvalidForm()
@@ -185,9 +190,38 @@ class FormTest extends TestCase
             'email' => '',
             'username' => ''
         ]);
+        self::assertFalse($form->field("email")->isOptionalOnEmpty());
         $form->validate('username', Rule::notEmpty('username not valid'), true);
         $form->validateWhenFieldHasNoError('email', Rule::email('email not valid'));
         self::assertFalse($form->verify());
+    }
+
+    public function testOptionalFormModeError2()
+    {
+        $form = new Form();
+        $form->addFields([
+            'email' => '',
+            'username' => ''
+        ]);
+        $form->field("email")
+            ->validate(Rule::url("err_1"), true)
+            ->setOptionalOnEmpty(false);
+        self::assertFalse($form->field("email")->isOptionalOnEmpty());
+        self::assertFalse($form->verify());
+    }
+
+    public function testOptionalFormModeError3()
+    {
+        $form = new Form();
+        $form->addFields([
+            'email' => '',
+            'username' => ''
+        ]);
+        $form->field("email")
+            ->validate(Rule::url("err_1"), true)
+            ->setOptionalOnEmpty(true);
+        self::assertTrue($form->field("email")->isOptionalOnEmpty());
+        self::assertTrue($form->verify());
     }
 
     public function testOptionalFieldMode()
@@ -274,39 +308,6 @@ class FormTest extends TestCase
         self::assertFalse($form->isRegistered('name2'));
     }
 
-    public function testBuildObject()
-    {
-        $form = new Form();
-        $form->addFields(['name' => 'bob', 'price' => '10.00']);
-        $class = new class() {
-            private $name;
-            private $price;
-
-            public function getName()
-            {
-                return $this->name;
-            }
-
-            public function setName($name)
-            {
-                $this->name = $name;
-            }
-
-            public function getPrice()
-            {
-                return $this->price;
-            }
-
-            public function setPrice($price)
-            {
-                $this->price = $price;
-            }
-        };
-        $form->buildObject($class);
-        self::assertEquals('bob', $class->getName());
-        self::assertEquals('10.00', $class->getPrice());
-    }
-
     public function testBuildStdClass()
     {
         $form = new Form();
@@ -329,13 +330,13 @@ class FormTest extends TestCase
         $form = new Form();
         $form->addField('something', 'Martin Sandwish');
         $form->addField('age', 'lul');
-        $form->validate('something', Rule::integer('err_1'));
-        $form->validate('age', Rule::integer('err_2'));
-        $form->validate('something', Rule::ipAddress('err_3'));
+        $form->field("something")
+            ->validate(Rule::integer('err_1'))
+            ->validate(Rule::ipAddress('err_2'))
+            ->all();
+        $form->field("age")->validate(Rule::integer('err_3'));
         $form->verify();
         $errors = $form->getErrorMessages();
-
-        // Must be in the order of programming instead of field names
         self::assertEquals('err_1', $errors[0]);
         self::assertEquals('err_2', $errors[1]);
         self::assertEquals('err_3', $errors[2]);
