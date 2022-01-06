@@ -66,7 +66,7 @@ class Uri
         $defaultPorts = ['http' => 80, 'https' => 443];
         return $this->getScheme() . '://'
             . $this->getHost()
-            . (($this->getPort() != $defaultPorts[$this->getScheme()]) ? ":" . $this->getPort() : "");
+            . (($this->getPort() != $defaultPorts[$this->getScheme()] && !is_null($this->getPort())) ? ":" . $this->getPort() : "");
     }
 
     /**

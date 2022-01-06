@@ -175,6 +175,7 @@ class RequestTest extends TestCase
     public function testUri()
     {
         $uri = 'http://bob:omega123@127.0.0.1:8080/test/3?sort=4&filter[]=a&filter[]=b#section';
+        $uriNoPort = 'http://127.0.0.1/test';
         $method = 'GET';
         $request = new Request($uri, $method);
 
@@ -191,5 +192,8 @@ class RequestTest extends TestCase
         self::assertEquals('bob', $request->getUri()->getUsername());
         self::assertEquals('omega123', $request->getUri()->getPassword());
         self::assertFalse($request->getUri()->isSecure());
+
+        $request = new Request($uriNoPort, $method);
+        self::assertEquals('http://127.0.0.1', $request->getBaseUrl());
     }
 }
