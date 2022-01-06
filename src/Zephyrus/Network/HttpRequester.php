@@ -99,7 +99,7 @@ class HttpRequester
         $mime = finfo_file($info, $filepath);
         finfo_close($info);
         $extension = pathinfo($filepath, PATHINFO_EXTENSION);
-        return new CurlFile($filepath, $mime, $uploadFilename . '.' . $extension);
+        return new CurlFile($filepath, $mime, $uploadFilename . (!empty($extension) ? ('.' . $extension) : ""));
     }
 
     public function __construct(string $method, string $url)
