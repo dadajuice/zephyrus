@@ -2,6 +2,10 @@
 
 interface ContentType
 {
+    // Default classic content types for form submission (multipart being for upload purposes).
+    const FORM = 'application/x-www-form-urlencoded';
+    const FORM_MULTIPART = 'multipart/form-data';
+
     const ANY = '*/*';
     const HTML = 'text/html'; /* RFC 2854 */
     const PLAIN = 'text/plain'; /* RFC 2046 */
