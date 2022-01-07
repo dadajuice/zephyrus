@@ -27,10 +27,15 @@ class Rule
     use TimeRules;
     use FileRules;
 
-    public function __construct($validation, string $errorMessage = "")
+    public function __construct($validation = null, string $errorMessage = "")
     {
         $this->validation = $validation;
         $this->errorMessage = $errorMessage;
+    }
+
+    public function setValidationCallback($validation)
+    {
+        $this->validation = $validation;
     }
 
     /**
