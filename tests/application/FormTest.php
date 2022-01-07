@@ -25,6 +25,27 @@ class FormTest extends TestCase
         self::assertFalse($form->hasError());
     }
 
+    public function testRuleGroup()
+    {
+        $form = new Form();
+        $form->addFields([
+            'username' => 'blewis',
+            'firstname' => 'bob',
+            'lastname' => 'lewis',
+            'password' => '123'
+        ]);
+        $form->field('username')->validate([
+            Rule::notEmpty("err_1"),
+            Rule::name("err_2")
+        ]);
+        $form->field('password')->validate([
+            Rule::notEmpty("err_3"),
+            Rule::passwordCompliant("err_4")
+        ]);
+        self::assertFalse($form->verify());
+        self::assertEquals(["err_4"], $form->getErrorMessages());
+    }
+
     public function testUnregistered()
     {
         $form = new Form();

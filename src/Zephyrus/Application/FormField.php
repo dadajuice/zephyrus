@@ -41,6 +41,25 @@ class FormField
     }
 
     /**
+     * Adds a rule to be applied to the field when verify is called.
+     *
+     * @param Rule|array $rule
+     * @param bool $optional
+     * @return FormField
+     */
+    public function validate(Rule|array $rule, bool $optional = false): FormField
+    {
+        if (is_array($rule)) {
+            foreach ($rule as $item) {
+                $this->addRule($item, $optional);
+            }
+        } else {
+            $this->addRule($rule, $optional);
+        }
+        return $this;
+    }
+
+    /**
      * Instead of stopping at the first failed validation, it will proceed to validate all given rules and accumulate
      * errors. Useful to retrieve all errors on a field at once.
      */
@@ -84,12 +103,6 @@ class FormField
             }
         }
         return empty($this->errorMessages);
-    }
-
-    public function validate(Rule $rule, bool $optional = false): FormField
-    {
-        $this->addRule($rule, $optional);
-        return $this;
     }
 
     /**
