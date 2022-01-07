@@ -11,7 +11,6 @@ class HttpRequesterTest extends TestCase
     public function testGet()
     {
         $request = HttpRequester::post("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/existing.txt");
-        $request = HttpRequester::put("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/existing.txt");
         $request = HttpRequester::delete("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/existing.txt");
         $request = HttpRequester::patch("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/existing.txt");
         $request = HttpRequester::get("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/existing.txt");
@@ -20,8 +19,8 @@ class HttpRequesterTest extends TestCase
         $request->setFollowRedirection(true);
         $request->setUserAgent("PHPUnit Test");
         $request->execute(['t' => time()]);
-        self::assertEquals('200', $request->getResponseHttpCode());
-        self::assertEquals('200', $request->getResponseInfo()['http_code']);
+        self::assertEquals(200, $request->getResponseHttpCode());
+        self::assertEquals(200, $request->getResponseInfo()['http_code']);
         self::assertEquals('One ring to rule them all', $request->getResponse());
 
         $request = HttpRequester::put("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/existing.txt");
@@ -30,19 +29,9 @@ class HttpRequesterTest extends TestCase
         $request->execute();
 
         $request = HttpRequester::get("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/existing.txt");
-
         $request->executeStream(function ($result, $info) {
             self::assertEquals('One ring to rule them all', $result);
         });
-
-    }
-
-    public function testInvalidRequest()
-    {
-        $this->expectException(HttpRequesterException::class);
-        $request = HttpRequester::get("https://lkjdsflkjsdf.msdfe.sdf.sdf");
-        $request->setConnectionTimeout(1);
-        $request->execute();
     }
 
     public function testDownload()
@@ -71,7 +60,7 @@ class HttpRequesterTest extends TestCase
         $file = HttpRequester::prepareUploadFile(ROOT_DIR . '/lib/filesystem/existing.txt', 'test.txt');
         self::assertTrue($file instanceof \CURLFile);
         self::assertEquals(ROOT_DIR . '/lib/filesystem/existing.txt', $file->getFilename());
-        $request->execute(['file' => $file, 'test' => ['name' => 't', 'age' => 3, 'classes' => ['nest', 'nest 2']]]);
+        $request->executeUpload($file, 'file', ['test' => ['name' => 't', 'age' => 3, 'classes' => ['nest', 'nest 2']]]);
     }
 
     public function testInvalidUpload()
