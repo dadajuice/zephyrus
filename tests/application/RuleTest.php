@@ -5,6 +5,64 @@ use Zephyrus\Application\Rule;
 
 class RuleTest extends TestCase
 {
+    public function testNestedSimpleArray()
+    {
+        $rule = Rule::nested('age', Rule::integer());
+        self::assertTrue($rule->isValid(['name' => 'Bob', 'age' => 23]));
+        self::assertFalse($rule->isValid(['name' => 'Bob']));
+        self::assertFalse($rule->isValid(['age' => 'Bob']));
+    }
+
+    public function testNestedSimpleObject()
+    {
+        $rule = Rule::nested('age', Rule::integer());
+        self::assertTrue($rule->isValid((object) ['name' => 'Bob', 'age' => 23]));
+        self::assertFalse($rule->isValid((object) ['name' => 'Bob']));
+        self::assertFalse($rule->isValid((object) ['age' => 'Bob']));
+    }
+
+    public function testNestedComplexArray()
+    {
+        $rule = Rule::nested('student', Rule::nested('name', Rule::notEmpty()));
+        self::assertTrue($rule->isValid(['student' => ['id' => 3, 'name' => 'Rolan Balesque', 'username' => 'mbalesque']]));
+        self::assertFalse($rule->isValid(['student' => ['id' => 3, 'name' => '', 'username' => 'mbalesque']]));
+        self::assertFalse($rule->isValid(['student' => ['id' => 3, 'username' => 'mbalesque']]));
+        self::assertFalse($rule->isValid(['not_student' => 'test']));
+    }
+
+    public function testNestedComplexObject()
+    {
+        $rule = Rule::nested('student', Rule::nested('name', Rule::notEmpty()));
+        self::assertTrue($rule->isValid((object) ['student' => (object) ['id' => 3, 'name' => 'Rolan Balesque', 'username' => 'mbalesque']]));
+        self::assertFalse($rule->isValid((object) ['student' => (object) ['id' => 3, 'name' => '', 'username' => 'mbalesque']]));
+        self::assertFalse($rule->isValid((object) ['student' => (object) ['id' => 3, 'username' => 'mbalesque']]));
+        self::assertFalse($rule->isValid((object) ['not_student' => 'test']));
+    }
+
+    public function testNestedMixedArrayObject()
+    {
+        $rule = Rule::nested('student', Rule::nested('name', Rule::notEmpty()));
+        self::assertTrue($rule->isValid(['student' => (object)['id' => 3, 'name' => 'Rolan Balesque', 'username' => 'mbalesque']]));
+        self::assertFalse($rule->isValid(['student' => (object)['id' => 3, 'name' => '', 'username' => 'mbalesque']]));
+        self::assertFalse($rule->isValid(['student' => (object)['id' => 3, 'username' => 'mbalesque']]));
+        self::assertFalse($rule->isValid(['not_student' => 'test']));
+    }
+
+    public function testNestedMixedMessages()
+    {
+        $rule = Rule::nested('student', Rule::nested('name', Rule::notEmpty("Name is empty"), "Invalid name key"), "invalid student key");
+        $rule->isValid(['student' => (object)['id' => 3, 'name' => '', 'username' => 'mbalesque']]);
+        self::assertEquals("Name is empty", $rule->getErrorMessage());
+
+        $rule = Rule::nested('student', Rule::nested('name', Rule::notEmpty("Name is empty"), "Invalid name key"), "invalid student key");
+        $rule->isValid(['student' => (object)['id' => 3, 'username' => 'mbalesque']]);
+        self::assertEquals("Invalid name key", $rule->getErrorMessage());
+
+        $rule = Rule::nested('student', Rule::nested('name', Rule::notEmpty("Name is empty"), "Invalid name key"), "invalid student key");
+        $rule->isValid(['not_student' => 'test']);
+        self::assertEquals("invalid student key", $rule->getErrorMessage());
+    }
+
     public function testIsValid()
     {
         $rule = new Rule(function($value) {

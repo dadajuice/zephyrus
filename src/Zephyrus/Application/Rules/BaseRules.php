@@ -69,6 +69,39 @@ trait BaseRules
         }, $errorMessage);
     }
 
+    /**
+     * Allows to add one or multiple rules to a nested child element (either an array or an object). The given error
+     * message for the nested rule is only used when something is wrong with the validated data (e.g. not an array or
+     * key doesn't exist).
+     *
+     * @param string $key
+     * @param Rule $rule
+     * @param string $errorMessage
+     * @return Rule
+     */
+    public static function nested(string $key, Rule $rule, string $errorMessage = ""): Rule
+    {
+        $resultRule = new Rule();
+        $resultRule->setErrorMessage($errorMessage);
+        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rule, $key) {
+            if (!is_object($data) && !is_array($data)) {
+                return false;
+            }
+            if (is_array($data) && !isset($data[$key])) {
+                return false;
+            }
+            if (is_object($data) && !property_exists($data, $key)) {
+                return false;
+            }
+            $valid = $rule->isValid(is_array($data) ? $data[$key] : $data->$key, $fields);
+            if (!$valid) {
+                $resultRule->setErrorMessage($rule->getErrorMessage());
+            }
+            return $valid;
+        });
+        return $resultRule;
+    }
+
     public static function all(Rule $rule, string $errorMessage = ""): Rule
     {
         return new Rule(function ($data, $fields) use ($rule) {
