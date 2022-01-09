@@ -75,31 +75,16 @@ trait BaseRules
      * key doesn't exist).
      *
      * @param string $key
-     * @param Rule $rule
+     * @param Rule|array $rule
      * @param string $errorMessage
      * @return Rule
      */
-    public static function nested(string $key, Rule $rule, string $errorMessage = ""): Rule
+    public static function nested(string $key, Rule|array $rule, string $errorMessage = ""): Rule
     {
-        $resultRule = new Rule();
-        $resultRule->setErrorMessage($errorMessage);
-        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rule, $key) {
-            if (!is_object($data) && !is_array($data)) {
-                return false;
-            }
-            if (is_array($data) && !isset($data[$key])) {
-                return false;
-            }
-            if (is_object($data) && !property_exists($data, $key)) {
-                return false;
-            }
-            $valid = $rule->isValid(is_array($data) ? $data[$key] : $data->$key, $fields);
-            if (!$valid) {
-                $resultRule->setErrorMessage($rule->getErrorMessage());
-            }
-            return $valid;
-        });
-        return $resultRule;
+        if ($rule instanceof Rule) {
+            return self::nestedRule($key, $rule, $errorMessage);
+        }
+        return self::nestedArray($key, $rule, $errorMessage);
     }
 
     public static function all(Rule $rule, string $errorMessage = ""): Rule
@@ -120,5 +105,72 @@ trait BaseRules
         return new Rule(function ($data) use ($possibleValues) {
             return Validation::isOnlyWithin($data, $possibleValues);
         }, $errorMessage);
+    }
+
+    private static function nestedRule(string $key, Rule $rule, string $errorMessage = ""): Rule
+    {
+        $resultRule = new Rule();
+        $resultRule->setErrorMessage($errorMessage);
+        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rule, $key, $errorMessage) {
+            if (!is_object($data) && !is_array($data)) {
+                return false;
+            }
+            if (is_array($data) && !isset($data[$key])) {
+                return false;
+            }
+            if (is_object($data) && !property_exists($data, $key)) {
+                return false;
+            }
+
+            $valid = $rule->isValid(is_array($data) ? $data[$key] : $data->$key, $fields);
+            if (!$valid) {
+                $resultRule->setErrorMessage($rule->getErrorMessage());
+            }
+            return $valid;
+
+        });
+        return $resultRule;
+    }
+
+    private static function nestedArray(string $key, array $rule, string $errorMessage = ""): Rule
+    {
+        $resultRule = new Rule();
+        $resultRule->setErrorMessage($errorMessage);
+        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rule, $key, $errorMessage) {
+            if (!is_object($data) && !is_array($data)) {
+                return false;
+            }
+            if (is_array($data) && !isset($data[$key])) {
+                return false;
+            }
+            if (is_object($data) && !property_exists($data, $key)) {
+                return false;
+            }
+            if (!isAssociativeArray($rule)) {
+                return false;
+            }
+
+            foreach ($rule as $fieldName => $nestedRule) {
+                if ($nestedRule instanceof Rule) {
+                    $nestedRule = self::nested($fieldName, $nestedRule, $errorMessage);
+                    $valid = $nestedRule->isValid(is_array($data) ? $data[$key] : $data->$key, $fields);
+                    if (!$valid) {
+                        $resultRule->setErrorMessage($nestedRule->getErrorMessage());
+                        return false;
+                    }
+                } elseif (isAssociativeArray($nestedRule)) {
+                    $innerNestedRule = self::nested($fieldName, $nestedRule, $errorMessage);
+                    $valid = $innerNestedRule->isValid(is_array($data) ? $data[$key] : $data->$key, $fields);
+                    if (!$valid) {
+                        $resultRule->setErrorMessage($innerNestedRule->getErrorMessage());
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        });
+
+        return $resultRule;
     }
 }

@@ -63,6 +63,98 @@ class RuleTest extends TestCase
         self::assertEquals("invalid student key", $rule->getErrorMessage());
     }
 
+    public function testNestedComplexArrayMultiple()
+    {
+        $rule = Rule::nested('student', [
+            'name' => Rule::notEmpty(),
+            'id' => Rule::integer()
+        ]);
+        self::assertTrue($rule->isValid(['student' => ['id' => 3, 'name' => 'Rolan Balesque', 'username' => 'mbalesque']]));
+        self::assertFalse($rule->isValid(['student' => ['id' => 'e', 'name' => 'Bob', 'username' => 'mbalesque']]));
+        self::assertFalse($rule->isValid(['student' => ['id' => 3, 'username' => 'mbalesque']]));
+        self::assertFalse($rule->isValid(['not_student' => 'test']));
+    }
+
+    public function testNestedComplexArrayMultiple2()
+    {
+        $rule = Rule::nested('student', [
+            'name' => Rule::notEmpty(),
+            'id' => Rule::integer(),
+            'main_course' => [
+                'id' => Rule::integer(),
+                'class' => Rule::notEmpty()
+            ],
+            'teachers' => Rule::all(Rule::name())
+        ]);
+
+        $row = ['student' => [
+            'id' => 3,
+            'name' => 'Rolan Balesque',
+            'main_course' => (object) [
+                'id' => 500,
+                'class' => 'Computer'
+            ],
+            'teachers' => ['Bob', 'Rolan', 'Dan', 'Claire']
+        ]];
+        self::assertTrue($rule->isValid($row));
+
+        $row = ['student' => [
+            'id' => 3,
+            'name' => 'Rolan Balesque',
+            'main_course' => (object) [
+                'id' => "ERROR",
+                'class' => 'Computer'
+            ],
+            'teachers' => ['Bob', 'Rolan', 'Dan', 'Claire']
+        ]];
+        self::assertFalse($rule->isValid($row));
+
+
+        $rule = Rule::nested('student', [
+            'name' => Rule::notEmpty(),
+            'id' => Rule::integer(),
+            'main_course' => [
+                'id' => Rule::integer(),
+                'class' => Rule::notEmpty(),
+                'info' => [
+                    'description' => Rule::notEmpty("NANI Y"),
+                    'number' => Rule::notEmpty()
+                ]
+            ],
+            'teachers' => Rule::all(Rule::name())
+        ]);
+        $row = ['student' => [
+            'id' => 3,
+            'name' => 'Rolan Balesque',
+            'main_course' => (object) [
+                'id' => 200,
+                'class' => 'Computer',
+                'info' => [
+                    'description' => 'Lorem ipsum',
+                    'number' => '420-2S4-SU'
+                ]
+            ],
+            'teachers' => ['Bob', 'Rolan', 'Dan', 'Claire']
+        ]];
+        self::assertTrue($rule->isValid($row));
+
+        $row = ['student' => [
+            'id' => 3,
+            'name' => 'Rolan Balesque',
+            'main_course' => (object) [
+                'id' => 200,
+                'class' => 'Computer',
+                'info' => [
+                    'description' => '',
+                    'number' => '420-2S4-SU'
+                ]
+            ],
+            'teachers' => ['Bob', 'Rolan', 'Dan', 'Claire']
+        ]];
+        self::assertFalse($rule->isValid($row));
+        self::assertEquals("NANI Y", $rule->getErrorMessage());
+    }
+
     public function testIsValid()
     {
         $rule = new Rule(function($value) {
@@ -562,7 +654,6 @@ class RuleTest extends TestCase
     {
         $rule = Rule::liveUrl();
         self::assertTrue($rule->isValid("https://google.com"));
-        self::assertTrue($rule->isValid("https://github.com/dadajuice/zephyrus"));
         self::assertFalse($rule->isValid("https://lksdfksdfkhjsdfkjhfdskjhfdskjfdsjkhdfs.clkdsfh.com"));
     }
 
