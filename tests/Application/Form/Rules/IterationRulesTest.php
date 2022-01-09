@@ -1,10 +1,63 @@
-<?php namespace Zephyrus\Tests\Form\Rules;
+<?php namespace Zephyrus\Tests\Application\Form\Rules;
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Rule;
 
 class IterationRulesTest extends TestCase
 {
+    public function testArrayAll()
+    {
+        $rule = Rule::all(Rule::integer(), "not all integers");
+        self::assertTrue($rule->isValid([1, 2, 3, 4, 5, 6]));
+        self::assertFalse($rule->isValid([1, 2, "error", 4, 5, 6]));
+    }
+
+    public function testArrayAllNotArray()
+    {
+        $rule = Rule::all(Rule::integer(), "not all integers");
+        self::assertFalse($rule->isValid("Invalid"));
+    }
+
+    public function testArrayNotEmpty()
+    {
+        $rule = Rule::arrayNotEmpty();
+        self::assertTrue($rule->isValid([1, 2, 3]));
+        self::assertFalse($rule->isValid([]));
+        self::assertFalse($rule->isValid("oui"));
+        self::assertFalse($rule->isValid(null));
+    }
+
+    public function testIsInArray()
+    {
+        $rule = Rule::inArray(["a", "b", "c"], "err");
+        self::assertTrue($rule->isValid("b"));
+        self::assertFalse($rule->isValid("e"));
+    }
+
+    public function testIsNotInArray()
+    {
+        $rule = Rule::notInArray(["a", "b", "c"], "err");
+        self::assertTrue($rule->isValid("d"));
+        self::assertFalse($rule->isValid("b"));
+    }
+
+    public function testIsOnlyWithin()
+    {
+        $rule = Rule::onlyWithin(['a', 'b', 'c']);
+        self::assertTrue($rule->isValid(['a']));
+        self::assertTrue($rule->isValid(['a', 'b']));
+        self::assertTrue($rule->isValid(['a', 'b', 'c']));
+        self::assertTrue($rule->isValid(['a', 'a']));
+        self::assertTrue($rule->isValid('a'));
+        self::assertTrue($rule->isValid('c'));
+        self::assertFalse($rule->isValid(['a', 'b', 'c', 'd']));
+        self::assertFalse($rule->isValid(['d', 'c', 'b', 'a']));
+        self::assertFalse($rule->isValid(['g']));
+        self::assertFalse($rule->isValid(['g', 'a']));
+        self::assertFalse($rule->isValid(['a', 'g']));
+        self::assertFalse($rule->isValid('d'));
+    }
+
     public function testNestedSimpleArray()
     {
         $rule = Rule::nested('age', Rule::integer());

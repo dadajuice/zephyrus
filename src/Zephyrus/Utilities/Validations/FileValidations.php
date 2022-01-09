@@ -37,6 +37,43 @@ trait FileValidations
         return $data['error'] == UPLOAD_ERR_OK;
     }
 
+    public static function isMultipleUpload($data): bool
+    {
+        // Validates required keys
+        $neededKeys = ['error', 'tmp_name', 'type', 'name', 'size'];
+        $missingKeys = array_diff_key(array_flip($neededKeys), $data);
+        if (!empty($missingKeys)) {
+            return false;
+        }
+
+        // Validates that each key is a proper array
+        if (!is_array($data['error']) || !is_array($data['tmp_name']) || !is_array($data['type'])
+            || !is_array($data['name']) || !is_array($data['size'])) {
+            return false;
+        }
+
+        // Validates that each key is an array of same size
+        $counts[] = count($data['error']);
+        $counts[] = count($data['tmp_name']);
+        $counts[] = count($data['type']);
+        $counts[] = count($data['name']);
+        $counts[] = count($data['size']);
+        if (count(array_unique($counts)) === 1) {
+            return false;
+        }
+
+        // Validates that all uploaded files has no error
+        foreach ($data['error'] as $error) {
+            if ($error != UPLOAD_ERR_OK) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // TODO: Faire un uploadManager class comme avant ... easily determine if multiple or not et procéder.
+    // TODO: Form class avoir un "buildUploader" dedans
+
     /**
      * Validates that the REAL file mime type (using the finfo PHP library) is
      * correct according to a specified list.
