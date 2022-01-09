@@ -7,19 +7,24 @@ class SessionConfigurationTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
-        ini_set('session.use_cookies', 1);
-        ini_set('session.use_only_cookies', 1);
+        // Make sure any previous session initiated in another test class will not interfere
+        Session::getInstance()->destroy();
+        Session::kill();
     }
 
     protected function setUp(): void
     {
+        // Before each test, properly start a new session instance
         Session::getInstance()->start();
     }
 
     protected function tearDown(): void
     {
+        // After each test, properly destroy the session
         Session::getInstance()->destroy();
         Session::kill();
+
+        // Restore default cookie parameters
         session_set_cookie_params(0);
     }
 
