@@ -134,3 +134,15 @@ function __(string $message, ...$args): string
     $parameters = array_merge([$message], $args);
     return call_user_func_array('sprintf', $parameters);
 }
+
+/**
+ * Verifies if an array is associative, meaning that the key must not be numerical and sequential (0 - x).
+ *
+ * @param array $array
+ * @return bool
+ */
+function isAssociativeArray(array $array): bool
+{
+    if (array() === $array) return false;
+    return array_keys($array) != range(0, count($array) - 1);
+}
