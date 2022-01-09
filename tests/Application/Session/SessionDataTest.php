@@ -19,6 +19,7 @@ class SessionDataTest extends TestCase
     protected function tearDown(): void
     {
         Session::getInstance()->destroy();
+        Session::kill();
     }
 
     public function testNativeInteroperability()
