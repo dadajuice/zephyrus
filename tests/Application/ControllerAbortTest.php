@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Tests\application;
+<?php namespace Zephyrus\Tests\application\Application;
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Controller;

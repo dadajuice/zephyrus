@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Tests;
+<?php namespace Zephyrus\Tests\Application;
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Callback;
@@ -34,7 +34,7 @@ class CallbackTest extends TestCase
 
     public function testClassMethod()
     {
-        $callback = new Callback(['\Zephyrus\Tests\ValidationClass', 'validPrice']);
+        $callback = new Callback(['\Zephyrus\Tests\Application\ValidationClass', 'validPrice']);
         $result = $callback->execute(3);
         self::assertFalse($result);
     }

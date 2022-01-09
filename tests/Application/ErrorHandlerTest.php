@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Tests;
+<?php namespace Zephyrus\Tests\Application;
 
 use InvalidArgumentException;
 use LogicException;
