@@ -159,7 +159,7 @@ class Session
         $_SESSION = [];
         setcookie(session_name(), '', 1);
         unset($_COOKIE[session_name()]);
-        session_destroy();
+        @session_destroy();
     }
 
     /**
