@@ -2,6 +2,7 @@
 
 use Zephyrus\Application\Rules\BaseRules;
 use Zephyrus\Application\Rules\FileRules;
+use Zephyrus\Application\Rules\IterationRules;
 use Zephyrus\Application\Rules\SpecializedRules;
 use Zephyrus\Application\Rules\StringRules;
 use Zephyrus\Application\Rules\TimeRules;
@@ -22,6 +23,7 @@ class Rule
      * Includes all rules defined as trait classes
      */
     use BaseRules;
+    use IterationRules;
     use SpecializedRules;
     use StringRules;
     use TimeRules;
