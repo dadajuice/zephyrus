@@ -14,15 +14,27 @@ trait IterationRules
      */
     public static function all(Rule $rule, string $errorMessage = ""): Rule
     {
-        return new Rule(function ($data, $fields) use ($rule) {
+        $resultRule = new Rule();
+        $resultRule->setErrorMessage($errorMessage);
+        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rule, $errorMessage) {
             if (!is_array($data)) {
                 return false;
             }
-            $filteredArray = array_filter($data, function ($value) use ($rule, $fields) {
-                return $rule->isValid($value, $fields);
-            });
-            return count($filteredArray) == count($data);
-        }, $errorMessage);
+            foreach ($data as $key => $value) {
+                $valid = $rule->isValid($value, $fields);
+                if (!$valid) {
+                    $pathing = $rule->getPathing();
+                    if (!empty($pathing)) {
+                        $pathing = '.' . $pathing;
+                    }
+                    $resultRule->setPathing($key . $pathing);
+                    $resultRule->setErrorMessage($rule->getErrorMessage());
+                    return false;
+                }
+            }
+            return true;
+        });
+        return $resultRule;
     }
 
     /**
@@ -60,6 +72,11 @@ trait IterationRules
 
             $valid = $rule->isValid(is_array($data) ? $data[$key] : $data->$key, $fields);
             if (!$valid) {
+                $pathing = $rule->getPathing();
+                if (!empty($pathing)) {
+                    $pathing = '.' . $pathing;
+                }
+                $resultRule->setPathing($key . $pathing);
                 $resultRule->setErrorMessage($rule->getErrorMessage());
             }
             return $valid;
@@ -91,6 +108,11 @@ trait IterationRules
                     $nestedRule = self::nested($fieldName, $nestedRule, $errorMessage);
                     $valid = $nestedRule->isValid(is_array($data) ? $data[$key] : $data->$key, $fields);
                     if (!$valid) {
+                        $pathing = $nestedRule->getPathing();
+                        if (!empty($pathing)) {
+                            $pathing = '.' . $pathing;
+                        }
+                        $resultRule->setPathing($key . $pathing);
                         $resultRule->setErrorMessage($nestedRule->getErrorMessage());
                         return false;
                     }
@@ -98,6 +120,11 @@ trait IterationRules
                     $innerNestedRule = self::nested($fieldName, $nestedRule, $errorMessage);
                     $valid = $innerNestedRule->isValid(is_array($data) ? $data[$key] : $data->$key, $fields);
                     if (!$valid) {
+                        $pathing = $innerNestedRule->getPathing();
+                        if (!empty($pathing)) {
+                            $pathing = '.' . $pathing;
+                        }
+                        $resultRule->setPathing($key . $pathing);
                         $resultRule->setErrorMessage($innerNestedRule->getErrorMessage());
                         return false;
                     }

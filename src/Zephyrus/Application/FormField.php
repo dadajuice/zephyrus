@@ -36,12 +36,20 @@ class FormField
     private bool $hasError = false;
 
     /**
-     * List of error messages currently registered to the field. This list is filled when the verify method is called
-     * and one or many rules have failed. Then the attached message to the rule will be registered in this list.
+     * Associative array for all the registered error of the field with the key being the error pathing. Default pathing
+     * is the field name.
      *
-     * @var string[]
+     * @var array
      */
-    private array $errorMessages = [];
+    private array $errors = [];
+
+    /**
+     * Determines if the error keys should contain the full pathing for nested rules. If the field has nested errors the
+     * pathing could be "students.2.name" which means students[2]['name'] has the error.
+     *
+     * @var bool
+     */
+    private bool $useNestedPathing = true;
 
     /**
      * Dictates how to handle a field with an empty value with an optional rule. By default, an optional rule on an
@@ -126,13 +134,30 @@ class FormField
     }
 
     /**
+     * Retrieves the complete error information including the pathing. Returns an associative array where the key is
+     * the pathing and the value is an array of messages.
+     *
+     * @return array
+     */
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
+
+    /**
      * Retrieves the list of registered errors.
      *
      * @return string[]
      */
     public function getErrorMessages(): array
     {
-        return $this->errorMessages;
+        $messages = [];
+        foreach ($this->errors as $errors) {
+            foreach ($errors as $error) {
+                $messages[] = $error;
+            }
+        }
+        return $messages;
     }
 
     /**
@@ -147,7 +172,14 @@ class FormField
     {
         foreach ($this->rules as $validation) {
             if ($this->isRuleTriggered($validation) && !$validation->rule->isValid($this->value, $fields)) {
-                $this->errorMessages[] = $validation->rule->getErrorMessage();
+                $pathing = "";
+                if ($this->useNestedPathing) {
+                    $pathing = $validation->rule->getPathing();
+                    if (!empty($pathing)) {
+                        $pathing = '.' . $pathing;
+                    }
+                }
+                $this->errors[$this->name . $pathing][] = $validation->rule->getErrorMessage();
                 $this->hasError = true;
                 if (!$this->verifyAll) {
                     return false;
@@ -179,6 +211,16 @@ class FormField
     public function setOptionalOnEmpty(bool $emptyIsOptional)
     {
         $this->optionalOnEmpty = $emptyIsOptional;
+    }
+
+    public function isUsingNestedPathing(): bool
+    {
+        return $this->useNestedPathing;
+    }
+
+    public function setUseNestedPathing(bool $useNestedPathing)
+    {
+        $this->useNestedPathing = $useNestedPathing;
     }
 
     private function isRuleTriggered(stdClass $validation): bool

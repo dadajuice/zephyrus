@@ -19,6 +19,11 @@ class Rule
      */
     private $errorMessage;
 
+    /**
+     * @var string
+     */
+    private $pathing = "";
+
     /*
      * Includes all rules defined as trait classes
      */
@@ -38,6 +43,16 @@ class Rule
     public function setValidationCallback($validation)
     {
         $this->validation = $validation;
+    }
+
+    public function setPathing(string $pathing)
+    {
+        $this->pathing = $pathing;
+    }
+
+    public function getPathing(): string
+    {
+        return $this->pathing;
     }
 
     /**
