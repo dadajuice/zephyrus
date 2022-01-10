@@ -27,7 +27,7 @@ class Bootstrap
         }
     }
 
-    public static function getHelperFunctionsPath()
+    public static function getHelperFunctionsPath(): string
     {
         return realpath(__DIR__ . '/../functions.php');
     }
