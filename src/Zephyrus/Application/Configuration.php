@@ -1,15 +1,19 @@
 <?php namespace Zephyrus\Application;
 
+use RuntimeException;
+
 class Configuration
 {
-    const CONFIGURATION_PATH = ROOT_DIR . '/config.ini';
+    public const CONFIGURATION_PATH = ROOT_DIR . '/config.ini';
+
+    private static ?ConfigurationFile $configurationFile = null;
 
     /**
-     * @var ConfigurationFile
+     * Reads all available configurations.
+     *
+     * @return array
      */
-    private static $configurationFile = null;
-
-    public static function getConfigurations()
+    public static function getConfigurations(): array
     {
         if (is_null(self::$configurationFile)) {
             self::initializeConfigurations();
@@ -31,33 +35,36 @@ class Configuration
         }
     }
 
-    public static function getApplicationConfiguration($property = null, $defaultValue = null)
+    public static function getApplicationConfiguration(?string $property = null, mixed $defaultValue = null): mixed
     {
         return self::getConfiguration('application', $property, $defaultValue);
     }
 
-    public static function getSecurityConfiguration($property = null, $defaultValue = null)
+    public static function getSecurityConfiguration(?string $property = null, mixed $defaultValue = null): mixed
     {
         return self::getConfiguration('security', $property, $defaultValue);
     }
 
-    public static function getDatabaseConfiguration($property = null, $defaultValue = null)
+    public static function getDatabaseConfiguration(?string $property = null, mixed $defaultValue = null): mixed
     {
         return self::getConfiguration('database', $property, $defaultValue);
     }
 
-    public static function getSessionConfiguration($property = null, $defaultValue = null)
+    public static function getSessionConfiguration(?string $property = null, mixed $defaultValue = null): mixed
     {
         return self::getConfiguration('session', $property, $defaultValue);
     }
 
     /**
+     * Retrieves the configurations of the given section if no property has been set, otherwise, tries to read the
+     * specified property within the given section. If it fails, the default value is returned.
+     *
      * @param string $section
-     * @param string $property
-     * @param null $defaultValue
+     * @param string|null $property
+     * @param mixed $defaultValue
      * @return mixed
      */
-    public static function getConfiguration(string $section, ?string $property = null, $defaultValue = null)
+    public static function getConfiguration(string $section, ?string $property = null, mixed $defaultValue = null): mixed
     {
         if (is_null(self::$configurationFile)) {
             self::initializeConfigurations();
@@ -66,13 +73,13 @@ class Configuration
     }
 
     /**
-     * Parse the .ini configuration file (/config.ini) into a PHP associative
-     * array including sections. Throws exception if file is not accessible.
+     * Parse the .ini configuration file (/config.ini) into a PHP associative array including sections. Throws an
+     * exception if file is not accessible.
      */
     private static function initializeConfigurations()
     {
         if (!is_readable(self::CONFIGURATION_PATH)) {
-            throw new \RuntimeException("Cannot parse configurations file (config.ini)");
+            throw new RuntimeException("Cannot parse configurations file (config.ini)");
         }
         self::$configurationFile = new ConfigurationFile(self::CONFIGURATION_PATH);
     }
