@@ -12,6 +12,87 @@ class IterationRulesTest extends TestCase
         self::assertFalse($rule->isValid([1, 2, "error", 4, 5, 6]));
     }
 
+    public function testArrayAllObject()
+    {
+        $rule = Rule::all([
+            'title' => Rule::notEmpty("Title invalid"),
+            'description' => Rule::notEmpty("Description invalid"),
+            'hours' => Rule::integer("Hours invalid")
+        ], "not all ok");
+        self::assertTrue($rule->isValid([
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => 3],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => 3],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => 3]
+        ]));
+        self::assertFalse($rule->isValid([
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => 3],
+            (object) ['title' => '', 'description' => 'Lorem', 'hours' => 3],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => 3]
+        ]));
+    }
+
+    public function testArrayAllNestedObject()
+    {
+        $rule = Rule::all([
+            'title' => Rule::notEmpty("Title invalid"),
+            'description' => Rule::notEmpty("Description invalid"),
+            'hours' => Rule::nested('time', Rule::integer("Time invalid"))
+        ], "not all ok");
+        self::assertTrue($rule->isValid([
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => ['block' => 4, 'time' => 300]],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => ['block' => 4, 'time' => 300]],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => ['block' => 4, 'time' => 300]]
+        ]));
+        self::assertFalse($rule->isValid([
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => ['block' => 4, 'time' => 300]],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => ['block' => 4, 'time' => "Oups"]],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => ['block' => 4, 'time' => 300]]
+        ]));
+    }
+
+    public function testArrayAllNestedObject2()
+    {
+        $rule = Rule::all([
+            'title' => Rule::notEmpty("Title invalid"),
+            'description' => Rule::notEmpty("Description invalid"),
+            'hours' => Rule::all(Rule::nested('time', Rule::integer("Time invalid")))
+        ], "not all ok");
+        self::assertTrue($rule->isValid([
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => [['block' => 4, 'time' => 300], ['block' => 4, 'time' => 300]]],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => [['block' => 4, 'time' => 300], ['block' => 4, 'time' => 300]]],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => [['block' => 4, 'time' => 300], ['block' => 4, 'time' => 300]]]
+        ]));
+        self::assertFalse($rule->isValid([
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => [['block' => 4, 'time' => 300], ['block' => 4, 'time' => 300]]],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => [['block' => 4, 'time' => 300], ['block' => 4, 'time' => 300]]],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => [['block' => 4, 'time' => 300], ['block' => 4, 'time' => "Oups"]]]
+        ]));
+    }
+
+    public function testArrayAllNestedObject3()
+    {
+        $rule = Rule::all([
+            'title' => Rule::notEmpty("Title invalid"),
+            'description' => Rule::notEmpty("Description invalid"),
+            'hours' => Rule::all([
+                'time' => [
+                    Rule::integer("Time invalid"),
+                    Rule::range(0, 300, "Time invalid")
+                ]
+            ])
+        ], "not all ok");
+        self::assertTrue($rule->isValid([
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => [['block' => 4, 'time' => 300], ['block' => 4, 'time' => 300]]],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => [['block' => 4, 'time' => 300], ['block' => 4, 'time' => 300]]],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => [['block' => 4, 'time' => 300], ['block' => 4, 'time' => 300]]]
+        ]));
+        self::assertFalse($rule->isValid([
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => [['block' => 4, 'time' => 300], ['block' => 4, 'time' => 300]]],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => [['block' => 4, 'time' => 300], ['block' => 4, 'time' => 300]]],
+            (object) ['title' => 'Testing', 'description' => 'Lorem', 'hours' => [['block' => 4, 'time' => 300], ['block' => 4, 'time' => 500]]]
+        ]));
+    }
+
     public function testArrayAllNotArray()
     {
         $rule = Rule::all(Rule::integer(), "not all integers");
@@ -206,5 +287,80 @@ class IterationRulesTest extends TestCase
         ]];
         self::assertFalse($rule->isValid($row));
         self::assertEquals("NANI Y", $rule->getErrorMessage());
+    }
+
+    public function testAllSimpleWithMultipleRules()
+    {
+        $rule = Rule::all([
+            Rule::notEmpty(),
+            Rule::integer(),
+            Rule::range(0, 100)
+        ]);
+        $row = [3, 9, 10, 99, 80];
+        self::assertTrue($rule->isValid($row));
+
+        $row = [3, 9, 10, 400, 80];
+        self::assertFalse($rule->isValid($row));
+    }
+
+    public function testNestedSimpleWithMultipleRules()
+    {
+        $rule = Rule::nested('test', [
+            Rule::notEmpty(),
+            Rule::integer(),
+            Rule::range(0, 100)
+        ]);
+        $row = ['test' => 3];
+        self::assertTrue($rule->isValid($row));
+
+        $row = ['test' => 300];
+        self::assertFalse($rule->isValid($row));
+    }
+
+    public function testNestedComplexArrayMultiple3()
+    {
+        $rule = Rule::nested('student', [
+            'name' => Rule::notEmpty(),
+            'id' => Rule::integer(),
+            'main_course' => [
+                'id' => [Rule::integer(), Rule::range(0, 100, "NANI Z")],
+                'class' => Rule::notEmpty(),
+                'info' => [
+                    'description' => Rule::notEmpty(),
+                    'number' => Rule::notEmpty()
+                ]
+            ],
+            'teachers' => Rule::all(Rule::name())
+        ]);
+        $row = ['student' => [
+            'id' => 3,
+            'name' => 'Rolan Balesque',
+            'main_course' => (object) [
+                'id' => 80,
+                'class' => 'Computer',
+                'info' => [
+                    'description' => 'Lorem ipsum',
+                    'number' => '420-2S4-SU'
+                ]
+            ],
+            'teachers' => ['Bob', 'Rolan', 'Dan', 'Claire']
+        ]];
+        self::assertTrue($rule->isValid($row));
+
+        $row = ['student' => [
+            'id' => 3,
+            'name' => 'Rolan Balesque',
+            'main_course' => (object) [
+                'id' => 250, // Trigger
+                'class' => 'Computer',
+                'info' => [
+                    'description' => 'Lorem ipsum',
+                    'number' => '420-2S4-SU'
+                ]
+            ],
+            'teachers' => ['Bob', 'Rolan', 'Dan', 'Claire']
+        ]];
+        self::assertFalse($rule->isValid($row));
+        self::assertEquals("NANI Z", $rule->getErrorMessage());
     }
 }

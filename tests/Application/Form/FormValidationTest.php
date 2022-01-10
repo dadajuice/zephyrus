@@ -160,7 +160,7 @@ class FormValidationTest extends TestCase
         $form = new Form();
         $form->addField('ids[]', [1, 2, 3, "err", 5, 6]);
         $form->field("ids[]")
-            ->validate(Rule::all(Rule::integer(), "err_99"));
+            ->validate(Rule::all(Rule::integer("err_99"), "err_98"));
         self::assertFalse($form->verify());
         self::assertEquals('err_99', $form->getErrorMessages()[0]);
     }
