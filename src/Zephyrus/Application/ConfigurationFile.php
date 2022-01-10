@@ -1,16 +1,11 @@
 <?php namespace Zephyrus\Application;
 
+use RuntimeException;
+
 class ConfigurationFile
 {
-    /**
-     * @var string
-     */
-    private $path;
-
-    /**
-     * @var array
-     */
-    private $content = [];
+    private string $path;
+    private array $content = [];
 
     public function __construct(string $filePath)
     {
@@ -20,10 +15,10 @@ class ConfigurationFile
         }
     }
 
-    public function save()
+    public function save(): bool
     {
         if (!is_writable(dirname($this->path))) {
-            throw new \RuntimeException("Cannot write file [{$this->path}]");
+            throw new RuntimeException("Cannot write file [$this->path]");
         }
         $file = fopen($this->path, 'w');
         flock($file, LOCK_EX);
@@ -53,7 +48,7 @@ class ConfigurationFile
         $this->content[$section] = $properties;
     }
 
-    private function buildConfigurations()
+    private function buildConfigurations(): array
     {
         $data = [];
         foreach ($this->content as $sectionName => $sectionContent) {
@@ -68,7 +63,7 @@ class ConfigurationFile
         return $data;
     }
 
-    private function formatConfigurationData($data)
+    private function formatConfigurationData($data): string
     {
         return (is_bool($data))
             ? var_export($data, true)

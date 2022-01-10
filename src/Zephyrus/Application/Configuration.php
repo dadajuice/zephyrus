@@ -35,22 +35,22 @@ class Configuration
         }
     }
 
-    public static function getApplicationConfiguration(?string $property = null, mixed $defaultValue = null): mixed
+    public static function getApplicationConfiguration(?string $property = null, $defaultValue = null)
     {
         return self::getConfiguration('application', $property, $defaultValue);
     }
 
-    public static function getSecurityConfiguration(?string $property = null, mixed $defaultValue = null): mixed
+    public static function getSecurityConfiguration(?string $property = null, $defaultValue = null)
     {
         return self::getConfiguration('security', $property, $defaultValue);
     }
 
-    public static function getDatabaseConfiguration(?string $property = null, mixed $defaultValue = null): mixed
+    public static function getDatabaseConfiguration(?string $property = null, $defaultValue = null)
     {
         return self::getConfiguration('database', $property, $defaultValue);
     }
 
-    public static function getSessionConfiguration(?string $property = null, mixed $defaultValue = null): mixed
+    public static function getSessionConfiguration(?string $property = null, $defaultValue = null)
     {
         return self::getConfiguration('session', $property, $defaultValue);
     }
@@ -61,10 +61,10 @@ class Configuration
      *
      * @param string $section
      * @param string|null $property
-     * @param mixed $defaultValue
+     * @param mixed|null $defaultValue
      * @return mixed
      */
-    public static function getConfiguration(string $section, ?string $property = null, mixed $defaultValue = null): mixed
+    public static function getConfiguration(string $section, ?string $property = null, mixed $defaultValue = null)
     {
         if (is_null(self::$configurationFile)) {
             self::initializeConfigurations();
