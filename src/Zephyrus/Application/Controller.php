@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Application;
 
+use InvalidArgumentException;
 use Zephyrus\Exceptions\RouteArgumentException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
@@ -14,25 +15,10 @@ use Zephyrus\Network\Router;
 
 abstract class Controller implements Routable
 {
-    /**
-     * @var Request;
-     */
-    protected $request;
-
-    /**
-     * @var Router
-     */
-    private $router;
-
-    /**
-     * @var array
-     */
-    private $overrideArguments = [];
-
-    /**
-     * @var array
-     */
-    private $restrictedArguments = [];
+    protected ?Request $request = null;
+    private Router $router;
+    private array $overrideArguments = [];
+    private array $restrictedArguments = [];
 
     use AbortResponses;
     use RenderResponses;
@@ -64,7 +50,7 @@ abstract class Controller implements Routable
      * callback receives the previous obtained response from either the before callback or the natural execution. Used
      * as a middleware mechanic.
      *
-     * @param Response $response
+     * @param Response|null $response
      * @return Response | null
      */
     public function after(?Response $response): ?Response
@@ -83,7 +69,7 @@ abstract class Controller implements Routable
     public function overrideArgument(string $argumentName, callable $callback)
     {
         if (count((new Callback($callback))->getReflection()->getParameters()) != 1) {
-            throw new \InvalidArgumentException("Override callback should have only one argument which will contain the value of the associated argument name");
+            throw new InvalidArgumentException("Override callback should have only one argument which will contain the value of the associated argument name");
         }
         $this->overrideArguments[$argumentName] = $callback;
     }
@@ -100,7 +86,7 @@ abstract class Controller implements Routable
     {
         foreach ($rules as $rule) {
             if (!($rule instanceof Rule)) {
-                throw new \InvalidArgumentException("Specified rules for argument restrictions should be instance of Rule class");
+                throw new InvalidArgumentException("Specified rules for argument restrictions should be instance of Rule class");
             }
         }
         $this->restrictedArguments[$parameterName] = (isset($this->restrictedArguments[$parameterName]))
@@ -151,7 +137,7 @@ abstract class Controller implements Routable
      * @param string $instanceMethod
      * @param string | array $acceptedFormats
      */
-    final protected function get(string $uri, string $instanceMethod, $acceptedFormats = ContentType::ANY)
+    final protected function get(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY)
     {
         $this->router->get($uri, [$this, $instanceMethod], $acceptedFormats);
     }
@@ -166,7 +152,7 @@ abstract class Controller implements Routable
      * @param string $instanceMethod
      * @param string | array $acceptedFormats
      */
-    final protected function post(string $uri, string $instanceMethod, $acceptedFormats = ContentType::ANY)
+    final protected function post(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY)
     {
         $this->router->post($uri, [$this, $instanceMethod], $acceptedFormats);
     }
@@ -181,7 +167,7 @@ abstract class Controller implements Routable
      * @param string $instanceMethod
      * @param string | array $acceptedFormats
      */
-    final protected function put(string $uri, string $instanceMethod, $acceptedFormats = ContentType::ANY)
+    final protected function put(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY)
     {
         $this->router->put($uri, [$this, $instanceMethod], $acceptedFormats);
     }
@@ -197,7 +183,7 @@ abstract class Controller implements Routable
      * @param string $instanceMethod
      * @param string | array $acceptedFormats
      */
-    final protected function patch(string $uri, string $instanceMethod, $acceptedFormats = ContentType::ANY)
+    final protected function patch(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY)
     {
         $this->router->patch($uri, [$this, $instanceMethod], $acceptedFormats);
     }
@@ -213,14 +199,14 @@ abstract class Controller implements Routable
      * @param string $instanceMethod
      * @param string | array $acceptedFormats
      */
-    final protected function delete(string $uri, string $instanceMethod, $acceptedFormats = ContentType::ANY)
+    final protected function delete(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY)
     {
         $this->router->delete($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
     /**
      * Builds a Form class instance automatically filled with all the request body parameters. Should be used to add
-     * validations.
+     * validation rules.
      *
      * @param bool $includeRouteArguments
      * @return Form
