@@ -171,7 +171,7 @@ class FormFieldTest extends TestCase
         self::assertEquals("Title invalid", $field->getErrorMessages()[0]);
     }
 
-    /*public function testDeeperIndexMultipleAllNestedErrorPathing()
+    public function testDeeperIndexMultipleAllNestedErrorPathing()
     {
         $field = new FormField("student", [
             'name' => 'Bob Lewis',
@@ -198,5 +198,5 @@ class FormFieldTest extends TestCase
         self::assertFalse($field->verify());
         self::assertEquals("student.classes.1.title", array_keys($field->getErrors())[0]);
         self::assertEquals("Title invalid", $field->getErrorMessages()[0]);
-    }*/
+    }
 }
