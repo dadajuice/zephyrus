@@ -1,11 +1,11 @@
 <?php namespace Zephyrus\Security;
 
-use Expose\FilterCollection;
-use Expose\Manager;
-use Expose\Report;
 use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\IntrusionDetectionException;
 
+/**
+ * @codeCoverageIgnore
+ */
 class IntrusionDetection
 {
     const REQUEST = 1;
@@ -13,9 +13,6 @@ class IntrusionDetection
     const POST = 4;
     const COOKIE = 8;
 
-    /**
-     * @var Manager
-     */
     private $manager;
 
     /**
@@ -28,6 +25,9 @@ class IntrusionDetection
      */
     private static $instance = null;
 
+    /**
+     * @deprecated
+     */
     public static function getInstance(): self
     {
         if (is_null(self::$instance)) {
@@ -131,7 +131,7 @@ class IntrusionDetection
      * when an intrusion is detected. Will contains essential data such as
      * impact, targeted inputs and detection descriptions.
      *
-     * @param Report[] $reports
+     * @param $reports
      * @return mixed[]
      */
     private function getDetectionData($reports): array
@@ -167,7 +167,7 @@ class IntrusionDetection
     private function __construct()
     {
         $config = Configuration::getSecurityConfiguration();
-        $filters = new FilterCollection();
+        /*$filters = new FilterCollection();
         $filters->load();
 
         $this->manager = new Manager($filters, new class() extends \Psr\Log\AbstractLogger {
@@ -177,7 +177,7 @@ class IntrusionDetection
         });
         if (isset($config['ids_exceptions'])) {
             $this->manager->setException($config['ids_exceptions']);
-        }
+        }*/
         $this->surveillance = self::GET | self::POST;
     }
 }

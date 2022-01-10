@@ -36,7 +36,6 @@ abstract class Controller extends \Zephyrus\Application\Controller
     /**
      * @throws UnauthorizedAccessException
      * @throws InvalidCsrfException
-     * @throws IntrusionDetectionException
      */
     public function before(): ?Response
     {
@@ -47,9 +46,6 @@ abstract class Controller extends \Zephyrus\Application\Controller
         $this->secureHeader->send();
         if (Configuration::getSecurityConfiguration('csrf_guard_enabled')) {
             $this->csrfGuard->guard();
-        }
-        if (Configuration::getSecurityConfiguration('ids_enabled')) {
-            IntrusionDetection::getInstance()->run();
         }
         return null;
     }

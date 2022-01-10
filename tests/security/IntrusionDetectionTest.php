@@ -6,7 +6,10 @@ use Zephyrus\Security\IntrusionDetection;
 
 class IntrusionDetectionTest extends TestCase
 {
-    public function testWorking()
+    /**
+     * @deprecated
+     */
+    /*public function testWorking()
     {
         $ids = IntrusionDetection::getInstance();
         $ids->setSurveillance(IntrusionDetection::GET | IntrusionDetection::POST | IntrusionDetection::REQUEST
@@ -63,5 +66,5 @@ class IntrusionDetectionTest extends TestCase
         $ids->setSurveillance(0);
         $_GET['test'] = "' AND 1=1#";
         $ids->run();
-    }
+    }*/
 }

@@ -12,7 +12,6 @@
   "require": {
     "php": ">=8.0",
     "pug-php/pug": "2.*",
-    "enygma/expose": "^3.0",
     "ext-pdo": "*",
     "ext-json": "*",
     "ext-simplexml": "*",
