@@ -154,7 +154,7 @@ class FormField
                 }
             }
         }
-        return $this->hasError;
+        return !$this->hasError;
     }
 
     /**
