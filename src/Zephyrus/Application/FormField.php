@@ -28,6 +28,14 @@ class FormField
     private array $rules = [];
 
     /**
+     * Determines if the form field has an error. Will change during the verification of the rules if at least one of
+     * them fails. Cannot rely exclusively on the error messages list because the rules could have empty messages.
+     *
+     * @var bool
+     */
+    private bool $hasError = false;
+
+    /**
      * List of error messages currently registered to the field. This list is filled when the verify method is called
      * and one or many rules have failed. Then the attached message to the rule will be registered in this list.
      *
@@ -140,12 +148,21 @@ class FormField
         foreach ($this->rules as $validation) {
             if ($this->isRuleTriggered($validation) && !$validation->rule->isValid($this->value, $fields)) {
                 $this->errorMessages[] = $validation->rule->getErrorMessage();
+                $this->hasError = true;
                 if (!$this->verifyAll) {
                     return false;
                 }
             }
         }
-        return empty($this->errorMessages);
+        return $this->hasError;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasError(): bool
+    {
+        return $this->hasError;
     }
 
     /**
