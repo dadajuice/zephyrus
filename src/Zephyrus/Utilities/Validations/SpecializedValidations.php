@@ -22,6 +22,9 @@ trait SpecializedValidations
         return preg_match("/^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/", $data);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public static function isLiveUrl($data, array $acceptedValidCodes = [200, 201, 202, 204, 301, 302]): bool
     {
         $result = false;
