@@ -1,7 +1,8 @@
 language: php
 sudo: required
 php:
-  - 7.3
+  - 8.0
+  - 8.1
 
 env:
   CODECLIMATE_REPO_TOKEN: 909885d13238ccab94f6492ea52185141ed0f478883b7a5db1070a5c9830f666
