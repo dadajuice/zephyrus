@@ -1,7 +1,6 @@
 <?php namespace Zephyrus\Security;
 
 use Zephyrus\Application\Configuration;
-use Zephyrus\Exceptions\IntrusionDetectionException;
 use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Exceptions\UnauthorizedAccessException;
 use Zephyrus\Network\ContentType;

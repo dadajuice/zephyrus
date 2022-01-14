@@ -144,8 +144,8 @@ class HttpRequester
      *
      * @param string|array $payload
      * @param string|null $filePath
-     * @return string
      * @throws HttpRequesterException
+     * @return string
      */
     public function executeDownload(string|array $payload = "", ?string $filePath = null): string
     {
@@ -168,8 +168,8 @@ class HttpRequester
      * e.g. application/x-www-form-urlencoded or a string for other type such as application/json.
      *
      * @param string|array $payload
-     * @return string
      * @throws HttpRequesterException
+     * @return string
      */
     public function execute(string|array $payload = ""): string
     {
@@ -305,8 +305,8 @@ class HttpRequester
      * Prepares the cURL instance based on the requester configurations.
      *
      * @param string|array $payload
-     * @return CurlHandle
      * @throws HttpRequesterException
+     * @return CurlHandle
      */
     private function buildCurl(string|array $payload = ""): CurlHandle
     {

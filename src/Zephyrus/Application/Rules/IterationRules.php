@@ -42,7 +42,7 @@ trait IterationRules
     {
         $resultRule = new Rule();
         $resultRule->setErrorMessage($errorMessage);
-        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rule, $key, $errorMessage) {
+        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rule, $key) {
             if (!is_object($data) && !is_array($data)) {
                 return false;
             }
@@ -149,7 +149,7 @@ trait IterationRules
     {
         $resultRule = new Rule();
         $resultRule->setErrorMessage($errorMessage);
-        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rule, $errorMessage) {
+        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rule) {
             if (!is_array($data)) {
                 return false;
             }
@@ -226,5 +226,4 @@ trait IterationRules
         });
         return $resultRule;
     }
-
 }
