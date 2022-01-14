@@ -1,183 +1,133 @@
 <?php namespace Zephyrus\Security;
 
+use RuntimeException;
 use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\IntrusionDetectionException;
+use Zephyrus\Network\RequestFactory;
+use Zephyrus\Security\IntrusionDetection\IntrusionCache;
+use Zephyrus\Security\IntrusionDetection\IntrusionMonitor;
+use Zephyrus\Security\IntrusionDetection\IntrusionReport;
+use Zephyrus\Security\IntrusionDetection\IntrusionRuleLoader;
 
-/**
- * @codeCoverageIgnore
- */
 class IntrusionDetection
 {
-    const REQUEST = 1;
-    const GET = 2;
-    const POST = 4;
-    const COOKIE = 8;
+    public const DEFAULT_CONFIGURATIONS = [
+        'enabled' => true, // Enable the intrusion detection feature
+        'cached' => true, // Enable the APCu (PHP cache) for loaded rules
+        'custom_file' => '', // Change the default rule file
+        'impact_threshold' => 0, // Minimum impact to be considered to throw an exception (default is any detection)
+        'monitor_cookies' => true, // Verifies the content of request cookies
+        'exceptions' => [] // List of request parameters to be exempt of detection (e.g. '__utmz')
+    ];
 
-    private $manager;
+    private array $configurations;
+
+    /**
+     * @var IntrusionMonitor
+     */
+    private IntrusionMonitor $monitor;
+
+    /**
+     * @var array
+     */
+    private array $exceptions = [];
 
     /**
      * @var int
      */
-    private $surveillance = 0;
+    private int $impactThreshold = 0;
 
     /**
-     * @var IntrusionDetection
+     * @var bool
      */
-    private static $instance = null;
+    private bool $includeCookiesMonitoring = true;
 
-    /**
-     * @deprecated
-     */
-    public static function getInstance(): self
+    public function __construct(array $configurations = [])
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
-        }
-        return self::$instance;
+        $this->initializeConfigurations($configurations);
+        $this->initializeMonitor();
+        $this->initializeExceptions();
+        $this->initializeImpactThreshold();
+        $this->initializeCookieMonitoring();
     }
 
     /**
-     * Execute the intrusion detection analysis using the specified monitored
-     * inputs. If an intrusion is detected, the method will launch the detection
-     * callback.
+     * Execute the intrusion detection analysis using the specified monitored inputs. If an intrusion is detected, the
+     * method will throw an exception.
      *
      * @throws IntrusionDetectionException
      */
-    public function run()
+    public function run(): IntrusionReport
     {
-        $guard = $this->getMonitoringInputs();
-        if (empty($guard)) {
-            throw new \RuntimeException("Nothing to monitor ! Either configure the IDS to monitor at least one input or 
-                completely deactivate this feature.");
+        $this->monitor->setExceptions($this->exceptions);
+        $report = $this->monitor->run($this->getMonitoringInputs());
+        if ($report->getImpact() > $this->impactThreshold) {
+            throw new IntrusionDetectionException($report);
         }
-        $this->manager->run($guard);
-        if ($this->manager->getImpact() > 0) {
-            $data = $this->getDetectionData($this->manager->getReports());
+        return $report;
+    }
 
-            throw new IntrusionDetectionException($data);
+    private function initializeConfigurations(array $configurations)
+    {
+        if (empty($configurations)) {
+            $configurations = Configuration::getConfiguration('ids') ?? self::DEFAULT_CONFIGURATIONS;
+        }
+        $this->configurations = $configurations;
+    }
+
+    private function initializeMonitor()
+    {
+        $loader = new IntrusionRuleLoader($this->configurations['custom_file'] ?? null);
+        if (isset($this->configurations['cached']) && $this->configurations['cached']) {
+            $cache = new IntrusionCache();
+            $intrusionRules = $cache->getRules();
+            if (empty($intrusionRules)) {
+                $intrusionRules = $loader->loadFromFile();
+                $cache->cache($intrusionRules);
+            }
+        } else {
+            $intrusionRules = $loader->loadFromFile();
+        }
+        $this->monitor = new IntrusionMonitor($intrusionRules);
+    }
+
+    private function initializeExceptions()
+    {
+        if (isset($this->configurations['exceptions']) && !empty($this->configurations['exceptions'])) {
+            $this->exceptions = $this->configurations['exceptions'];
+        }
+    }
+
+    private function initializeCookieMonitoring()
+    {
+        if (isset($this->configurations['monitor_cookies']) && $this->configurations['monitor_cookies']) {
+            $this->includeCookiesMonitoring = $this->configurations['monitor_cookies'];
+        }
+    }
+
+    private function initializeImpactThreshold()
+    {
+        if (isset($this->configurations['impact_threshold'])) {
+            if (!is_int($this->configurations['impact_threshold'])) {
+                throw new RuntimeException("IDS impact threshold configuration property must be int.");
+            }
+            $this->impactThreshold = $this->configurations['impact_threshold'];
         }
     }
 
     /**
-     * Applies the desired inputs to be analysed with bitwise operations using
-     * the class constants (e.g. GET | POST | COOKIE). Default to GET and POST
-     * only.
+     * Prepares the request parameters to be verified by the IDS monitor. Will automatically include all request data
+     * and cookies if included in configurations.
      *
-     * @param int $surveillanceBitwise
-     */
-    public function setSurveillance(int $surveillanceBitwise)
-    {
-        $this->surveillance = $surveillanceBitwise;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMonitoringRequest(): bool
-    {
-        return ($this->surveillance & self::REQUEST) > 0;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMonitoringGet(): bool
-    {
-        return ($this->surveillance & self::GET) > 0;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMonitoringPost(): bool
-    {
-        return ($this->surveillance & self::POST) > 0;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMonitoringCookie(): bool
-    {
-        return ($this->surveillance & self::COOKIE) > 0;
-    }
-
-    /**
-     * Retrieves the monitoring inputs to consider depending on the current
-     * configuration.
-     *
-     * @return mixed[]
+     * @return array
      */
     private function getMonitoringInputs(): array
     {
-        $guard = [];
-        if ($this->surveillance & self::REQUEST) {
-            $guard['REQUEST'] = $_REQUEST;
-        }
-        if ($this->surveillance & self::GET) {
-            $guard['GET'] = $_GET;
-        }
-        if ($this->surveillance & self::POST) {
-            $guard['POST'] = $_POST;
-        }
-        if ($this->surveillance & self::COOKIE) {
-            $guard['COOKIE'] = $_COOKIE;
+        $request = RequestFactory::read();
+        $guard = $request->getParameters();
+        if ($this->includeCookiesMonitoring) {
+            $guard = array_merge($guard, $request->getCookies());
         }
         return $guard;
-    }
-
-    /**
-     * Constructs a custom basic associative array based on the PHPIDS report
-     * when an intrusion is detected. Will contains essential data such as
-     * impact, targeted inputs and detection descriptions.
-     *
-     * @param $reports
-     * @return mixed[]
-     */
-    private function getDetectionData($reports): array
-    {
-        $data = [
-            'impact' => 0,
-            'detections' => []
-        ];
-        foreach ($reports as $report) {
-            $variableName = $report->getVarName();
-            $filters = $report->getFilterMatch();
-            if (!isset($data['detections'][$variableName])) {
-                $data['detections'][$variableName] = [
-                    'value' => $report->getVarValue(),
-                    'events' => []
-                ];
-            }
-            foreach ($filters as $filter) {
-                $data['detections'][$variableName]['events'][] = [
-                    'description' => $filter->getDescription(),
-                    'impact' => $filter->getImpact()
-                ];
-                $data['impact'] += $filter->getImpact();
-            }
-        }
-        return $data;
-    }
-
-    /**
-     * Constructor which initiates the configuration of the PHPIDS framework
-     * and prepare the monitor component.
-     */
-    private function __construct()
-    {
-        $config = Configuration::getSecurityConfiguration();
-        /*$filters = new FilterCollection();
-        $filters->load();
-
-        $this->manager = new Manager($filters, new class() extends \Psr\Log\AbstractLogger {
-            public function log($level, $message, array $context = [])
-            {
-            }
-        });
-        if (isset($config['ids_exceptions'])) {
-            $this->manager->setException($config['ids_exceptions']);
-        }*/
-        $this->surveillance = self::GET | self::POST;
     }
 }
