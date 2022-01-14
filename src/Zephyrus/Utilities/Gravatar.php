@@ -28,7 +28,9 @@ class Gravatar
         $uri = 'https://www.gravatar.com/avatar/' . $this->hash . '?d=404';
         $headers = @get_headers($uri);
         if (is_bool($headers)) {
+            // @codeCoverageIgnoreStart
             return false;
+            // @codeCoverageIgnoreEnd
         }
         return preg_match("|200|", $headers[0]);
     }
