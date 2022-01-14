@@ -1,22 +1,38 @@
 <?php namespace Zephyrus\Exceptions;
 
+use Zephyrus\Security\IntrusionDetection\IntrusionReport;
+
 class IntrusionDetectionException extends \Exception
 {
-    /**
-     * @var array
-     */
-    private $intrusionData;
+    private IntrusionReport $report;
 
-    public function __construct(array $intrusionData)
+    public function __construct(IntrusionReport $report)
     {
-        $this->intrusionData = $intrusionData;
+        parent::__construct();
+        $this->report = $report;
+    }
+
+    /**
+     * @return int
+     */
+    public function getImpact(): int
+    {
+        return $this->report->getImpact();
     }
 
     /**
      * @return array
      */
-    public function getIntrusionData(): array
+    public function getDetectedIntrusions(): array
     {
-        return $this->intrusionData;
+        return $this->report->getDetectedIntrusions();
+    }
+
+    /**
+     * @return IntrusionReport
+     */
+    public function getReport(): IntrusionReport
+    {
+        return $this->report;
     }
 }
