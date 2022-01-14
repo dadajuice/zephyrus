@@ -12,10 +12,10 @@
   </coverage>
   <testsuites>
     <testsuite name="application">
-      <directory>tests/application</directory>
+      <directory>tests/Application</directory>
       <directory>tests/utilities</directory>
       <directory>tests/network</directory>
-      <directory>tests/security</directory>
+      <directory>tests/Security</directory>
       <directory>tests/database</directory>
     </testsuite>
   </testsuites>
