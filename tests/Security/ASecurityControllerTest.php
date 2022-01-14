@@ -31,8 +31,7 @@ class ASecurityControllerTest extends TestCase
                 try {
                     parent::before();
                 } catch (IntrusionDetectionException $exception) {
-                    $data = $exception->getIntrusionData();
-                    if ($data['impact'] >= 10) {
+                    if ($exception->getImpact() >= 10) {
                         return $this->abortForbidden();
                     }
                 } catch (InvalidCsrfException $exception) {
@@ -108,8 +107,7 @@ class ASecurityControllerTest extends TestCase
                 try {
                     parent::before();
                 } catch (IntrusionDetectionException $exception) {
-                    $data = $exception->getIntrusionData();
-                    if ($data['impact'] >= 10) {
+                    if ($exception->getImpact() >= 10) {
                         return $this->abortForbidden();
                     }
                 } catch (InvalidCsrfException $exception) {
