@@ -10,6 +10,14 @@ class IntrusionMonitor
     private array $rules;
 
     /**
+     * List of parameter names to be excluded from the IDS monitoring. If one of these parameters are encountered, the
+     * monitor will skill them entirely. Be cautious about the security implications.
+     *
+     * @var array
+     */
+    private array $exceptions = [];
+
+    /**
      * Prepares the monitor with a set of IDS rules to verify.
      *
      * @param array $rules
@@ -17,6 +25,16 @@ class IntrusionMonitor
     public function __construct(array $rules)
     {
         $this->rules = $rules;
+    }
+
+    /**
+     * Specifies the list of parameters to be excluded from the monitoring.
+     *
+     * @param array $parameters
+     */
+    public function setExceptions(array $parameters)
+    {
+        $this->exceptions = $parameters;
     }
 
     /**
@@ -30,6 +48,9 @@ class IntrusionMonitor
     {
         $report = new IntrusionReport();
         foreach ($data as $parameter => $value) {
+            if (in_array($parameter, $this->exceptions)) {
+                continue;
+            }
             foreach ($this->rules as $rule) {
                 if ($this->detectIntrusion($rule->rule, $value)) {
                     $report->addIntrusion($rule, $parameter, $value);

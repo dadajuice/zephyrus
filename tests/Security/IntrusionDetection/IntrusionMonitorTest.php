@@ -35,4 +35,21 @@ class IntrusionMonitorTest extends TestCase
         self::assertEquals(0, $report->getImpact());
         self::assertTrue($report->getExecutionTime() > 0.0);
     }
+
+    public function testDetectionException()
+    {
+        $rules = (new IntrusionRuleLoader())->loadFromFile();
+        $monitor = new IntrusionMonitor($rules);
+        $monitor->setExceptions(['password']); // Ignore password detection
+        $report = $monitor->run([
+            'username' => "' AND 1=1#",
+            'password' => "<script>document.cookie;</script>"
+        ]);
+        $events = $report->getDetectedIntrusions();
+        self::assertCount(1, $events);
+        self::assertEquals(3, $report->getImpact());
+        self::assertTrue(is_object($events[0]));
+        self::assertEquals("Detects common comment types", $events[0]->description);
+        self::assertTrue($report->getExecutionTime() > 0.0);
+    }
 }
