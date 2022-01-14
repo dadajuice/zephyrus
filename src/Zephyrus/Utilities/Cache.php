@@ -27,7 +27,9 @@ class Cache
     public function __construct(string $cacheKey)
     {
         if (!self::isAvailable()) {
+            // @codeCoverageIgnoreStart
             throw new RuntimeException("APCu extension not installed or not enabled.");
+            // @codeCoverageIgnoreEnd
         }
         $this->cacheKey = $cacheKey;
     }
@@ -77,7 +79,9 @@ class Cache
     {
         $result = apcu_store($this->cacheKey, $data, $timeToLive);
         if ($result === false) {
+            // @codeCoverageIgnoreStart
             throw new RuntimeException("Failed to cache specified data");
+            // @codeCoverageIgnoreEnd
         }
     }
 }
