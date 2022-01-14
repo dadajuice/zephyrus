@@ -7,18 +7,25 @@ use Zephyrus\Network\RequestFactory;
 
 class SessionSecureStorageTest extends TestCase
 {
-    /*public function testEncryption()
+    public static function tearDownAfterClass(): void
+    {
+        Session::getInstance()->destroy();
+        Session::kill();
+    }
+
+    public function testEncryption()
     {
         $config = [
             'name' => 'bob',
             'encryption_enabled' => true
         ];
+        Session::getInstance()->destroy();
         Session::kill();
         Session::getInstance($config)->start();
         $_SESSION['test'] = 'je suis chiffre';
         $content = $this->getSessionFileContent();
-        self::assertTrue(strpos($content, 'je suis chiffre') === false);
-    }*/
+        self::assertTrue(!str_contains($content, 'je suis chiffre'));
+    }
 
     /*public function testNonEncryption()
     {
@@ -29,8 +36,8 @@ class SessionSecureStorageTest extends TestCase
         Session::getInstance($config)->start();
         $_SESSION['test'] = 'je suis chiffre';
         $content = $this->getSessionFileContent();
-        self::assertTrue(strpos($content, 'je suis chiffre') !== false);
-    }
+        self::assertTrue(str_contains($content, 'je suis chiffre'));
+    }*/
 
     public function testFingerprint()
     {
@@ -212,11 +219,11 @@ class SessionSecureStorageTest extends TestCase
         self::assertEquals(3, count($_COOKIE));
         self::assertTrue(isset($_COOKIE['bob']));
         $storage->destroy();
-    }*/
+    }
 
-    /*private function getSessionFileContent()
+    private function getSessionFileContent()
     {
-        session_commit();
+        //session_commit();
         return file_get_contents(Session::getSavePath() . '/sess_' . session_id());
-    }*/
+    }
 }
