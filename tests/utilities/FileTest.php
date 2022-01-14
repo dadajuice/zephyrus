@@ -6,6 +6,47 @@ use Zephyrus\Utilities\FileSystem\File;
 
 class FileTest extends TestCase
 {
+    public function testEncryption()
+    {
+        $file = File::create(ROOT_DIR . '/lib/filesystem/to_encrypt.txt');
+        self::assertTrue(file_exists(ROOT_DIR . '/lib/filesystem/to_encrypt.txt'));
+
+        $file->write("my secret");
+        self::assertEquals("my secret", $file->read());
+
+        $file->encrypt('my_key');
+        self::assertNotEquals("my secret", $file->read());
+
+        $file->decrypt("my_key");
+        self::assertEquals("my secret", $file->read());
+
+        unlink(ROOT_DIR . '/lib/filesystem/to_encrypt.txt');
+    }
+
+    public function testEncryptionCopy()
+    {
+        $file = File::create(ROOT_DIR . '/lib/filesystem/to_encrypt.txt');
+        self::assertTrue(file_exists(ROOT_DIR . '/lib/filesystem/to_encrypt.txt'));
+
+        $file->write("my secret");
+        self::assertEquals("my secret", $file->read());
+
+        $file->encrypt('my_key', ROOT_DIR . '/lib/filesystem/to_encrypt2.txt');
+        self::assertTrue(file_exists(ROOT_DIR . '/lib/filesystem/to_encrypt2.txt'));
+
+        self::assertEquals("my secret", $file->read());
+        $file = new File(ROOT_DIR . '/lib/filesystem/to_encrypt2.txt');
+        self::assertNotEquals("my secret", $file->read());
+        $file->decrypt("my_key", ROOT_DIR . '/lib/filesystem/to_encrypt3.txt');
+        self::assertTrue(file_exists(ROOT_DIR . '/lib/filesystem/to_encrypt3.txt'));
+        $file = new File(ROOT_DIR . '/lib/filesystem/to_encrypt3.txt');
+        self::assertEquals("my secret", $file->read());
+
+        unlink(ROOT_DIR . '/lib/filesystem/to_encrypt.txt');
+        unlink(ROOT_DIR . '/lib/filesystem/to_encrypt2.txt');
+        unlink(ROOT_DIR . '/lib/filesystem/to_encrypt3.txt');
+    }
+
     public function testCreate()
     {
         $file = File::create(ROOT_DIR . '/lib/filesystem/newly.txt');
@@ -15,6 +56,7 @@ class FileTest extends TestCase
         self::assertEquals('txt', $file->getExtension());
         self::assertEquals(ROOT_DIR . '/lib/filesystem', $file->getDirectoryName());
         self::assertEquals(date(FORMAT_DATE), date(FORMAT_DATE, $file->getLastModifiedTime()));
+        self::assertEquals(date(FORMAT_DATE), date(FORMAT_DATE, $file->getLastAccessedTime()));
         self::assertFalse(strpos($file->getRealPath(), '..'));
     }
 
