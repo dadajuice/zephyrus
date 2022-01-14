@@ -1,7 +1,5 @@
 <?php namespace Zephyrus\Security\IntrusionDetection;
 
-use stdClass;
-
 class IntrusionMonitor
 {
     /**
@@ -10,20 +8,6 @@ class IntrusionMonitor
      * @var array
      */
     private array $rules;
-
-    /**
-     * List of all the intrusion detailed data which has been detected by the run method.
-     *
-     * @var array
-     */
-    private array $intrusions = [];
-
-    /**
-     * Global impact of all the intrusion detected.
-     *
-     * @var int
-     */
-    private int $impact = 0;
 
     /**
      * Prepares the monitor with a set of IDS rules to verify.
@@ -40,45 +24,20 @@ class IntrusionMonitor
      * return the resulting impact. The complete details can be obtained with the getReports method.
      *
      * @param array $data
-     * @return int
+     * @return IntrusionReport
      */
-    public function run(array $data): int
+    public function run(array $data): IntrusionReport
     {
+        $report = new IntrusionReport();
         foreach ($data as $parameter => $value) {
-            $this->executeAllRules($parameter, $value);
-        }
-        return $this->impact;
-    }
-
-    public function getImpact(): int
-    {
-        return $this->impact;
-    }
-
-    public function getReports(): array
-    {
-        return $this->intrusions;
-    }
-
-    private function executeAllRules($parameter, $value)
-    {
-        foreach ($this->rules as $intrusionRule) {
-            if ($this->detectIntrusion($intrusionRule->rule, $value)) {
-                $this->addIntrusion($intrusionRule, $parameter, $value);
-                $this->impact += $intrusionRule->impact;
+            foreach ($this->rules as $rule) {
+                if ($this->detectIntrusion($rule->rule, $value)) {
+                    $report->addIntrusion($rule, $parameter, $value);
+                }
             }
         }
-    }
-
-    private function addIntrusion(stdClass $rule, string $parameter, $value)
-    {
-        $this->intrusions[] = (object) [
-            'impact' => $rule->impact,
-            'description' => $rule->description,
-            'tags' => $rule->tags->tag,
-            'argument_name' => $parameter,
-            'argument_value' => $value
-        ];
+        $report->end();
+        return $report;
     }
 
     /**

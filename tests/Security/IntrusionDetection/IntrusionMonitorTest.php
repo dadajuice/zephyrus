@@ -10,29 +10,29 @@ class IntrusionMonitorTest extends TestCase
     {
         $rules = (new IntrusionRuleLoader())->loadFromFile();
         $monitor = new IntrusionMonitor($rules);
-        $impact = $monitor->run([
+        $report = $monitor->run([
             'username' => "' AND 1=1#",
             'password' => "<script>document.cookie;</script>"
         ]);
-        $reports = $monitor->getReports();
-        self::assertCount(6, $reports); // Detected 6 intrusions
-        self::assertEquals(23, $impact);
-        self::assertEquals(23, $monitor->getImpact());
-        self::assertTrue(is_object($reports[2]));
-        self::assertEquals("Detects very basic XSS probings", $reports[2]->description);
+        $events = $report->getDetectedIntrusions();
+        self::assertCount(6, $events); // Detected 6 intrusions
+        self::assertEquals(23, $report->getImpact());
+        self::assertTrue(is_object($events[2]));
+        self::assertEquals("Detects very basic XSS probings", $events[2]->description);
+        self::assertTrue($report->getExecutionTime() > 0.0);
     }
 
     public function testNoDetection()
     {
         $rules = (new IntrusionRuleLoader())->loadFromFile();
         $monitor = new IntrusionMonitor($rules);
-        $impact = $monitor->run([
+        $report = $monitor->run([
             'username' => "blewis",
             'password' => "passw0rd"
         ]);
-        $reports = $monitor->getReports();
-        self::assertCount(0, $reports);
-        self::assertEquals(0, $impact);
-        self::assertEquals(0, $monitor->getImpact());
+        $events = $report->getDetectedIntrusions();
+        self::assertCount(0, $events);
+        self::assertEquals(0, $report->getImpact());
+        self::assertTrue($report->getExecutionTime() > 0.0);
     }
 }
