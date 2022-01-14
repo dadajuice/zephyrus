@@ -172,6 +172,17 @@ class Directory extends FileSystemNode
     }
 
     /**
+     * Obtains the last access timestamp of the path/file defined in the constructor. If its a directory, it will
+     * automatically fetch the latest accessed time.
+     *
+     * @return int
+     */
+    public function getLastAccessedTime(): int
+    {
+        return $this->getDirectoryLastAccessedTime($this->path);
+    }
+
+    /**
      * Recursively delete everything inside a given directory path. Makes sure
      * to ignore <.> and <..> navigation directory. Returns true on success or
      * false on failure.
@@ -207,6 +218,26 @@ class Directory extends FileSystemNode
             $lastModifiedTime = max($fileLastModifiedTime, $directoryLastModifiedTime, $lastModifiedTime);
         }
         return ($lastModifiedTime == 0) ? $directoryLastModifiedTime : $lastModifiedTime;
+    }
+
+    /**
+     * Obtains the last access timestamp of the given directory path. It will recursively fetch the most recent access
+     * inside.
+     *
+     * @param string $rootDirectoryPath
+     * @return int
+     */
+    private function getDirectoryLastAccessedTime(string $rootDirectoryPath): int
+    {
+        $lastAccessedTime = 0;
+        $directoryLastAccessedTime = fileatime($rootDirectoryPath);
+        foreach (glob("$rootDirectoryPath/*") as $file) {
+            $fileLastModifiedTime = (is_file($file))
+                ? fileatime($file)
+                : $this->getDirectoryLastAccessedTime($file);
+            $lastAccessedTime = max($fileLastModifiedTime, $directoryLastAccessedTime, $lastAccessedTime);
+        }
+        return ($lastAccessedTime == 0) ? $directoryLastAccessedTime : $lastAccessedTime;
     }
 
     /**
