@@ -16,11 +16,12 @@ class EncryptedSessionHandlerTest extends TestCase
      */
     private $sessionId;
 
-    /*protected function setUp(): void
+    protected function setUp(): void
     {
         if (isset($_COOKIE['key_phpsessid'])) {
             unset($_COOKIE['key_phpsessid']);
         }
+        Session::getInstance()->destroy();
         Session::kill();
         $this->handler = new EncryptedSessionHandler();
         session_set_save_handler($this->handler);
@@ -71,7 +72,7 @@ class EncryptedSessionHandlerTest extends TestCase
      * Set-Cookie header and place it into the $_COOKIE super global just like the normal workflow of request would
      * do.
      */
-    /*private function setupCookie()
+    private function setupCookie()
     {
         $headers = xdebug_get_headers();
         $headers = array_reverse($headers);
@@ -85,5 +86,5 @@ class EncryptedSessionHandlerTest extends TestCase
             }
         }
         $_COOKIE['key_phpsessid'] = urldecode($cookie);
-    }*/
+    }
 }
