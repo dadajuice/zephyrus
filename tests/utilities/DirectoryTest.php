@@ -13,6 +13,11 @@ class DirectoryTest extends TestCase
         self::assertEquals(date(FORMAT_DATE), date(FORMAT_DATE, $directory->getLastModifiedTime()));
         Directory::create(ROOT_DIR . '/lib/filesystem/new_dir', 0777, true);
         self::assertTrue(file_exists(ROOT_DIR . '/lib/filesystem/new_dir'));
+        File::create(ROOT_DIR . '/lib/filesystem/new_dir/yoyo.test');
+        self::assertTrue(file_exists(ROOT_DIR . '/lib/filesystem/new_dir/yoyo.test'));
+        Directory::create(ROOT_DIR . '/lib/filesystem/new_dir/newer_dir', 0777, true);
+        File::create(ROOT_DIR . '/lib/filesystem/new_dir/newer_dir/yoyo2.test');
+        self::assertEquals(date(FORMAT_DATE), date(FORMAT_DATE, $directory->getLastAccessedTime()));
     }
 
     /**
