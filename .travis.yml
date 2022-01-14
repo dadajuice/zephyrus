@@ -14,7 +14,7 @@ before_script:
   - travis_retry composer install --no-interaction
 
 script:
-  - vendor/bin/phpunit --verbose --stderr --coverage-clover=coverage.xml
+  - XDEBUG_MODE=coverage vendor/bin/phpunit --stderr --verbose
 
 after_script:
   - vendor/bin/test-reporter --coverage-report coverage.xml
