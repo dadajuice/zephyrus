@@ -6,7 +6,7 @@ use Zephyrus\Utilities\FileSystem\File;
 
 class IntrusionRuleLoader
 {
-    private const DEFAULT_FILE =  'default_filter_rules.json';
+    private const DEFAULT_FILE = 'default_filter_rules.json';
 
     /**
      * @var string
@@ -24,9 +24,6 @@ class IntrusionRuleLoader
         $this->filePath = $ruleFile;
     }
 
-    /**
-     *
-     */
     public function loadFromFile(): array
     {
         $json = json_decode(file_get_contents($this->filePath));

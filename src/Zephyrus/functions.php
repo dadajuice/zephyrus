@@ -143,6 +143,8 @@ function __(string $message, ...$args): string
  */
 function isAssociativeArray(array $array): bool
 {
-    if (array() === $array) return false;
+    if ([] === $array) {
+        return false;
+    }
     return array_keys($array) != range(0, count($array) - 1);
 }
