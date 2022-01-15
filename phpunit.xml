@@ -6,7 +6,7 @@
     </include>
     <exclude/>
     <report>
-      <clover outputFile="tests/coverage/result.xml"/>
+      <clover outputFile="clover.xml"/>
       <html outputDirectory="tests/coverage/result"/>
     </report>
   </coverage>
