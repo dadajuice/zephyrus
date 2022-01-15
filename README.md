@@ -23,7 +23,7 @@ Bienvenue dans le Framework Zephyrus! Ce framework est fondé sur un modèle pé
 * Traitement des vues avec le préprocesseur HTML _[Pug](https://github.com/pug-php/pug)_ nativement intégré ou simplement du PHP natif.
 * Approche pédagogique pour la conception élégante de classes et favorise une rétrocompatibilité avec les fonctionnalités natives de PHP comme l'utilisation des super-globales, de la session et autres.
 * Routeur de requêtes simple et flexible basé sur des contrôleurs incluant une intégration facile de middlewares dans le flux d'une requête et d'un contrôleur du projet. Facilite la segmentation des responsabilités et la lecture d'une chaîne d'exécution.
-* Plusieurs mécanismes de sécurité intégrés tel que les entêtes CSP, les jetons CSRF, protection XSS, détection d'intrusion (_[Expose](https://github.com/enygma/expose)_), mécanisme d'authorisation et plus encore!
+* Plusieurs mécanismes de sécurité intégrés tel que les entêtes CSP, les jetons CSRF, protection XSS, détection d'intrusion basé sur le projet (_[Expose](https://github.com/enygma/expose)_), mécanisme d'authorisation et plus encore!
 * Philosophie d'accès aux données depuis des courtiers manuellement définis offrant un contôle complet sur la construction des requêtes SQL et, par conséquent, une facilité de maintenance et d'optimisation.
 * Approche simple pour intégrer des recherches, tris et pagination sur les requêtes manuelles.
 * Système de validation de formulaires élégant et facilement extensible offrant une multitude de règles nativement sur les nombres, les chaînes, les fichiers téléversés, les dates, etc.
@@ -34,7 +34,7 @@ Bienvenue dans le Framework Zephyrus! Ce framework est fondé sur un modèle pé
 * Et plus encore !
 
 # Installation
-Zephyrus nécessite PHP 7.1 ou plus. Présentement, supporte uniquement Apache comme serveur web (pour un autre type de serveur, il suffirait d’adapter les fichiers .htaccess). Le gestionnaire de dépendance [Composer](https://getcomposer.org/) est également requis. La structure résultante de l’installation contient plusieurs exemples pour faciliter les premiers pas.
+Zephyrus nécessite PHP 8.0 ou plus. Présentement, supporte uniquement Apache comme serveur web (pour un autre type de serveur, il suffirait d’adapter les fichiers .htaccess). Le gestionnaire de dépendance [Composer](https://getcomposer.org/) est également requis. La structure résultante de l’installation contient plusieurs exemples pour faciliter les premiers pas.
 
 #### Option 1 : Installation depuis composer (recommandé)
 ```
@@ -84,7 +84,7 @@ app/Controllers/ExampleBroker.php
 
 use Models\Brokers\ClientBroker;
 
-class ExampleController extends ApiController
+class ExampleController extends Controller
 {
     public function initializeRoutes()
     {      
@@ -95,7 +95,7 @@ class ExampleController extends ApiController
     public function index()
     {
         $broker = new ClientBroker();       
-        return $this->success(['clients' => $broker->findAll()]);
+        return $this->json(['clients' => $broker->findAll()]);
     }
 
     public function read($clientId)
@@ -105,7 +105,7 @@ class ExampleController extends ApiController
         if (is_null($client)) {
             return $this->abortNotFound();  
         }
-        return $this->success(['client' => $client]);
+        return $this->json(['client' => $client]);
     }
 }
 ```
@@ -118,7 +118,7 @@ class ExampleController extends ApiController
 use Models\Brokers\UserBroker;
 use Zephyrus\Application\Rule;
 
-class ExampleController extends ApiController
+class ExampleController extends Controller
 {
     public function initializeRoutes()
     {              
@@ -133,20 +133,23 @@ class ExampleController extends ApiController
     
         // Appliquer une série de règles de validation sur les champs nécessaires. Il existe une grande quantité
         // de validations intégrés dans Zephyrus. Consulter les Rule:: pour les découvrir.
-        $form->validate('firstname', Rule::notEmpty("Firstname must not be empty"));
-        $form->validate('lastname', Rule::notEmpty("Lastname must not be empty"));
-        $form->validate('birthdate', Rule::date("Date is invalid"));
-        $form->validate('email', Rule::email("Email is invalid"));
-        $form->validate('password', Rule::passwordCompliant("Password does not meet security requirements"));
-        $form->validate('password_confirm', Rule::sameAs("password", "Password doesn't match"));
-        $form->validate('username', Rule::notEmpty("Username must not be empty"));
-        $form->validate('username', new Rule(function ($value) {
+        $form->field('firstname')->validate(Rule::notEmpty("Firstname must not be empty")));
+        $form->field('lastname')->validate(Rule::notEmpty("Lastname must not be empty"));
+        $form->field('birthdate')->validate(Rule::date("Date is invalid"));
+        $form->field('email')
+            ->validate(Rule::notEmpty("Email must not be empty"))
+            ->validate(Rule::email("Email is invalid"));
+        $form->field('password')->validate(Rule::passwordCompliant("Password does not meet security requirements"));
+        $form->field('password_confirm')->validate(Rule::sameAs("password", "Password doesn't match"));
+        $form->field('username')
+            ->validate(Rule::notEmpty("Username must not be empty"))
+            ->validate(new Rule(function ($value) {
             return $value != "admin";
-        }, "Username must not be admin!"));
+        }, "Username must not be admin!"));        
 
-        // Si la vérification échoue, retourner les messages d'erreur
+        // Si la vérification échoue, retourner les messages d'erreur avec leur champs
         if (!$form->verify()) {            
-            return $this->error($form->getErrorMessages());
+            return $this->json($form->getErrors());
         }
 
         // Effectuer le traitement si aucune erreur n'est détectée (dans ce cas, ajouter l'utilisateur depuis
@@ -154,7 +157,7 @@ class ExampleController extends ApiController
         $clientId = (new UserBroker())->insert($form->buildObject());
 
         // Retourner au client l'identifiant du nouvel utilisateur
-        return $this->success(['client_id' => $clientId]);
+        return $this->json(['client_id' => $clientId]);
     }
 }
 ```
