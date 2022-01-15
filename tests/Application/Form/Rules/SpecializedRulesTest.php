@@ -79,13 +79,12 @@ class SpecializedRulesTest extends TestCase
         self::assertFalse($rule->isValid(""));
     }
 
-    // Do not test since it requires an internet connection
-    /*public function testIsLiveUrl()
+    public function testIsLiveUrl()
     {
         $rule = Rule::liveUrl();
         self::assertTrue($rule->isValid("https://google.com"));
         self::assertFalse($rule->isValid("https://lksdfksdfkhjsdfkjhfdskjhfdskjfdsjkhdfs.clkdsfh.com"));
-    }*/
+    }
 
     public function testIsYouTubeUrl()
     {
