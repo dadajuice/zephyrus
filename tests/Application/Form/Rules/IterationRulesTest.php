@@ -5,6 +5,22 @@ use Zephyrus\Application\Rule;
 
 class IterationRulesTest extends TestCase
 {
+    public function testAssociativeArray()
+    {
+        $rule = Rule::associativeArray("not assoc");
+        self::assertFalse($rule->isValid([1, 2, 3, 4, 5, 6]));
+        self::assertFalse($rule->isValid(["Bob", "Lewis", 4, 3.5, "Toto"]));
+        self::assertTrue($rule->isValid([
+            'name' => 'Bob',
+            'age' => 30
+        ]));
+        self::assertTrue($rule->isValid([
+            'name' => 'Bob',
+            2 => 'test',
+            'age' => 30
+        ]));
+    }
+
     public function testArrayAll()
     {
         $rule = Rule::all(Rule::integer(), "not all integers");
@@ -145,6 +161,27 @@ class IterationRulesTest extends TestCase
         self::assertTrue($rule->isValid(['name' => 'Bob', 'age' => 23]));
         self::assertFalse($rule->isValid(['name' => 'Bob']));
         self::assertFalse($rule->isValid(['age' => 'Bob']));
+    }
+
+    public function testInvalidAll()
+    {
+        $rule = Rule::all([Rule::integer(), "oups"], "invalid array");
+        self::assertFalse($rule->isValid([1, 2, 3]));
+        self::assertEquals("invalid array", $rule->getErrorMessage());
+    }
+
+    public function testInvalidNested()
+    {
+        $rule = Rule::nested('age', Rule::integer(), "invalid array");
+        self::assertFalse($rule->isValid("nope array"));
+        self::assertEquals("invalid array", $rule->getErrorMessage());
+    }
+
+    public function testInvalidNestedArray()
+    {
+        $rule = Rule::nested('age', [Rule::integer(), "oups"], "invalid array");
+        self::assertFalse($rule->isValid(['name' => 'Bob', 'age' => 23]));
+        self::assertEquals("invalid array", $rule->getErrorMessage());
     }
 
     public function testNestedSimpleObject()
