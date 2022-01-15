@@ -7,6 +7,7 @@ env:
   global:
   - CC_TEST_REPORTER_ID: 909885d13238ccab94f6492ea52185141ed0f478883b7a5db1070a5c9830f666
   - CODECOV_TOKEN: d001a9d9-d243-4552-a0a1-ba2a0852e995
+  - XDEBUG_MODE: coverage
 
 before_script:
   - sudo locale-gen --no-archive fr_CA.UTF-8
