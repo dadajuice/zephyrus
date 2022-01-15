@@ -43,6 +43,13 @@ trait BaseRules
         }, $errorMessage);
     }
 
+    public static function associativeArray(string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data) {
+            return Validation::isAssociativeArray($data);
+        }, $errorMessage);
+    }
+
     public static function array(string $errorMessage = ""): Rule
     {
         return new Rule(function ($data) {

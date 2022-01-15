@@ -27,6 +27,17 @@ trait BaseValidations
         return ($min <= $data) && ($data <= $max);
     }
 
+    /**
+     * Verifies if an array is associative, meaning that the key must not be numerical and sequential (0 - x).
+     *
+     * @param $data
+     * @return bool
+     */
+    public static function isAssociativeArray($data): bool
+    {
+        return is_array($data) && array_keys($data) != range(0, count($data) - 1);
+    }
+
     public static function isBoolean($data): bool
     {
         return is_bool($data)

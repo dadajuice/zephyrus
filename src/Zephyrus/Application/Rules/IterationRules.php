@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Application\Rules;
 
 use Zephyrus\Application\Rule;
+use Zephyrus\Utilities\Validation;
 
 trait IterationRules
 {
@@ -14,7 +15,7 @@ trait IterationRules
      */
     public static function all(Rule|array $rule, string $errorMessage = ""): Rule
     {
-        if (is_array($rule) && isAssociativeArray($rule)) {
+        if (is_array($rule) && Validation::isAssociativeArray($rule)) {
             return self::allNested($rule, $errorMessage);
         }
         return self::allSingleRule($rule, $errorMessage);
@@ -32,7 +33,7 @@ trait IterationRules
      */
     public static function nested(string $key, Rule|array $rule, string $errorMessage = ""): Rule
     {
-        if (is_array($rule) && isAssociativeArray($rule)) {
+        if (is_array($rule) && Validation::isAssociativeArray($rule)) {
             return self::nestedArray($key, $rule, $errorMessage);
         }
         return self::nestedRule($key, $rule, $errorMessage);
@@ -94,12 +95,12 @@ trait IterationRules
             if (is_object($data) && !property_exists($data, $key)) {
                 return false;
             }
-            if (!isAssociativeArray($rules)) {
+            if (!Validation::isAssociativeArray($rules)) {
                 return false;
             }
 
             foreach ($rules as $fieldName => $nestedRule) {
-                if (is_array($nestedRule) && isAssociativeArray($nestedRule)) {
+                if (Validation::isAssociativeArray($nestedRule)) {
                     $innerNestedRule = self::nested($fieldName, $nestedRule, $errorMessage);
                     $valid = $innerNestedRule->isValid(is_array($data) ? $data[$key] : $data->$key, $fields);
                     if (!$valid) {
@@ -192,7 +193,7 @@ trait IterationRules
             if (!is_array($data)) {
                 return false;
             }
-            if (!isAssociativeArray($rules)) {
+            if (!Validation::isAssociativeArray($rules)) {
                 return false;
             }
 
