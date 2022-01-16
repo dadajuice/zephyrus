@@ -14,7 +14,7 @@ use Zephyrus\Security\IntrusionDetection;
 
 class SecurityControllerTest extends TestCase
 {
-    /*public function testGetRouting()
+    public function testGetRouting()
     {
         $router = new Router();
         $controller = new class($router) extends Controller {
@@ -68,10 +68,6 @@ class SecurityControllerTest extends TestCase
             }
         };
 
-        $ids = IntrusionDetection::getInstance();
-        $ids->setSurveillance(IntrusionDetection::GET | IntrusionDetection::POST | IntrusionDetection::REQUEST
-            | IntrusionDetection::COOKIE);
-
         $controller->initializeRoutes();
         $req = new Request('http://test.local/', 'get');
         ob_start();
@@ -84,11 +80,7 @@ class SecurityControllerTest extends TestCase
         // CSRF tokens applied
         self::assertTrue(strpos($output, '<input type="hidden" name="CSRFName"') !== false);
         self::assertTrue(strpos($output, '<input type="hidden" name="CSRFToken"') !== false);
-
-        // Headers
-        // TODO: Remove static index (51)
-        self::assertTrue(strpos(xdebug_get_headers()[51], "Content-Security-Policy") !== false);
-    }*/
+    }
 
     public function testGetRoutingFailed()
     {
