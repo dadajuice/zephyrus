@@ -38,13 +38,13 @@ Zephyrus nécessite PHP 8.0 ou plus. Présentement, supporte uniquement Apache c
 
 #### Option 1 : Installation depuis composer (recommandé)
 ```
-$ composer create-project zephyrus/framework nom_projet
+$ composer create-project zephyrus/framework <PROJECT_NAME>
 ```
 
 #### Option 2 : Depuis une archive
 ```
-$ mkdir nom_projet
-$ cd nom_projet
+$ mkdir <PROJECT_NAME>
+$ cd <PROJECT_NAME>
 $ wget https://github.com/dadajuice/zephyrus-framework/archive/vx.y.z.tar.gz
 $ tar -xvf vx.y.z.tar.gz --strip 1
 $ composer install
@@ -54,6 +54,24 @@ $ composer install
 ```
 $ git clone https://github.com/dadajuice/zephyrus-framework.git
 $ composer install  
+```
+
+## Intégration avec Apache
+Une fois le projet installé, il suffit d'ajouter un entré dans vos vhost qui pointe vers le répertoire `/public` du 
+projet.
+
+```
+<VirtualHost *:80>
+        ServerName <HOST or IP>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/<PROJECT_NAME>/public        
+        <Directory /var/www/>
+                AllowOverride All
+                Require all granted
+        </Directory>
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
 ```
 
 # Utilisation
