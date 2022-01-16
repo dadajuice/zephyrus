@@ -106,7 +106,7 @@ function val(string $fieldId, $defaultValue = "")
  */
 function nonce(): string
 {
-    return ContentSecurityPolicy::getRequestNonce();
+    return ContentSecurityPolicy::getRequestNonce() ?? "";
 }
 
 /**
