@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Tests;
+<?php namespace Zephyrus\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Network\Router;
@@ -12,7 +12,7 @@ use Zephyrus\Security\ContentSecurityPolicy;
 use Zephyrus\Security\Controller;
 use Zephyrus\Security\IntrusionDetection;
 
-class ASecurityControllerTest extends TestCase
+class SecurityControllerTest extends TestCase
 {
     /*public function testGetRouting()
     {
@@ -146,6 +146,10 @@ class ASecurityControllerTest extends TestCase
         ob_start();
         $router->run($req);
         $output = ob_get_clean();
+        self::assertTrue($controller->getCsrfGuard()->isEnabled());
+        self::assertTrue($controller->getIntrusionDetection()->isEnabled());
+        self::assertTrue($controller->getAuthorization()->isAuthorized("/"));
+        self::assertEquals("SAMEORIGIN", $controller->getSecureHeader()->getFrameOptions());
         self::assertEquals("invalid access", $output);
     }
 }
