@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Security;
 
-use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\IntrusionDetectionException;
 use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Exceptions\UnauthorizedAccessException;
@@ -13,7 +12,7 @@ abstract class Controller extends \Zephyrus\Application\Controller
     /**
      * @var CsrfGuard
      */
-    private $csrfGuard;
+    private CsrfGuard $csrfGuard;
 
     /**
      * @var SecureHeader
@@ -54,8 +53,8 @@ abstract class Controller extends \Zephyrus\Application\Controller
         if ($this->ids->isEnabled()) {
             $this->ids->run();
         }
-        if (Configuration::getSecurityConfiguration('csrf_guard_enabled')) {
-            $this->csrfGuard->guard();
+        if ($this->csrfGuard->isEnabled()) {
+            $this->csrfGuard->run();
         }
         return null;
     }
@@ -64,8 +63,8 @@ abstract class Controller extends \Zephyrus\Application\Controller
     {
         if (!is_null($response)
             && $response->getContentType() == ContentType::HTML
-            && Configuration::getSecurityConfiguration('csrf_guard_enabled')
-            && Configuration::getSecurityConfiguration('csrf_guard_automatic_html')) {
+            && $this->csrfGuard->isEnabled()
+            && $this->csrfGuard->isHtmlIntegrationEnabled()) {
             $content = $this->csrfGuard->injectForms($response->getContent());
             $response->setContent($content);
         }
