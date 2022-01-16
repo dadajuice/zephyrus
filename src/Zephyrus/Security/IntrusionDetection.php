@@ -3,7 +3,7 @@
 use RuntimeException;
 use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\IntrusionDetectionException;
-use Zephyrus\Network\RequestFactory;
+use Zephyrus\Network\Request;
 use Zephyrus\Security\IntrusionDetection\IntrusionCache;
 use Zephyrus\Security\IntrusionDetection\IntrusionMonitor;
 use Zephyrus\Security\IntrusionDetection\IntrusionReport;
@@ -40,11 +40,28 @@ class IntrusionDetection
     /**
      * @var bool
      */
+    private bool $enabled = true;
+
+    /**
+     * @var bool
+     */
     private bool $includeCookiesMonitoring = true;
 
-    public function __construct(array $configurations = [])
+    /**
+     * @var IntrusionReport | null
+     */
+    private ?IntrusionReport $report = null;
+
+    /**
+     * @var Request | null
+     */
+    private ?Request $request;
+
+    public function __construct(?Request &$request, array $configurations = [])
     {
+        $this->request = &$request;
         $this->initializeConfigurations($configurations);
+        $this->initializeEnabledState();
         $this->initializeMonitor();
         $this->initializeExceptions();
         $this->initializeImpactThreshold();
@@ -57,14 +74,35 @@ class IntrusionDetection
      *
      * @throws IntrusionDetectionException
      */
-    public function run(): IntrusionReport
+    public function run()
     {
         $this->monitor->setExceptions($this->exceptions);
-        $report = $this->monitor->run($this->getMonitoringInputs());
-        if ($report->getImpact() > $this->impactThreshold) {
-            throw new IntrusionDetectionException($report);
+        $this->report = $this->monitor->run($this->getMonitoringInputs());
+        if ($this->report->getImpact() > $this->impactThreshold) {
+            throw new IntrusionDetectionException($this->report);
         }
-        return $report;
+    }
+
+    /**
+     * Verifies if the IDS monitoring is enabled based on the instance configuration. Should be use as a condition to
+     * execute the run method.
+     *
+     * @return bool
+     */
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * Retrieves the last run produced report containing the overall details of the detections and execution time. Will
+     * be null if the method run hasn't been called.
+     *
+     * @return IntrusionReport|null
+     */
+    public function getReport(): ?IntrusionReport
+    {
+        return $this->report;
     }
 
     private function initializeConfigurations(array $configurations)
@@ -115,6 +153,13 @@ class IntrusionDetection
         }
     }
 
+    private function initializeEnabledState()
+    {
+        if (isset($this->configurations['enabled'])) {
+            $this->enabled = $this->configurations['enabled'];
+        }
+    }
+
     /**
      * Prepares the request parameters to be verified by the IDS monitor. Will automatically include all request data
      * and cookies if included in configurations.
@@ -123,10 +168,9 @@ class IntrusionDetection
      */
     private function getMonitoringInputs(): array
     {
-        $request = RequestFactory::read();
-        $guard = $request->getParameters();
+        $guard = $this->request->getParameters();
         if ($this->includeCookiesMonitoring) {
-            $guard = array_merge($guard, $request->getCookies());
+            $guard = array_merge($guard, $this->request->getCookies());
         }
         return $guard;
     }

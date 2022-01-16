@@ -4,37 +4,36 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Zephyrus\Exceptions\IntrusionDetectionException;
 use Zephyrus\Network\Request;
-use Zephyrus\Network\RequestFactory;
 use Zephyrus\Security\IntrusionDetection;
 
 class IntrusionDetectionTest extends TestCase
 {
     public function testWorking()
     {
-        $ids = new IntrusionDetection();
-        RequestFactory::set(new Request("http://dummy.com", "GET", ['parameters' => [
+        $request = new Request("http://dummy.com", "GET", ['parameters' => [
             'test' => 5
-        ]]));
+        ]]);
+        $ids = new IntrusionDetection($request);
         $ids->run();
-        self::assertEquals("5", RequestFactory::read()->getParameter('test'));
+        self::assertEquals("5", $request->getParameter('test'));
     }
 
     public function testDetectionInjection()
     {
         $this->expectException(IntrusionDetectionException::class);
-        $ids = new IntrusionDetection();
-        RequestFactory::set(new Request("http://dummy.com", "GET", ['parameters' => [
+        $request = new Request("http://dummy.com", "GET", ['parameters' => [
             'test' => "' AND 1=1#"
-        ]]));
+        ]]);
+        $ids = new IntrusionDetection($request);
         $ids->run();
     }
 
     public function testDetectionExceptionData()
     {
-        $ids = new IntrusionDetection();
-        RequestFactory::set(new Request("http://dummy.com", "GET", ['parameters' => [
+        $request = new Request("http://dummy.com", "GET", ['parameters' => [
             'test' => "' AND 1=1#"
-        ]]));
+        ]]);
+        $ids = new IntrusionDetection($request);
         try {
             $ids->run();
         } catch (IntrusionDetectionException $e) {
@@ -46,41 +45,41 @@ class IntrusionDetectionTest extends TestCase
 
     public function testImpactThreshold()
     {
-        $ids = new IntrusionDetection([
+        $request = new Request("http://dummy.com", "GET", ['parameters' => [
+            'test' => "' AND 1=1#"
+        ]]);
+        $ids = new IntrusionDetection($request, [
             'enabled' => true,
             'cached' => true,
             'impact_threshold' => 10,
             'monitor_cookies' => true,
             'exceptions' => []
         ]);
-        RequestFactory::set(new Request("http://dummy.com", "GET", ['parameters' => [
-            'test' => "' AND 1=1#"
-        ]]));
-        $report = $ids->run();
-        self::assertEquals(3, $report->getImpact());
+        $ids->run();
+        self::assertEquals(3, $ids->getReport()->getImpact());
     }
 
     public function testImpactThresholdMisconfiguration()
     {
         $this->expectException(RuntimeException::class);
-        $ids = new IntrusionDetection([
+        $request = new Request("http://dummy.com", "GET", ['parameters' => [
+            'test' => "' AND 1=1#"
+        ]]);
+        $ids = new IntrusionDetection($request, [
             'impact_threshold' => "oups"
         ]);
-        RequestFactory::set(new Request("http://dummy.com", "GET", ['parameters' => [
-            'test' => "' AND 1=1#"
-        ]]));
-        $report = $ids->run();
-        self::assertEquals(3, $report->getImpact());
+        $ids->run();
+        self::assertEquals(3, $ids->getReport()->getImpact());
     }
 
     public function testNoCache()
     {
-        $ids = new IntrusionDetection([
+        $request = new Request("http://dummy.com", "GET", ['parameters' => [
+            'test' => "' AND 1=1#"
+        ]]);
+        $ids = new IntrusionDetection($request, [
             'cached' => false
         ]);
-        RequestFactory::set(new Request("http://dummy.com", "GET", ['parameters' => [
-            'test' => "' AND 1=1#"
-        ]]));
         try {
             $ids->run();
         } catch (IntrusionDetectionException $e) {
