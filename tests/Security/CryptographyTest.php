@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Tests;
+<?php namespace Zephyrus\Tests\Security;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -21,6 +21,18 @@ class CryptographyTest extends TestCase
         Cryptography::decryptFile(ROOT_DIR . '/secrets-temp.txt', 'secretlock');
         self::assertEquals('im batman', file_get_contents(ROOT_DIR . '/secrets-temp.txt'));
         unlink(ROOT_DIR . '/secrets-temp.txt');
+    }
+
+    public function testInexistantFileEncryption()
+    {
+        self::expectException(InvalidArgumentException::class);
+        Cryptography::encryptFile(ROOT_DIR . '/jkhdsfkhsdf.txt', 'secretlock');
+    }
+
+    public function testInexistantFileDecryption()
+    {
+        self::expectException(InvalidArgumentException::class);
+        Cryptography::decryptFile(ROOT_DIR . '/jkhdsfkhsdf.txt', 'secretlock');
     }
 
     public function testFailedDecryption()
