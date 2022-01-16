@@ -23,9 +23,9 @@ class Cryptography
      * @param string $algorithm
      * @return string
      */
-    public static function hashPassword(string $clearTextPassword, $algorithm = PASSWORD_DEFAULT): string
+    public static function hashPassword(string $clearTextPassword, string $algorithm = PASSWORD_DEFAULT): string
     {
-        $pepper = Configuration::getApplicationConfiguration("password_pepper", null);
+        $pepper = Configuration::getApplicationConfiguration("password_pepper");
         if ($pepper) {
             $clearTextPassword = $clearTextPassword . $pepper;
         }
@@ -42,7 +42,7 @@ class Cryptography
      */
     public static function verifyHashedPassword(string $clearTextPassword, string $hash): bool
     {
-        $pepper = Configuration::getApplicationConfiguration("password_pepper", null);
+        $pepper = Configuration::getApplicationConfiguration("password_pepper");
         if ($pepper) {
             $clearTextPassword = $clearTextPassword . $pepper;
         }
@@ -129,10 +129,10 @@ class Cryptography
      * characters ([0-9a-Z]) are used.
      *
      * @param int $length
-     * @param string | array $characters
+     * @param string|array|null $characters
      * @return string
      */
-    public static function randomString(int $length, $characters = null): string
+    public static function randomString(int $length, string|array $characters = null): string
     {
         if (is_null($characters)) {
             $characters = array_merge(range('a', 'z'), range('A', 'Z'), range('0', '9'));
@@ -220,12 +220,12 @@ class Cryptography
      * Encrypts the entire content of the given file with the specified key. This method overrides the original if no
      * destination is specified. Use the same algorithm as the encrypt function. This method makes sure to validate the
      * existence of the file and the support of the algorithm. Throws InvalidArgumentException otherwise. Warning! Make
-     * sure to not loose the key because the file will forever be encrypted.
+     * sure to not lose the key because the file will forever be encrypted.
      *
      * @see encrypt
      * @param string $plainTextFilename
      * @param string $key
-     * @param string $destination
+     * @param string|null $destination
      */
     public static function encryptFile(string $plainTextFilename, string $key, ?string $destination = null)
     {
@@ -245,7 +245,7 @@ class Cryptography
      * @see encrypt
      * @param string $cipherTextFilename
      * @param string $key
-     * @param string $destination
+     * @param string|null $destination
      */
     public static function decryptFile(string $cipherTextFilename, string $key, ?string $destination = null)
     {
@@ -258,7 +258,7 @@ class Cryptography
     }
 
     /**
-     * Encrypts the given plain text with the specified encryption key as usual but also authenticate with an hmac using
+     * Encrypts the given plain text with the specified encryption key as usual but also authenticate with a hmac using
      * the Encrypt-then-MAC approach for authenticated encryption. The result contains the cipher, the hmac and salt.
      *
      * @param string $plainText
@@ -281,7 +281,7 @@ class Cryptography
      * @param string $cipherText
      * @param string $encryptionKey
      * @param string $authenticationKey
-     * @return string
+     * @return string|null
      */
     public static function authDecrypt(string $cipherText, string $encryptionKey, string $authenticationKey): ?string
     {
@@ -313,7 +313,7 @@ class Cryptography
     }
 
     /**
-     * Returns the configured baseline encryption algorithm to be used in the application with the encrypt and decrypt
+     * Returns the configured baseline encryption algorithm to be used in the application with encrypt and decrypt
      * methods.
      *
      * @return string
