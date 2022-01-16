@@ -67,7 +67,7 @@ class ConfigurationFile
     {
         return (is_bool($data))
             ? var_export($data, true)
-            : ((ctype_upper($data)) ? $data : '"' . $data . '"');
+            : ((ctype_upper($data) || is_numeric($data)) ? $data : '"' . $data . '"');
     }
 
     private function buildConfigurationProperty(array &$data, array $sectionValue)

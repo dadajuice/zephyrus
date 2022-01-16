@@ -58,6 +58,7 @@ class ConfigurationFileTest extends TestCase
         $ini = new ConfigurationFile(ROOT_DIR . '/test.ini');
         $data = $ini->read('test', 'propertyA');
         self::assertEquals(1, $data);
+        self::assertTrue(is_int($data));
         @unlink(ROOT_DIR . '/test.ini');
     }
 
