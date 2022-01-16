@@ -9,25 +9,10 @@ use Zephyrus\Network\Router;
 
 abstract class Controller extends \Zephyrus\Application\Controller
 {
-    /**
-     * @var CsrfGuard
-     */
     private CsrfGuard $csrfGuard;
-
-    /**
-     * @var SecureHeader
-     */
-    private $secureHeader;
-
-    /**
-     * @var Authorization
-     */
-    private $authorization;
-
-    /**
-     * @var IntrusionDetection
-     */
-    private $ids;
+    private SecureHeader $secureHeader;
+    private Authorization $authorization;
+    private IntrusionDetection $ids;
 
     public function __construct(Router $router)
     {
