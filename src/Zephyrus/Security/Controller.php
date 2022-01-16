@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Security;
 
 use Zephyrus\Application\Configuration;
+use Zephyrus\Exceptions\IntrusionDetectionException;
 use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Exceptions\UnauthorizedAccessException;
 use Zephyrus\Network\ContentType;
@@ -24,17 +25,24 @@ abstract class Controller extends \Zephyrus\Application\Controller
      */
     private $authorization;
 
+    /**
+     * @var IntrusionDetection
+     */
+    private $ids;
+
     public function __construct(Router $router)
     {
         parent::__construct($router);
         $this->csrfGuard = new CsrfGuard($this->request);
         $this->authorization = new Authorization($this->request);
         $this->secureHeader = new SecureHeader();
+        $this->ids = new IntrusionDetection($this->request);
     }
 
     /**
      * @throws UnauthorizedAccessException
      * @throws InvalidCsrfException
+     * @throws IntrusionDetectionException
      */
     public function before(): ?Response
     {
@@ -43,6 +51,9 @@ abstract class Controller extends \Zephyrus\Application\Controller
             throw new UnauthorizedAccessException($this->request->getUri()->getPath(), $failedRequirements);
         }
         $this->secureHeader->send();
+        if ($this->ids->isEnabled()) {
+            $this->ids->run();
+        }
         if (Configuration::getSecurityConfiguration('csrf_guard_enabled')) {
             $this->csrfGuard->guard();
         }
@@ -67,6 +78,14 @@ abstract class Controller extends \Zephyrus\Application\Controller
     public function getCsrfGuard(): CsrfGuard
     {
         return $this->csrfGuard;
+    }
+
+    /**
+     * @return IntrusionDetection
+     */
+    public function getIntrusionDetection(): IntrusionDetection
+    {
+        return $this->ids;
     }
 
     /**
