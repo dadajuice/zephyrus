@@ -20,10 +20,10 @@
     "ext-curl": "*",
     "ext-fileinfo": "*",
     "ext-posix": "*",
-    "ext-openssl": "*"
+    "ext-openssl": "*",
+    "ext-mbstring": "*"
   },
   "require-dev": {
-    "php": ">=7.3",
     "phpunit/phpunit": "9.*.*",
     "ext-xdebug": "*"
   },
