@@ -75,6 +75,34 @@ class CsrfGuardTest extends TestCase
         self::assertTrue($csrf->isPatchSecured());
     }
 
+    public function testRequestException()
+    {
+        $req = new Request('http://test.local/test', 'POST');
+        $csrf = new CsrfGuard($req, [
+            'enabled' => true,
+            'guard_methods' => ['POST', 'PUT', 'PATCH', 'DELETE'],
+            'html_integration_enabled' => true,
+            'exceptions' => ['\/test'] // Regex to validate all route that begins with /test
+        ]);
+        self::assertTrue($csrf->isPostSecured());
+        $csrf->run();
+        self::assertTrue(true); // if reach is ok
+    }
+
+    public function testRequestRegexException()
+    {
+        $req = new Request('http://test.local/test/toto', 'POST');
+        $csrf = new CsrfGuard($req, [
+            'enabled' => true,
+            'guard_methods' => ['POST', 'PUT', 'PATCH', 'DELETE'],
+            'html_integration_enabled' => true,
+            'exceptions' => ['\/test.*'] // Regex to validate all route that begins with /test
+        ]);
+        self::assertTrue($csrf->isPostSecured());
+        $csrf->run();
+        self::assertTrue(true); // if reach is ok
+    }
+
     public function testInvalidGuardMethods()
     {
         $this->expectException(RuntimeException::class);

@@ -16,7 +16,8 @@ class CsrfGuard
     public const DEFAULT_CONFIGURATIONS = [
         'enabled' => true, // Enable the CSRF mitigation feature
         'html_integration_enabled' => true, // Automatically insert needed HTML into forms
-        'guard_methods' => ['POST', 'PUT', 'DELETE', 'PATCH'] // List of guarded methods
+        'guard_methods' => ['POST', 'PUT', 'DELETE', 'PATCH'], // List of guarded methods
+        'exceptions' => [] // List of route exceptions (e.g. ['\/test.*'] meaning all routes beginning with /test)
     ];
 
     /**
@@ -35,6 +36,15 @@ class CsrfGuard
      * @var array
      */
     private array $guardedMethods = ['POST', 'PUT', 'DELETE', 'PATCH'];
+
+    /**
+     * List of routes to ignore the CSRF mitigation no matter the HTTP method. Normally, all routes for the guarded
+     * HTTP methods should pass through the CSRF mitigation but, it may happen that some routes are exempt of
+     * mitigation. For such cases, the exceptions should be used. Accepts regex for the route definition.
+     *
+     * @var array
+     */
+    private array $exceptions = [];
 
     /**
      * Determines if the CSRF mitigation is active. Should be verified before calling the run method.
@@ -65,6 +75,7 @@ class CsrfGuard
         $this->initializeEnabledState();
         $this->initializeAutomaticHtmlIntegration();
         $this->initializeGuardedMethods();
+        $this->initializeExceptions();
     }
 
     /**
@@ -112,7 +123,7 @@ class CsrfGuard
      */
     public function run()
     {
-        if ($this->isHttpMethodFiltered(strtoupper($this->request->getMethod()))) {
+        if (!$this->isExempt()) {
             $formName = $this->getProvidedFormName();
             $providedToken = $this->getProvidedCsrfToken();
             if (is_null($formName) || is_null($providedToken)) {
@@ -185,6 +196,25 @@ class CsrfGuard
     public function isDeleteSecured(): bool
     {
         return in_array('DELETE', $this->guardedMethods);
+    }
+
+    /**
+     * Validates if the current request is exempt of CSRF verification. Can happen if the HTTP request method is not
+     * filtered or the route matches one of the defined exceptions.
+     *
+     * @return bool
+     */
+    private function isExempt(): bool
+    {
+        if (!$this->isHttpMethodFiltered(strtoupper($this->request->getMethod()))) {
+            return true;
+        }
+        foreach ($this->exceptions as $exceptionRegex) {
+            if (preg_match('/^' . $exceptionRegex . '$/', $this->request->getRoute())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -335,6 +365,13 @@ class CsrfGuard
                 }
             }
             $this->guardedMethods = $this->configurations['guard_methods'];
+        }
+    }
+
+    private function initializeExceptions()
+    {
+        if (isset($this->configurations['exceptions']) && !empty($this->configurations['exceptions'])) {
+            $this->exceptions = $this->configurations['exceptions'];
         }
     }
 }
