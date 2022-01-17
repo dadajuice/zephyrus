@@ -23,13 +23,13 @@ trait StringConverter
     {
         // check for existing comments
         if (preg_match('/(?:\<!-|-->|\/\*|\*\/|\/\/\W*\w+\s*$)|(?:--[^-]*-)/ms', $value)) {
-            $pattern = array(
+            $pattern = [
                 '/(?:(?:<!)(?:(?:--(?:[^-]*(?:-[^-]+)*)--\s*)*)(?:>))/ms',
                 '/(?:(?:\/\*\/*[^\/\*]*)+\*\/)/ms',
                 '/(?:--[^-]*-)/ms'
-            );
+            ];
             $converted = preg_replace($pattern, ';', $value);
-            $value    .= "\n" . $converted;
+            $value .= "\n" . $converted;
         }
 
         //make sure inline comments are detected and converted correctly
@@ -50,8 +50,8 @@ trait StringConverter
     private function convertFromWhiteSpace(string $value): string
     {
         //check for inline linebreaks
-        $search = array('\r', '\n', '\f', '\t', '\v');
-        $value  = str_replace($search, ';', $value);
+        $search = ['\r', '\n', '\f', '\t', '\v'];
+        $value = str_replace($search, ';', $value);
         // replace replacement characters regular spaces
         $value = str_replace('�', ' ', $value);
         //convert real linebreaks
@@ -73,7 +73,7 @@ trait StringConverter
         if (preg_match('/&#x?[\w]+/ms', $value)) {
             $converted = preg_replace('/(&#x?[\w]{2}\d?);?/ms', '$1;', $value);
             $converted = html_entity_decode($converted, ENT_QUOTES, 'UTF-8');
-            $value    .= "\n" . str_replace(';;', ';', $converted);
+            $value .= "\n" . str_replace(';;', ';', $converted);
         }
 
         // normalize obfuscated protocol handlers
@@ -94,8 +94,8 @@ trait StringConverter
     private function convertQuotes(string $value): string
     {
         // normalize different quotes to "
-        $pattern = array('\'', '`', '´', '’', '‘');
-        $value   = str_replace($pattern, '"', $value);
+        $pattern = ['\'', '`', '´', '’', '‘'];
+        $value = str_replace($pattern, '"', $value);
         //make sure harmless quoted strings don't generate false alerts
         $value = preg_replace('/^"([^"=\\!><~]+)"$/', '$1', $value);
         return $value;
@@ -110,12 +110,12 @@ trait StringConverter
     private function convertFromControlChars(string $value): string
     {
         // critical ctrl values
-        $search = array(
+        $search = [
             chr(0), chr(1), chr(2), chr(3), chr(4), chr(5),
             chr(6), chr(7), chr(8), chr(11), chr(12), chr(14),
             chr(15), chr(16), chr(17), chr(18), chr(19), chr(24),
             chr(25), chr(192), chr(193), chr(238), chr(255), '\\0'
-        );
+        ];
 
         $value = str_replace($search, '%00', $value);
 
@@ -146,26 +146,26 @@ trait StringConverter
         );
 
         $value = str_replace(
-            array(
+            [
                 '«',
                 '〈',
                 '＜',
                 '‹',
                 '〈',
                 '⟨'
-            ),
+            ],
             '<',
             $value
         );
         $value = str_replace(
-            array(
+            [
                 '»',
                 '〉',
                 '＞',
                 '›',
                 '〉',
                 '⟩'
-            ),
+            ],
             '>',
             $value
         );
@@ -221,7 +221,7 @@ trait StringConverter
 
         $compare = stripslashes($value);
 
-        $pattern = array(
+        $pattern = [
             '/(?:<\/\w+>\+<\w+>)/s',
             '/(?:":\d+[^"[]+")/s',
             '/(?:"?"\+\w+\+")/s',
@@ -240,7 +240,7 @@ trait StringConverter
             '/(?:(this|self)\.)/',
             '/(?:undefined)/',
             '/(?:in\s+)/'
-        );
+        ];
 
         // strip out concatenations
         $converted = preg_replace($pattern, null, $compare);
