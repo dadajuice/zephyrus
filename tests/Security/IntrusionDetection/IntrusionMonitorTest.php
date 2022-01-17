@@ -12,7 +12,8 @@ class IntrusionMonitorTest extends TestCase
         $monitor = new IntrusionMonitor($rules);
         $report = $monitor->run([
             'username' => "' AND 1=1#",
-            'password' => "<script>document.cookie;</script>"
+            'password' => "<script>document.cookie;</script>",
+            'name' => "Rolan Balesque"
         ]);
         $events = $report->getDetectedIntrusions();
         self::assertCount(8, $events); // Detected 8 intrusions
@@ -20,6 +21,10 @@ class IntrusionMonitorTest extends TestCase
         self::assertTrue(is_object($events[2]));
         self::assertEquals("Detects chained SQL injection attempts 2/2", $events[2]->description);
         self::assertTrue($report->getExecutionTime() > 0.0);
+        self::assertTrue($report->hasDetected('username'));
+        self::assertTrue($report->hasDetected('password'));
+        self::assertFalse($report->hasDetected('name'));
+        self::assertEquals("Detects common comment types", $report->getDetectedIntrusions('username')[0]->description);
     }
 
     public function testNoDetection()

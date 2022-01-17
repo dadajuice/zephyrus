@@ -64,14 +64,41 @@ class IntrusionReport
     }
 
     /**
-     * Reads all the detected intrusions details. Returns an array of object containing the following properties:
-     * impact, description, tags, argument_name and argument_value.
+     * Verifies if the specified field has triggered an intrusion.
      *
+     * @param string $field
+     * @return bool
+     */
+    public function hasDetected(string $field): bool
+    {
+        foreach ($this->intrusions as $intrusion) {
+            if ($intrusion->argument_name == $field) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Reads all the detected intrusions details. Returns an array of object containing the following properties:
+     * impact, description, tags, argument_name and argument_value. If the field argument is specified, it will return
+     * only the intrusion related to that field.
+     *
+     * @param string|null $field
      * @return stdClass[]
      */
-    public function getDetectedIntrusions(): array
+    public function getDetectedIntrusions(?string $field = null): array
     {
-        return $this->intrusions;
+        if (is_null($field)) {
+            return $this->intrusions;
+        }
+        $intrusions = [];
+        foreach ($this->intrusions as $intrusion) {
+            if ($intrusion->argument_name == $field) {
+                $intrusions[] = $intrusion;
+            }
+        }
+        return $intrusions;
     }
 
     /**
