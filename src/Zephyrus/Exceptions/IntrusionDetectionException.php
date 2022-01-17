@@ -23,9 +23,9 @@ class IntrusionDetectionException extends \Exception
     /**
      * @return array
      */
-    public function getDetectedIntrusions(): array
+    public function getDetectedIntrusions(?string $field = null): array
     {
-        return $this->report->getDetectedIntrusions();
+        return $this->report->getDetectedIntrusions($field);
     }
 
     /**
