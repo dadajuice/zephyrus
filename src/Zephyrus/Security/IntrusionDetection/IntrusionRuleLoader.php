@@ -15,7 +15,7 @@ class IntrusionRuleLoader
 
     public function __construct(?string $ruleFile = null)
     {
-        if (is_null($ruleFile)) {
+        if (empty($ruleFile)) {
             $ruleFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . self::DEFAULT_FILE;
         }
         if (!File::exists($ruleFile)) {
