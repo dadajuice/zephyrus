@@ -82,7 +82,7 @@ class CsrfGuardTest extends TestCase
             'enabled' => true,
             'guard_methods' => ['POST', 'PUT', 'PATCH', 'DELETE'],
             'html_integration_enabled' => true,
-            'exceptions' => ['\/test'] // Regex to validate all route that begins with /test
+            'exceptions' => ['/test'] // Direct exception
         ]);
         self::assertTrue($csrf->isPostSecured());
         $csrf->run();

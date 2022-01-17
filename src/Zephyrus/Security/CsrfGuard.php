@@ -210,6 +210,9 @@ class CsrfGuard
             return true;
         }
         foreach ($this->exceptions as $exceptionRegex) {
+            if ($exceptionRegex === $this->request->getRoute()) {
+                return true;
+            }
             if (preg_match('/^' . $exceptionRegex . '$/', $this->request->getRoute())) {
                 return true;
             }
