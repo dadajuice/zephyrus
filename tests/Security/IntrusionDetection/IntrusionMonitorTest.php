@@ -57,4 +57,17 @@ class IntrusionMonitorTest extends TestCase
         self::assertEquals("Detects common comment types", $events[0]->description);
         self::assertTrue($report->getExecutionTime() > 0.0);
     }
+
+    public function testDetectionRegexException()
+    {
+        $rules = (new IntrusionRuleLoader())->loadFromFile();
+        $monitor = new IntrusionMonitor($rules);
+        $monitor->setExceptions(['password', 'user.*']); // Ignore password detection
+        $report = $monitor->run([
+            'username' => "' AND 1=1#",
+            'password' => "<script>document.cookie;</script>"
+        ]);
+        $events = $report->getDetectedIntrusions();
+        self::assertCount(0, $events);
+    }
 }

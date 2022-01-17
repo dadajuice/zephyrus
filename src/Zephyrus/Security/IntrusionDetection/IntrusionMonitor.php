@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Security\IntrusionDetection;
 
+use stdClass;
 use Zephyrus\Security\IntrusionDetection\Converters\EncodingConverter;
 use Zephyrus\Security\IntrusionDetection\Converters\JavascriptConverter;
 use Zephyrus\Security\IntrusionDetection\Converters\SqlConverter;
@@ -61,7 +62,7 @@ class IntrusionMonitor
     {
         $report = new IntrusionReport();
         foreach ($data as $parameter => $value) {
-            if (in_array($parameter, $this->exceptions)) { // TODO: Regex parameters
+            if ($this->isExempt((string) $parameter)) {
                 continue;
             }
             foreach ($this->rules as $rule) {
@@ -72,17 +73,45 @@ class IntrusionMonitor
         return $report;
     }
 
-    private function detectIntrusion(\stdClass $rule, $parameter, $data, IntrusionReport $report)
+    /**
+     * Verifies if the parameter is exempt from IDS mitigation. Meaning it has been defined as an exception either
+     * directly or regex.
+     *
+     * @param string $parameter
+     * @return bool
+     */
+    private function isExempt(string $parameter): bool
+    {
+        foreach ($this->exceptions as $exception) {
+            if ($exception === $parameter) {
+                return true;
+            }
+            if (preg_match('/^' . $exception . '$/', $parameter)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function detectIntrusion(stdClass $rule, $parameter, $data, IntrusionReport $report)
     {
         if (is_array($data)) {
             foreach ($data as $value) {
                 $this->detectIntrusion($rule, $parameter, $value, $report);
             }
-            return;
-        }
-        $data = $this->convert((string) $data);
-        if (preg_match('/'. $rule->rule .'/im', $data) === 1) {
-            $report->addIntrusion($rule, $parameter, $data);
+        } elseif (is_string($data)) {
+            // define the pre-filter
+            $preFilter = '([^\w\s/@!?\.]+|(?:\./)|(?:@@\w+)|(?:\+ADw)|(?:union\s+select))i';
+
+            // to increase performance, only start detection if value isn't alphanumeric
+            if ((!$data || !preg_match($preFilter, $data))) {
+                return;
+            }
+
+            $data = $this->convert($data);
+            if (preg_match('/'. $rule->rule .'/im', $data) === 1) {
+                $report->addIntrusion($rule, $parameter, $data);
+            }
         }
     }
 
