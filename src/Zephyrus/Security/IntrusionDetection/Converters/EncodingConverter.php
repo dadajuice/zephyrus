@@ -46,7 +46,7 @@ trait EncodingConverter
             } else {
                 // @codeCoverageIgnoreStart
                 //list of all critical UTF7 codepoints
-                $schemes = array(
+                $schemes = [
                     '+ACI-'      => '"',
                     '+ADw-'      => '<',
                     '+AD4-'      => '>',
@@ -70,7 +70,7 @@ trait EncodingConverter
                     '+AF4-'      => '^',
                     '+ACIAPg-'   => '">',
                     '+ACIAPgA8-' => '">'
-                );
+                ];
 
                 $value = str_ireplace(
                     array_keys($schemes),

@@ -21,29 +21,29 @@ trait SqlConverter
      */
     private function convertFromSQLKeywords(string $value): string
     {
-        $pattern = array(
+        $pattern = [
             '/(?:is\s+null)|(like\s+null)|' .
             '(?:(?:^|\W)in[+\s]*\([\s\d"]+[^()]*\))/ims'
-        );
-        $value   = preg_replace($pattern, '"=0', $value);
-        $value   = preg_replace('/[^\w\)]+\s*like\s*[^\w\s]+/ims', '1" OR "1"', $value);
-        $value   = preg_replace('/null([,"\s])/ims', '0$1', $value);
-        $value   = preg_replace('/\d+\./ims', ' 1', $value);
-        $value   = preg_replace('/,null/ims', ',0', $value);
-        $value   = preg_replace('/(?:between)/ims', 'or', $value);
-        $value   = preg_replace('/(?:and\s+\d+\.?\d*)/ims', '', $value);
-        $value   = preg_replace('/(?:\s+and\s+)/ims', ' or ', $value);
+        ];
+        $value = preg_replace($pattern, '"=0', $value);
+        $value = preg_replace('/[^\w\)]+\s*like\s*[^\w\s]+/ims', '1" OR "1"', $value);
+        $value = preg_replace('/null([,"\s])/ims', '0$1', $value);
+        $value = preg_replace('/\d+\./ims', ' 1', $value);
+        $value = preg_replace('/,null/ims', ',0', $value);
+        $value = preg_replace('/(?:between)/ims', 'or', $value);
+        $value = preg_replace('/(?:and\s+\d+\.?\d*)/ims', '', $value);
+        $value = preg_replace('/(?:\s+and\s+)/ims', ' or ', $value);
 
-        $pattern = array(
+        $pattern = [
             '/(?:not\s+between)|(?:is\s+not)|(?:not\s+in)|' .
             '(?:xor|<>|rlike(?:\s+binary)?)|' .
             '(?:regexp\s+binary)|' .
             '(?:sounds\s+like)/ims'
-        );
-        $value   = preg_replace($pattern, '!', $value);
-        $value   = preg_replace('/"\s+\d/', '"', $value);
-        $value   = preg_replace('/(\W)div(\W)/ims', '$1 OR $2', $value);
-        $value   = preg_replace('/\/(?:\d+|null)/', null, $value);
+        ];
+        $value = preg_replace($pattern, '!', $value);
+        $value = preg_replace('/"\s+\d/', '"', $value);
+        $value = preg_replace('/(\W)div(\W)/ims', '$1 OR $2', $value);
+        $value = preg_replace('/\/(?:\d+|null)/', null, $value);
         return $value;
     }
 
@@ -55,7 +55,7 @@ trait SqlConverter
      */
     private function convertFromSQLHex(string $value): string
     {
-        $matches = array();
+        $matches = [];
         if (preg_match_all('/(?:(?:\A|[^\d])0x[a-f\d]{3,}[a-f\d]*)+/im', $value, $matches)) {
             foreach ($matches[0] as $match) {
                 $converted = '';
@@ -80,10 +80,10 @@ trait SqlConverter
      */
     private function convertFromUrlencodedSqlComment(string $value): string
     {
-        if (preg_match_all('/(?:\%23.*?\%0a)/im',$value,$matches)){
+        if (preg_match_all('/(?:\%23.*?\%0a)/im', $value, $matches)) {
             $converted = $value;
-            foreach($matches[0] as $match){
-                $converted = str_replace($match,' ',$converted);
+            foreach ($matches[0] as $match) {
+                $converted = str_replace($match, ' ', $converted);
             }
             $value .= "\n" . $converted;
         }
