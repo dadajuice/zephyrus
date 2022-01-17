@@ -15,10 +15,10 @@ class IntrusionMonitorTest extends TestCase
             'password' => "<script>document.cookie;</script>"
         ]);
         $events = $report->getDetectedIntrusions();
-        self::assertCount(6, $events); // Detected 6 intrusions
-        self::assertEquals(23, $report->getImpact());
+        self::assertCount(8, $events); // Detected 8 intrusions
+        self::assertEquals(35, $report->getImpact());
         self::assertTrue(is_object($events[2]));
-        self::assertEquals("Detects very basic XSS probings", $events[2]->description);
+        self::assertEquals("Detects chained SQL injection attempts 2/2", $events[2]->description);
         self::assertTrue($report->getExecutionTime() > 0.0);
     }
 
@@ -46,8 +46,8 @@ class IntrusionMonitorTest extends TestCase
             'password' => "<script>document.cookie;</script>"
         ]);
         $events = $report->getDetectedIntrusions();
-        self::assertCount(1, $events);
-        self::assertEquals(3, $report->getImpact());
+        self::assertCount(3, $events);
+        self::assertEquals(15, $report->getImpact());
         self::assertTrue(is_object($events[0]));
         self::assertEquals("Detects common comment types", $events[0]->description);
         self::assertTrue($report->getExecutionTime() > 0.0);

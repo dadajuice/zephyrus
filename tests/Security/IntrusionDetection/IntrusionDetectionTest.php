@@ -67,7 +67,7 @@ class IntrusionDetectionTest extends TestCase
         try {
             $ids->run();
         } catch (IntrusionDetectionException $e) {
-            self::assertEquals(3, $e->getImpact());
+            self::assertEquals(15, $e->getImpact());
             self::assertEquals("Detects common comment types", $e->getDetectedIntrusions()[0]->description);
             self::assertTrue($e->getReport()->getExecutionTime() > 0.0);
         }
@@ -81,12 +81,12 @@ class IntrusionDetectionTest extends TestCase
         $ids = new IntrusionDetection($request, [
             'enabled' => true,
             'cached' => true,
-            'impact_threshold' => 10,
+            'impact_threshold' => 20,
             'monitor_cookies' => true,
             'exceptions' => []
         ]);
         $ids->run();
-        self::assertEquals(3, $ids->getReport()->getImpact());
+        self::assertEquals(15, $ids->getReport()->getImpact());
     }
 
     public function testImpactThresholdMisconfiguration()
@@ -113,7 +113,7 @@ class IntrusionDetectionTest extends TestCase
         try {
             $ids->run();
         } catch (IntrusionDetectionException $e) {
-            self::assertEquals(3, $e->getImpact());
+            self::assertEquals(15, $e->getImpact());
             self::assertEquals("Detects common comment types", $e->getDetectedIntrusions()[0]->description);
             self::assertTrue($e->getReport()->getExecutionTime() > 0.0);
         }

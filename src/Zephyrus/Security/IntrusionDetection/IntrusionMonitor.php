@@ -1,5 +1,10 @@
 <?php namespace Zephyrus\Security\IntrusionDetection;
 
+use Zephyrus\Security\IntrusionDetection\Converters\EncodingConverter;
+use Zephyrus\Security\IntrusionDetection\Converters\JavascriptConverter;
+use Zephyrus\Security\IntrusionDetection\Converters\SqlConverter;
+use Zephyrus\Security\IntrusionDetection\Converters\StringConverter;
+
 class IntrusionMonitor
 {
     /**
@@ -16,6 +21,14 @@ class IntrusionMonitor
      * @var array
      */
     private array $exceptions = [];
+
+    /**
+     * Includes the converter traits used to filter classic known obfuscating methods.
+     */
+    use StringConverter;
+    use SqlConverter;
+    use JavascriptConverter;
+    use EncodingConverter;
 
     /**
      * Prepares the monitor with a set of IDS rules to verify.
@@ -51,6 +64,11 @@ class IntrusionMonitor
             if (in_array($parameter, $this->exceptions)) {
                 continue;
             }
+
+            $value = (is_array($value))
+                ? $this->convertArray($data)
+                : $this->convert($value);
+
             foreach ($this->rules as $rule) {
                 if ($this->detectIntrusion($rule->rule, $value)) {
                     $report->addIntrusion($rule, $parameter, $value);
@@ -79,5 +97,58 @@ class IntrusionMonitor
             return false;
         }
         return preg_match('/'. $regexRule .'/im', $data) === 1;
+    }
+
+    /**
+     * Cleans possible obfuscating used on the data. Works recursively for nested arrays.
+     *
+     * @param array $data
+     * @return array
+     */
+    private function convertArray(array $data): array
+    {
+        foreach ($data as &$value) {
+            if (is_array($value)) {
+                return $this->convertArray($value);
+            }
+            $value = $this->convert($value);
+        }
+        return $data;
+    }
+
+    /**
+     * Cleans possible obfuscating used on the value. Concepts and code kindly obtained from the PHPIDS project with
+     * permission from original author.
+     *
+     * @see https://github.com/PHPIDS/PHPIDS
+     * @param string $value
+     * @return string
+     */
+    private function convert(string $value): string
+    {
+        // Encoding based conversions
+        $value = $this->convertFromNestedBase64($value);
+        $value = $this->convertFromUTF7($value);
+        $value = $this->convertFromProprietaryEncodings($value);
+
+        // String based conversions
+        $value = $this->convertEntities($value);
+        $value = $this->convertFromCommented($value);
+        $value = $this->convertFromWhiteSpace($value);
+        $value = $this->convertQuotes($value);
+        $value = $this->convertFromControlChars($value);
+        $value = $this->convertFromOutOfRangeChars($value);
+        $value = $this->convertFromXML($value);
+        $value = $this->convertFromConcatenated($value);
+
+        // SQL based conversions
+        $value = $this->convertFromSQLKeywords($value);
+        $value = $this->convertFromSQLHex($value);
+        $value = $this->convertFromUrlencodedSqlComment($value);
+
+        // Javascript based conversions
+        $value = $this->convertFromJSCharCode($value);
+        $value = $this->convertJSRegexModifiers($value);
+        return $this->convertFromJSUnicode($value);
     }
 }
