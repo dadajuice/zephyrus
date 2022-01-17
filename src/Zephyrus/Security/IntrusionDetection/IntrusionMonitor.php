@@ -96,23 +96,34 @@ class IntrusionMonitor
     private function detectIntrusion(stdClass $rule, $parameter, $data, IntrusionReport $report)
     {
         if (is_array($data)) {
-            foreach ($data as $value) {
-                $this->detectIntrusion($rule, $parameter, $value, $report);
+            foreach ($data as $key => $value) {
+                $this->detectIntrusion($rule, $parameter . '.' . $key, $value, $report);
             }
         } elseif (is_string($data)) {
-            // define the pre-filter
-            $preFilter = '([^\w\s/@!?\.]+|(?:\./)|(?:@@\w+)|(?:\+ADw)|(?:union\s+select))i';
-
-            // to increase performance, only start detection if value isn't alphanumeric
-            if ((!$data || !preg_match($preFilter, $data))) {
+            if ($this->isSimplyAlphanumeric($data)) {
                 return;
             }
-
             $data = $this->convert($data);
             if (preg_match('/'. $rule->rule .'/im', $data) === 1) {
                 $report->addIntrusion($rule, $parameter, $data);
             }
         }
+    }
+
+    /**
+     * Only start detection if value isn't alphanumeric.
+     *
+     * @param string $data
+     * @return bool
+     */
+    private function isSimplyAlphanumeric(string $data): bool
+    {
+        // Only start detection if value isn't alphanumeric
+        $preFilter = '([^\w\s/@!?\.]+|(?:\./)|(?:@@\w+)|(?:\+ADw)|(?:union\s+select))i';
+        if ((!$data || !preg_match($preFilter, $data))) {
+            return true;
+        }
+        return false;
     }
 
     /**
