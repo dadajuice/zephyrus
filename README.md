@@ -23,7 +23,7 @@ Bienvenue dans le Framework Zephyrus! Ce framework est fondé sur un modèle pé
 * Traitement des vues avec le préprocesseur HTML _[Pug](https://github.com/pug-php/pug)_ nativement intégré ou simplement du PHP natif.
 * Approche pédagogique pour la conception élégante de classes et favorise une rétrocompatibilité avec les fonctionnalités natives de PHP comme l'utilisation des super-globales, de la session et autres.
 * Routeur de requêtes simple et flexible basé sur des contrôleurs incluant une intégration facile de middlewares dans le flux d'une requête et d'un contrôleur du projet. Facilite la segmentation des responsabilités et la lecture d'une chaîne d'exécution.
-* Plusieurs mécanismes de sécurité intégrés tel que les entêtes CSP, les jetons CSRF, protection XSS, détection d'intrusion basé sur le projet (_[Expose](https://github.com/enygma/expose)_), mécanisme d'authorisation et plus encore!
+* Plusieurs mécanismes de sécurité intégrés tel que les entêtes CSP, les jetons CSRF, protection XSS, détection d'intrusion basé sur le projet (_[PHPIDS](https://github.com/PHPIDS/PHPIDS)_), mécanisme d'authorisation et plus encore!
 * Philosophie d'accès aux données depuis des courtiers manuellement définis offrant un contôle complet sur la construction des requêtes SQL et, par conséquent, une facilité de maintenance et d'optimisation.
 * Approche simple pour intégrer des recherches, tris et pagination sur les requêtes manuelles.
 * Système de validation de formulaires élégant et facilement extensible offrant une multitude de règles nativement sur les nombres, les chaînes, les fichiers téléversés, les dates, etc.
@@ -181,6 +181,10 @@ class ExampleController extends Controller
 ```
 
 # Contribution
+
+#### Remerciements ❤️
+* Étudiants de la Technique informatique du Cégep de Sorel-Tracy ainsi que les employés de Onirique pour leur support et idées d'améliorations. 
+* Auteurs de _[PHPIDS](https://github.com/PHPIDS/PHPIDS)_ pour avoir donner leur permission pour l'inclusion de certaines parties de leur code pour concevoir le module de détection d'intrusion.
 
 #### Sécurité
 Veuillez communiquer en privé pour tout problème pouvant affecter la sécurité des applications créées avec ce framework.
