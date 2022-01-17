@@ -250,6 +250,19 @@ class HttpRequester
     }
 
     /**
+     * Disable or enable the SSL verification. Should always be enabled in production environnement. Disabling is
+     * useful when using a self-signed certificate. Handles the CURLOPT_SSL_VERIFYPEER and CURLOPT_SSL_VERIFYHOST
+     * options.
+     *
+     * @param bool $verifySsl
+     * @return void
+     */
+    public function setSslVerification(bool $verifySsl)
+    {
+        $this->verifySsl = $verifySsl;
+    }
+
+    /**
      * Defines the requester user agent to use for the request.
      *
      * @param string $userAgent

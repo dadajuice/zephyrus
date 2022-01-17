@@ -17,6 +17,7 @@ class HttpRequesterTest extends TestCase
         $request->setConnectionTimeout(10);
         $request->setContentType(ContentType::PLAIN);
         $request->setFollowRedirection(true);
+        $request->setSslVerification(false);
         $request->setUserAgent("PHPUnit Test");
         $request->execute(['t' => time()]);
         self::assertEquals(200, $request->getResponseHttpCode());
