@@ -70,6 +70,14 @@ class IntrusionMonitor
      */
     private function detectIntrusion(string $regexRule, $data): bool
     {
+        if (is_array($data)) {
+            foreach ($data as $value) {
+                if ($this->detectIntrusion($regexRule, $value)) {
+                    return true;
+                }
+            }
+            return false;
+        }
         return preg_match('/'. $regexRule .'/im', $data) === 1;
     }
 }

@@ -18,11 +18,41 @@ class IntrusionDetectionTest extends TestCase
         self::assertEquals("5", $request->getParameter('test'));
     }
 
+    public function testWorkingWithArray()
+    {
+        $request = new Request("http://dummy.com", "GET", ['parameters' => [
+            'test' => [3, 4]
+        ]]);
+        $ids = new IntrusionDetection($request);
+        $ids->run();
+        self::assertEquals("3", $request->getParameter('test')[0]);
+    }
+
     public function testDetectionInjection()
     {
         $this->expectException(IntrusionDetectionException::class);
         $request = new Request("http://dummy.com", "GET", ['parameters' => [
             'test' => "' AND 1=1#"
+        ]]);
+        $ids = new IntrusionDetection($request);
+        $ids->run();
+    }
+
+    public function testDetectionInjectionArray()
+    {
+        $this->expectException(IntrusionDetectionException::class);
+        $request = new Request("http://dummy.com", "GET", ['parameters' => [
+            'test' => [4, 5, "' AND 1=1#"]
+        ]]);
+        $ids = new IntrusionDetection($request);
+        $ids->run();
+    }
+
+    public function testDetectionInjectionNestedArray()
+    {
+        $this->expectException(IntrusionDetectionException::class);
+        $request = new Request("http://dummy.com", "GET", ['parameters' => [
+            'test' => [4, 5, 'greetings' => ["hello", "' AND 1=1#"]]
         ]]);
         $ids = new IntrusionDetection($request);
         $ids->run();
