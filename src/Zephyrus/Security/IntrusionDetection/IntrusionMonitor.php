@@ -61,59 +61,29 @@ class IntrusionMonitor
     {
         $report = new IntrusionReport();
         foreach ($data as $parameter => $value) {
-            if (in_array($parameter, $this->exceptions)) {
+            if (in_array($parameter, $this->exceptions)) { // TODO: Regex parameters
                 continue;
             }
-
-            $value = (is_array($value))
-                ? $this->convertArray($data)
-                : $this->convert($value);
-
             foreach ($this->rules as $rule) {
-                if ($this->detectIntrusion($rule->rule, $value)) {
-                    $report->addIntrusion($rule, $parameter, $value);
-                }
+                $this->detectIntrusion($rule, $parameter, $value, $report);
             }
         }
         $report->end();
         return $report;
     }
 
-    /**
-     * Executes the regex matching against the request data. If it matches, it means an intrusion has been detected.
-     *
-     * @param string $regexRule
-     * @param $data
-     * @return bool
-     */
-    private function detectIntrusion(string $regexRule, $data): bool
+    private function detectIntrusion(\stdClass $rule, $parameter, $data, IntrusionReport $report)
     {
         if (is_array($data)) {
             foreach ($data as $value) {
-                if ($this->detectIntrusion($regexRule, $value)) {
-                    return true;
-                }
+                $this->detectIntrusion($rule, $parameter, $value, $report);
             }
-            return false;
+            return;
         }
-        return preg_match('/'. $regexRule .'/im', $data) === 1;
-    }
-
-    /**
-     * Cleans possible obfuscating used on the data. Works recursively for nested arrays.
-     *
-     * @param array $data
-     * @return array
-     */
-    private function convertArray(array $data): array
-    {
-        foreach ($data as &$value) {
-            if (is_array($value)) {
-                return $this->convertArray($value);
-            }
-            $value = $this->convert($value);
+        $data = $this->convert((string) $data);
+        if (preg_match('/'. $rule->rule .'/im', $data) === 1) {
+            $report->addIntrusion($rule, $parameter, $data);
         }
-        return $data;
     }
 
     /**
