@@ -132,9 +132,7 @@ class HttpRequester
      */
     public function executeUpload(CURLFile $file, string $name = 'file', array $payload = [])
     {
-        $this->setContentType(ContentType::FORM_MULTIPART);
-        $payload = $this->prepareMultipartFormData(array_merge([$name => $file], $payload));
-        $this->execute($payload);
+        $this->execute(array_merge([$name => $file], $payload));
     }
 
     /**
@@ -165,7 +163,9 @@ class HttpRequester
 
     /**
      * Executes the HTTP request with the given payload. The payload can either be an array for the form content types
-     * e.g. application/x-www-form-urlencoded or a string for other type such as application/json.
+     * e.g. application/x-www-form-urlencoded or a string for other type such as application/json. If the payload is
+     * an array and contains a CURLFile, it will automatically be handled as an upload attempt and switch the content
+     * type to multipart/form-data.
      *
      * @param string|array $payload
      * @throws HttpRequesterException
@@ -173,6 +173,10 @@ class HttpRequester
      */
     public function execute(string|array $payload = ""): string
     {
+        if (is_array($payload) && $this->hasCurlFile($payload)) {
+            $this->setContentType(ContentType::FORM_MULTIPART);
+            $payload = $this->prepareMultipartFormData($payload);
+        }
         $curl = $this->buildCurl($payload);
         $this->response = curl_exec($curl);
         if ($this->response === false) {
@@ -315,6 +319,16 @@ class HttpRequester
     }
 
     /**
+     * Retrieves the content type used for the HTTP Request.
+     *
+     * @return string
+     */
+    public function getContentType(): string
+    {
+        return $this->contentType;
+    }
+
+    /**
      * Prepares the cURL instance based on the requester configurations.
      *
      * @param string|array $payload
@@ -442,6 +456,26 @@ class HttpRequester
             $payload = http_build_query($payload);
         }
         curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);
+    }
+
+    /**
+     * Verifies if the payload (only array compatible) has a CURLFile instance within its data. If it happens, it means
+     * the request needs to be a form data content type.
+     *
+     * @param array $payload
+     * @return bool
+     */
+    private function hasCurlFile(array $payload): bool
+    {
+        foreach ($payload as $data) {
+            if (is_array($data)) {
+                return $this->hasCurlFile($data);
+            }
+            if ($data instanceof CURLFile) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

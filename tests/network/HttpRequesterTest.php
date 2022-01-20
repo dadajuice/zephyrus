@@ -28,6 +28,7 @@ class HttpRequesterTest extends TestCase
         $request->addHeaders(['X-APP' => 'PHPUnit']);
         $request->addOptions([CURLOPT_RETURNTRANSFER => true]);
         $request->execute();
+        self::assertEquals(ContentType::FORM, $request->getContentType());
 
         $request = HttpRequester::get("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/existing.txt");
         $request->executeStream(function ($result, $info) {
@@ -62,6 +63,16 @@ class HttpRequesterTest extends TestCase
         self::assertTrue($file instanceof \CURLFile);
         self::assertEquals(ROOT_DIR . '/lib/filesystem/existing.txt', $file->getFilename());
         $request->executeUpload($file, 'file', ['test' => ['name' => 't', 'age' => 3, 'classes' => ['nest', 'nest 2']]]);
+        self::assertEquals(ContentType::FORM_MULTIPART, $request->getContentType());
+    }
+
+    public function testUploadWithExecuteNested()
+    {
+        $request = HttpRequester::post("https://raw.githubusercontent.com/dadajuice/zephyrus/master/tests/lib/filesystem/sdfdgdfdgfdfg.txt");
+        $file = HttpRequester::prepareUploadFile(ROOT_DIR . '/lib/filesystem/existing.txt', 'test.txt');
+        self::assertTrue($file instanceof \CURLFile);
+        $request->execute(['test' => ['name' => 't', 'file' => $file, 'classes' => ['nest', 'nest 2']]]);
+        self::assertEquals(ContentType::FORM_MULTIPART, $request->getContentType());
     }
 
     public function testInvalidUpload()
