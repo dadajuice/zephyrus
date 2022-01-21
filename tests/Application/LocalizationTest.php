@@ -75,7 +75,7 @@ class LocalizationTest extends TestCase
             self::assertTrue(false); // should not reach this point
         } catch (LocalizationException $e) {
             self::assertEquals(LocalizationException::ERROR_RESERVED_WORD, $e->getCode());
-            self::assertEquals("Cannot use the detected PHP reserved word [private] as localize key", $e->getMessage());
+            self::assertEquals("Cannot use the detected PHP reserved word [private] as localize key.", $e->getMessage());
         }
         unlink(ROOT_DIR . '/locale/fr_CA/invalid_words.json');
     }
@@ -91,7 +91,7 @@ class LocalizationTest extends TestCase
             self::assertTrue(false); // should not reach this point
         } catch (LocalizationException $e) {
             self::assertEquals(LocalizationException::ERROR_RESERVED_WORD, $e->getCode());
-            self::assertEquals("Cannot use the detected PHP reserved word [__line__] as localize key", $e->getMessage());
+            self::assertEquals("Cannot use the detected PHP reserved word [__line__] as localize key.", $e->getMessage());
         }
         unlink(ROOT_DIR . '/locale/fr_CA/invalid_words2.json');
     }
@@ -107,7 +107,7 @@ class LocalizationTest extends TestCase
             self::assertTrue(false); // should not reach this point
         } catch (LocalizationException $e) {
             self::assertEquals(LocalizationException::ERROR_INVALID_NAMING, $e->getCode());
-            self::assertEquals("Cannot use the word [123] as localize key since it doesn't respect the PHP constant definition", $e->getMessage());
+            self::assertEquals("Cannot use the word [123] as localize key since it doesn't respect the PHP constant definition.", $e->getMessage());
         }
         unlink(ROOT_DIR . '/locale/fr_CA/invalid_words3.json');
     }

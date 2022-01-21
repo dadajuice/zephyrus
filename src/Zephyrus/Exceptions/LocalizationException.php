@@ -1,19 +1,25 @@
 <?php namespace Zephyrus\Exceptions;
 
-class LocalizationException extends \Exception
+use Exception;
+
+class LocalizationException extends Exception
 {
-    const ERROR_RESERVED_WORD = 901;
-    const ERROR_INVALID_NAMING = 902;
+    public const ERROR_RESERVED_WORD = 901;
+    public const ERROR_INVALID_NAMING = 902;
 
     /**
+     * The processed JSON localization file which triggered an error.
+     *
      * @var string
      */
-    private $jsonFile = "";
+    private string $jsonFile;
 
     /**
-     * @var string
+     * Additional information to pass with the exception if needed.
+     *
+     * @var string|null
      */
-    private $additionalInformation = null;
+    private ?string $additionalInformation;
 
     public function __construct(int $code, string $jsonFile = "", ?string $additionalInformation = null)
     {
@@ -34,53 +40,32 @@ class LocalizationException extends \Exception
         return $this->jsonFile;
     }
 
-    // http://www.php.net/manual/en/function.json-last-error.php
-    private function codeToMessage($code)
+    /**
+     * Builds an error message based on the given code. Most codes follow the JSON_ERROR_x codes from PHP.
+     *
+     * @see http://www.php.net/manual/en/function.json-last-error.php
+     * @param int $code
+     * @return string
+     */
+    private function codeToMessage(int $code): string
     {
-        switch ($code) {
-            case self::ERROR_RESERVED_WORD:
-                $message = "Cannot use the detected PHP reserved word [" . $this->additionalInformation . "] as localize key";
-                break;
-            case self::ERROR_INVALID_NAMING:
-                $message = "Cannot use the word [" . $this->additionalInformation . "] as localize key since it doesn't respect the PHP constant definition";
-                break;
-            case JSON_ERROR_SYNTAX:
-                $message = "Syntax error";
-                break;
+        return match ($code) {
+            self::ERROR_RESERVED_WORD => "Cannot use the detected PHP reserved word [" . $this->additionalInformation . "] as localize key.",
+            self::ERROR_INVALID_NAMING => "Cannot use the word [" . $this->additionalInformation . "] as localize key since it doesn't respect the PHP constant definition.",
             // @codeCoverageIgnoreStart
             // Hard to test cases of JSON error
-            case JSON_ERROR_DEPTH:
-                $message = "The maximum stack depth has been exceeded";
-                break;
-            case JSON_ERROR_STATE_MISMATCH:
-                $message = "Invalid or malformed JSON";
-                break;
-            case JSON_ERROR_CTRL_CHAR:
-                $message = "Control character error, possibly incorrectly encoded";
-                break;
-            case JSON_ERROR_UTF8:
-                $message = "Malformed UTF-8 characters, possibly incorrectly encoded";
-                break;
-            case JSON_ERROR_RECURSION:
-                $message = "One or more recursive references in the value to be encoded";
-                break;
-            case JSON_ERROR_INF_OR_NAN:
-                $message = "One or more NAN or INF values in the value to be encoded";
-                break;
-            case JSON_ERROR_UNSUPPORTED_TYPE:
-                $message = "A value of a type that cannot be encoded was given";
-                break;
-            case JSON_ERROR_INVALID_PROPERTY_NAME:
-                $message = "A property name that cannot be encoded was given";
-                break;
-            case JSON_ERROR_UTF16:
-                $message = "Malformed UTF-16 characters, possibly incorrectly encoded";
-                break;
-            default:
-                $message = "Unknown localization error";
-                break;
+            JSON_ERROR_SYNTAX => "Syntax error.",
+            JSON_ERROR_DEPTH => "The maximum stack depth has been exceeded.",
+            JSON_ERROR_STATE_MISMATCH => "Invalid or malformed JSON.",
+            JSON_ERROR_CTRL_CHAR => "Control character error, possibly incorrectly encoded.",
+            JSON_ERROR_UTF8 => "Malformed UTF-8 characters, possibly incorrectly encoded.",
+            JSON_ERROR_RECURSION => "One or more recursive references in the value to be encoded.",
+            JSON_ERROR_INF_OR_NAN => "One or more NAN or INF values in the value to be encoded.",
+            JSON_ERROR_UNSUPPORTED_TYPE => "A value of a type that cannot be encoded was given.",
+            JSON_ERROR_INVALID_PROPERTY_NAME => "A property name that cannot be encoded was given.",
+            JSON_ERROR_UTF16 => "Malformed UTF-16 characters, possibly incorrectly encoded.",
+            default => "Unknown localization error",
             // @codeCoverageIgnoreEnd
-        }
-        return $message;
+        };
     }
 }
