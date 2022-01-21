@@ -121,12 +121,36 @@ class CsrfGuardTest extends TestCase
         $csrf->run();
     }
 
+    public function testGuardMissingException()
+    {
+        $req = new Request('http://test.local/test', 'POST');
+        $csrf = new CsrfGuard($req);
+        try {
+            $csrf->run();
+        } catch (InvalidCsrfException $e) {
+            self::assertEquals("POST", $e->getRequest()->getMethod());
+            self::assertEquals("The submitted form is missing the needed CSRF tokens. The requested route [POST /test] is configured to proceed the CSRF mitigation. If you think this is not the case, you can add the route to the CSRF exceptions, use the 'nocsrf' attribute on the &lt;form&gt; or disable the feature.", $e->getMessage());
+        }
+    }
+
     public function testInvalidToken()
     {
         $this->expectException(InvalidCsrfException::class);
         $req = new Request('http://test.local/test', 'PUT', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
         $csrf = new CsrfGuard($req);
         $csrf->run();
+    }
+
+    public function testGuardInvalidException()
+    {
+        $req = new Request('http://test.local/test', 'PUT', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
+        $csrf = new CsrfGuard($req);
+        try {
+            $csrf->run();
+        } catch (InvalidCsrfException $e) {
+            self::assertEquals("PUT", $e->getRequest()->getMethod());
+            self::assertEquals("The provided CSRF token is invalid or has expired.", $e->getMessage());
+        }
     }
 
     public function testInvalidToken2()

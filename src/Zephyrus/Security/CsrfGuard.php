@@ -127,10 +127,10 @@ class CsrfGuard
             $formName = $this->getProvidedFormName();
             $providedToken = $this->getProvidedCsrfToken();
             if (is_null($formName) || is_null($providedToken)) {
-                throw new InvalidCsrfException();
+                throw new InvalidCsrfException(InvalidCsrfException::ERROR_MISSING_TOKEN, $this->request);
             }
             if (!$this->validateToken($formName, $providedToken)) {
-                throw new InvalidCsrfException();
+                throw new InvalidCsrfException(InvalidCsrfException::ERROR_INVALID_TOKEN, $this->request);
             }
         }
     }
