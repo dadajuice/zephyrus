@@ -468,10 +468,10 @@ class HttpRequester
     private function hasCurlFile(array $payload): bool
     {
         foreach ($payload as $data) {
-            if (is_array($data)) {
-                return $this->hasCurlFile($data);
+            if (is_array($data) && $this->hasCurlFile($data)) {
+                return true;
             }
-            if ($data instanceof CURLFile) {
+            if ($data instanceof \CURLFile) {
                 return true;
             }
         }
