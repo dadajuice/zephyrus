@@ -42,13 +42,18 @@ class DatabaseTest extends TestCase
     {
         $broker = new class(self::$database) extends DatabaseBroker
         {
-            public function find()
+            public function find(): array
             {
                 $this->select("SELECT * FROM heroes WHERE id = ?", [1]);
-                $this->select("SELECT * FROM heroes WHERE power > ?", [2.5]);
+                return $this->select("SELECT * FROM heroes WHERE power > ?", [2.5]);
             }
         };
-        $broker->find();
+        $results = $broker->find();
+        self::assertEquals("Batman", $results[0]->name);
+        self::assertEquals(1, $results[0]->id);
+        self::assertTrue(is_int($results[0]->id));
+        self::assertEquals(5.6, $results[0]->power);
+        self::assertTrue(is_double($results[0]->power));
     }
 
     /**
