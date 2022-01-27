@@ -86,7 +86,7 @@ class SessionSecureStorageTest extends TestCase
         Session::getInstance()->destroy();
     }
 
-    public function testProbabilityExpiration()
+    /*public function testProbabilityExpiration()
     {
         $config = [
             'name' => 'bob',
@@ -97,7 +97,7 @@ class SessionSecureStorageTest extends TestCase
         $storage = Session::getInstance($config);
         $storage->start();
         $storage->destroy();
-    }
+    }*/
 
     public function testExpirationCleanup()
     {
