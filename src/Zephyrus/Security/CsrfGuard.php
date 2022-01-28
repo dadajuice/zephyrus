@@ -8,9 +8,7 @@ use Zephyrus\Network\Request;
 
 class CsrfGuard
 {
-    public const HEADER_NAME = 'HTTP_X_CSRF_NAME';
     public const HEADER_TOKEN = 'HTTP_X_CSRF_TOKEN';
-    public const REQUEST_TOKEN_NAME = 'CSRFName';
     public const REQUEST_TOKEN_VALUE = 'CSRFToken';
     public const TOKEN_LENGTH = 48;
     public const DEFAULT_CONFIGURATIONS = [
@@ -110,9 +108,8 @@ class CsrfGuard
     {
         $name = $this->generateFormName();
         $token = $this->generateToken($name);
-        $html = '<input type="hidden" name="' . self::REQUEST_TOKEN_NAME . '" value="' . $name . '" />';
-        $html .= '<input type="hidden" name="' . self::REQUEST_TOKEN_VALUE . '" value="' . $token . '" />';
-        return $html;
+        $value = $name . '$' . $token;
+        return '<input type="hidden" name="' . self::REQUEST_TOKEN_VALUE . '" value="' . $value . '" />';
     }
 
     /**
@@ -124,12 +121,16 @@ class CsrfGuard
     public function run()
     {
         if (!$this->isExempt()) {
-            $formName = $this->getProvidedFormName();
             $providedToken = $this->getProvidedCsrfToken();
-            if (is_null($formName) || is_null($providedToken)) {
+            if (is_null($providedToken)) {
                 throw new InvalidCsrfException(InvalidCsrfException::ERROR_MISSING_TOKEN, $this->request);
             }
-            if (!$this->validateToken($formName, $providedToken)) {
+            $tokenParts = explode("$", $providedToken);
+            if (count($tokenParts) < 2) {
+                throw new InvalidCsrfException(InvalidCsrfException::ERROR_INVALID_TOKEN, $this->request);
+            }
+            list($formName, $token) = $tokenParts;
+            if (!$this->validateToken($formName, $token)) {
                 throw new InvalidCsrfException(InvalidCsrfException::ERROR_INVALID_TOKEN, $this->request);
             }
         }
@@ -297,21 +298,6 @@ class CsrfGuard
             $token = $this->request->getHeader(self::HEADER_TOKEN);
         }
         return $token;
-    }
-
-    /**
-     * Obtains the form name provided by the client either by request data or by an HTTP header (e.g. Ajax based
-     * requests). Returns null if undefined.
-     *
-     * @return null|string
-     */
-    private function getProvidedFormName(): ?string
-    {
-        $formName = $this->request->getParameter(self::REQUEST_TOKEN_NAME);
-        if (is_null($formName)) {
-            $formName = $this->request->getHeader(self::HEADER_NAME);
-        }
-        return $formName;
     }
 
     /**
