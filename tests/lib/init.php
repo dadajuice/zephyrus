@@ -11,3 +11,6 @@ ini_set('session.use_only_cookies', 1);
 define('ROOT_DIR', __DIR__ . '/..');
 $loader->addPsr4('Controllers\\', ROOT_DIR . '/app/Controllers');
 require_once ROOT_DIR . '/../src/Zephyrus/functions.php';
+
+// Include functions specific for unit testing
+require_once "helper_functions.php";
