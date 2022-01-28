@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Tests;
+<?php namespace Zephyrus\Tests\Network;
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Network\Cookie;

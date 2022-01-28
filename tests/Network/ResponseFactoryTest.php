@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Tests\network;
+<?php namespace Zephyrus\Tests\Network;
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Network\ResponseFactory;

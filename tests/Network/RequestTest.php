@@ -1,4 +1,4 @@
-<?php
+<?php namespace Zephyrus\Tests\Network;
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Network\Request;
