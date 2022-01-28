@@ -2,7 +2,7 @@
 
 class Cookie
 {
-    public const DURATION_SESSION = null;
+    public const DURATION_SESSION = 0;
     public const DURATION_HOUR = 3600;
     public const DURATION_DAY = 86400;
     public const DURATION_WEEK = 604800;
@@ -112,7 +112,7 @@ class Cookie
             'expires' => time() + $this->lifetime,
             'path' => $this->path,
             'domain' => $this->domain,
-            'secure' => $this->secure && $_SERVER['HTTPS'],
+            'secure' => $this->secure && ($_SERVER['HTTPS'] ?? false),
             'httponly' => $this->httpOnly,
             'samesite' => $this->sameSite
         ];
