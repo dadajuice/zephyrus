@@ -2,91 +2,124 @@
 
 class Cookie
 {
-    const DURATION_SESSION = null;
-    const DURATION_HOUR = 3600;
-    const DURATION_DAY = 86400;
-    const DURATION_WEEK = 604800;
-    const DURATION_MONTH = 2419200;
-    const DURATION_YEAR = 29030400;
-    const DURATION_FOREVER = 145152000; // 5 years
+    public const DURATION_SESSION = null;
+    public const DURATION_HOUR = 3600;
+    public const DURATION_DAY = 86400;
+    public const DURATION_WEEK = 604800;
+    public const DURATION_MONTH = 2419200;
+    public const DURATION_YEAR = 29030400;
+    public const DURATION_FOREVER = 145152000; // 5 years
 
     /**
-     * @var string Cookie name used to identify
+     * Cookie name used to identify.
+     *
+     * @var string
      */
-    private $name;
+    private string $name;
 
     /**
-     * @var string Cookie value which will end stored on clients' side
+     * Cookie value which will end stored on clients' side.
+     *
+     * @var string|null
      */
-    private $value;
+    private ?string $value;
 
     /**
-     * @var int Cookie expire time (timestamp)
+     * Cookie expire time (timestamp).
+     *
+     * @var int
      */
-    private $lifetime = self::DURATION_SESSION;
+    private int $lifetime = self::DURATION_SESSION;
 
     /**
-     * @var string The domain that the cookie is available to
+     * The domain that the cookie is available to.
+     *
+     * @var string
      */
-    private $domain = '';
+    private string $domain = '';
 
     /**
-     * @var string The path on the server which the cookie will be available
-     * on. If set to '/', the cookie will be available to the entire specified
-     * domain.
+     * The path on the server which the cookie will be available on. If set to '/' (default value), the cookie will be
+     * available to the entire specified domain.
+     *
+     * @var string
      */
-    private $path = '/';
+    private string $path = '/';
 
     /**
-     * @var bool Determines if the cookie should be sent only over HTTPS from
-     * the client side.
+     * Determines if the cookie should be sent only over HTTPS from the client side.
+     *
+     * @var bool
      */
-    private $secure = false;
+    private bool $secure = true;
 
     /**
-     * @var bool Determines if the cookie is made accessible only through the
-     * HTTP protocol and thus making it inaccessible from scripting
-     * language.
+     * Determines if the cookie is made accessible only through the HTTP protocol and thus making it inaccessible from
+     * frontend scripting language.
+     *
+     * @var bool
      */
-    private $httpOnly = true;
+    private bool $httpOnly = true;
 
     /**
-     * @var bool Determines if url encoding should be used for the cookie value
+     * Determines if url encoding should be used for the cookie value.
+     *
+     * @var bool
      */
-    private $urlEncodedValue = false;
+    private bool $urlEncodedValue = false;
 
     /**
-     * Cookie constructor which automatically create the cookie in the HTTP
-     * response header when the <value> argument is given. Otherwise, the
-     * constructor tries to load the value of the specified cookie name.
+     * @var string
+     */
+    private string $sameSite = 'Strict';
+
+    /**
+     * Shorthand method to immediately read a cookie value or receive the default value in case the cookie doesn't
+     * exist.
      *
      * @param string $name
-     * @param string $value
+     * @param string|null $defaultValue
+     * @return string|null
      */
-    public function __construct($name, $value = null)
+    public static function read(string $name, ?string $defaultValue = null): ?string
     {
-        $this->name = $name;
-        $this->value = $value;
+        return $_COOKIE[$name] ?? $defaultValue;
     }
 
     /**
-     * Save the cookie in the HTTP response header using the default PHP
-     * functions setcookie or setrawcookie depending on the need to save the
-     * cookie value without url encoding.
+     * Cookie constructor which automatically create the cookie in the HTTP response header upon usage of the send
+     * method once it's fully configured.
+     *
+     * @param string $name
+     * @param string|null $value
+     */
+    public function __construct(string $name, ?string $value = null)
+    {
+        $this->name = $name;
+        $this->value = (!is_null($value)) ? $value : self::read($name);
+    }
+
+    /**
+     * Save the cookie in the HTTP response header using the default PHP functions setcookie or setrawcookie depending
+     * on the need to save the cookie value without url encoding.
      *
      * @see http://php.net/manual/en/function.setcookie.php
      * @see http://php.net/manual/en/function.setrawcookie.php
      */
     public function send()
     {
+        $options = [
+            'expires' => time() + $this->lifetime,
+            'path' => $this->path,
+            'domain' => $this->domain,
+            'secure' => $this->secure && $_SERVER['HTTPS'],
+            'httponly' => $this->httpOnly,
+            'samesite' => $this->sameSite
+        ];
         $args = [
             $this->name,
             $this->value,
-            time() + $this->lifetime,
-            $this->path,
-            $this->domain,
-            $this->secure,
-            $this->httpOnly
+            $options
         ];
         $function = (!$this->urlEncodedValue) ? 'setrawcookie' : 'setcookie';
         call_user_func_array($function, $args);
@@ -94,8 +127,8 @@ class Cookie
     }
 
     /**
-     * Correctly destroy cookie currently loaded. Does not verify for time() to
-     * expire the cookie to avoid any time corruption on either sides.
+     * Correctly destroy cookie currently loaded. Does not verify for time() to expire the cookie to avoid any time
+     * corruption on either sides.
      */
     public function destroy()
     {
@@ -117,7 +150,7 @@ class Cookie
     }
 
     /**
-     * Apply a new expiration date.
+     * Apply a new expiration date using a timestamp.
      *
      * @param int $lifetime
      */
@@ -148,8 +181,8 @@ class Cookie
     }
 
     /**
-     * Specify if the cookie should only be transmitted on HTTPS from the
-     * client side.
+     * Specify if the cookie should only be transmitted on HTTPS from the client side if possible. Defaults to true. If
+     * the server doesn't support HTTPS, it will revert to a non-secure solution automatically. Should always be true.
      *
      * @param bool $secure
      */
@@ -159,8 +192,8 @@ class Cookie
     }
 
     /**
-     * Specify if the cookie should be made accessible only though the HTTP
-     * protocol, thus disabling access from scripting languages.
+     * Specify if the cookie should be made accessible only though the HTTP protocol, thus disabling access from
+     * scripting languages. Defaults to true and should always be true for security reasons.
      *
      * @param bool $httpOnly
      */
@@ -170,7 +203,23 @@ class Cookie
     }
 
     /**
-     * Specify if the cookie value is urlencoded (default FALSE).
+     * Restricts the cookie to the ownership context (RFC6265bis).
+     *
+     * @see https://web.dev/samesite-cookies-explained/
+     * @param string $sameSite
+     */
+    public function setSameSite(string $sameSite)
+    {
+        $possibleValues = ['None', 'Lax', 'Strict'];
+        if (!in_array($sameSite, $possibleValues)) {
+            throw new \InvalidArgumentException("The Cookie samesite property must be one of the following : Lax, None or Strict.");
+        }
+        $this->sameSite = $sameSite;
+    }
+
+    /**
+     * Specify if the cookie value is urlencoded. Defaults to false. When its false, the rawcookie function will be
+     * used to send information.
      *
      * @param bool $urlEncodedValue
      */
@@ -180,7 +229,9 @@ class Cookie
     }
 
     /**
-     * @return string Cookie name
+     * Retrieves the given name of the cookie.
+     *
+     * @return string
      */
     public function getName(): string
     {
@@ -188,9 +239,12 @@ class Cookie
     }
 
     /**
-     * @return string Cookie value
+     * Retrieves the value given to the cookie or the loaded value if applicable. If no cookie was loaded, the value
+     * will be NULL.
+     *
+     * @return string|null
      */
-    public function getValue(): string
+    public function getValue(): ?string
     {
         return $this->value;
     }
