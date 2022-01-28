@@ -78,7 +78,6 @@ class SecurityControllerTest extends TestCase
         self::assertTrue($guard->isPostSecured());
 
         // CSRF tokens applied
-        self::assertTrue(strpos($output, '<input type="hidden" name="CSRFName"') !== false);
         self::assertTrue(strpos($output, '<input type="hidden" name="CSRFToken"') !== false);
     }
 

@@ -31,7 +31,7 @@ class CsrfGuardTest extends TestCase
         $name = $fields[1];
         $value = $fields[2];
 
-        $req = new Request('http://test.local/test', 'DELETE', ['parameters' => ['CSRFName' => $name, 'CSRFToken' => $value]]);
+        $req = new Request('http://test.local/test', 'DELETE', ['parameters' => ['CSRFToken' => $name . '$' . $value]]);
         $csrf = new CsrfGuard($req, [
             'guard_methods' => ['DELETE']
         ]);
@@ -136,14 +136,14 @@ class CsrfGuardTest extends TestCase
     public function testInvalidToken()
     {
         $this->expectException(InvalidCsrfException::class);
-        $req = new Request('http://test.local/test', 'PUT', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
+        $req = new Request('http://test.local/test', 'PUT', ['parameters' => ['CSRFToken' => 'invalid']]);
         $csrf = new CsrfGuard($req);
         $csrf->run();
     }
 
     public function testGuardInvalidException()
     {
-        $req = new Request('http://test.local/test', 'PUT', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
+        $req = new Request('http://test.local/test', 'PUT', ['parameters' => ['CSRFToken' => 'invalid']]);
         $csrf = new CsrfGuard($req);
         try {
             $csrf->run();
@@ -156,7 +156,7 @@ class CsrfGuardTest extends TestCase
     public function testInvalidToken2()
     {
         $this->expectException(InvalidCsrfException::class);
-        $req = new Request('http://test.local/test', 'PATCH', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
+        $req = new Request('http://test.local/test', 'PATCH', ['parameters' => ['CSRFToken' => 'invalid']]);
         $csrf = new CsrfGuard($req);
         $csrf->run();
     }
@@ -164,7 +164,7 @@ class CsrfGuardTest extends TestCase
     public function testInvalidGuard()
     {
         $this->expectException(InvalidCsrfException::class);
-        $req = new Request('http://test.local/test', 'POST', ['parameters' => ['CSRFName' => 'invalid', 'CSRFToken' => 'invalid']]);
+        $req = new Request('http://test.local/test', 'POST', ['parameters' => ['CSRFToken' => 'invalid']]);
         $csrf = new CsrfGuard($req);
         $csrf->run();
     }
@@ -190,7 +190,7 @@ class CsrfGuardTest extends TestCase
         $name = $fields[1];
         $value = $fields[2];
 
-        $req = new Request('http://test.local/test', 'DELETE', ['parameters' => ['CSRFName' => $name, 'CSRFToken' => $value]]);
+        $req = new Request('http://test.local/test', 'DELETE', ['parameters' => ['CSRFToken' => $name . '$' . $value]]);
         $csrf = new CsrfGuard($req);
         Session::getInstance()->remove('__CSRF_TOKEN');
         $csrf->run();
@@ -198,13 +198,13 @@ class CsrfGuardTest extends TestCase
 
     private function hasHiddenFields($html): bool
     {
-        return (bool) preg_match("/<input type=\"hidden\" name=\"CSRFName\" value=\"CSRFGuard_[0-9]+\" \/><input type=\"hidden\" name=\"CSRFToken\" value=\"[0-9a-zA-Z]+\" \/>/", $html);
+        return (bool) preg_match("/<input type=\"hidden\" name=\"CSRFToken\" value=\"CSRFGuard_[0-9]+\\$[0-9a-zA-Z]+\" \/>/", $html);
     }
 
     private function getHiddenFieldValues($html): array
     {
         $output = [];
-        preg_match("/<input type=\"hidden\" name=\"CSRFName\" value=\"(CSRFGuard_[0-9]+)\" \/><input type=\"hidden\" name=\"CSRFToken\" value=\"([0-9a-zA-Z]+)\" \/>/", $html, $output);
+        preg_match("/<input type=\"hidden\" name=\"CSRFToken\" value=\"(CSRFGuard_[0-9]+)\\$([0-9a-zA-Z]+)\" \/>/", $html, $output);
         return $output;
     }
 }
