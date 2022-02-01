@@ -17,6 +17,7 @@ class IntrusionDetection
         'custom_file' => '', // Change the default rule file
         'impact_threshold' => 0, // Minimum impact to be considered to throw an exception (default is any detection)
         'monitor_cookies' => true, // Verifies the content of request cookies
+        'monitor_url' => true, // Verifies the content of the request URL
         'exceptions' => [] // List of request parameters to be exempt of detection (e.g. '__utmz')
     ];
 
@@ -48,6 +49,11 @@ class IntrusionDetection
     private bool $includeCookiesMonitoring = true;
 
     /**
+     * @var bool
+     */
+    private bool $includeUrlMonitoring = true;
+
+    /**
      * @var IntrusionReport | null
      */
     private ?IntrusionReport $report = null;
@@ -66,6 +72,7 @@ class IntrusionDetection
         $this->initializeExceptions();
         $this->initializeImpactThreshold();
         $this->initializeCookieMonitoring();
+        $this->initializeUrlMonitoring();
     }
 
     /**
@@ -143,6 +150,13 @@ class IntrusionDetection
         }
     }
 
+    private function initializeUrlMonitoring()
+    {
+        if (isset($this->configurations['monitor_url']) && $this->configurations['monitor_url']) {
+            $this->includeUrlMonitoring = $this->configurations['monitor_url'];
+        }
+    }
+
     private function initializeImpactThreshold()
     {
         if (isset($this->configurations['impact_threshold'])) {
@@ -168,10 +182,11 @@ class IntrusionDetection
      */
     private function getMonitoringInputs(): array
     {
-        $guard = $this->request->getParameters();
-        if ($this->includeCookiesMonitoring) {
-            $guard = array_merge($guard, $this->request->getCookies());
-        }
-        return $guard;
+        return [
+            'parameters' => $this->request->getParameters(),
+            'arguments' => $this->request->getArguments(),
+            'cookies' => ($this->includeCookiesMonitoring) ? $this->request->getCookies() : [],
+            'url' => ($this->includeUrlMonitoring) ? ['requested_url' => $this->request->getRequestedUri()] : [],
+        ];
     }
 }

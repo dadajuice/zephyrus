@@ -58,7 +58,7 @@ class IntrusionDetectionTest extends TestCase
             $ids->run();
         } catch (IntrusionDetectionException $e) {
             $intrusions = $e->getReport()->getDetectedIntrusions();
-            self::assertEquals("test.2", $intrusions[0]->argument_name);
+            self::assertEquals("parameters.test.2", $intrusions[0]->argument_name);
         }
     }
 
@@ -72,7 +72,7 @@ class IntrusionDetectionTest extends TestCase
             $ids->run();
         } catch (IntrusionDetectionException $e) {
             $intrusions = $e->getReport()->getDetectedIntrusions();
-            self::assertEquals("test.bob", $intrusions[0]->argument_name);
+            self::assertEquals("parameters.test.bob", $intrusions[0]->argument_name);
         }
     }
 
@@ -84,6 +84,18 @@ class IntrusionDetectionTest extends TestCase
         ]]);
         $ids = new IntrusionDetection($request);
         $ids->run();
+    }
+
+    public function testDetectionInjectionWithUrl()
+    {
+        $request = new Request("http://dummy.com/<script>alert(document.cookie);</script>", "GET");
+        $ids = new IntrusionDetection($request);
+        try {
+            $ids->run();
+        } catch (IntrusionDetectionException $e) {
+            $intrusions = $e->getReport()->getDetectedIntrusions();
+            self::assertEquals("url.requested_url", $intrusions[0]->argument_name);
+        }
     }
 
     public function testDetectionExceptionData()
