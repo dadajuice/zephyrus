@@ -334,7 +334,7 @@ class CsrfGuard
     private function initializeEnabledState()
     {
         if (isset($this->configurations['enabled'])) {
-            $this->enabled = $this->configurations['enabled'];
+            $this->enabled = (bool) $this->configurations['enabled'];
         }
     }
 
