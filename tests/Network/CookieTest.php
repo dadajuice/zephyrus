@@ -24,10 +24,11 @@ class CookieTest extends TestCase
 
         $cookieContent = str_replace("Set-Cookie: ", "", $header);
         $cookieSegment = explode("; ", $cookieContent);
+
         self::assertEquals("test_default_cookie=12345", $cookieSegment[0]);
-        self::assertEquals("path=/", $cookieSegment[3]);
-        self::assertEquals("HttpOnly", $cookieSegment[4]);
-        self::assertEquals("SameSite=Strict", $cookieSegment[5]);
+        self::assertEquals("path=/", $cookieSegment[1]);
+        self::assertEquals("HttpOnly", $cookieSegment[2]);
+        self::assertEquals("SameSite=Strict", $cookieSegment[3]);
     }
 
     public function testStaticRead()
