@@ -65,18 +65,21 @@ class SessionDataTest extends TestCase
     {
         Session::getInstance()->set('test', '999');
         self::assertEquals(null, Session::getInstance()->read('username'));
+        self::assertEquals(null, session('username'));
     }
 
     public function testReadDefaultUnregistered()
     {
         Session::getInstance()->set('test', '999');
         self::assertEquals('admin', Session::getInstance()->read('username', 'admin'));
+        self::assertEquals('admin', session('username', 'admin'));
     }
 
     public function testRemove()
     {
         Session::getInstance()->set('val', '4567');
         self::assertEquals('4567', $_SESSION['val']);
+        self::assertTrue(Session::getInstance()->has('val'));
         Session::getInstance()->remove('val');
         self::assertFalse(isset($_SESSION['val']));
         self::assertFalse(Session::getInstance()->has('val'));
