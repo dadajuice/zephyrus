@@ -2,39 +2,46 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Session;
-use Zephyrus\Security\EncryptedSessionHandler;
+use Zephyrus\Application\Session\EncryptedSessionHandler;
 
 class EncryptedSessionHandlerTest extends TestCase
 {
     /**
      * @var EncryptedSessionHandler
      */
-    private $handler;
+    private EncryptedSessionHandler $handler;
 
     /**
      * @var string
      */
-    private $sessionId;
+    private string $sessionId;
 
     protected function setUp(): void
     {
+        // Destroy any previous encryption key cookie sent
         if (isset($_COOKIE['key_phpsessid'])) {
             unset($_COOKIE['key_phpsessid']);
         }
+
+        // Destroy any reference to the Session to use native PHP session function for those tests
         Session::getInstance()->destroy();
         Session::kill();
+
+        // Assign handler and start session
         $this->handler = new EncryptedSessionHandler();
+        session_save_path(sys_get_temp_dir());
         session_set_save_handler($this->handler);
         session_name('phpsessid');
-        session_start();
-        $this->handler->open('/tmp', 'phpsessid');
+        session_start(); // Will do the first open
+
+        // Prepares the cookies to simulate they have been sent to the client
+        //$this->handler->open(sys_get_temp_dir(), 'phpsessid');
         $this->sessionId = session_id();
         $this->setupCookie();
     }
 
     protected function tearDown(): void
     {
-        Session::kill();
         $this->handler->destroy($this->sessionId);
         session_destroy();
         unset($_COOKIE['key_phpsessid']);
@@ -43,13 +50,16 @@ class EncryptedSessionHandlerTest extends TestCase
     public function testSuccessfulSessionDecryption()
     {
         self::assertTrue(isset($_COOKIE['key_phpsessid']));
+        $previousCookie = $_COOKIE['key_phpsessid'];
         $this->handler->write($this->sessionId, 'my_secret');
         $result = $this->handler->read($this->sessionId);
         self::assertEquals('my_secret', $result);
 
         // Close and reopen handler stream (equivalent of ending session)
         $this->handler->close();
-        $this->handler->open('/tmp', 'phpsessid');
+        $this->handler->open(sys_get_temp_dir(), 'phpsessid');
+        $newCookie = $_COOKIE['key_phpsessid'];
+        self::assertEquals($previousCookie, $newCookie);
         $result = $this->handler->read($this->sessionId);
         self::assertEquals('my_secret', $result);
     }
@@ -61,7 +71,7 @@ class EncryptedSessionHandlerTest extends TestCase
         self::assertEquals('my_ultimate_secret', $result);
         $this->handler->close();
         $_COOKIE['key_phpsessid'] = "wrong"; // simulate invalid key
-        $this->handler->open('/tmp', 'phpsessid');
+        $this->handler->open(sys_get_temp_dir(), 'phpsessid');
         $result = $this->handler->read($this->sessionId);
         self::assertNull($result);
     }
@@ -74,17 +84,9 @@ class EncryptedSessionHandlerTest extends TestCase
      */
     private function setupCookie()
     {
-        $headers = xdebug_get_headers();
-        $headers = array_reverse($headers);
-        $cookie = null;
-        foreach ($headers as $header) {
-            if (strpos($header, 'Set-Cookie: key_phpsessid') !== false) {
-                $cookie = $header;
-                $cookie = str_replace('Set-Cookie: key_phpsessid=', '', $cookie);
-                $cookie = str_replace('; path=/', '', $cookie);
-                break;
-            }
-        }
-        $_COOKIE['key_phpsessid'] = urldecode($cookie);
+        $cookie = getSetCookieHeader("key_phpsessid");
+        $cookieParts = explode("; ", $cookie);
+        $value = str_replace('Set-Cookie: key_phpsessid=', '', $cookieParts[0]);
+        $_COOKIE['key_phpsessid'] = $value;
     }
 }
