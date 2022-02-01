@@ -109,7 +109,7 @@ class Cookie
     public function send()
     {
         $options = [
-            'expires' => time() + $this->lifetime,
+            'expires' => $this->lifetime  > 0 ? time() + $this->lifetime : 0,
             'path' => $this->path,
             'domain' => $this->domain,
             'secure' => $this->secure && ($_SERVER['HTTPS'] ?? false),
