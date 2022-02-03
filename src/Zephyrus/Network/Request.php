@@ -73,6 +73,11 @@ class Request
     private $files;
 
     /**
+     * @var bool checks if the request was done through HTTPS
+     */
+    private $secure;
+
+    /**
      * Request constructor which need the option array data to populate the
      * request. E.g.
      *
@@ -255,6 +260,14 @@ class Request
     }
 
     /**
+     * @return bool
+     */
+    public function isSecure(): bool
+    {
+        return $this->secure;
+    }
+
+    /**
      * Retrieves the defined accepted representations order by specified priority using the standard parameter "q" which
      * should range from 0 (lowest) to 1 (highest).
      *
@@ -374,6 +387,7 @@ class Request
         $this->userAgent = $this->serverVariables['HTTP_USER_AGENT'] ?? '';
         $this->clientIp = $this->serverVariables['REMOTE_ADDR'] ?? '';
         $this->referer = $this->serverVariables['HTTP_REFERER'] ?? '';
+        $this->secure = $this->serverVariables['HTTPS'] ?? false;
     }
 
     private function initializeBaseUrl()

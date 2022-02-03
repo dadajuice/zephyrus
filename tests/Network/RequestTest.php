@@ -40,6 +40,25 @@ class RequestTest extends TestCase
         self::assertEquals('192.168.2.1', $request->getClientIp());
         self::assertEquals('chrome', $request->getUserAgent());
         self::assertEquals('text/html', $request->getAccept());
+        self::assertFalse($request->isSecure());
+    }
+
+    public function testServerSecure()
+    {
+        $server = [];
+        $uri = 'https://127.0.0.1/test/3?sort=4&filter[]=a&filter[]=b#section';
+        $method = 'GET';
+        $server['REMOTE_ADDR'] = '192.168.2.1';
+        $server['HTTP_ACCEPT'] = 'text/html';
+        $server['HTTP_USER_AGENT'] = 'chrome';
+        $server['HTTPS'] = true;
+        $request = new Request($uri, $method, [
+            'server' => $server
+        ]);
+        self::assertEquals('192.168.2.1', $request->getClientIp());
+        self::assertEquals('chrome', $request->getUserAgent());
+        self::assertEquals('text/html', $request->getAccept());
+        self::assertTrue($request->isSecure());
     }
 
     public function testMultipleAccept()
