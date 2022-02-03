@@ -80,6 +80,21 @@ class FileUpload
     private $customGenerationCallback = null;
 
     /**
+     * Returns the maximum allowed upload size (in MB) based on the server configurations. To increment this size the
+     * upload_max_filesize and post_max_size properties must be modified (either directly in the PHP.ini, in a .htaccess
+     * or using ini_set function).
+     *
+     * @return int
+     */
+    public static final function getMaxUploadSize(): int
+    {
+        $maxUpload = (int)(ini_get('upload_max_filesize'));
+        $maxPost = (int)(ini_get('post_max_size'));
+        $memoryLimit = (int)(ini_get('memory_limit'));
+        return min($maxUpload, $maxPost, $memoryLimit);
+    }
+
+    /**
      * Builds an instance based on a valid $_FILE element which is an array with the following keys : error, size,
      * tmp_name, name and size. Upon instanciation, if something is wrong with the given data, an exception will be
      * thrown preventing any instance to be built. Makes sure that the given element is properly formed and is really
