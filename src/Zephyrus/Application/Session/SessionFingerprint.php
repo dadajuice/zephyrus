@@ -42,9 +42,34 @@ class SessionFingerprint
         }
     }
 
+    /**
+     * Checks if the session fingerprint data has been initiated.
+     *
+     * @return bool
+     */
     public function isInitiated(): bool
     {
         return isset($_SESSION['__HANDLER_FINGERPRINT']);
+    }
+
+    /**
+     * Checks if the user agent (browser identification) of the client is currently fingerprinted for the session.
+     *
+     * @return bool
+     */
+    public function isUserAgentFingerprinted(): bool
+    {
+        return $this->userAgentFingerprinted;
+    }
+
+    /**
+     * Checks if the ip address of the client is currently fingerprinted for the session.
+     *
+     * @return bool
+     */
+    public function isIpAddressFingerprinted(): bool
+    {
+        return $this->ipAddressFingerprinted;
     }
 
     /**
