@@ -23,6 +23,28 @@ abstract class FileSystemNode
     }
 
     /**
+     * Verifies if the given path is writable by the current web server user.
+     *
+     * @param string $path
+     * @return bool
+     */
+    public static function isWritable(string $path): bool
+    {
+        return is_writable($path);
+    }
+
+    /**
+     * Verifies if the given path is readable by the current web server user.
+     *
+     * @param string $path
+     * @return bool
+     */
+    public static function isReadable(string $path): bool
+    {
+        return is_readable($path);
+    }
+
+    /**
      * Constructs an abstract FileSystemNode which is used by the Directory
      * and File classes. Throws an InvalidArgumentException if the given path
      * is non existent.
