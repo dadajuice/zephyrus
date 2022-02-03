@@ -19,7 +19,7 @@ class SessionEncryptionTest extends TestCase
         $content = $this->getSessionFileContent();
         self::assertNotEmpty($content);
         self::assertTrue(!str_contains($content, 'i am a secret'));
-        unlink(Session::getSavePath() . '/sess_' . session_id());
+        unlink(Session::getSystemSavePath() . '/sess_' . session_id());
     }
 
     public function testNonEncryption()
@@ -36,12 +36,12 @@ class SessionEncryptionTest extends TestCase
         $content = $this->getSessionFileContent();
         self::assertNotEmpty($content);
         self::assertTrue(str_contains($content, 'i am a secret'));
-        unlink(Session::getSavePath() . '/sess_' . session_id());
+        unlink(Session::getSystemSavePath() . '/sess_' . session_id());
     }
 
     private function getSessionFileContent(): string
     {
         session_commit();
-        return file_get_contents(Session::getSavePath() . '/sess_' . session_id());
+        return file_get_contents(Session::getSystemSavePath() . '/sess_' . session_id());
     }
 }
