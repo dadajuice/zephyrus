@@ -17,7 +17,7 @@ class Session
         'name' => self::DEFAULT_SESSION_NAME, // Name of the session cookie (empty means system default session_name())
         'lifetime' => Cookie::DURATION_SESSION, // Seconds before the session is considered to be expired
         'lifetime_mode' => 'default', // default (lifetime is global) or reset (each request refreshes the lifetime)
-        'save_path' => self::DEFAULT_SAVE_PATH, // Path where to save the session files
+        'save_path' => '', // Path where to save the session files (empty means php.ini defaults)
         'encryption_enabled' => true, // Session files on the web server are encrypted
         'fingerprint_ip' => false, // Session cookie is bound to the client ip address
         'fingerprint_ua' => true, // Session cookie is bound to the client user agent

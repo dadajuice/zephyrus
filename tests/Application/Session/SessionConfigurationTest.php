@@ -31,7 +31,8 @@ class SessionConfigurationTest extends TestCase
         self::assertEquals(600, $session->getLifetime());
         self::assertEquals('none', $session->getRefreshMode());
         self::assertEquals(0, $session->getRefreshRate());
-        self::assertEquals(Session::DEFAULT_SAVE_PATH, $session->getSavePath());
+        self::assertTrue($session->getSavePath() == session_save_path()
+            || $session->getSavePath() == sys_get_temp_dir());
         self::assertEquals("kViaaDAH3L3cDMABvqtO", $session->getName());
     }
 
@@ -46,18 +47,15 @@ class SessionConfigurationTest extends TestCase
         self::assertEquals(0, $session->getLifetime());
         self::assertEquals('none', $session->getRefreshMode());
         self::assertEquals(0, $session->getRefreshRate());
-        self::assertEquals(Session::DEFAULT_SAVE_PATH, $session->getSavePath());
         self::assertEquals(Session::DEFAULT_SESSION_NAME, $session->getName());
     }
 
     public function testInitialisationFromSystemSavePath()
     {
         $session = Session::getInstance([
-            'save_path' => ''
+            'save_path' => Session::DEFAULT_SAVE_PATH
         ]);
-        self::assertNotEquals(Session::DEFAULT_SAVE_PATH, $session->getSavePath());
-        self::assertTrue($session->getSavePath() == session_save_path()
-            || $session->getSavePath() == sys_get_temp_dir());
+        self::assertEquals(Session::DEFAULT_SAVE_PATH, $session->getSavePath());
     }
 
     public function testInitialisationLifetime()
