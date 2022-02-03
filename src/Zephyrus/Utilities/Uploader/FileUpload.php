@@ -86,11 +86,11 @@ class FileUpload
      *
      * @return int
      */
-    public static final function getMaxUploadSize(): int
+    final public static function getMaxUploadSize(): int
     {
-        $maxUpload = (int)(ini_get('upload_max_filesize'));
-        $maxPost = (int)(ini_get('post_max_size'));
-        $memoryLimit = (int)(ini_get('memory_limit'));
+        $maxUpload = (int) (ini_get('upload_max_filesize'));
+        $maxPost = (int) (ini_get('post_max_size'));
+        $memoryLimit = (int) (ini_get('memory_limit'));
         return min($maxUpload, $maxPost, $memoryLimit);
     }
 
@@ -117,8 +117,8 @@ class FileUpload
      *
      * @param string $destinationDirectory
      * @param string|null $filename
-     * @return string
      * @throws UploaderException
+     * @return string
      */
     public function upload(string $destinationDirectory, ?string $filename = null): string
     {
@@ -241,7 +241,7 @@ class FileUpload
         if ($this->maximumFileSize <= 0) {
             return true;
         }
-        return ($this->file->size() <= $this->maximumFileSize);
+        return $this->file->size() <= $this->maximumFileSize;
     }
 
     /**
@@ -453,8 +453,8 @@ class FileUpload
     /**
      * @param string $destinationDirectory
      * @param string $filename
-     * @return string
      * @throws UploaderException
+     * @return string
      */
     private function prepareDestination(string $destinationDirectory, string $filename): string
     {

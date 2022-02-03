@@ -16,7 +16,7 @@ class SessionFingerprint
     /**
      * Defines if the ip address should be considered when creating the fingerprint.  Meaning the user ip address should
      * not change during the session. Use carefully as this could provoke false positive (vpn, proxies, cellular
-     * networks, etc.)
+     * networks, etc.).
      *
      * @var bool
      */
