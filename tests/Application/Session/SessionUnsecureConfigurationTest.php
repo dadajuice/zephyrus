@@ -1,8 +1,8 @@
 <?php namespace Zephyrus\Tests\Application\Session;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Session;
+use Zephyrus\Exceptions\SessionException;
 
 class SessionUnsecureConfigurationTest extends TestCase
 {
@@ -15,7 +15,7 @@ class SessionUnsecureConfigurationTest extends TestCase
 
     public function testUnsecureSessionInitialisation()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(SessionException::class);
         ini_set('session.use_cookies', 0);
         ini_set('session.use_only_cookies', 0);
         Session::getInstance()->start();
