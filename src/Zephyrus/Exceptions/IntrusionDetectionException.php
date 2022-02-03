@@ -21,6 +21,7 @@ class IntrusionDetectionException extends \Exception
     }
 
     /**
+     * @param string|null $field
      * @return array
      */
     public function getDetectedIntrusions(?string $field = null): array
