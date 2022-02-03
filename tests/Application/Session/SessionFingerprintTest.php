@@ -1,8 +1,8 @@
 <?php namespace Zephyrus\Tests\Application\Session;
 
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 use Zephyrus\Application\Session;
+use Zephyrus\Exceptions\SessionException;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 
@@ -60,7 +60,7 @@ class SessionFingerprintTest extends TestCase
 
     public function testInvalidFingerprintUserAgent()
     {
-        self::expectException(RuntimeException::class); // TODO: Change for SessionException
+        self::expectException(SessionException::class);
         $config = [
             'name' => 'session_fingerprint_test',
             'fingerprint_ua' => true,
@@ -130,7 +130,7 @@ class SessionFingerprintTest extends TestCase
 
     public function testInvalidFingerprintIpAddress()
     {
-        self::expectException(RuntimeException::class); // TODO: Change for SessionException
+        self::expectException(SessionException::class);
         $config = [
             'name' => 'session_fingerprint_test',
             'fingerprint_ua' => false,
@@ -200,7 +200,7 @@ class SessionFingerprintTest extends TestCase
 
     public function testInvalidFingerprintBoth()
     {
-        self::expectException(RuntimeException::class); // TODO: Change for SessionException
+        self::expectException(SessionException::class);
         $config = [
             'name' => 'session_fingerprint_test',
             'fingerprint_ua' => true,
