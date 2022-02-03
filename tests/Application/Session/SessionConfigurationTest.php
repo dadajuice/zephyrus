@@ -72,6 +72,17 @@ class SessionConfigurationTest extends TestCase
         self::assertEquals(24000, ini_get("session.gc_maxlifetime"));
     }
 
+    public function testRestart()
+    {
+        $session = Session::getInstance();
+        $session->start();
+        $session->set('test', 'i am value');
+        self::assertEquals('i am value', $_SESSION['test']);
+        $session->restart();
+        self::assertFalse($session->has('test'));
+        self::assertFalse(isset($_SESSION['test']));
+    }
+
     public function testInitialisationNotEnabled()
     {
         $session = Session::getInstance([
