@@ -8,7 +8,7 @@ class IntrusionDetectionException extends \Exception
 
     public function __construct(IntrusionReport $report)
     {
-        parent::__construct();
+        parent::__construct("IDS: Possible intrusion detected of impact " . $report->getImpact() . ".");
         $this->report = $report;
     }
 
