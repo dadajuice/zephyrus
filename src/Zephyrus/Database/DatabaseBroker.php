@@ -164,7 +164,7 @@ abstract class DatabaseBroker
      * @param string $query
      * @param array $parameters
      * @param callable|null $callback
-     * @return array|stdClass[]
+     * @return array
      */
     protected function filteredSelect(string $query, array $parameters = [], ?callable $callback = null): array
     {
@@ -172,7 +172,7 @@ abstract class DatabaseBroker
         if (!is_null($this->pager)) {
             $query .= $this->pager->getSqlLimitClause($this->database->getAdapter());
         }
-        return $this->select($query, $parameters, $callback);
+        return self::select($query, $parameters, $callback);
     }
 
     /**
@@ -186,7 +186,7 @@ abstract class DatabaseBroker
     protected function filteredSelectSingle(string $query, array $parameters = []): ?stdClass
     {
         $query = $this->filterQuery($query);
-        return $this->selectSingle($query, $parameters);
+        return self::selectSingle($query, $parameters);
     }
 
     /**
