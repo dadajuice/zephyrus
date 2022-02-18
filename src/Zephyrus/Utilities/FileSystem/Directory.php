@@ -98,14 +98,13 @@ class Directory extends FileSystemNode
     }
 
     /**
-     * Searches for all file names that satisfies the given pattern inside
-     * the directory.
+     * Searches for all file names that satisfy the given pattern inside the directory. Default will fetch all files.
      *
      * @param string $pattern
      * @param bool $includeDirectoryName
      * @return array
      */
-    public function findFilenames(string $pattern, bool $includeDirectoryName = false): array
+    public function findFilenames(string $pattern = '.+', bool $includeDirectoryName = false): array
     {
         $directoryIterator = new RecursiveDirectoryIterator($this->path, RecursiveDirectoryIterator::SKIP_DOTS);
         $recursiveIterator = new RecursiveIteratorIterator($directoryIterator);
@@ -120,13 +119,13 @@ class Directory extends FileSystemNode
     }
 
     /**
-     * Searches for all file instances that satisfies the given pattern inside
-     * the directory.
+     * Searches for all file instances that satisfy the given pattern inside the directory. Default will fetch all
+     * files.
      *
      * @param string $pattern
      * @return File[];
      */
-    public function findFiles(string $pattern): array
+    public function findFiles(string $pattern = '.+'): array
     {
         $files = $this->findFilenames($pattern, true);
         return $this->pathToFiles($files);
