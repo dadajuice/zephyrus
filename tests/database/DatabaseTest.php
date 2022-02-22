@@ -144,6 +144,18 @@ class DatabaseTest extends TestCase
         $db->rollback();
     }
 
+    /**
+     * @doesNotPerformAssertions
+     * This is needed since the rollback method doesn't return anything but we still want to make sure that no exceptions are thrown
+     */
+    public function testRollback()
+    {
+        $db = DatabaseFactory::buildFromConfigurations(['dbms' => 'sqlite']);
+        $db->beginTransaction();
+        $db->beginTransaction();
+        $db->rollback();
+    }
+
     public function testInvalidDsn()
     {
         $this->expectException(DatabaseException::class);
