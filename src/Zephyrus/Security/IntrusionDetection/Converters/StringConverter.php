@@ -125,7 +125,7 @@ trait StringConverter
         $value = urldecode(
             preg_replace(
                 '/(?:%E(?:2|3)%8(?:0|1)%(?:A|8|9)\w|%EF%BB%BF|%EF%BF%BD)|(?:&#(?:65|8)\d{3};?)/i',
-                null,
+                "",
                 urlencode($value)
             )
         );
@@ -137,13 +137,13 @@ trait StringConverter
         $value = urldecode($value);
 
         $value = preg_replace('/(?:%ff1c)/', '<', $value);
-        $value = preg_replace('/(?:&[#x]*(200|820|200|820|zwn?j|lrm|rlm)\w?;?)/i', null, $value);
+        $value = preg_replace('/(?:&[#x]*(200|820|200|820|zwn?j|lrm|rlm)\w?;?)/i', "", $value);
         $value = preg_replace(
             '/(?:&#(?:65|8)\d{3};?)|' .
             '(?:&#(?:56|7)3\d{2};?)|' .
             '(?:&#x(?:fe|20)\w{2};?)|' .
             '(?:&#x(?:d[c-f])\w{2};?)/i',
-            null,
+            "",
             $value
         );
 
@@ -245,7 +245,7 @@ trait StringConverter
         ];
 
         // strip out concatenations
-        $converted = preg_replace($pattern, null, $compare);
+        $converted = preg_replace($pattern, "", $compare);
 
         //strip object traversal
         $converted = preg_replace('/\w(\.\w\()/', "$1", $converted);

@@ -102,15 +102,15 @@ trait EncodingConverter
         $value = preg_replace('/^"([^"=\\!><~]+)"$/', '$1', $value);
 
         //OpenID login tokens
-        $value = preg_replace('/{[\w-]{8,9}\}(?:\{[\w=]{8}\}){2}/', null, $value);
+        $value = preg_replace('/{[\w-]{8,9}\}(?:\{[\w=]{8}\}){2}/', "", $value);
 
-        //convert Content and \sdo\s to null
-        $value = preg_replace('/Content|\Wdo\s/', null, $value);
+        //convert Content and \sdo\s to empty string
+        $value = preg_replace('/Content|\Wdo\s/', "", $value);
 
         //strip emoticons
         $value = preg_replace(
             '/(?:\s[:;]-[)\/PD]+)|(?:\s;[)PD]+)|(?:\s:[)PD]+)|-\.-|\^\^/m',
-            null,
+            "",
             $value
         );
 
