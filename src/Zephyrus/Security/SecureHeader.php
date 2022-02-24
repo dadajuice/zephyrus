@@ -3,67 +3,50 @@
 class SecureHeader
 {
     /**
-     * Provides Clickjacking protection. Values: deny - no rendering within a frame,
-     * sameorigin - no rendering if origin mismatch, allow-from: DOMAIN - allow
-     * rendering if framed by frame loaded from DOMAIN.
+     * Provides Clickjacking protection. Values: deny - no rendering within a frame, sameorigin - no rendering if origin
+     * mismatch, allow-from: DOMAIN - allow rendering if framed by frame loaded from DOMAIN.
      *
      * @var string
      */
-    private $frameOptions = "SAMEORIGIN";
+    private string $frameOptions = "SAMEORIGIN";
 
     /**
-     * This header enables the Cross-site scripting (XSS) filter built into most recent
-     * web browsers. It's usually enabled by default anyway, so the role of this header
-     * is to re-enable the filter for this particular website if it was disabled by
-     * the user.
+     * The only defined value, "nosniff", prevents Internet Explorer and Google Chrome from MIME-sniffing a response
+     * away from the declared content-type. This reduces exposure to drive-by download attacks and sites serving user
+     * uploaded content that, by clever naming, could be treated by MSIE as executable or dynamic HTML files.
      *
      * @var string
      */
-    private $xssProtection = "1; mode=block";
+    private string $contentTypeOptions = "nosniff";
 
     /**
-     * The only defined value, "nosniff", prevents Internet Explorer and Google Chrome
-     * from MIME-sniffing a response away from the declared content-type. This reduces
-     * exposure to drive-by download attacks and sites serving user uploaded content
-     * that, by clever naming, could be treated by MSIE as executable or dynamic HTML
-     * files.
+     * HTTP Strict-Transport-Security (HSTS) enforces secure (HTTP over SSL/TLS) connections to the server. This will
+     * reduce impact of bugs in web applications leaking session data through cookies and external links and defends
+     * against Man-in-the-middle attacks. HSTS also disables the ability for user's to ignore SSL negotiation warnings.
      *
      * @var string
      */
-    private $contentTypeOptions = "nosniff";
+    private string $strictTransportSecurity = "max-age=16070400; includeSubDomains";
 
     /**
-     * HTTP Strict-Transport-Security (HSTS) enforces secure (HTTP over SSL/TLS) connections
-     * to the server. This reduces impact of bugs in web applications leaking session data
-     * through cookies and external links and defends against Man-in-the-middle attacks. HSTS
-     * also disables the ability for user's to ignore SSL negotiation warnings.
+     * Requires careful tuning and precise definition of the policy. If enabled, CSP has significant impact on the way
+     * browser renders pages (e.g., inline JavaScript disabled by default and must be explicitly allowed in policy). CSP
+     * prevents a wide range of attacks, including Cross-site scripting and other cross-site injections.
      *
-     * @var string
+     * @var ContentSecurityPolicy|null
      */
-    private $strictTransportSecurity = "max-age=16070400; includeSubDomains";
-
-    /**
-     * Requires careful tuning and precise definition of the policy. If
-     * enabled, CSP has significant impact on the way browser renders
-     * pages (e.g., inline JavaScript disabled by default and must be
-     * explicitly allowed in policy). CSP prevents a wide range of attacks,
-     * including Cross-site scripting and other cross-site injections.
-     *
-     * @var ContentSecurityPolicy
-     */
-    private $contentSecurityPolicy = null;
+    private ?ContentSecurityPolicy $contentSecurityPolicy = null;
 
     /**
      * This class defines the CORS policy. This is needed for JavaScript frontside calls from another origin and thus
      * need careful tuning for optimal security.
      *
-     * @var CrossOriginResourcePolicy
+     * @var CrossOriginResourcePolicy|null
      */
-    private $crossOriginResourcePolicy = null;
+    private ?CrossOriginResourcePolicy $crossOriginResourcePolicy = null;
 
     /**
-     * Bulk send HTTP response header aiming security purposes. Each one are
-     * explained in code.
+     * Bulk send HTTP response header aiming security purposes. Each one are explained in code.
      *
      * @see https://www.owasp.org/index.php/List_of_useful_HTTP_headers
      */
@@ -71,7 +54,6 @@ class SecureHeader
     {
         $this->sendContentOptions();
         $this->sendFrameOptions();
-        $this->sendXssProtection();
         $this->sendStrictTransport();
         $this->sendCrossOriginResourcePolicy();
         $this->sendContentSecurity();
@@ -91,22 +73,6 @@ class SecureHeader
     public function setFrameOptions(string $frameOptions)
     {
         $this->frameOptions = $frameOptions;
-    }
-
-    /**
-     * @return string
-     */
-    public function getXssProtection(): string
-    {
-        return $this->xssProtection;
-    }
-
-    /**
-     * @param string $xssProtection
-     */
-    public function setXssProtection(string $xssProtection)
-    {
-        $this->xssProtection = $xssProtection;
     }
 
     /**
@@ -142,7 +108,7 @@ class SecureHeader
     }
 
     /**
-     * @return ContentSecurityPolicy
+     * @return ContentSecurityPolicy|null
      */
     public function getContentSecurityPolicy(): ?ContentSecurityPolicy
     {
@@ -150,7 +116,7 @@ class SecureHeader
     }
 
     /**
-     * @param ContentSecurityPolicy $csp
+     * @param ContentSecurityPolicy|null $csp
      */
     public function setContentSecurityPolicy(?ContentSecurityPolicy $csp)
     {
@@ -166,7 +132,7 @@ class SecureHeader
     }
 
     /**
-     * @param CrossOriginResourcePolicy $cors
+     * @param CrossOriginResourcePolicy|null $cors
      */
     public function setCrossOriginResourcePolicy(?CrossOriginResourcePolicy $cors)
     {
@@ -184,13 +150,6 @@ class SecureHeader
     {
         if (!empty($this->frameOptions)) {
             header('X-Frame-Options: ' . $this->frameOptions);
-        }
-    }
-
-    private function sendXssProtection()
-    {
-        if (!empty($this->xssProtection)) {
-            header('X-XSS-Protection: ' . $this->xssProtection);
         }
     }
 
