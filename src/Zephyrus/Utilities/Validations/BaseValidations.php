@@ -44,7 +44,9 @@ trait BaseValidations
             || strcasecmp($data, "true") == 0
             || strcasecmp($data, "false") == 0
             || (is_int($data) && $data == 0)
-            || (is_int($data) && $data == 1);
+            || (is_int($data) && $data == 1)
+            || $data == "0"
+            || $data == "1";
     }
 
     public static function isOnlyWithin($data, array $allPossibleValues)
