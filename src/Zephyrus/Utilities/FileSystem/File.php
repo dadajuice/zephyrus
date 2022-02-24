@@ -167,6 +167,16 @@ class File extends FileSystemNode
     }
 
     /**
+     * Returns the md5 hash of the file (can be useful for Etags or integrity checks).
+     *
+     * @return string
+     */
+    public function md5(): string
+    {
+        return md5_file($this->path);
+    }
+
+    /**
      * If the initial path is a single file, will remove it. If the given path is a directory, it will completely empty
      * it and then remove the directory. Returns true on success and false on failure.
      */
