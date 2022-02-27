@@ -16,15 +16,6 @@ class SecureHeaderTest extends TestCase
         self::assertTrue(in_array('X-Frame-Options: SAMEORIGIN', xdebug_get_headers()));
     }
 
-    public function testXssProtection()
-    {
-        $header = new SecureHeader();
-        $header->setXssProtection("1; mode=block");
-        self::assertEquals("1; mode=block", $header->getXssProtection());
-        $header->send();
-        self::assertTrue(in_array('X-XSS-Protection: 1; mode=block', xdebug_get_headers()));
-    }
-
     public function testContentTypeOptions()
     {
         $header = new SecureHeader();
