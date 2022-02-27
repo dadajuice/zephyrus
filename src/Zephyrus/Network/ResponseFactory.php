@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Network;
 
 use Zephyrus\Network\Responses\AbortResponses;
+use Zephyrus\Network\Responses\DownloadResponses;
 use Zephyrus\Network\Responses\RenderResponses;
 use Zephyrus\Network\Responses\StreamResponses;
 use Zephyrus\Network\Responses\SuccessResponse;
@@ -18,6 +19,7 @@ class ResponseFactory
     use StreamResponses;
     use SuccessResponse;
     use XmlResponses;
+    use DownloadResponses;
 
     public static function getInstance(): self
     {
