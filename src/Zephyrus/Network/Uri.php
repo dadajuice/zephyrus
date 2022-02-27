@@ -50,15 +50,15 @@ class Uri
     public function __construct(string $uri)
     {
         $urlParts = parse_url($uri);
-        $this->host = $urlParts['host'] ?? null;
-        $this->scheme = $urlParts['scheme'] ?? null;
+        $this->host = $urlParts['host'] ?? "";
+        $this->scheme = $urlParts['scheme'] ?? "";
         $this->isSecure = $this->scheme == 'https';
-        $this->username = $urlParts['user'] ?? null;
-        $this->port = $urlParts['port'] ?? null;
-        $this->password = $urlParts['pass'] ?? null;
-        $this->path = $urlParts['path'] ?? null;
-        $this->query = $urlParts['query'] ?? null;
-        $this->fragment = $urlParts['fragment'] ?? null;
+        $this->username = $urlParts['user'] ?? "";
+        $this->port = $urlParts['port'] ?? "";
+        $this->password = $urlParts['pass'] ?? "";
+        $this->path = $urlParts['path'] ?? "";
+        $this->query = $urlParts['query'] ?? "";
+        $this->fragment = $urlParts['fragment'] ?? "";
     }
 
     public function getBaseUrl()
@@ -66,7 +66,7 @@ class Uri
         $defaultPorts = ['http' => 80, 'https' => 443];
         return $this->getScheme() . '://'
             . $this->getHost()
-            . (($this->getPort() != $defaultPorts[$this->getScheme()] && !is_null($this->getPort())) ? ":" . $this->getPort() : "");
+            . (($this->getPort() != $defaultPorts[$this->getScheme()] && !empty($this->getPort())) ? ":" . $this->getPort() : "");
     }
 
     /**
