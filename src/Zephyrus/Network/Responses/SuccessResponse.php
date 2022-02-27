@@ -2,7 +2,6 @@
 
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Response;
-use Zephyrus\Utilities\FileSystem\File;
 
 trait SuccessResponse
 {
