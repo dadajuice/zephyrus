@@ -6,6 +6,7 @@ use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Responses\AbortResponses;
+use Zephyrus\Network\Responses\DownloadResponses;
 use Zephyrus\Network\Responses\RenderResponses;
 use Zephyrus\Network\Responses\StreamResponses;
 use Zephyrus\Network\Responses\SuccessResponse;
@@ -25,6 +26,7 @@ abstract class Controller implements Routable
     use StreamResponses;
     use SuccessResponse;
     use XmlResponses;
+    use DownloadResponses;
 
     public function __construct(Router $router)
     {
