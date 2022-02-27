@@ -154,11 +154,29 @@ class HttpRequester
         if ($file === false) {
             throw new HttpRequesterException("Cannot open file [$filePath] for download", $this->method, $this->url);
         }
-        $this->addOption(CURLOPT_TIMEOUT, 50);
+        $this->addOption(CURLOPT_TIMEOUT, 28800);
         $this->addOption(CURLOPT_FILE, $file);
         $this->execute($payload);
         fclose($file);
         return $filePath;
+    }
+
+    /**
+     * Proceeds to download (as a stream) the targeted file by the configured requester URL. This particular download
+     * method allows to passthrough directly to the client output without the need to locally save the file. Useful if
+     * there's no need for additional processing of a remote file and giving it directly to the client.
+     *
+     * @param string|array $payload
+     * @throws HttpRequesterException
+     */
+    public function passthroughDownload(string|array $payload = "")
+    {
+        $this->addOption(CURLOPT_TIMEOUT, 500);
+        $this->addOption(CURLOPT_WRITEFUNCTION, function ($curl, $data) {
+            echo $data;
+            return strlen($data);
+        });
+        $this->execute($payload);
     }
 
     /**
