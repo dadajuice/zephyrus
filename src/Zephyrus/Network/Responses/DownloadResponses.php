@@ -39,7 +39,7 @@ trait DownloadResponses
                 ]
             ]);
             $handle = fopen($filePath, 'rb', false, $context);
-            ob_end_clean();
+            //ob_end_clean();
             fpassthru($handle);
             fclose($handle);
             if ($deleteAfter) {
