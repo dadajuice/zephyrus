@@ -105,14 +105,14 @@ class Response
     }
 
     /**
-     * Makes sure the response's content type is text/html and that the content
-     * contains at least the <html> tag.
+     * Makes sure the response's content type is text/html and that the content contains at least the <html> tag.
      *
      * @return bool
      */
     public function hasHtmlContent(): bool
     {
-        return $this->contentType == ContentType::HTML && (strpos($this->content, "<html>") !== false);
+        return $this->contentType == ContentType::HTML
+            && str_contains($this->content, "<html>");
     }
 
     /**
@@ -156,6 +156,14 @@ class Response
     public function getContentType(): string
     {
         return $this->contentType;
+    }
+
+    /**
+     * @param int $code
+     */
+    public function setCode(int $code)
+    {
+        $this->code = $code;
     }
 
     /**
