@@ -2,18 +2,15 @@
 
 class TransactionPDO extends \PDO
 {
-    private static $savepointEnabled = ["pgsql", "mysql", "sqlite"];
+    private static array $savepointEnabled = ["pgsql", "mysql", "sqlite"];
 
-    /**
-     * @var int
-     */
-    private $currentTransactionLevel = 0;
+    private int $currentTransactionLevel = 0;
 
     /**
      * PDO begin transaction override to work with savepoint capabilities for
      * supported SGBD. Allows nested transactions.
      */
-    public function beginTransaction()
+    public function beginTransaction(): bool
     {
         if ($this->currentTransactionLevel == 0 || !$this->nestable()) {
             parent::beginTransaction();
@@ -28,36 +25,36 @@ class TransactionPDO extends \PDO
      * PDO commit override to work with savepoint capabilities for supported
      * SGBD. Allows nested transactions.
      */
-    public function commit()
+    public function commit(): bool
     {
         --$this->currentTransactionLevel;
         if ($this->currentTransactionLevel == 0 || !$this->nestable()) {
-            parent::commit();
+            return parent::commit();
         } else {
             $this->exec("RELEASE SAVEPOINT LEVEL{$this->currentTransactionLevel}");
         }
+        return true;
     }
 
     /**
      * PDO rollback override to work with savepoint capabilities for
      * supported SGBD. Allows nested transactions.
      */
-    public function rollBack()
+    public function rollBack(): bool
     {
         --$this->currentTransactionLevel;
         if ($this->currentTransactionLevel == 0 || !$this->nestable()) {
-            parent::rollBack();
+            return parent::rollBack();
         } else {
             $this->exec("ROLLBACK TO SAVEPOINT LEVEL{$this->currentTransactionLevel}");
         }
+        return true;
     }
 
     /**
      * Verifies if the current PDO driver supports save points.
-     *
-     * @return bool
      */
-    private function nestable()
+    private function nestable(): bool
     {
         return in_array($this->getAttribute(\PDO::ATTR_DRIVER_NAME), self::$savepointEnabled);
     }
