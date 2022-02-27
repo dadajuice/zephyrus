@@ -1,7 +1,5 @@
 <?php namespace Zephyrus\Network;
 
-use Zephyrus\Application\Callback;
-
 class Response
 {
     /**
@@ -72,8 +70,7 @@ class Response
     public function sendContent()
     {
         if (!is_null($this->contentCallback)) {
-            $callback = new Callback($this->contentCallback);
-            $callback->execute();
+            ($this->contentCallback)();
         }
         echo $this->content;
     }
