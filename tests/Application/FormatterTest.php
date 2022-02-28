@@ -94,6 +94,9 @@ class FormatterTest extends TestCase
     {
         $result = Formatter::datetime('2016-01-01 23:15:00');
         self::assertEquals('1 janvier 2016, 23:15', $result);
+
+        $result = Formatter::datetime('2016-01-01 01:15:00');
+        self::assertEquals('1 janvier 2016, 01:15', $result);
     }
 
     public function testFormatSizeKb()
