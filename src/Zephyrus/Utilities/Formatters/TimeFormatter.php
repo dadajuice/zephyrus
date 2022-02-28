@@ -21,7 +21,7 @@ trait TimeFormatter
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new DateTime($dateTime);
         }
-        $formatter = new IntlDateFormatter(Locale::getDefault(), IntlDateFormatter::LONG, IntlDateFormatter::SHORT, null, null, Configuration::getConfiguration('lang', 'datetime', " d LLLL yyyy, H:mm"));
+        $formatter = new IntlDateFormatter(Locale::getDefault(), IntlDateFormatter::LONG, IntlDateFormatter::SHORT, null, null, Configuration::getConfiguration('lang', 'datetime', "d LLLL yyyy, H:mm"));
         return $formatter->format($dateTime->getTimestamp());
     }
 
