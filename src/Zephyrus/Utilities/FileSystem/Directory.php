@@ -4,6 +4,8 @@ use InvalidArgumentException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
+use RuntimeException;
+use ZipArchive;
 
 class Directory extends FileSystemNode
 {
@@ -179,6 +181,35 @@ class Directory extends FileSystemNode
     public function getLastAccessedTime(): int
     {
         return $this->getDirectoryLastAccessedTime($this->path);
+    }
+
+    /**
+     * Creates a compressed zip archive of the entire directory at the given $zipPath. Optionally, you can define a
+     * password to protect the archive which will encrypt every file upon compression (by default using AES 256) using
+     * the given password as the key. Returns the resulting ZipArchive instance for further processing if needed. Will
+     * throw a RuntimeException if the archive cannot be created.
+     *
+     * @param string $zipPath
+     * @param string|null $password
+     * @param int $encryptionMethod
+     * @return ZipArchive
+     */
+    public function zip(string $zipPath, ?string $password = null, int $encryptionMethod = ZipArchive::EM_AES_256): ZipArchive
+    {
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath, ZipArchive::CREATE) === true) {
+            foreach ($this->getFiles() as $file) {
+                $filename = str_replace($this->getRealPath() . DIRECTORY_SEPARATOR, '', $file->getRealPath());
+                $zip->addFile($file->getRealPath(), $filename);
+                if (!empty($password) && $encryptionMethod != ZipArchive::EM_NONE) {
+                    $zip->setEncryptionName($filename, $encryptionMethod, $password);
+                }
+            }
+            $zip->close();
+        } else {
+            throw new RuntimeException("Compressed zip archive creation has failed for path [$zipPath]. Make sure the destination directory exists and is writable.");
+        }
+        return $zip;
     }
 
     /**
