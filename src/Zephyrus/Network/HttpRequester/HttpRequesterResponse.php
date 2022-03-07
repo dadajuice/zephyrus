@@ -17,7 +17,7 @@ class HttpRequesterResponse
     private ?string $contentType;
 
     /**
-     * Received HTTP Code (e.g. 200)
+     * Received HTTP Code (e.g. 200).
      *
      * @var int
      */
