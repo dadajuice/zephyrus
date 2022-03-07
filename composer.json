@@ -21,7 +21,8 @@
     "ext-fileinfo": "*",
     "ext-posix": "*",
     "ext-openssl": "*",
-    "ext-mbstring": "*"
+    "ext-mbstring": "*",
+    "ext-zip": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "9.*.*",
