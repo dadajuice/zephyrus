@@ -83,8 +83,8 @@ class HttpRequester
      * type to multipart/form-data.
      *
      * @param array|string $payload
-     * @return HttpRequesterResponse
      * @throws HttpRequesterException
+     * @return HttpRequesterResponse
      */
     public function execute(string|array $payload = ""): HttpRequesterResponse
     {
