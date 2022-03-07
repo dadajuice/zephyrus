@@ -4,23 +4,30 @@ use CURLFile;
 use CurlHandle;
 use InvalidArgumentException;
 use Zephyrus\Exceptions\HttpRequesterException;
+use Zephyrus\Network\HttpRequester\HttpPayload;
+use Zephyrus\Network\HttpRequester\HttpRequesterResponse;
+use Zephyrus\Network\HttpRequester\RequestTypes\HttpDownloadRequest;
+use Zephyrus\Network\HttpRequester\RequestTypes\HttpStreamRequest;
+use Zephyrus\Network\HttpRequester\RequestTypes\HttpUploadRequest;
+use Zephyrus\Utilities\FileSystem\File;
 
 class HttpRequester
 {
-    const DEFAULT_CONNECTION_TIMEOUT = 15;
-    const DEFAULT_CONTENT_TYPE = ContentType::FORM;
-
-    private array $headers = [];
     private string $url;
     private string $method;
-    private int $connectionTimeout = self::DEFAULT_CONNECTION_TIMEOUT;
-    private bool $followRedirection = true;
     private bool $verifySsl = true;
+    private bool $followRedirection = true;
     private string $userAgent = "Zephyrus HTTP Requester/1.0.0";
     private array $options = [];
-    private string $contentType = self::DEFAULT_CONTENT_TYPE;
-    private string $response;
-    private array $responseResults = [];
+    private array $headers = [];
+    private string $contentType = ContentType::FORM;
+    private int $connectionTimeout = 15;
+    private string $accept = ContentType::ANY;
+    private $writeCallback;
+
+    use HttpStreamRequest;
+    use HttpDownloadRequest;
+    use HttpUploadRequest;
 
     public static function get(string $url): self
     {
@@ -60,21 +67,7 @@ class HttpRequester
         if (!is_readable($localFilePath)) {
             throw new InvalidArgumentException("Specified filepath [$localFilePath] is not readable and thus cannot be prepared as a remote request file transfer");
         }
-        $info = finfo_open(FILEINFO_MIME_TYPE);
-        $mime = finfo_file($info, $localFilePath);
-        finfo_close($info);
-        if (is_null($uploadFilename)) {
-            $uploadFilename = pathinfo($localFilePath, PATHINFO_FILENAME);
-        } else {
-            $givenExtension = pathinfo($uploadFilename, PATHINFO_EXTENSION);
-            if (empty($givenExtension)) {
-                $extension = pathinfo($localFilePath, PATHINFO_EXTENSION);
-                if (!empty($extension)) {
-                    $uploadFilename .= '.' . $extension;
-                }
-            }
-        }
-        return new CurlFile($localFilePath, $mime, $uploadFilename);
+        return (new File($localFilePath))->buildCurlFile($uploadFilename);
     }
 
     public function __construct(string $method, string $url)
@@ -84,136 +77,36 @@ class HttpRequester
     }
 
     /**
-     * Executes an HTTP request that returns some sort of stream (e.g. SSE). Will execute the given callback with the
-     * cumulated results and request info. Does not return anything since the processing of the request is done via the
-     * specified callback.
-     *
-     * @param callable $callback
-     * @param string|array $payload
-     * @throws HttpRequesterException
-     */
-    public function executeStream(callable $callback, string|array $payload = "")
-    {
-        $this->addOption(CURLOPT_WRITEFUNCTION, function ($curl, $data) use ($callback) {
-            $bytes = strlen($data);
-            static $buf = '';
-            $buf .= $data;
-            $info = curl_getinfo($curl);
-
-            while (1) {
-                $pos = strpos($buf, "\n");
-                if ($pos === false) {
-                    break;
-                }
-
-                // @codeCoverageIgnoreStart
-                $data = substr($buf, 0, $pos + 1);
-                $buf = substr($buf, $pos + 1);
-                if (strlen($data) > 50) {
-                    $results = str_replace("data:", "", $data);
-                    ($callback)($results, $info);
-                }
-                // @codeCoverageIgnoreEnd
-            }
-
-            return $bytes;
-        });
-        $this->execute($payload);
-    }
-
-    /**
-     * Executes the HTTP request to upload the given file. Along with the file, a list of parameters can optionally be
-     * sent. Be warned that the content type will be automatically overridden to multipart/form-data.
-     *
-     * @param CURLFile $file
-     * @param string $name
-     * @param array $payload
-     * @throws HttpRequesterException
-     */
-    public function executeUpload(CURLFile $file, string $name = 'file', array $payload = [])
-    {
-        $this->execute(array_merge([$name => $file], $payload));
-    }
-
-    /**
-     * Executes the HTTP request as a file download. The saved file can be defined with the filePath argument
-     * optionally. If none is given, the default temp folder will be used. This method returns the complete filepath of
-     * the downloaded file.
-     *
-     * @param string|array $payload
-     * @param string|null $filePath
-     * @throws HttpRequesterException
-     * @return string
-     */
-    public function executeDownload(string|array $payload = "", ?string $filePath = null): string
-    {
-        if (is_null($filePath)) {
-            $filePath = tempnam(sys_get_temp_dir(), "zephyrus");
-        }
-        $file = @fopen($filePath, 'w+');
-        if ($file === false) {
-            throw new HttpRequesterException("Cannot open file [$filePath] for download", $this->method, $this->url);
-        }
-        $this->addOption(CURLOPT_TIMEOUT, 28800);
-        $this->addOption(CURLOPT_FILE, $file);
-        $this->execute($payload);
-        fclose($file);
-        return $filePath;
-    }
-
-    /**
-     * Proceeds to download (as a stream) the targeted file by the configured requester URL. This particular download
-     * method allows to passthrough directly to the client output without the need to locally save the file. Useful if
-     * there's no need for additional processing of a remote file and giving it directly to the client.
-     *
-     * @param string|array $payload
-     * @throws HttpRequesterException
-     */
-    public function passthroughDownload(string|array $payload = "")
-    {
-        $this->addOption(CURLOPT_TIMEOUT, 500);
-        $this->addOption(CURLOPT_WRITEFUNCTION, function ($curl, $data) {
-            echo $data;
-            return strlen($data);
-        });
-        $this->execute($payload);
-    }
-
-    /**
-     * Executes the HTTP request with the given payload. The payload can either be an array for the form content types
+     * Executes the HTTP request with the given payload. The payload can either be an array for the form content type
      * e.g. application/x-www-form-urlencoded or a string for other type such as application/json. If the payload is
      * an array and contains a CURLFile, it will automatically be handled as an upload attempt and switch the content
      * type to multipart/form-data.
      *
-     * @param string|array $payload
+     * @param array|string $payload
+     * @return HttpRequesterResponse
      * @throws HttpRequesterException
-     * @return string
      */
-    public function execute(string|array $payload = ""): string
+    public function execute(string|array $payload = ""): HttpRequesterResponse
     {
-        if (is_array($payload) && $this->hasCurlFile($payload)) {
-            $this->setContentType(ContentType::FORM_MULTIPART);
-            $payload = $this->prepareMultipartFormData($payload);
-        }
-        $curl = $this->buildCurl($payload);
-        $this->response = curl_exec($curl);
-        if ($this->response === false) {
+        $curl = $this->buildCurl(new HttpPayload($this->contentType, $payload));
+        $response = curl_exec($curl);
+        if ($response === false) {
             throw new HttpRequesterException(curl_error($curl), $this->method, $this->url);
         }
-        $this->responseResults = curl_getinfo($curl);
+        $information = curl_getinfo($curl);
         curl_close($curl);
-        return $this->response;
+        return new HttpRequesterResponse($response, $information);
     }
 
     /**
-     * Adds an HTTP header to the request.
+     * Adds an HTTP header to the request. If the header already exists, it will update its value.
      *
      * @param string $name
      * @param string $value
      */
     public function addHeader(string $name, string $value)
     {
-        $this->headers[] = "$name:$value";
+        $this->headers[$name] = $value;
     }
 
     /**
@@ -224,7 +117,31 @@ class HttpRequester
     public function addHeaders(array $headers)
     {
         foreach ($headers as $name => $value) {
-            $this->headers[] = "$name:$value";
+            $this->headers[$name] = $value;
+        }
+    }
+
+    /**
+     * Removes the specified name from the headers list. Nothing is made if the header is already not present.
+     *
+     * @param string $name
+     */
+    public function removeHeader(string $name)
+    {
+        if (isset($this->headers[$name])) {
+            unset($this->headers[$name]);
+        }
+    }
+
+    /**
+     * Removes a list of specified names from the headers list. Nothing is made if the header is already not present.
+     *
+     * @param array $names
+     */
+    public function removeHeaders(array $names)
+    {
+        foreach ($names as $name) {
+            $this->removeHeader($name);
         }
     }
 
@@ -248,6 +165,30 @@ class HttpRequester
     {
         foreach ($curlOptions as $curlOption => $value) {
             $this->options[$curlOption] = $value;
+        }
+    }
+
+    /**
+     * Removes the specified cURL option.
+     *
+     * @param string $curlOption
+     */
+    public function removeOption(string $curlOption)
+    {
+        if (isset($this->options[$curlOption])) {
+            unset($this->options[$curlOption]);
+        }
+    }
+
+    /**
+     * Removes a list of specified cURL options.
+     *
+     * @param array $curlOptions
+     */
+    public function removeOptions(array $curlOptions)
+    {
+        foreach ($curlOptions as $option) {
+            $this->removeOption($option);
         }
     }
 
@@ -294,6 +235,11 @@ class HttpRequester
         $this->userAgent = $userAgent;
     }
 
+    public function setWriteCallback(callable $callback)
+    {
+        $this->writeCallback = $callback;
+    }
+
     /**
      * Defines the content type used to send the request. Defaults to application/x-www-form-urlencoded.
      *
@@ -305,86 +251,35 @@ class HttpRequester
     }
 
     /**
-     * Retrieve the raw response obtained after the request execution. Each execute method should return its proper
-     * expected response.
-     *
-     * @return string
-     */
-    public function getResponse(): string
-    {
-        return $this->response;
-    }
-
-    /**
-     * Retrieves the HTTP response code (e.g. 200) after the request execution.
-     *
-     * @return int
-     */
-    public function getResponseHttpCode(): int
-    {
-        return $this->responseResults['http_code'];
-    }
-
-    /**
-     * Retrieves all response information gather by cURL after the request execution.
-     *
-     * @see https://www.php.net/manual/fr/function.curl-getinfo.php
-     * @return array
-     */
-    public function getResponseInfo(): array
-    {
-        return $this->responseResults;
-    }
-
-    /**
-     * Retrieves the content type used for the HTTP Request.
-     *
-     * @return string
-     */
-    public function getContentType(): string
-    {
-        return $this->contentType;
-    }
-
-    /**
      * Prepares the cURL instance based on the requester configurations.
      *
-     * @param string|array $payload
-     * @throws HttpRequesterException
+     * @param HttpPayload $payload
      * @return CurlHandle
      */
-    private function buildCurl(string|array $payload = ""): CurlHandle
+    private function buildCurl(HttpPayload $payload): CurlHandle
     {
-        $curl = curl_init($this->buildRequestedUrl($payload));
-        if ($curl === false) {
-            throw new HttpRequesterException("Cannot instantiate cURL instance for url [$this->url]", $this->method, $this->url);
-        }
+        $this->addHeader('Content-Type', $payload->getContentType());
+        $curl = curl_init();
+        $this->setDefaultHeaders();
         $this->setCurlBasicOptions($curl);
         $this->setCurlUserAgent($curl);
-        $this->setCurlOptionalMethod($curl);
+        $this->setCurlCustomMethod($curl);
         $this->setCurlSsl($curl);
+        $this->setCurlWriteFunction($curl);
         $this->setCurlAdditionalOptions($curl);
         $this->setCurlHeaders($curl);
-        if ($this->method != 'get') {
-            $this->setCurlPayload($curl, $payload);
-        }
+        $this->setCurlPayload($curl, $payload);
         return $curl;
     }
 
     /**
-     * Adds the url parameters if there is a given payload to the request and the method is GET. Makes sure to properly
-     * append to the url the resulting query string.
-     *
-     * @param string|array $payload
-     * @return string
+     * Applies the specified Accept and any other default headers.
      */
-    private function buildRequestedUrl(string|array $payload): string
+    private function setDefaultHeaders()
     {
-        $requestedUrl = $this->url;
-        if ($this->method == 'get' && is_array($payload) && !empty($payload)) {
-            $requestedUrl .= (!str_contains($requestedUrl, '?') ? '?' : '&') . http_build_query($payload);
+        if (!empty($this->accept)) {
+            $this->addHeader('Accept', $this->accept);
         }
-        return $requestedUrl;
     }
 
     /**
@@ -394,6 +289,7 @@ class HttpRequester
      */
     private function setCurlBasicOptions(CurlHandle $curl)
     {
+        curl_setopt($curl, CURLOPT_URL, $this->url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, 0);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->connectionTimeout);
@@ -406,7 +302,7 @@ class HttpRequester
      *
      * @param CurlHandle $curl
      */
-    private function setCurlOptionalMethod(CurlHandle $curl)
+    private function setCurlCustomMethod(CurlHandle $curl)
     {
         if ($this->method != 'get' && $this->method != 'post') {
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, strtoupper($this->method));
@@ -422,6 +318,13 @@ class HttpRequester
     {
         if (!empty($this->userAgent)) {
             curl_setopt($curl, CURLOPT_USERAGENT, $this->userAgent);
+        }
+    }
+
+    private function setCurlWriteFunction(CurlHandle $curl)
+    {
+        if (!is_null($this->writeCallback)) {
+            curl_setopt($curl, CURLOPT_WRITEFUNCTION, $this->writeCallback);
         }
     }
 
@@ -449,14 +352,18 @@ class HttpRequester
     }
 
     /**
-     * Applies the specified content type and any other given headers to the cURL HTTPHEADER option.
+     * Applies the specified Content-Type, Accept and any other given headers to the cURL HTTPHEADER option using the
+     * proper required formatting by cURL instance.
      *
      * @param CurlHandle $curl
      */
     private function setCurlHeaders(CurlHandle $curl)
     {
-        $this->addHeader('Content-Type', $this->contentType);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $this->headers);
+        $curlCompatibleHeaders = [];
+        foreach ($this->headers as $name => $value) {
+            $curlCompatibleHeaders[] = "$name:$value";
+        }
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $curlCompatibleHeaders);
     }
 
     /**
@@ -465,65 +372,16 @@ class HttpRequester
      * as is.
      *
      * @param CurlHandle $curl
-     * @param string|array $payload
+     * @param HttpPayload $payload
      */
-    private function setCurlPayload(CurlHandle $curl, string|array $payload)
+    private function setCurlPayload(CurlHandle $curl, HttpPayload $payload)
     {
+        if ($this->method == 'get') {
+            $requestedUrl = $this->url . (!str_contains($this->url, '?') ? '?' : '&') . $payload->getContent();
+            curl_setopt($curl, CURLOPT_URL, $requestedUrl);
+            return;
+        }
         curl_setopt($curl, CURLOPT_POST, true);
-        if ($this->contentType == ContentType::FORM && is_array($payload)) {
-            $payload = http_build_query($payload);
-        }
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);
-    }
-
-    /**
-     * Verifies if the payload (only array compatible) has a CURLFile instance within its data. If it happens, it means
-     * the request needs to be a form data content type.
-     *
-     * @param array $payload
-     * @return bool
-     */
-    private function hasCurlFile(array $payload): bool
-    {
-        foreach ($payload as $data) {
-            if (is_array($data) && $this->hasCurlFile($data)) {
-                return true;
-            }
-            if ($data instanceof \CURLFile) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Corrects a problem with cURL while sending array in multipart/form-data. Reconstruct an array with the proper
-     * formatting needed by multipart content type. Can go up to 2 levels of nested array. Needs to be done recursively
-     * to allow an unlimited amount of levels.
-     *
-     * @param array $payload
-     * @return array
-     */
-    private function prepareMultipartFormData(array $payload): array
-    {
-        $parameters = [];
-        foreach ($payload as $parameterName => $parameterValue) {
-            // Problem with cURL while sending array in multipart/form-data
-            if (is_array($parameterValue)) {
-                foreach ($parameterValue as $key => $value) {
-                    if (is_array($value)) {
-                        // Nested array case (2 levels)
-                        foreach ($value as $innerKey => $innerValue) {
-                            $parameters[$parameterName . '[' . $key . '][' . $innerKey . ']'] = $innerValue;
-                        }
-                    } else {
-                        $parameters[$parameterName . '[' . $key . ']'] = $value;
-                    }
-                }
-                continue;
-            }
-            $parameters[$parameterName] = $parameterValue;
-        }
-        return $parameters;
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $payload->getContent());
     }
 }
