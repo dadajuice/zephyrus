@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Utilities\FileSystem;
 
+use CURLFile;
 use Zephyrus\Security\Cryptography;
 
 class File extends FileSystemNode
@@ -45,7 +46,7 @@ class File extends FileSystemNode
     }
 
     /**
-     * Retrieves the name of the file and its extension.
+     * Retrieves the name of the file and its extension (e.g /var/www/project/martin.txt would return "martin.txt").
      *
      * @return string
      */
@@ -184,6 +185,29 @@ class File extends FileSystemNode
     public function sha1(): string
     {
         return sha1_file($this->path);
+    }
+
+    /**
+     * Creates an instance of CURLFile based on the current file destined to be used in a Curl upload session. If no
+     * uploadFilename is given, the original filename will be used (including extension).
+     *
+     * @param string|null $uploadFilename
+     * @return CURLFile
+     */
+    public function buildCurlFile(?string $uploadFilename = null): CURLFile
+    {
+        if (is_null($uploadFilename)) {
+            $uploadFilename = $this->getBasename();
+        } else {
+            $givenExtension = pathinfo($uploadFilename, PATHINFO_EXTENSION);
+            if (empty($givenExtension)) {
+                $extension = $this->getExtension();
+                if (!empty($extension)) {
+                    $uploadFilename .= '.' . $extension;
+                }
+            }
+        }
+        return new CURLFile($this->path, $this->getMimeType(), $uploadFilename);
     }
 
     /**
