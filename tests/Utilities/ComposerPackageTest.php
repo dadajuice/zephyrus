@@ -9,7 +9,7 @@ class ComposerPackageTest extends TestCase
     {
         $array = ComposerPackage::getPackages();
         $versions = ComposerPackage::getVersions();
-        self::assertEquals(21, count($array));
+        self::assertEquals(3, count($array));
         self::assertEquals("2.7.6", ComposerPackage::getVersion('pug-php/pug'));
         self::assertEquals("2.7.6", $versions['pug-php/pug']);
         self::assertEquals("2.7.6", $array['pug-php/pug']->version);
