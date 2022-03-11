@@ -70,6 +70,28 @@ trait DownloadResponses
         return $response;
     }
 
+    /**
+     * Creates a response as a downloadable file defined by the specified callback. Useful if the file is not located
+     * on the server, but you need to serve it without download it beforehand and pass it directly to the client. For
+     * this specific download type, the size, content type and filename are mandatory because it cannot be determined
+     * automatically.
+     *
+     * @param int $size
+     * @param string $contentType
+     * @param string $filename
+     * @param callable $callback
+     * @return Response
+     */
+    public function downloadCallback(int $size, string $contentType, string $filename, callable $callback): Response
+    {
+        $response = new Response($contentType, 200);
+        $this->addFileTransferHeaders($response);
+        $response->addHeader("Content-Disposition", 'attachment; filename="' . $filename . '"');
+        $response->addHeader("Content-Length", $size);
+        $response->setContentCallback($callback);
+        return $response;
+    }
+
     /*public function downloadDirect(string $filePath, ?string $filename = null, bool $deleteAfter = false)
     {
         if (!file_exists($filePath)) {
