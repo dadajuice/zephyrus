@@ -13,6 +13,7 @@ class HttpUploadReceiver
     private array $fileData;
     private int $chunkSize;
     private string $path;
+    private string $originalFilename;
 
     public function __construct(Request $request, ?string $uploadDirectory = null)
     {
@@ -25,15 +26,17 @@ class HttpUploadReceiver
     /**
      * @throws HttpUploadException
      */
-    public function receiveChunk(callable $completedCallback)
+    public function receiveChunk(callable $completedCallback): bool
     {
         if ($this->chunk > $this->totalChunks) {
             throw HttpUploadException::sizeOverflow();
         }
         $this->appendChunk();
         if ($this->chunk == $this->totalChunks) {
-            $completedCallback($this->path);
+            $completedCallback($this->path, $this->originalFilename);
+            return true;
         }
+        return false;
     }
 
     public function getPath(): string
@@ -132,6 +135,7 @@ class HttpUploadReceiver
         }
         $this->fileData = $fileData;
         $this->chunkSize = $size;
+        $this->originalFilename = $fileData['name'];
     }
 
     private function prepareUploadDirectory(?string $uploadDirectory): string
