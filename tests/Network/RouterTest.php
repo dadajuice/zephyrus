@@ -225,4 +225,28 @@ class RouterTest extends TestCase
         });
         $router->run($req);
     }
+
+    public function testRouteConflictOrder()
+    {
+        $req = new Request('http://test.local/test/test', 'GET');
+        $router = new Router();
+
+        $router->get('/test/{id}', function($id) {
+            $response = new Response();
+            $response->setContent('test1');
+            return $response;
+
+        });
+        $router->get('/test/test', function() {
+            $response = new Response();
+            $response->setContent('test2');
+            return $response;
+
+        });
+
+        ob_start();
+        $router->run($req);
+        $output = ob_get_clean();
+        self::assertEquals("test2", $output);
+    }
 }

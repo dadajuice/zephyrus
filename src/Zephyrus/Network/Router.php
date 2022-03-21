@@ -188,6 +188,11 @@ class Router
         if (empty($matchingRoutes)) {
             throw new RouteNotFoundException($this->requestedUri, $this->requestedMethod);
         }
+
+        usort($matchingRoutes, function ($a, $b) {
+            return strcmp($a->route->getUri(), $b->route->getUri());
+        });
+
         foreach ($matchingRoutes as $routeDefinition) {
             if ($this->isRequestAcceptedForRoute($routeDefinition)) {
                 return $routeDefinition;
