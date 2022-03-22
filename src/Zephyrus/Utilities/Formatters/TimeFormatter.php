@@ -7,31 +7,43 @@ use Zephyrus\Application\Configuration;
 
 trait TimeFormatter
 {
-    public static function date($dateTime)
+    public static function date(DateTime|string|null $dateTime): string
     {
+        if (is_null($dateTime)) {
+            return "-";
+        }
+
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new DateTime($dateTime);
         }
         $formatter = new IntlDateFormatter(Locale::getDefault(), IntlDateFormatter::LONG, IntlDateFormatter::NONE, null, null, Configuration::getConfiguration('lang', 'date', "d LLLL yyyy"));
-        return $formatter->format($dateTime->getTimestamp());
+        return $formatter->format($dateTime->getTimestamp()) ?: "-";
     }
 
-    public static function datetime($dateTime)
+    public static function datetime(DateTime|string|null $dateTime): string
     {
+        if (is_null($dateTime)) {
+            return "-";
+        }
+
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new DateTime($dateTime);
         }
         $formatter = new IntlDateFormatter(Locale::getDefault(), IntlDateFormatter::LONG, IntlDateFormatter::SHORT, null, null, Configuration::getConfiguration('lang', 'datetime', "d LLLL yyyy, HH:mm"));
-        return $formatter->format($dateTime->getTimestamp());
+        return $formatter->format($dateTime->getTimestamp()) ?: "-";
     }
 
-    public static function time($dateTime)
+    public static function time(DateTime|string|null $dateTime): string
     {
+        if (is_null($dateTime)) {
+            return "-";
+        }
+
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new DateTime($dateTime);
         }
         $formatter = new IntlDateFormatter(Locale::getDefault(), IntlDateFormatter::NONE, IntlDateFormatter::LONG, null, null, Configuration::getConfiguration('lang', 'time', "HH:mm"));
-        return $formatter->format($dateTime->getTimestamp());
+        return $formatter->format($dateTime->getTimestamp()) ?: "-";
     }
 
     public static function duration($seconds, $minuteSuffix = ":", $hourSuffix = ":", $secondSuffix = "")
