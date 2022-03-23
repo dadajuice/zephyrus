@@ -102,7 +102,6 @@ trait StreamResponses
         header("Connection: keep-alive");
         set_time_limit(0);
         ignore_user_abort(true);
-        ini_set('auto_detect_line_endings', 1);
         ini_set('max_execution_time', '0');
         // @codeCoverageIgnoreStart
         // ob_get_level should always be at 1 when using SSE, this if is for
