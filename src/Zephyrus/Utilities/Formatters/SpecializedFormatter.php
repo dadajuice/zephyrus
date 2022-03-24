@@ -11,7 +11,7 @@ trait SpecializedFormatter
      * @param string $name
      * @return string
      */
-    public static function seourl(string $name)
+    public static function seourl(string $name): string
     {
         $url = mb_strtolower($name);
         $url = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $url);
@@ -29,7 +29,8 @@ trait SpecializedFormatter
     public static function filesize(
         int $sizeInBytes,
         array $units = ['G' => 'gb', 'M' => 'mb', 'K' => 'kb', 'B' => 'bytes']
-    ) {
+    ): string
+    {
         $fileSize = $sizeInBytes;
         $unit = $units['B'];
         if ($sizeInBytes >= 1073741824) {
@@ -45,7 +46,7 @@ trait SpecializedFormatter
         return Formatter::decimal($fileSize, 0, 2) . ' ' . $unit;
     }
 
-    public static function ellipsis(string $str, int $length = 50, string $concat = "...")
+    public static function ellipsis(string $str, int $length = 50, string $concat = "..."): string
     {
         return (strlen($str) > $length) ? substr($str, 0, $length) . $concat : $str;
     }
