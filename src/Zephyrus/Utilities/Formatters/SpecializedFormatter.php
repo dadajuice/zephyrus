@@ -22,15 +22,18 @@ trait SpecializedFormatter
     }
 
     /**
-     * http://stackoverflow.com/questions/15188033/human-readable-file-size.
-     * @param int $sizeInBytes
+     * Returns the most human-readable file size based on the size given in byte. If null is provided, as with the other
+     * formats, the string "-" is returned.
+     *
+     * @param ?int $sizeInBytes
+     * @param array $units
      * @return string
      */
-    public static function filesize(
-        int $sizeInBytes,
-        array $units = ['G' => 'gb', 'M' => 'mb', 'K' => 'kb', 'B' => 'bytes']
-    ): string
+    public static function filesize(?int $sizeInBytes, array $units = ['G' => 'gb', 'M' => 'mb', 'K' => 'kb', 'B' => 'bytes']): string
     {
+        if (is_null($sizeInBytes)) {
+            return "-";
+        }
         $fileSize = $sizeInBytes;
         $unit = $units['B'];
         if ($sizeInBytes >= 1073741824) {
