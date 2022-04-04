@@ -15,8 +15,8 @@ trait NumericFormatter
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP);
-        $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE) ?: "-";
-        return $result;
+        $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
+        return $result === false ? "-" : $result;
     }
 
     public static function money(int|float|null $amount, int $minDecimals = 2, int $maxDecimals = 2): string
@@ -30,8 +30,8 @@ trait NumericFormatter
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP);
-        $result = $formatter->formatCurrency($amount, Configuration::getApplicationConfiguration('currency')) ?: "-";
-        return $result;
+        $result = $formatter->formatCurrency($amount, Configuration::getApplicationConfiguration('currency'));
+        return $result === false ? "-" : $result;
     }
 
     public static function decimal(int|float|null $number, int $minDecimals = 2, int $maxDecimals = 4): string
@@ -45,7 +45,7 @@ trait NumericFormatter
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP);
-        $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE) ?: "-";
-        return $result;
+        $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
+        return $result === false ? "-" : $result;
     }
 }

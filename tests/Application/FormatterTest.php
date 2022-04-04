@@ -34,6 +34,8 @@ class FormatterTest extends TestCase
         self::assertEquals("12,2", $result);
         $result = Formatter::decimal(12, 0, 0);
         self::assertEquals("12", $result);
+        $result = Formatter::decimal(0, 0, 0);
+        self::assertEquals("0", $result);
     }
 
     public function testFormatSeoUrl()
@@ -66,6 +68,8 @@ class FormatterTest extends TestCase
         self::assertEquals('2,27 $', $result);
         $result = Formatter::money(2.263);
         self::assertEquals('2,26 $', $result);
+        $result = Formatter::money(0);
+        self::assertEquals('0,00 $', $result);
     }
 
     public function testFormatPercent()
