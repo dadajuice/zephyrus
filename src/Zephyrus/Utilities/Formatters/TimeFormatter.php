@@ -12,7 +12,6 @@ trait TimeFormatter
         if (is_null($dateTime)) {
             return "-";
         }
-
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new DateTime($dateTime);
         }
@@ -25,7 +24,6 @@ trait TimeFormatter
         if (is_null($dateTime)) {
             return "-";
         }
-
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new DateTime($dateTime);
         }
@@ -38,7 +36,6 @@ trait TimeFormatter
         if (is_null($dateTime)) {
             return "-";
         }
-
         if (!$dateTime instanceof \DateTime) {
             $dateTime = new DateTime($dateTime);
         }

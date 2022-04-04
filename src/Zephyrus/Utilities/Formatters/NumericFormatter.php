@@ -9,7 +9,6 @@ trait NumericFormatter
         if (is_null($number)) {
             return "-";
         }
-
         $locale = Configuration::getApplicationConfiguration('locale');
         $formatter = new \NumberFormatter($locale, \NumberFormatter::PERCENT);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
@@ -24,7 +23,6 @@ trait NumericFormatter
         if (is_null($amount)) {
             return "-";
         }
-
         $locale = Configuration::getApplicationConfiguration('locale');
         $formatter = new \NumberFormatter($locale, \NumberFormatter::CURRENCY);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
@@ -39,7 +37,6 @@ trait NumericFormatter
         if (is_null($number)) {
             return "-";
         }
-
         $locale = Configuration::getApplicationConfiguration('locale');
         $formatter = new \NumberFormatter($locale, \NumberFormatter::DECIMAL);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);

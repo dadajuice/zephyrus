@@ -130,6 +130,12 @@ class FormatterTest extends TestCase
         self::assertEquals('1,9 gb', $result);
     }
 
+    public function testFormatSizeNull()
+    {
+        $result = Formatter::filesize(null);
+        self::assertEquals('-', $result);
+    }
+
     public function testDuration()
     {
         $result = Formatter::duration(30000);
