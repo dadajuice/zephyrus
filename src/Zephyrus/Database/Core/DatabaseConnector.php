@@ -1,6 +1,6 @@
 <?php namespace Zephyrus\Database\Core;
 
-class TransactionPDO extends \PDO
+class DatabaseConnector extends \PDO
 {
     private static array $savepointEnabled = ["pgsql", "mysql", "sqlite"];
 
