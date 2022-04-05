@@ -9,7 +9,7 @@ class DatabaseConnector extends PDO
     private int $currentTransactionLevel = 0;
 
     /**
-     * PDO begin transaction override to work with savepoint capabilities for supported SGBD. Allows for working nested
+     * PDO begin transaction override to work with savepoint capabilities for supported DBMS. Allows for working nested
      * transactions.
      *
      * @return bool
@@ -26,7 +26,7 @@ class DatabaseConnector extends PDO
     }
 
     /**
-     * PDO commit override to work with savepoint capabilities for supported SGBD. Allows for working nested
+     * PDO commit override to work with savepoint capabilities for supported DBMS. Allows for working nested
      * transactions.
      *
      * @return bool
@@ -43,7 +43,7 @@ class DatabaseConnector extends PDO
     }
 
     /**
-     * PDO rollback override to work with savepoint capabilities for supported SGBD. Allows for working nested
+     * PDO rollback override to work with savepoint capabilities for supported DBMS. Allows for working nested
      * transactions.
      *
      * @return bool
