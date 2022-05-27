@@ -329,7 +329,7 @@ class Session
             'lifetime' => $this->lifetime,
             'secure' => $_SERVER['HTTPS'] ?? false,
             'httponly' => true,
-            'samesite' => 'Strict'
+            'samesite' => 'Lax'
         ]);
         session_name($this->name);
         session_set_save_handler($this->encryptionEnabled
