@@ -10,6 +10,7 @@ class FatalDatabaseException extends Exception
     public const DRIVER_NOT_SUPPORTED = 903;
     public const MISSING_CONFIGURATION = 904;
     public const INVALID_PORT_CONFIGURATION = 905;
+    public const SQLITE_INVALID_DATABASE = 906;
 
     public static function connectionFailed(string $errorMessage): self
     {
@@ -38,6 +39,11 @@ class FatalDatabaseException extends Exception
         return new self(sprintf(self::codeToMessage(self::DRIVER_NOT_SUPPORTED), $dbms, $supportedDrivers));
     }
 
+    public static function sqliteInvalidDatabase(string $path): self
+    {
+        return new self(sprintf(self::codeToMessage(self::SQLITE_INVALID_DATABASE), $path));
+    }
+
     private static function codeToMessage(int $code): string
     {
         return match ($code) {
@@ -46,6 +52,7 @@ class FatalDatabaseException extends Exception
             self::DRIVER_NOT_SUPPORTED => "The configured database management system [%s] is currently unsupported by Zephyrus. Use one of the supported drivers [%s].",
             self::MISSING_CONFIGURATION => "The configuration key [%s] is needed for database initialisation.",
             self::INVALID_PORT_CONFIGURATION => "The database port configuration property must be int when specified.",
+            self::SQLITE_INVALID_DATABASE => "The specified SQLite database file [%s] doesn't exists or is not readable (use database name [:memory:] to use in memory database).",
             default => "Unknown fatal database error [$code].",
         };
     }
