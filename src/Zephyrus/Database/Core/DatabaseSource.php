@@ -32,7 +32,7 @@ class DatabaseSource
      */
     public static function getSupportedDrivers(): array
     {
-        return ['sqlite', 'mysql', 'mariadb', 'pgsql'];
+        return ['sqlite', 'sqlite2', 'mysql', 'mariadb', 'pgsql'];
     }
 
     /**
