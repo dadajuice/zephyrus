@@ -2,121 +2,147 @@
 
 use PDO;
 use PDOException;
-use Zephyrus\Database\Core\Database;
-use Zephyrus\Database\Core\TransactionPDO;
-use Zephyrus\Exceptions\DatabaseException;
+use Zephyrus\Database\Core\Adapters\Mysql\MysqlAdapter;
+use Zephyrus\Database\Core\Adapters\Postgresql\PostgresAdapter;
+use Zephyrus\Database\Core\Adapters\Sqlite\SqliteAdapter;
+use Zephyrus\Database\Core\DatabaseConnector;
+use Zephyrus\Database\Core\DatabaseSource;
+use Zephyrus\Exceptions\FatalDatabaseException;
 
 abstract class DatabaseAdapter
 {
-    /**
-     * @var string
-     */
-    private $dbms;
+    protected DatabaseSource $source;
+    private SchemaInterrogator $schemaInterrogator;
 
     /**
-     * @var string
+     * Builds the proper DatabaseAdapter instance based on the given database source. Cannot fail as the source is
+     * verified beforehand.
+     *
+     * @param DatabaseSource $source
+     * @return DatabaseAdapter
      */
-    private $databaseName;
-
-    /**
-     * @var string
-     */
-    private $username;
-
-    /**
-     * @var string
-     */
-    private $password;
-
-    /**
-     * @var string
-     */
-    private $host;
-
-    /**
-     * @var string
-     */
-    private $port;
-
-    /**
-     * @var string
-     */
-    private $charset;
-
-    /**
-     * @var string
-     */
-    private $dsn;
-
-    /**
-     * @throws DatabaseException
-     * @return PDO
-     */
-    public function buildHandle(): \PDO
+    public static function build(DatabaseSource $source): DatabaseAdapter
     {
-        if (!in_array($this->dbms, PDO::getAvailableDrivers())) {
-            throw new DatabaseException("Configured Database management 
-                system [{$this->dbms}] doesn't correspond to one of the available 
-                drivers [" . implode(',', PDO::getAvailableDrivers()) . "]");
-        }
+        return match ($source->getDatabaseSourceName()) {
+            'sqlite', 'sqlite2' => new SqliteAdapter($source),
+            'pgsql' => new PostgresAdapter($source),
+            'mysql', 'mariadb' => new MysqlAdapter($source),
+        };
+    }
 
+    /**
+     * Creates the PDO handle to allow for query to be executed to the configured database source. This can be
+     * overridden if a specific driver requires additional verifications (e.g. sqlite) or more attributes. Will throw
+     * a FatalDatabaseException when connection fails.
+     *
+     * @return DatabaseConnector
+     * @throws FatalDatabaseException
+     */
+    public function buildConnector(): DatabaseConnector
+    {
         try {
-            $handle = new TransactionPDO($this->dsn, $this->username, $this->password);
+            $handle = new DatabaseConnector($this->buildDataSourceName(), $this->source->getUsername(),
+                $this->source->getPassword());
             $handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $handle;
         } catch (PDOException $e) {
-            throw new DatabaseException("Connection failed to database : " . $e->getMessage());
+            throw FatalDatabaseException::connectionFailed($e->getMessage());
         }
     }
 
     /**
-     * @param array $configurations
-     * @throws DatabaseException
+     * Retrieves the configured database source instance for the adapter.
+     *
+     * @return DatabaseSource
      */
-    public function __construct(array $configurations)
+    final public function getSource(): DatabaseSource
     {
-        if (!array_key_exists('dbms', $configurations)) {
-            throw new \InvalidArgumentException("The [dbms] database configuration option is required");
-        }
-        $this->dbms = $configurations['dbms'];
-        $this->username = $configurations['username'] ?? "";
-        $this->password = $configurations['password'] ?? "";
-        $this->databaseName = $configurations['database'] ?? "";
-        $this->host = $configurations['host'] ?? "";
-        $this->charset = $configurations['charset'] ?? "";
-        $this->port = $configurations['port'] ?? "";
-        $this->dsn = $this->buildDataSourceName();
+        return $this->source;
     }
 
     /**
-     * @param string $field
-     * @param string $search
+     * Allows for overrides if a specific DBMS needs to build the PDO compatible DSN differently. E.g. MySQL supports
+     * the addition of charset in its DSN and SQLite requires a simpler string.
+     *
      * @return string
      */
-    public function getSearchFieldClause(string $field, string $search): string
+    protected function buildDataSourceName(): string
     {
-        $search = $this->purify($search);
-        return "($field LIKE '%$search%')";
+        return $this->source->getDatabaseSourceName();
     }
 
     /**
-     * @param int $offset
-     * @param int $maxEntities
-     * @return string
+     * Builds the Adapter instance only accessible from the static build method. Cannot be instantiated otherwise to
+     * assure compatibility.
+     *
+     * @param DatabaseSource $source
      */
-    public function getLimitClause(int $offset, int $maxEntities): string
+    private function __construct(DatabaseSource $source)
     {
-        return " LIMIT $offset, $maxEntities";
+        $this->source = $source;
+        $this->schemaInterrogator = $this->buildSchemaInterrogator();
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
+     * Builds the correct SQL clause to send environnement variable to the database instance based on the given variable
+     * name and variable value. Must be defined by the children classes.
+     *
      * @param string $name
      * @param string $value
      * @return string
      */
-    public function getAddEnvironmentVariableClause(string $name, string $value): string
+    public abstract function getAddEnvironmentVariableClause(string $name, string $value): string;
+
+    public abstract function getLimitClause(int $limit, int $offset): string;
+
+    public abstract function buildSchemaInterrogator(): SchemaInterrogator;
+
+    // TODO: Querybuilder class ??
+
+
+
+
+
+    public function getSchemaInterrogator(): SchemaInterrogator
     {
-        return "SET @$name = '$value'";
+        return $this->schemaInterrogator;
     }
 
     /**
@@ -128,142 +154,6 @@ abstract class DatabaseAdapter
      */
     public function purify(string $data): string
     {
-        return htmlspecialchars(trim(strip_tags($data)), ENT_QUOTES | ENT_HTML401, 'UTF-8');
-    }
-
-    /**
-     * @return string
-     */
-    public function getDatabaseManagementSystem(): string
-    {
-        return $this->dbms;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDatabaseName(): string
-    {
-        return $this->databaseName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUsername(): string
-    {
-        return $this->username;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
-    /**
-     * @return string
-     */
-    public function getHost(): string
-    {
-        return $this->host;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPort(): string
-    {
-        return $this->port;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCharset(): string
-    {
-        return $this->charset;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDataSourceName(): string
-    {
-        return $this->dsn;
-    }
-
-    /**
-     * Meta query to retrieve all table names of given database instance. Must be redefined in children adapter classes
-     * to adapt for each supported DBMS. Should return only an array with the table names as value (e.g. ['user',
-     * 'client']).
-     *
-     * @param Database $database
-     * @return array
-     */
-    public function getAllTableNames(Database $database): array
-    {
-        return [];
-    }
-
-    /**
-     * Meta query to retrieve all table details of given database instance. Must be redefined in children adapter
-     * classes to adapt for each supported DBMS. Should return an array of stdClass.
-     *
-     * @param Database $database
-     * @return array
-     */
-    public function getAllTables(Database $database): array
-    {
-        $results = [];
-        foreach ($this->getAllTableNames($database) as $name) {
-            $results[] = (object) [
-                'name' => $name,
-                'columns' => $this->getAllColumns($database, $name),
-                'constraints' => $this->getAllConstraints($database, $name)
-            ];
-        }
-        return $results;
-    }
-
-    /**
-     * Meta query to retrieve all column names of given table name within the specified database instance. Must be
-     * redefined in children adapter classes to adapt for each supported DBMS. Should return only an array with the
-     * columns names as value (e.g. ['firstname', 'lastname']).
-     *
-     * @param Database $database
-     * @param string $tableName
-     * @return array
-     */
-    public function getAllColumnNames(Database $database, string $tableName): array
-    {
-        return [];
-    }
-
-    public function getAllConstraints(Database $database, string $tableName): array
-    {
-        return [];
-    }
-
-    /**
-     * Meta query to retrieve all column details of given table name within the specified database instance. Must be
-     * redefined in children adapter classes to adapt for each supported DBMS. Should return an array of stdClass.
-     *
-     * @param Database $database
-     * @param string $tableName
-     * @return array
-     */
-    public function getAllColumns(Database $database, string $tableName): array
-    {
-        return [];
-    }
-
-    protected function buildDataSourceName(): string
-    {
-        $charset = (!empty($this->charset)) ? "charset={$this->charset};" : "";
-        $port = (!empty($this->port)) ? "port={$this->port};" : "";
-        return $this->dbms . ':dbname=' . $this->databaseName . ';host=' . $this->host . ';' . $port . $charset;
+        return htmlspecialchars(trim($data), ENT_QUOTES | ENT_HTML401, 'UTF-8');
     }
 }
