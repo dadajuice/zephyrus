@@ -39,7 +39,7 @@ class WhereClause
 
     public function getSql(): string
     {
-        return ((empty($this->whereClause)) ?: 'WHERE ') . $this->whereClause;
+        return ((empty($this->whereClause)) ? '' : 'WHERE ') . $this->whereClause;
     }
 
     private function concatCondition(WhereCondition $baseCondition)
