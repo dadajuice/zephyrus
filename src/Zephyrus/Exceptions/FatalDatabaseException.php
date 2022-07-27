@@ -11,6 +11,8 @@ class FatalDatabaseException extends Exception
     public const MISSING_CONFIGURATION = 904;
     public const INVALID_PORT_CONFIGURATION = 905;
     public const SQLITE_INVALID_DATABASE = 906;
+    public const TRANSACTION_COMMIT_FAILED = 907;
+    public const TRANSACTION_ROLLBACK_FAILED = 908;
 
     public static function connectionFailed(string $errorMessage): self
     {
@@ -44,6 +46,16 @@ class FatalDatabaseException extends Exception
         return new self(sprintf(self::codeToMessage(self::SQLITE_INVALID_DATABASE), $path));
     }
 
+    public static function transactionCommitFailed(string $message): self
+    {
+        return new self(self::codeToMessage(self::TRANSACTION_COMMIT_FAILED), $message);
+    }
+
+    public static function transactionRollbackFailed(string $message): self
+    {
+        return new self(self::codeToMessage(self::TRANSACTION_COMMIT_FAILED), $message);
+    }
+
     private static function codeToMessage(int $code): string
     {
         return match ($code) {
@@ -53,6 +65,8 @@ class FatalDatabaseException extends Exception
             self::MISSING_CONFIGURATION => "The configuration key [%s] is needed for database initialisation.",
             self::INVALID_PORT_CONFIGURATION => "The database port configuration property must be int when specified.",
             self::SQLITE_INVALID_DATABASE => "The specified SQLite database file [%s] doesn't exists or is not readable (use database name [:memory:] to use in memory database).",
+            self::TRANSACTION_COMMIT_FAILED => "Couldn't commit SQL transaction with message [%s]. Are you sure a transaction has been started ?",
+            self::TRANSACTION_ROLLBACK_FAILED => "Couldn't rollback SQL transaction with message [%s]. Are you sure a transaction has been started ?",
             default => "Unknown fatal database error [$code].",
         };
     }
