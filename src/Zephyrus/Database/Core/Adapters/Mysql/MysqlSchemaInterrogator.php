@@ -1,9 +1,9 @@
 <?php namespace Zephyrus\Database\Core\Adapters\Mysql;
 
-use Zephyrus\Database\Core\Adapters\SchemaInterrogator as BaseInterrogator;
+use Zephyrus\Database\Core\Adapters\SchemaInterrogator;
 use Zephyrus\Database\Core\Database;
 
-class SchemaInterrogator extends BaseInterrogator
+class MysqlSchemaInterrogator extends SchemaInterrogator
 {
     /**
      * @codeCoverageIgnore

@@ -1,9 +1,9 @@
 <?php namespace Zephyrus\Database\Core\Adapters\Sqlite;
 
-use Zephyrus\Database\Core\Adapters\SchemaInterrogator as BaseInterrogator;
+use Zephyrus\Database\Core\Adapters\SchemaInterrogator;
 use Zephyrus\Database\Core\Database;
 
-class SchemaInterrogator extends BaseInterrogator
+class SqliteSchemaInterrogator extends SchemaInterrogator
 {
     public function getAllTableNames(Database $database): array
     {

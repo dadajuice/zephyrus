@@ -1,14 +1,13 @@
 <?php namespace Zephyrus\Database\Core\Adapters\Postgresql;
 
-use Zephyrus\Database\Core\Adapters\SchemaInterrogator as BaseInterrogator;
+use Zephyrus\Database\Core\Adapters\SchemaInterrogator;
 use Zephyrus\Database\Core\Database;
 
-class SchemaInterrogator extends BaseInterrogator
+class PostgresSchemaInterrogator extends SchemaInterrogator
 {
     /**
      * @codeCoverageIgnore
      * @param Database $database
-     * @throws \Zephyrus\Exceptions\DatabaseException
      * @return array
      */
     public function getAllTableNames(Database $database): array
@@ -26,7 +25,6 @@ class SchemaInterrogator extends BaseInterrogator
      * @codeCoverageIgnore
      * @param Database $database
      * @param string $tableName
-     * @throws \Zephyrus\Exceptions\DatabaseException
      * @return array
      */
     public function getAllColumnNames(Database $database, string $tableName): array
@@ -43,7 +41,6 @@ class SchemaInterrogator extends BaseInterrogator
      * @codeCoverageIgnore
      * @param Database $database
      * @param string $tableName
-     * @throws \Zephyrus\Exceptions\DatabaseException
      * @return array
      */
     public function getAllConstraints(Database $database, string $tableName): array
@@ -71,7 +68,6 @@ class SchemaInterrogator extends BaseInterrogator
      * @codeCoverageIgnore
      * @param Database $database
      * @param string $tableName
-     * @throws \Zephyrus\Exceptions\DatabaseException
      * @return array
      */
     public function getAllColumns(Database $database, string $tableName): array
