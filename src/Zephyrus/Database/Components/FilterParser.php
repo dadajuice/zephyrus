@@ -16,7 +16,8 @@ class FilterParser
      *
      *     example.com?filters[column:type]=content
      *
-     * .
+     * The columnConversion array allows specifying correspondance between request parameters and database column (if
+     * developers don't want to expose database column directly in UI links).
      *
      * @param array $columnConversion
      * @return WhereClause

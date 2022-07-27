@@ -34,7 +34,8 @@ class SortParser
      *     example.com?sorts[column] = asc|desc
      *
      * If no sorts are given, the configured default sorts will be used. The NULLs ordering is defined by the
-     * setAscNullLast and setDescNullLast methods.
+     * setAscNullLast and setDescNullLast methods. The columnConversion array allows specifying correspondance between
+     * request parameters and database column (if developers don't want to expose database column directly in UI links).
      *
      * @param array $columnConversion
      * @return OrderByClause
