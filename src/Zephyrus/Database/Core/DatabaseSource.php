@@ -128,6 +128,17 @@ class DatabaseSource
         return $this->charset;
     }
 
+    /**
+     * Retrieves the PDO compatible DSN string for connection purpose.
+     *
+     * @return string
+     */
+    public function getDatabaseSourceName(): string
+    {
+        $port = (!empty($this->getPort())) ? "port={$this->getPort()};" : "";
+        return $this->getDatabaseManagementSystem() . ':dbname=' . $this->getDatabaseName() . ';host=' . $this->getDatabaseName() . ';' . $port;
+    }
+
     private function initializeConfigurations(array $configurations)
     {
         if (empty($configurations)) {
