@@ -3,33 +3,30 @@
 use PDO;
 use PDOException;
 use Zephyrus\Database\Core\Adapters\DatabaseAdapter;
+use Zephyrus\Database\Core\Adapters\SchemaInterrogator;
 use Zephyrus\Exceptions\DatabaseException;
+use Zephyrus\Exceptions\FatalDatabaseException;
 
 class Database
 {
-    /**
-     * @var \PDO
-     */
-    private $handle = null;
+    private DatabaseConnector $connector;
+    private DatabaseAdapter $adapter;
 
     /**
-     * @var DatabaseAdapter
+     * Instantiates the database facade instance which will permit queries to be sent to the database.
+     *
+     * @param DatabaseSource $source
+     * @throws FatalDatabaseException
      */
-    private $adapter;
-
-    /**
-     * @param DatabaseAdapter $adapter
-     * @throws DatabaseException
-     */
-    public function __construct(DatabaseAdapter $adapter)
+    public function __construct(DatabaseSource $source)
     {
-        $this->adapter = $adapter;
-        $this->handle = $adapter->buildHandle();
+        $this->adapter = DatabaseAdapter::build($source);
+        $this->connector = $this->adapter->buildConnector();
     }
 
     /**
-     * Execute a parametrized SQL query. Parameters must be included as an
-     * array compatible with the PDO query preparation.
+     * Executes a parametrized SQL query. Parameters must be included as an array compatible with the PDO query
+     * preparation.
      *
      * @param string $query
      * @param array $parameters
@@ -39,7 +36,7 @@ class Database
     public function query(string $query, array $parameters = []): DatabaseStatement
     {
         try {
-            $statement = $this->handle->prepare($query, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
+            $statement = $this->connector->prepare($query, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
             foreach ($parameters as $name => &$variable) {
                 $statement->bindParam(
                     (is_string($name) ? ":$name" : intval($name) + 1),
@@ -56,6 +53,38 @@ class Database
     }
 
     /**
+     * Retrieves the interrogator instance to perform various meta database (schema) queries.
+     *
+     * @return SchemaInterrogator
+     */
+    public function getSchemaInterrogator(): SchemaInterrogator
+    {
+        return $this->adapter->getSchemaInterrogator();
+    }
+
+    /**
+     * Retrieves the configured database source currently used by the instance.
+     *
+     * @return DatabaseSource
+     */
+    public function getSource(): DatabaseSource
+    {
+        return $this->adapter->getSource();
+    }
+
+    /**
+     * Retrieves the wrapped native PDO instance used for database interaction.
+     *
+     * @return DatabaseConnector
+     */
+    public function getConnector(): DatabaseConnector
+    {
+        return $this->connector;
+    }
+
+    /**
+     * Retrieves the configured database adapter based on the DBMS.
+     *
      * @return DatabaseAdapter
      */
     public function getAdapter(): DatabaseAdapter
@@ -64,49 +93,45 @@ class Database
     }
 
     /**
-     * Disable auto-commit mode and begin an SQL transaction. When this method
-     * is called, database will only be updated when calling the <commit>
-     * method. Calling the <rollback> method will undo any SQL commands done
-     * within the started transaction.
+     * Disable auto-commit mode and begin an SQL transaction. When this method is called, database will only be updated
+     * when calling the <commit> method. Calling the <rollback> method will undo any SQL commands done within the
+     * started transaction.
      *
      * @see self::commit()
      * @see self::rollback()
      */
     public function beginTransaction()
     {
-        $this->handle->beginTransaction();
+        $this->connector->beginTransaction();
     }
 
     /**
-     * Manually commit a started SQL transaction. After a successful commit, the
-     * connection handler will return auto-commit mode.
+     * Manually commit a started SQL transaction. After a successful commit, the connection handler will return
+     * auto-commit mode.
      *
-     * @throws DatabaseException
+     * @throws FatalDatabaseException
      */
     public function commit()
     {
         try {
-            $this->handle->commit();
+            $this->connector->commit();
         } catch (PDOException $e) {
-            throw new DatabaseException("Couldn't commit SQL transaction. Are you sure a transaction 
-                has been started ?");
+            throw FatalDatabaseException::transactionCommitFailed($e->getMessage());
         }
     }
 
     /**
-     * Cancel any SQL commands done within a started SQL transaction. After a
-     * successful rollback, the connection handler will return auto-commit
-     * mode.
+     * Cancels any SQL commands done within a started SQL transaction. After a successful rollback, the connection
+     * handler will return auto-commit mode.
      *
-     * @throws DatabaseException
+     * @throws FatalDatabaseException
      */
     public function rollback()
     {
         try {
-            $this->handle->rollBack();
+            $this->connector->rollBack();
         } catch (PDOException $e) {
-            throw new DatabaseException("Couldn't rollback SQL transaction. Are you sure a transaction 
-                has been started ?");
+            throw FatalDatabaseException::transactionRollbackFailed($e->getMessage());
         }
     }
 
@@ -114,46 +139,20 @@ class Database
      * @param string|null $name
      * @return string
      */
-    public function getLastInsertedId(string $name = null)
+    public function getLastInsertedId(string $name = null): string
     {
-        return $this->handle->lastInsertId($name);
-    }
-
-    public function getAllTableNames(): array
-    {
-        return $this->adapter->getAllTableNames($this);
-    }
-
-    public function getAllTables(): array
-    {
-        return $this->adapter->getAllTables($this);
-    }
-
-    public function getAllColumnNames(string $tableName): array
-    {
-        return $this->adapter->getAllColumnNames($this, $tableName);
-    }
-
-    public function getAllConstraints(string $tableName): array
-    {
-        return $this->adapter->getAllConstraints($this, $tableName);
-    }
-
-    public function getAllColumns(string $tableName): array
-    {
-        return $this->adapter->getAllColumns($this, $tableName);
+        return $this->connector->lastInsertId($name);
     }
 
     /**
-     * Guesses the best PDO::PARAM_x type constant for a given variable. Ignored
-     * from coverage because test Database (sqlite) doesn't have proper BOOL or
-     * NULL.
+     * Guesses the best PDO::PARAM_x type constant for a given variable. Ignored from coverage because test Database
+     * sqlite doesn't have proper BOOL or NULL.
      *
      * @codeCoverageIgnore
      * @param mixed $variable
      * @return int
      */
-    private function evaluatePdoType($variable): int
+    private function evaluatePdoType(mixed $variable): int
     {
         if (is_float($variable)) {
             // PDO doesn't have PARAM_FLOAT, so it must be evaluated as STR
