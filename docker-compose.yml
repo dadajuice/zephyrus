@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+  webserver:
+    build:
+      context: .
+      dockerfile: "./docker/services/php80/Dockerfile"
+    container_name: "zephyrus_webserver"
+    restart: 'always'
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www/html:cached
+      - ./docker/vhosts:/etc/apache2/sites-enabled
