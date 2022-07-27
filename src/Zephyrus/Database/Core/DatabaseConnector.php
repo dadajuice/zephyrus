@@ -4,7 +4,7 @@ use PDO;
 
 class DatabaseConnector extends PDO
 {
-    private static array $savepointEnabled = ["pgsql", "mysql", "sqlite"];
+    private static array $savepointEnabled = ["pgsql", "mysql", "mariadb", "sqlite", "sqlite2"];
 
     private int $currentTransactionLevel = 0;
 
