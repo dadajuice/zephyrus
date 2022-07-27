@@ -28,9 +28,7 @@ class DatabaseStatement
     public function __construct(PDOStatement $statement)
     {
         $this->statement = $statement;
-        if (Configuration::getDatabaseConfiguration('convert_type', false)) {
-            $this->initializeTypeConversion();
-        }
+        $this->initializeTypeConversion();
     }
 
     /**
@@ -83,7 +81,7 @@ class DatabaseStatement
     private function sanitizeOutput(&$row)
     {
         foreach (get_object_vars($row) as $column => $value) {
-            if (!is_null($value) && is_string($value)) {
+            if (is_string($value)) {
                 $row->{$column} = ($this->sanitizeCallback)($value);
             }
         }
@@ -109,7 +107,7 @@ class DatabaseStatement
         if (in_array($pdoType, self::TYPE_INTEGER)) {
             return "intval";
         }
-        // Boolean type doesnt exists in SQLITE
+        // Boolean type doesn't exist in SQLITE
         // @codeCoverageIgnoreStart
         if (in_array($pdoType, self::TYPE_BOOLEAN)) {
             return "boolval";
