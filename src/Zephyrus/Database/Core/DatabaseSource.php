@@ -2,7 +2,7 @@
 
 use PDO;
 use Zephyrus\Application\Configuration;
-use Zephyrus\Exceptions\DatabaseException;
+use Zephyrus\Exceptions\FatalDatabaseException;
 
 class DatabaseSource
 {
@@ -45,6 +45,9 @@ class DatabaseSource
         return PDO::getAvailableDrivers();
     }
 
+    /**
+     * @throws FatalDatabaseException
+     */
     public function __construct(array $configurations = [])
     {
         $this->initializeConfigurations($configurations);
@@ -136,7 +139,7 @@ class DatabaseSource
     public function getDatabaseSourceName(): string
     {
         $port = (!empty($this->getPort())) ? "port={$this->getPort()};" : "";
-        return $this->getDatabaseManagementSystem() . ':dbname=' . $this->getDatabaseName() . ';host=' . $this->getDatabaseName() . ';' . $port;
+        return $this->getDatabaseManagementSystem() . ':dbname=' . $this->getDatabaseName() . ';host=' . $this->getHost() . ';' . $port;
     }
 
     private function initializeConfigurations(array $configurations)
@@ -147,41 +150,53 @@ class DatabaseSource
         $this->configurations = $configurations;
     }
 
+    /**
+     * @throws FatalDatabaseException
+     */
     private function initializeDbms()
     {
         if (!isset($this->configurations['dbms'])) {
-            throw DatabaseException::missingConfiguration('dbms');
+            throw FatalDatabaseException::missingConfiguration('dbms');
         }
         $this->dbms = $this->configurations['dbms'];
         if (!in_array($this->dbms, self::getAvailableDrivers())) {
-            throw DatabaseException::driverNotAvailable($this->dbms);
+            throw FatalDatabaseException::driverNotAvailable($this->dbms);
         }
         if (!in_array($this->dbms, self::getSupportedDrivers())) {
-            throw DatabaseException::driverNotSupported($this->dbms);
+            throw FatalDatabaseException::driverNotSupported($this->dbms);
         }
     }
 
+    /**
+     * @throws FatalDatabaseException
+     */
     private function initializeHost()
     {
         if (!isset($this->configurations['host'])) {
-            throw DatabaseException::missingConfiguration('host');
+            throw FatalDatabaseException::missingConfiguration('host');
         }
         $this->host = $this->configurations['host'];
     }
 
+    /**
+     * @throws FatalDatabaseException
+     */
     private function initializeDatabaseName()
     {
         if (!isset($this->configurations['database'])) {
-            throw DatabaseException::missingConfiguration('database');
+            throw FatalDatabaseException::missingConfiguration('database');
         }
         $this->databaseName = $this->configurations['database'];
     }
 
+    /**
+     * @throws FatalDatabaseException
+     */
     private function initializePort()
     {
         if (isset($this->configurations['port']) && $this->configurations['port']) {
             if (!is_int($this->configurations['port'])) {
-                throw DatabaseException::invalidPortConfiguration();
+                throw FatalDatabaseException::invalidPortConfiguration();
             }
             $this->port = $this->configurations['port'];
         }
