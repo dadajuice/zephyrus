@@ -1,24 +1,18 @@
 <?php namespace Zephyrus\Database\Core;
 
+use Exception;
+use PDO;
 use PDOStatement;
 use stdClass;
-use Zephyrus\Application\Configuration;
 
 class DatabaseStatement
 {
-    const TYPE_INTEGER = ['LONGLONG', 'LONG', 'INTEGER', 'INT4'];
-    const TYPE_BOOLEAN = ['TINY', 'BOOL'];
-    const TYPE_FLOAT = ['NEWDECIMAL', 'FLOAT', 'DOUBLE', 'DECIMAL', 'NUMERIC'];
+    public const TYPE_INTEGER = ['LONGLONG', 'LONG', 'INTEGER', 'INT4'];
+    public const TYPE_BOOLEAN = ['TINY', 'BOOL'];
+    public const TYPE_FLOAT = ['NEWDECIMAL', 'FLOAT', 'DOUBLE', 'DECIMAL', 'NUMERIC'];
 
-    /**
-     * @var PDOStatement
-     */
-    private $statement = null;
-
-    /**
-     * @var array
-     */
-    private $fetchColumnTypes = [];
+    private PDOStatement $statement;
+    private array $fetchColumnTypes = [];
 
     /**
      * @var callable
@@ -32,15 +26,14 @@ class DatabaseStatement
     }
 
     /**
-     * Returns the next row from the current result set obtained from the last
-     * executed query. Automatically strip slashes that would have been stored
-     * in database as escaping.
+     * Returns the next row from the current result set (statement). Automatically strip slashes that would have been
+     * stored in database as escaping.
      *
      * @return stdClass|null
      */
     public function next(): ?stdClass
     {
-        $row = $this->statement->fetch(\PDO::FETCH_OBJ);
+        $row = $this->statement->fetch(PDO::FETCH_OBJ);
         if ($row === false) {
             return null;
         }
@@ -54,31 +47,49 @@ class DatabaseStatement
     }
 
     /**
+     * Counts the number of rows contain in the result set.
+     *
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return $this->statement->rowCount();
     }
 
     /**
      * Defines the function to be executed to sanitize any output from the Database responses.
+     *
+     * @param callable $callback
      */
-    public function setSanitizeCallback($callback)
+    public function setSanitizeCallback(callable $callback)
     {
         $this->sanitizeCallback = $callback;
     }
 
-    private function convertRowTypes(&$row)
+    /**
+     * Converts the values of the given row to its native counterpart if available (e.g. int column should be extracted
+     * as an int and not string which is the default behavior). Modifies the row directly.
+     *
+     * @param stdClass $row
+     */
+    private function convertRowTypes(stdClass $row)
     {
         foreach (get_object_vars($row) as $column => $value) {
-            if (isset($this->fetchColumnTypes[$column]) && !is_null($value) && is_callable($this->fetchColumnTypes[$column])) {
+            if (isset($this->fetchColumnTypes[$column])
+                && !is_null($value)
+                && is_callable($this->fetchColumnTypes[$column])) {
                 $row->{$column} = $this->fetchColumnTypes[$column]($row->{$column});
             }
         }
     }
 
-    private function sanitizeOutput(&$row)
+    /**
+     * Sanitizes all string values with the configured sanitize callback. This should be generic security filtering and
+     * not column specific. Modifies the row directly.
+     *
+     * @param stdClass $row
+     */
+    private function sanitizeOutput(stdClass $row)
     {
         foreach (get_object_vars($row) as $column => $value) {
             if (is_string($value)) {
@@ -87,13 +98,17 @@ class DatabaseStatement
         }
     }
 
+    /**
+     * Prepares the information needed to process the value type conversion. This method analyse the native type of the
+     * reset set columns and prepares the callback conversion function call accordingly.
+     */
     private function initializeTypeConversion()
     {
         for ($i = 0; $i < $this->statement->columnCount(); ++$i) {
             try {
-                $meta = $this->statement->getColumnMeta($i);
-                $this->fetchColumnTypes[$meta['name']] = $this->getMetaCallback(strtoupper($meta['native_type']));
-            } catch (\Exception $exception) {
+                $column = $this->statement->getColumnMeta($i);
+                $this->fetchColumnTypes[$column['name']] = $this->getMetaCallback(strtoupper($column['native_type']));
+            } catch (Exception) {
                 // With DBMS SQLite, if a query has no result, it cannot use the getColumnMeta method as this will
                 // throw an out of range exception even if the columnCount returns the correct result. Must be a bug
                 // within PDO statement with SQLite. To avoid any problem, an empty catch will make sure to ignore
@@ -102,6 +117,12 @@ class DatabaseStatement
         }
     }
 
+    /**
+     * Gets the native PHP function name to convert a string to a native type (either int, float or boolean).
+     *
+     * @param string $pdoType
+     * @return string|null
+     */
     private function getMetaCallback(string $pdoType): ?string
     {
         if (in_array($pdoType, self::TYPE_INTEGER)) {
