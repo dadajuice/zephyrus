@@ -11,7 +11,7 @@ class OrderByClause
 
     public function getSql(): string
     {
-        return ((empty($this->orderBySql)) ?: 'ORDER BY ') . $this->orderBySql;
+        return ((empty($this->orderBySql)) ? '' : 'ORDER BY ') . $this->orderBySql;
     }
 
     public function asc(string $column, bool $nullLast = true): self
