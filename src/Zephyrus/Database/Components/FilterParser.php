@@ -16,6 +16,11 @@ class FilterParser
         $this->allowedColumns = $allowedColumns;
     }
 
+    public function setAllowedColumns(array $allowedColumns)
+    {
+        $this->allowedColumns = $allowedColumns;
+    }
+
     /**
      * Parses the request parameters to build a corresponding WHERE clause. The parameters should be given following the
      * public constants:

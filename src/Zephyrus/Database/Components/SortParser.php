@@ -8,13 +8,15 @@ class SortParser
     public const URL_PARAMETER = 'sorts';
 
     private OrderByClause $orderByClause;
+    private array $allowedColumns;
     private array $defaultSorts;
     private bool $ascNullLast = true;
     private bool $descNullLast = false;
 
-    public function __construct(array $defaultSorts = [])
+    public function __construct(array $defaultSorts = [], array $allowedColumns = [])
     {
         $this->defaultSorts = $defaultSorts;
+        $this->allowedColumns = $allowedColumns;
     }
 
     public function setAscNullLast(bool $nullLast)
@@ -25,6 +27,11 @@ class SortParser
     public function setDescNullLast(bool $nullLast)
     {
         $this->descNullLast = $nullLast;
+    }
+
+    public function setAllowedColumns(array $allowedColumns)
+    {
+        $this->allowedColumns = $allowedColumns;
     }
 
     /**
@@ -46,6 +53,9 @@ class SortParser
         $sortColumns = $request->getParameter(self::URL_PARAMETER, $this->defaultSorts);
         $this->orderByClause = new OrderByClause();
         foreach ($sortColumns as $column => $order) {
+            if (!in_array($column, $this->allowedColumns)) {
+                continue;
+            }
             // Invalid order are evaluated as asc sorting (default)
             match ($order) {
                 'desc' => $this->orderByClause->desc($columnConversion[$column] ?? $column, !$this->descNullLast),
