@@ -58,7 +58,7 @@ abstract class SchemaInterrogator
      * @param Database $database
      * @return stdClass[]
      */
-    public function getAllTables(Database $database): array
+    public final function getAllTables(Database $database): array
     {
         $results = [];
         foreach ($this->getAllTableNames($database) as $name) {
