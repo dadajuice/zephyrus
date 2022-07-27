@@ -5,6 +5,11 @@ use PDO;
 use PDOStatement;
 use stdClass;
 
+/**
+ * This class serves as a PDOStatement wrapper with some specialized behavior such as automatically convert value types
+ * and doing sanitization of string values. Each query using the Database facade class will produce a DatabaseStatement
+ * which in turn can be used to advance in the result set.
+ */
 class DatabaseStatement
 {
     public const TYPE_INTEGER = ['LONGLONG', 'LONG', 'INTEGER', 'INT4'];
@@ -64,6 +69,16 @@ class DatabaseStatement
     public function setSanitizeCallback(callable $callback)
     {
         $this->sanitizeCallback = $callback;
+    }
+
+    /**
+     * Retrieves the wrapped native PDO statement instance.
+     *
+     * @return PDOStatement
+     */
+    public function getPdoStatement(): PDOStatement
+    {
+        return $this->statement;
     }
 
     /**
