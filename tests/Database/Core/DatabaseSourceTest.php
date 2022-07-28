@@ -41,6 +41,7 @@ class DatabaseSourceTest extends TestCase
         self::assertEquals("10.10.4.36", $source->getHost());
         self::assertEquals("admin", $source->getUsername());
         self::assertEquals("Passw0rd123!", $source->getPassword());
+        self::assertEquals("utf8", $source->getCharset());
         self::assertEquals("pgsql:dbname=test;host=10.10.4.36;port=888;", $source->getDatabaseSourceName());
     }
 

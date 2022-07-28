@@ -160,7 +160,7 @@ class DatabaseSource
             throw FatalDatabaseException::driverNotAvailable($this->dbms);
         }
         if (!in_array($this->dbms, self::getSupportedDrivers())) {
-            throw FatalDatabaseException::driverNotSupported($this->dbms);
+            throw FatalDatabaseException::driverNotSupported($this->dbms); // @codeCoverageIgnore
         }
     }
 
@@ -192,7 +192,7 @@ class DatabaseSource
     private function initializePort()
     {
         if (isset($this->configurations['port']) && $this->configurations['port']) {
-            if (!is_int($this->configurations['port'])) {
+            if (!is_numeric($this->configurations['port'])) {
                 throw FatalDatabaseException::invalidPortConfiguration();
             }
             $this->port = $this->configurations['port'];
