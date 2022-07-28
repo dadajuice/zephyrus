@@ -80,7 +80,10 @@ class QueryFilter
         $lastLimitOccurrence = strripos($query, "limit", $lastFromByOccurrence);
         $insertionPosition = strlen($query);
         if ($lastLimitOccurrence !== false && $lastLimitOccurrence > $lastWhereByOccurrence) {
-            $insertionPosition = $lastLimitOccurrence - 1;
+            $lastParenthesisOccurrences = strripos($query, ")");
+            if ($lastParenthesisOccurrences === false || ($lastLimitOccurrence > $lastParenthesisOccurrences)) {
+                $insertionPosition = $lastLimitOccurrence - 1;
+            }
         }
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);
