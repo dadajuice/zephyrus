@@ -6,7 +6,7 @@ class WhereClause
 {
     public const OPERATOR_AND = "AND";
     public const OPERATOR_OR = "OR";
-    private const SUPPORTED_OPERATORS = [self::OPERATOR_AND, self::OPERATOR_OR];
+    public const SUPPORTED_OPERATORS = [self::OPERATOR_AND, self::OPERATOR_OR];
 
     private string $whereClause = "";
     private array $queryParameters = [];
