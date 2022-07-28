@@ -53,7 +53,7 @@ class QueryFilter
         if (!$this->hasPagination()) {
             return $rawQuery;
         }
-        return $rawQuery . $this->limitClause->getSql();
+        return rtrim($rawQuery) . ' ' . $this->limitClause->getSql();
     }
 
     private function injectOrderByClause(string $query): string
