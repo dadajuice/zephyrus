@@ -9,9 +9,11 @@ class WhereClause
     private string $whereClause = "";
     private array $queryParameters = [];
 
-    public function __construct(WhereCondition $baseCondition)
+    public function __construct(?WhereCondition $baseCondition = null)
     {
-        $this->concatCondition($baseCondition);
+        if (!is_null($baseCondition)) {
+            $this->concatCondition($baseCondition);
+        }
     }
 
     public function and(WhereCondition $condition): self
