@@ -38,17 +38,33 @@ class QueryFilterTest extends TestCase
         self::assertEquals("SELECT * FROM view_project LIMIT 50 OFFSET 100", $resultQuery);
     }
 
-//    public function testSimpleFilter()
-//    {
-//        $request = new Request("http://example.com/projects?filters[name:contains]=micro", "get", ['parameters' => [
-//            'filters' => ['name:contains' => 'micro']
-//        ]]);
-//        RequestFactory::set($request);
-//        $filter = new QueryFilter();
-//        self::assertTrue($filter->isFilterRequested());
-//
-//        $query = "SELECT * FROM view_project";
-//        $resultQuery = $filter->filter($query);
-//        self::assertEquals("SELECT * FROM view_project WHERE (name ILIKE ?)", $resultQuery);
-//    }
+    public function testSort()
+    {
+        $request = new Request("http://example.com/projects?sorts[name]=asc", "get", ['parameters' => [
+            'sorts' => ['name' => 'desc']
+        ]]);
+        RequestFactory::set($request);
+        $filter = new QueryFilter();
+        $filter->setAllowedSortColumns(['name']);
+        self::assertTrue($filter->isSortRequested());
+
+        $query = "SELECT * FROM view_project";
+        $resultQuery = $filter->sort($query);
+        self::assertEquals("SELECT * FROM view_project ORDER BY name DESC", $resultQuery);
+    }
+
+    public function testSimpleFilter()
+    {
+        $request = new Request("http://example.com/projects?filters[name:contains]=micro", "get", ['parameters' => [
+            'filters' => ['name:contains' => 'micro']
+        ]]);
+        RequestFactory::set($request);
+        $filter = new QueryFilter();
+        $filter->setAllowedFilterColumns(['name']);
+        self::assertTrue($filter->isFilterRequested());
+
+        $query = "SELECT * FROM view_project";
+        $resultQuery = $filter->filter($query);
+        self::assertEquals("SELECT * FROM view_project WHERE (name ILIKE ?)", $resultQuery);
+    }
 }
