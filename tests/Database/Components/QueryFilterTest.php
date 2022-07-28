@@ -67,4 +67,19 @@ class QueryFilterTest extends TestCase
         $resultQuery = $filter->filter($query);
         self::assertEquals("SELECT * FROM view_project WHERE (name ILIKE ?)", $resultQuery);
     }
+
+    public function testFilterWithPreExistingWhere()
+    {
+        $request = new Request("http://example.com/projects?filters[name:contains]=micro", "get", ['parameters' => [
+            'filters' => ['name:contains' => 'micro']
+        ]]);
+        RequestFactory::set($request);
+        $filter = new QueryFilter();
+        $filter->setAllowedFilterColumns(['name']);
+        self::assertTrue($filter->isFilterRequested());
+
+        $query = "SELECT * FROM view_project WHERE state = 'ACTIVE' AND archive_date IS NULL";
+        $resultQuery = $filter->filter($query);
+        self::assertEquals("SELECT * FROM view_project WHERE state = 'ACTIVE' AND archive_date IS NULL AND (name ILIKE ?)", $resultQuery);
+    }
 }
