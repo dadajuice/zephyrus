@@ -22,6 +22,9 @@ class QueryFilterTest extends TestCase
 
         $resultQuery = $filter->sort($query);
         self::assertEquals("SELECT * FROM view_project", $resultQuery);
+
+        $resultQuery = $filter->paginate($query, false);
+        self::assertEquals("SELECT * FROM view_project", $resultQuery);
     }
 
     public function testPagination()
@@ -36,6 +39,18 @@ class QueryFilterTest extends TestCase
         $query = "SELECT * FROM view_project";
         $resultQuery = $filter->paginate($query);
         self::assertEquals("SELECT * FROM view_project LIMIT 50 OFFSET 100", $resultQuery);
+    }
+
+    public function testForcePagination()
+    {
+        $request = new Request("http://example.com/projects", "get", ['parameters' => []]);
+        RequestFactory::set($request);
+        $filter = new QueryFilter();
+        self::assertFalse($filter->isPaginationRequested());
+
+        $query = "SELECT * FROM view_project";
+        $resultQuery = $filter->paginate($query, true); // Default
+        self::assertEquals("SELECT * FROM view_project LIMIT 50 OFFSET 0", $resultQuery);
     }
 
     public function testSort()
