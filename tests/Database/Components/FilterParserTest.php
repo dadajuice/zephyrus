@@ -82,6 +82,21 @@ class FilterParserTest extends TestCase
         self::assertEquals(["bob"], $clause->getQueryParameters());
     }
 
+    public function testDefaultContains()
+    {
+        $request = new Request("http://example.com?filters[name]=bob", "get", ['parameters' => [
+            'filters' => ['name' => 'bob']
+        ]]);
+        RequestFactory::set($request);
+
+        $parser = new FilterParser();
+        $parser->setAllowedColumns(['name', 'price', 'brand']);
+        $clause = $parser->parse();
+
+        self::assertEquals("WHERE (name ILIKE ?)", $clause->getSql());
+        self::assertEquals(["%bob%"], $clause->getQueryParameters());
+    }
+
     public function testNothingAllowed()
     {
         $request = new Request("http://example.com", "get", ['parameters' => []]);
@@ -89,5 +104,34 @@ class FilterParserTest extends TestCase
         $parser = new FilterParser();
         $clause = $parser->parse();
         self::assertEquals("", $clause->getSql());
+    }
+
+    public function testIgnoreInvalidQualifier()
+    {
+        $request = new Request("http://example.com?filters[name:kjhsdfkhsf]=bob", "get", ['parameters' => [
+            'filters' => ['name:kjhsdfkhsf' => 'bob']
+        ]]);
+        RequestFactory::set($request);
+
+        $parser = new FilterParser();
+        $parser->setAllowedColumns(['name', 'price', 'brand']);
+        $clause = $parser->parse();
+
+        self::assertEquals("", $clause->getSql());
+    }
+
+    public function testExtraFieldNotAllowed()
+    {
+        $request = new Request("http://example.com?filters[name:equals]=bob&filters[username:equals]=toto", "get", ['parameters' => [
+            'filters' => ['name:equals' => 'bob', 'username:equals' => 'toto']
+        ]]);
+        RequestFactory::set($request);
+
+        $parser = new FilterParser();
+        $parser->setAllowedColumns(['name', 'price', 'brand']);
+        $clause = $parser->parse();
+
+        self::assertEquals("WHERE (name = ?)", $clause->getSql());
+        self::assertEquals(["bob"], $clause->getQueryParameters());
     }
 }
