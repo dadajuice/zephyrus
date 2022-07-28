@@ -5,6 +5,7 @@ use PDOException;
 use Zephyrus\Database\Core\Adapters\Mysql\MysqlAdapter;
 use Zephyrus\Database\Core\Adapters\Postgresql\PostgresAdapter;
 use Zephyrus\Database\Core\Adapters\Sqlite\SqliteAdapter;
+use Zephyrus\Database\Core\Database;
 use Zephyrus\Database\Core\DatabaseConnector;
 use Zephyrus\Database\Core\DatabaseSource;
 use Zephyrus\Exceptions\FatalDatabaseException;
@@ -12,7 +13,6 @@ use Zephyrus\Exceptions\FatalDatabaseException;
 abstract class DatabaseAdapter
 {
     protected DatabaseSource $source;
-    private SchemaInterrogator $schemaInterrogator;
 
     /**
      * Builds the proper DatabaseAdapter instance based on the given database source. Cannot fail as the source is
@@ -23,7 +23,7 @@ abstract class DatabaseAdapter
      */
     public static function build(DatabaseSource $source): DatabaseAdapter
     {
-        return match ($source->getDatabaseSourceName()) {
+        return match ($source->getDatabaseManagementSystem()) {
             'sqlite', 'sqlite2' => new SqliteAdapter($source),
             'pgsql' => new PostgresAdapter($source),
             'mysql', 'mariadb' => new MysqlAdapter($source),
@@ -80,7 +80,6 @@ abstract class DatabaseAdapter
     private function __construct(DatabaseSource $source)
     {
         $this->source = $source;
-        $this->schemaInterrogator = $this->buildSchemaInterrogator();
     }
 
 
@@ -132,7 +131,7 @@ abstract class DatabaseAdapter
 
     public abstract function getLimitClause(int $limit, int $offset): string;
 
-    public abstract function buildSchemaInterrogator(): SchemaInterrogator;
+    public abstract function buildSchemaInterrogator(Database $database): SchemaInterrogator;
 
     // TODO: Querybuilder class ??
 
@@ -140,10 +139,7 @@ abstract class DatabaseAdapter
 
 
 
-    public function getSchemaInterrogator(): SchemaInterrogator
-    {
-        return $this->schemaInterrogator;
-    }
+
 
     /**
      * Basic filtering to eliminate any tags and empty leading / trailing

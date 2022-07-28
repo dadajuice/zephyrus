@@ -2,6 +2,7 @@
 
 use Zephyrus\Database\Core\Adapters\DatabaseAdapter;
 use Zephyrus\Database\Core\Adapters\SchemaInterrogator;
+use Zephyrus\Database\Core\Database;
 
 class MysqlAdapter extends DatabaseAdapter
 {
@@ -15,9 +16,9 @@ class MysqlAdapter extends DatabaseAdapter
         return "SET @$name = '$value'";
     }
 
-    public function buildSchemaInterrogator(): SchemaInterrogator
+    public function buildSchemaInterrogator(Database $database): SchemaInterrogator
     {
-        return new \Zephyrus\Database\Core\Adapters\Mysql\MysqlSchemaInterrogator();
+        return new MysqlSchemaInterrogator($database);
     }
 
     /**

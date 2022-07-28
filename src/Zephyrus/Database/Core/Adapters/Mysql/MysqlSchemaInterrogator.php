@@ -7,13 +7,12 @@ class MysqlSchemaInterrogator extends SchemaInterrogator
 {
     /**
      * @codeCoverageIgnore
-     * @param Database $database
      * @return array
      */
-    public function getAllTableNames(Database $database): array
+    public function getAllTableNames(): array
     {
         $sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = schema()";
-        $statement = $database->query($sql);
+        $statement = $this->database->query($sql);
         $results = [];
         while ($row = $statement->next()) {
             $results[] = $row->table_name;
@@ -23,14 +22,13 @@ class MysqlSchemaInterrogator extends SchemaInterrogator
 
     /**
      * @codeCoverageIgnore
-     * @param Database $database
      * @param string $tableName
      * @return array
      */
-    public function getAllColumnNames(Database $database, string $tableName): array
+    public function getAllColumnNames(string $tableName): array
     {
         $columns = [];
-        $statement = $database->query("SHOW FIELDS FROM $tableName");
+        $statement = $this->database->query("SHOW FIELDS FROM $tableName");
         while ($row = $statement->next()) {
             $columns[] = $row->Field;
         }
@@ -39,15 +37,14 @@ class MysqlSchemaInterrogator extends SchemaInterrogator
 
     /**
      * @codeCoverageIgnore
-     * @param Database $database
      * @param string $tableName
      * @return array
      */
-    public function getAllConstraints(Database $database, string $tableName): array
+    public function getAllConstraints(string $tableName): array
     {
         $constraints = [];
         $sql = "SHOW FIELDS FROM $tableName";
-        $statement = $database->query($sql, [$tableName]);
+        $statement = $this->database->query($sql, [$tableName]);
         while ($row = $statement->next()) {
             if ($row->Key == 'PRI' || $row->Key == 'MUL') {
                 $constraints[] = (object) [
@@ -61,14 +58,13 @@ class MysqlSchemaInterrogator extends SchemaInterrogator
 
     /**
      * @codeCoverageIgnore
-     * @param Database $database
      * @param string $tableName
      * @return array
      */
-    public function getAllColumns(Database $database, string $tableName): array
+    public function getAllColumns(string $tableName): array
     {
         $columns = [];
-        $statement = $database->query("SHOW FIELDS FROM $tableName");
+        $statement = $this->database->query("SHOW FIELDS FROM $tableName");
         while ($row = $statement->next()) {
             $columns[] = (object) [
                 'name' => $row->Field,

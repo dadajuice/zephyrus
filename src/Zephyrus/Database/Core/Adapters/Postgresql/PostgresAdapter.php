@@ -2,6 +2,7 @@
 
 use Zephyrus\Database\Core\Adapters\DatabaseAdapter;
 use Zephyrus\Database\Core\Adapters\SchemaInterrogator;
+use Zephyrus\Database\Core\Database;
 
 class PostgresAdapter extends DatabaseAdapter
 {
@@ -23,8 +24,8 @@ class PostgresAdapter extends DatabaseAdapter
         return "set session \"$name\" = '$value';";
     }
 
-    public function buildSchemaInterrogator(): SchemaInterrogator
+    public function buildSchemaInterrogator(Database $database): SchemaInterrogator
     {
-        return new \Zephyrus\Database\Core\Adapters\Postgresql\PostgresSchemaInterrogator();
+        return new PostgresSchemaInterrogator($database);
     }
 }

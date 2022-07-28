@@ -59,7 +59,7 @@ class Database
      */
     public function getSchemaInterrogator(): SchemaInterrogator
     {
-        return $this->adapter->getSchemaInterrogator();
+        return $this->adapter->buildSchemaInterrogator($this);
     }
 
     /**

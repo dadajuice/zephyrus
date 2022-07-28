@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Database\Core\Adapters\Sqlite;
 
 use Zephyrus\Database\Core\Adapters\DatabaseAdapter;
+use Zephyrus\Database\Core\Database;
 use Zephyrus\Database\Core\DatabaseConnector;
 use Zephyrus\Exceptions\FatalDatabaseException;
 
@@ -49,9 +50,9 @@ class SqliteAdapter extends DatabaseAdapter
         return "";
     }
 
-    public function buildSchemaInterrogator(): SqliteSchemaInterrogator
+    public function buildSchemaInterrogator(Database $database): SqliteSchemaInterrogator
     {
-        return new \Zephyrus\Database\Core\Adapters\Sqlite\SqliteSchemaInterrogator();
+        return new SqliteSchemaInterrogator($database);
     }
 
     public function getLimitClause(int $limit, int $offset): string

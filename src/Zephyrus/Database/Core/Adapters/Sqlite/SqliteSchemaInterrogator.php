@@ -5,10 +5,10 @@ use Zephyrus\Database\Core\Database;
 
 class SqliteSchemaInterrogator extends SchemaInterrogator
 {
-    public function getAllTableNames(Database $database): array
+    public function getAllTableNames(): array
     {
         $sql = "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'";
-        $statement = $database->query($sql);
+        $statement = $this->database->query($sql);
         $results = [];
         while ($row = $statement->next()) {
             $results[] = $row->name;
@@ -16,10 +16,10 @@ class SqliteSchemaInterrogator extends SchemaInterrogator
         return $results;
     }
 
-    public function getAllConstraints(Database $database, string $tableName): array
+    public function getAllConstraints(string $tableName): array
     {
         $constraints = [];
-        $statement = $database->query("PRAGMA table_info($tableName)");
+        $statement = $this->database->query("PRAGMA table_info($tableName)");
         while ($row = $statement->next()) {
             if ($row->pk) {
                 $constraints[] = (object) [
@@ -31,20 +31,20 @@ class SqliteSchemaInterrogator extends SchemaInterrogator
         return $constraints;
     }
 
-    public function getAllColumnNames(Database $database, string $tableName): array
+    public function getAllColumnNames(string $tableName): array
     {
         $columns = [];
-        $statement = $database->query("PRAGMA table_info($tableName)");
+        $statement = $this->database->query("PRAGMA table_info($tableName)");
         while ($row = $statement->next()) {
             $columns[] = $row->name;
         }
         return $columns;
     }
 
-    public function getAllColumns(Database $database, string $tableName): array
+    public function getAllColumns(string $tableName): array
     {
         $columns = [];
-        $statement = $database->query("PRAGMA table_info($tableName)");
+        $statement = $this->database->query("PRAGMA table_info($tableName)");
         while ($row = $statement->next()) {
             $columns[] = (object) [
                 'name' => $row->name,
