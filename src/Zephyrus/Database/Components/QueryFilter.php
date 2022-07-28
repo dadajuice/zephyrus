@@ -64,9 +64,9 @@ class QueryFilter
         return $this->injectOrderByClause($rawQuery);
     }
 
-    public function paginate(string $rawQuery): string
+    public function paginate(string $rawQuery, bool $forcePaginate = true): string
     {
-        if (!$this->isPaginationRequested() && false) { // TODO: OR NEEDED EXPLICITLY
+        if (!$this->isPaginationRequested() && !$forcePaginate) {
             return $rawQuery;
         }
         $this->limitClause = $this->pagerParser->parse();
