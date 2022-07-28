@@ -16,44 +16,44 @@ class FatalDatabaseException extends Exception
 
     public static function connectionFailed(string $errorMessage): self
     {
-        return new self(sprintf(self::codeToMessage(self::CONNECTION_FAILED), $errorMessage));
+        return new self(sprintf(self::codeToMessage(self::CONNECTION_FAILED), $errorMessage), self::CONNECTION_FAILED);
     }
 
     public static function missingConfiguration(string $configurationKey): self
     {
-        return new self(sprintf(self::codeToMessage(self::MISSING_CONFIGURATION), $configurationKey));
+        return new self(sprintf(self::codeToMessage(self::MISSING_CONFIGURATION), $configurationKey), self::MISSING_CONFIGURATION);
     }
 
     public static function invalidPortConfiguration(): self
     {
-        return new self(self::codeToMessage(self::INVALID_PORT_CONFIGURATION));
+        return new self(self::codeToMessage(self::INVALID_PORT_CONFIGURATION), self::INVALID_PORT_CONFIGURATION);
     }
 
     public static function driverNotAvailable(string $dbms): self
     {
         $availableDrivers = implode(',', DatabaseSource::getAvailableDrivers());
-        return new self(sprintf(self::codeToMessage(self::DRIVER_NOT_AVAILABLE), $dbms, $availableDrivers));
+        return new self(sprintf(self::codeToMessage(self::DRIVER_NOT_AVAILABLE), $dbms, $availableDrivers), self::DRIVER_NOT_AVAILABLE);
     }
 
     public static function driverNotSupported(string $dbms): self
     {
         $supportedDrivers = implode(',', DatabaseSource::getSupportedDrivers());
-        return new self(sprintf(self::codeToMessage(self::DRIVER_NOT_SUPPORTED), $dbms, $supportedDrivers));
+        return new self(sprintf(self::codeToMessage(self::DRIVER_NOT_SUPPORTED), $dbms, $supportedDrivers), self::DRIVER_NOT_SUPPORTED);
     }
 
     public static function sqliteInvalidDatabase(string $path): self
     {
-        return new self(sprintf(self::codeToMessage(self::SQLITE_INVALID_DATABASE), $path));
+        return new self(sprintf(self::codeToMessage(self::SQLITE_INVALID_DATABASE), $path), self::SQLITE_INVALID_DATABASE);
     }
 
     public static function transactionCommitFailed(string $message): self
     {
-        return new self(self::codeToMessage(self::TRANSACTION_COMMIT_FAILED), $message);
+        return new self(self::codeToMessage(self::TRANSACTION_COMMIT_FAILED), $message, self::TRANSACTION_COMMIT_FAILED);
     }
 
     public static function transactionRollbackFailed(string $message): self
     {
-        return new self(self::codeToMessage(self::TRANSACTION_COMMIT_FAILED), $message);
+        return new self(self::codeToMessage(self::TRANSACTION_COMMIT_FAILED), $message, self::TRANSACTION_ROLLBACK_FAILED);
     }
 
     private static function codeToMessage(int $code): string
