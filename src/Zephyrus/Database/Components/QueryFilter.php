@@ -6,53 +6,70 @@ use Zephyrus\Database\QueryBuilder\WhereClause;
 
 class QueryFilter
 {
+    private FilterParser $filterParser;
+    private SortParser $sortParser;
+    private PagerParser $pagerParser;
+
     private LimitClause $limitClause;
     private WhereClause $whereClause;
     private OrderByClause $orderByClause;
 
     public function __construct()
     {
-        $this->initializeFilters();
-        $this->initializeSorting();
-        $this->initializePagination();
+        $this->filterParser = new FilterParser();
+        $this->pagerParser = new PagerParser();
+        $this->sortParser = new SortParser();
     }
 
-    public function hasFilter(): bool
+    public function isFilterRequested(): bool
     {
-        return !empty($this->whereClause->getSql());
+        return $this->filterParser->hasRequested();
     }
 
-    public function hasSort(): bool
+    public function isSortRequested(): bool
     {
-        return !empty($this->orderByClause->getSql());
+        return $this->sortParser->hasRequested();
     }
 
-    public function hasPagination(): bool
+    public function isPaginationRequested(): bool
     {
-        return !empty($this->limitClause->getSql());
+        return $this->pagerParser->hasRequested();
+    }
+
+    public function setAllowedSortColumns(array $allowedSorts)
+    {
+        $this->sortParser->setAllowedColumns($allowedSorts);
+    }
+
+    public function setAllowedFilterColumns(array $allowedSorts)
+    {
+        $this->filterParser->setAllowedColumns($allowedSorts);
     }
 
     public function filter(string $rawQuery): string
     {
-        if (!$this->hasFilter()) {
+        if (!$this->isFilterRequested()) {
             return $rawQuery;
         }
+        $this->whereClause = $this->filterParser->parse();
         return $this->injectWhereClause($rawQuery);
     }
 
     public function sort(string $rawQuery): string
     {
-        if (!$this->hasSort()) {
+        if (!$this->isSortRequested()) { // TODO: OR DEFAULT SORT
             return $rawQuery;
         }
+        $this->orderByClause = $this->sortParser->parse();
         return $this->injectOrderByClause($rawQuery);
     }
 
     public function paginate(string $rawQuery): string
     {
-        if (!$this->hasPagination()) {
+        if (!$this->isPaginationRequested() && false) { // TODO: OR NEEDED EXPLICITLY
             return $rawQuery;
         }
+        $this->limitClause = $this->pagerParser->parse();
         return rtrim($rawQuery) . ' ' . $this->limitClause->getSql();
     }
 
@@ -68,7 +85,7 @@ class QueryFilter
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);
         $orderBy = $this->orderByClause->getSql();
-        return (!empty($orderBy)) ? $begin . $orderBy . $end : $query;
+        return (!empty($orderBy)) ? rtrim($begin) . ' ' . $orderBy . $end : $query;
     }
 
     private function injectWhereClause(string $query): string
@@ -86,35 +103,8 @@ class QueryFilter
         }
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);
-        $clause = (($lastWhereByOccurrence !== false) ? " AND " : " WHERE "); // TODO: Treat as AND or OR with config ?
+        //$clause = (($lastWhereByOccurrence !== false) ? " AND " : " WHERE "); // TODO: Treat as AND or OR with config ?
         $where = $this->whereClause->getSql();
-        return (!empty($where)) ? $begin . $clause . '(' . $where . ')' . $end : $query;
-    }
-
-    /**
-     * Prepares the WHERE clause based on the request parameters following the filter structure.
-     */
-    private function initializeFilters()
-    {
-        $filter = new FilterParser();
-        $this->whereClause = $filter->parse();
-    }
-
-    /**
-     * Prepares the LIMIT clause based on the request parameters following the pager structure.
-     */
-    private function initializePagination()
-    {
-        $pager = new PagerParser();
-        $this->limitClause = $pager->parse();
-    }
-
-    /**
-     * Prepares the ORDER BY clause based on the request parameters following the sort structure.
-     */
-    private function initializeSorting()
-    {
-        $sort = new SortParser();
-        $this->orderByClause = $sort->parse();
+        return (!empty($where)) ? rtrim($begin) . ' ' . $where . $end : $query;
     }
 }
