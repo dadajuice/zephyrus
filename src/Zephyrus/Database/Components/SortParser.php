@@ -8,16 +8,11 @@ class SortParser
     public const URL_PARAMETER = 'sorts';
 
     private OrderByClause $orderByClause;
-    private array $allowedColumns;
-    private array $defaultSorts;
+    private array $allowedColumns = [];
+    private array $defaultSorts = [];
+    private array $aliasColumns = [];
     private bool $ascNullLast = true;
     private bool $descNullLast = false;
-
-    public function __construct(array $defaultSorts = [], array $allowedColumns = [])
-    {
-        $this->defaultSorts = $defaultSorts;
-        $this->allowedColumns = $allowedColumns;
-    }
 
     public function setAscNullLast(bool $nullLast)
     {
@@ -29,9 +24,25 @@ class SortParser
         $this->descNullLast = $nullLast;
     }
 
+    public function setAliasColumns(array $aliasColumns)
+    {
+        $this->aliasColumns = $aliasColumns;
+    }
+
     public function setAllowedColumns(array $allowedColumns)
     {
         $this->allowedColumns = $allowedColumns;
+    }
+
+    public function setDefaultSort(array $defaultSorts)
+    {
+        $this->defaultSorts = $defaultSorts;
+    }
+
+    public function hasSorts(): bool
+    {
+        $request = RequestFactory::read();
+        return !empty($request->getParameter(self::URL_PARAMETER, []));
     }
 
     /**
@@ -44,10 +55,9 @@ class SortParser
      * setAscNullLast and setDescNullLast methods. The columnConversion array allows specifying correspondance between
      * request parameters and database column (if developers don't want to expose database column directly in UI links).
      *
-     * @param array $columnConversion
      * @return OrderByClause
      */
-    public function parse(array $columnConversion = []): OrderByClause
+    public function parse(): OrderByClause
     {
         $request = RequestFactory::read();
         $sortColumns = $request->getParameter(self::URL_PARAMETER, $this->defaultSorts);
@@ -58,8 +68,8 @@ class SortParser
             }
             // Invalid order are evaluated as asc sorting (default)
             match ($order) {
-                'desc' => $this->orderByClause->desc($columnConversion[$column] ?? $column, !$this->descNullLast),
-                default => $this->orderByClause->asc($columnConversion[$column] ?? $column, $this->ascNullLast),
+                'desc' => $this->orderByClause->desc($this->aliasColumns[$column] ?? $column, !$this->descNullLast),
+                default => $this->orderByClause->asc($this->aliasColumns[$column] ?? $column, $this->ascNullLast),
             };
         }
         return $this->orderByClause;

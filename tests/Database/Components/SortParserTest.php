@@ -26,8 +26,10 @@ class SortParserTest extends TestCase
         $request = new Request("http://example.com", "get", ['parameters' => []]);
         RequestFactory::set($request);
 
-        $parser = new SortParser(['name' => 'desc', 'price' => 'asc']);
+        $parser = new SortParser();
+        $parser->setDefaultSort(['name' => 'desc', 'price' => 'asc']);
         $parser->setAllowedColumns(['name', 'price', 'brand']);
+        self::assertTrue($parser->hasSorts());
         $clause = $parser->parse();
 
         self::assertEquals("ORDER BY name DESC, price ASC", $clause->getSql());
@@ -47,6 +49,7 @@ class SortParserTest extends TestCase
         $request = new Request("http://example.com", "get", ['parameters' => []]);
         RequestFactory::set($request);
         $parser = new SortParser();
+        self::assertFalse($parser->hasSorts());
         $clause = $parser->parse();
         self::assertEquals("", $clause->getSql());
     }
@@ -82,9 +85,10 @@ class SortParserTest extends TestCase
 
         $parser = new SortParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse([
+        $parser->setAliasColumns([
             'price' => 'amount'
         ]);
+        $clause = $parser->parse();
 
         self::assertEquals("ORDER BY name ASC, amount DESC, brand ASC", $clause->getSql());
     }
