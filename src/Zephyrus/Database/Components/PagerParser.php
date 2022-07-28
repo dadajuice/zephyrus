@@ -55,6 +55,6 @@ class PagerParser
         $limit = min($limit, $this->maxLimitAllowed);
         $currentPage = (!is_numeric($page) || $page < 0) ? 1 : $page;
         $offset = $limit * ($currentPage - 1);
-        return new LimitClause($this->defaultLimit, $offset);
+        return new LimitClause($limit, $offset);
     }
 }
