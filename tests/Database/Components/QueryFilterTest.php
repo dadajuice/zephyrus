@@ -12,9 +12,16 @@ class QueryFilterTest extends TestCase
         $request = new Request("http://example.com/projects", "get", ['parameters' => []]);
         RequestFactory::set($request);
         $filter = new QueryFilter();
-        self::assertTrue($filter->hasPagination()); // Default there is always pager ...
-        self::assertFalse($filter->hasSort());
-        self::assertFalse($filter->hasFilter());
+        self::assertFalse($filter->isPaginationRequested());
+        self::assertFalse($filter->isSortRequested());
+        self::assertFalse($filter->isFilterRequested());
+
+        $query = "SELECT * FROM view_project";
+        $resultQuery = $filter->filter($query);
+        self::assertEquals("SELECT * FROM view_project", $resultQuery);
+
+        $resultQuery = $filter->sort($query);
+        self::assertEquals("SELECT * FROM view_project", $resultQuery);
     }
 
     public function testPagination()
@@ -24,8 +31,24 @@ class QueryFilterTest extends TestCase
         ]]);
         RequestFactory::set($request);
         $filter = new QueryFilter();
+        self::assertTrue($filter->isPaginationRequested());
+
         $query = "SELECT * FROM view_project";
         $resultQuery = $filter->paginate($query);
         self::assertEquals("SELECT * FROM view_project LIMIT 50 OFFSET 100", $resultQuery);
     }
+
+//    public function testSimpleFilter()
+//    {
+//        $request = new Request("http://example.com/projects?filters[name:contains]=micro", "get", ['parameters' => [
+//            'filters' => ['name:contains' => 'micro']
+//        ]]);
+//        RequestFactory::set($request);
+//        $filter = new QueryFilter();
+//        self::assertTrue($filter->isFilterRequested());
+//
+//        $query = "SELECT * FROM view_project";
+//        $resultQuery = $filter->filter($query);
+//        self::assertEquals("SELECT * FROM view_project WHERE (name ILIKE ?)", $resultQuery);
+//    }
 }

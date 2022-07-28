@@ -17,7 +17,7 @@ class FilterParserTest extends TestCase
 
         $parser = new FilterParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
-        self::assertTrue($parser->hasFilters());
+        self::assertTrue($parser->hasRequested());
         $clause = $parser->parse();
 
         self::assertEquals("WHERE (name ILIKE ?)", $clause->getSql());
@@ -33,7 +33,7 @@ class FilterParserTest extends TestCase
         $parser->setAllowedColumns(['name', 'price', 'brand']);
         $clause = $parser->parse();
 
-        self::assertFalse($parser->hasFilters());
+        self::assertFalse($parser->hasRequested());
         self::assertEquals("", $clause->getSql());
     }
 

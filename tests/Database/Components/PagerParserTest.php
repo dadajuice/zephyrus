@@ -12,6 +12,7 @@ class PagerParserTest extends TestCase
         $request = new Request("http://example.com/projects", "get", ['parameters' => []]);
         RequestFactory::set($request);
         $parser = new PagerParser();
+        self::assertFalse($parser->hasRequested());
         $clause = $parser->parse();
         self::assertEquals("LIMIT 50 OFFSET 0", $clause->getSql());
     }
@@ -23,6 +24,7 @@ class PagerParserTest extends TestCase
         ]]);
         RequestFactory::set($request);
         $parser = new PagerParser();
+        self::assertTrue($parser->hasRequested());
         $clause = $parser->parse();
         self::assertEquals("LIMIT 50 OFFSET 200", $clause->getSql());
     }
