@@ -1,5 +1,7 @@
 <?php namespace Zephyrus\Database\QueryBuilder;
 
+use InvalidArgumentException;
+
 class WhereClause
 {
     public const OPERATOR_AND = "AND";
@@ -30,7 +32,7 @@ class WhereClause
     {
         $logicalOperator = strtoupper($logicalOperator);
         if (!in_array($logicalOperator, self::SUPPORTED_OPERATORS)) {
-            throw new \InvalidArgumentException("Logical operator must be either AND or OR.");
+            throw new InvalidArgumentException("Logical operator must be either AND or OR.");
         }
         if (!empty($this->whereClause)) {
             $this->whereClause .= " $logicalOperator ";
