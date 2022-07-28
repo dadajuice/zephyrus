@@ -18,6 +18,22 @@ class PagerParser
         $this->maxLimitAllowed = $maxLimitAllowed;
     }
 
+    public function setDefaultLimit(int $defaultLimit)
+    {
+        $this->defaultLimit = $defaultLimit;
+    }
+
+    public function setMaxLimitAllowed(int $maxLimitAllowed)
+    {
+        $this->maxLimitAllowed = $maxLimitAllowed;
+    }
+
+    public function hasRequested(): bool
+    {
+        $request = RequestFactory::read();
+        return !empty($request->getParameter(self::URL_PARAMETER, []));
+    }
+
     /**
      * Parses the request parameters to build a corresponding LIMIT clause. The parameters should be given following the
      * public constants:

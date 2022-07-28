@@ -39,7 +39,7 @@ class SortParser
         $this->defaultSorts = $defaultSorts;
     }
 
-    public function hasSorts(): bool
+    public function hasRequested(): bool
     {
         $request = RequestFactory::read();
         return !empty($request->getParameter(self::URL_PARAMETER, []));

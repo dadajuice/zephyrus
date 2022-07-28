@@ -32,7 +32,7 @@ class FilterParser
         $this->aggregateOperator = $operator;
     }
 
-    public function hasFilters(): bool
+    public function hasRequested(): bool
     {
         $request = RequestFactory::read();
         return !empty($request->getParameter(self::URL_PARAMETER, []));
