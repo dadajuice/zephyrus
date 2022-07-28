@@ -48,12 +48,12 @@ class FatalDatabaseException extends Exception
 
     public static function transactionCommitFailed(string $message): self
     {
-        return new self(self::codeToMessage(self::TRANSACTION_COMMIT_FAILED), $message, self::TRANSACTION_COMMIT_FAILED);
+        return new self(sprintf(self::codeToMessage(self::TRANSACTION_COMMIT_FAILED), $message), self::TRANSACTION_COMMIT_FAILED);
     }
 
     public static function transactionRollbackFailed(string $message): self
     {
-        return new self(self::codeToMessage(self::TRANSACTION_COMMIT_FAILED), $message, self::TRANSACTION_ROLLBACK_FAILED);
+        return new self(sprintf(self::codeToMessage(self::TRANSACTION_COMMIT_FAILED), $message), self::TRANSACTION_ROLLBACK_FAILED);
     }
 
     private static function codeToMessage(int $code): string
