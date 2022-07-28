@@ -17,13 +17,13 @@ class DatabaseSource
     ];
 
     private array $configurations;
-    private string $dbms;
-    private string $host;
-    private string $port;
-    private string $databaseName;
-    private string $username;
-    private string $password;
-    private string $charset;
+    private string $dbms = '';
+    private string $host = '';
+    private string $port = '';
+    private string $databaseName = '';
+    private string $username = '';
+    private string $password = '';
+    private string $charset = '';
 
     /**
      * Retrieves the list of currently supported DBMS by Zephyrus.
@@ -48,7 +48,7 @@ class DatabaseSource
     /**
      * @throws FatalDatabaseException
      */
-    public function __construct(array $configurations = [])
+    public function __construct(array $configurations = self::DEFAULT_CONFIGURATIONS)
     {
         $this->initializeConfigurations($configurations);
         $this->initializeDbms();
@@ -144,9 +144,6 @@ class DatabaseSource
 
     private function initializeConfigurations(array $configurations)
     {
-        if (empty($configurations)) {
-            $configurations = Configuration::getConfiguration('database') ?? self::DEFAULT_CONFIGURATIONS;
-        }
         $this->configurations = $configurations;
     }
 
