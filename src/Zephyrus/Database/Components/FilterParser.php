@@ -55,6 +55,7 @@ class FilterParser
                 'begins' => $this->whereClause->or(WhereCondition::like($columnConversion[$column] ?? $column, "$content%")),
                 'ends' => $this->whereClause->or(WhereCondition::like($columnConversion[$column] ?? $column, "%$content")),
                 'equals' => $this->whereClause->or(WhereCondition::equals($columnConversion[$column] ?? $column, $content)),
+                default => null
             };
         }
         return $this->whereClause;
