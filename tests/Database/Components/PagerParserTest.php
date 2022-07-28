@@ -28,4 +28,43 @@ class PagerParserTest extends TestCase
         $clause = $parser->parse();
         self::assertEquals("LIMIT 50 OFFSET 200", $clause->getSql());
     }
+
+    public function testPageLimit()
+    {
+        $request = new Request("http://example.com/projects?page=5&limit=100", "get", ['parameters' => [
+            'page' => 5,
+            'limit' => 100
+        ]]);
+        RequestFactory::set($request);
+        $parser = new PagerParser();
+        $parser->setMaxLimitAllowed(250);
+        $clause = $parser->parse();
+        self::assertEquals("LIMIT 100 OFFSET 400", $clause->getSql());
+    }
+
+    public function testCustomMaxPage()
+    {
+        $request = new Request("http://example.com/projects?page=5", "get", ['parameters' => [
+            'page' => 2
+        ]]);
+        RequestFactory::set($request);
+        $parser = new PagerParser();
+        $parser->setMaxLimitAllowed(120);
+        $parser->setDefaultLimit(80);
+        self::assertTrue($parser->hasRequested());
+        $clause = $parser->parse();
+        self::assertEquals("LIMIT 80 OFFSET 80", $clause->getSql());
+    }
+
+    public function testRejectedLimitPage()
+    {
+        $request = new Request("http://example.com/projects?page=2&limit=500", "get", ['parameters' => [
+            'page' => 2, 'limit' => 500
+        ]]);
+        RequestFactory::set($request);
+        $parser = new PagerParser();
+        self::assertTrue($parser->hasRequested());
+        $clause = $parser->parse();
+        self::assertEquals("LIMIT 50 OFFSET 50", $clause->getSql());
+    }
 }
