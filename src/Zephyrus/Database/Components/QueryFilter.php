@@ -103,8 +103,9 @@ class QueryFilter
         }
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);
-        //$clause = (($lastWhereByOccurrence !== false) ? " AND " : " WHERE "); // TODO: Treat as AND or OR with config ?
+        $clause = (($lastWhereByOccurrence !== false) ? " AND " : " WHERE ");
         $where = $this->whereClause->getSql();
-        return (!empty($where)) ? rtrim($begin) . ' ' . $where . $end : $query;
+        $where = str_replace('WHERE ', '', $where); // Remove WHERE to build manually ...
+        return rtrim($begin) . $clause . $where . $end;
     }
 }
