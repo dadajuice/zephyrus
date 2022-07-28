@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Tests\Database\QueryBuilder;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Database\QueryBuilder\WhereClause;
 use Zephyrus\Database\QueryBuilder\WhereCondition;
@@ -24,6 +25,15 @@ class WhereClauseTest extends TestCase
         $where->or($emailCondition);
         self::assertEquals("WHERE (username = ?) OR (email = ?)", $where->getSql());
         self::assertEquals(["dadajuice", "bob@lewis.com"], $where->getQueryParameters());
+    }
+
+    public function testInvalidOperator()
+    {
+        self::expectException(InvalidArgumentException::class);
+        $usernameCondition = WhereCondition::equals("username", "dadajuice");
+        $emailCondition = WhereCondition::equals("email", "bob@lewis.com");
+        $where = new WhereClause($usernameCondition);
+        $where->add($emailCondition, 'TOTO');
     }
 
     public function testAndMultiple()
