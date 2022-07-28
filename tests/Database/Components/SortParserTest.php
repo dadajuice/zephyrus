@@ -22,6 +22,38 @@ class SortParserTest extends TestCase
         self::assertEquals("ORDER BY name ASC", $clause->getSql());
     }
 
+    public function testNullAscSorting()
+    {
+        $request = new Request("http://example.com?sorts[name]=asc", "get", ['parameters' => [
+            'sorts' => ['name' => 'asc']
+        ]]);
+        RequestFactory::set($request);
+
+        $parser = new SortParser();
+        $parser->setAscNullLast(false); // Reverse order of NULLs
+        self::assertTrue($parser->hasRequested());
+        $parser->setAllowedColumns(['name', 'price', 'brand']);
+        $clause = $parser->parse();
+
+        self::assertEquals("ORDER BY name ASC NULLS FIRST", $clause->getSql());
+    }
+
+    public function testNullDescSorting()
+    {
+        $request = new Request("http://example.com?sorts[name]=desc", "get", ['parameters' => [
+            'sorts' => ['name' => 'desc']
+        ]]);
+        RequestFactory::set($request);
+
+        $parser = new SortParser();
+        $parser->setDescNullLast(true); // Reverse order of NULLs
+        self::assertTrue($parser->hasRequested());
+        $parser->setAllowedColumns(['name', 'price', 'brand']);
+        $clause = $parser->parse();
+
+        self::assertEquals("ORDER BY name DESC NULLS LAST", $clause->getSql());
+    }
+
     public function testDefaultSort()
     {
         $request = new Request("http://example.com", "get", ['parameters' => []]);
