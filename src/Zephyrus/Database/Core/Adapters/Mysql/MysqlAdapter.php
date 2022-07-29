@@ -6,6 +6,17 @@ use Zephyrus\Database\Core\Database;
 
 class MysqlAdapter extends DatabaseAdapter
 {
+    /**
+     * For MySql / MariaDB the charset can be specified in the DSN.
+     *
+     * @return string
+     */
+    public function getDsn(): string
+    {
+        $charset = (!empty($this->source->getCharset())) ? "charset={$this->source->getCharset()};" : "";
+        return parent::getDsn() . $charset;
+    }
+
     public function getLimitClause(int $limit, int $offset): string
     {
         return " LIMIT $offset, $limit";
@@ -19,16 +30,5 @@ class MysqlAdapter extends DatabaseAdapter
     public function buildSchemaInterrogator(Database $database): SchemaInterrogator
     {
         return new MysqlSchemaInterrogator($database);
-    }
-
-    /**
-     * For MySql / MariaDB the charset can be specified in the DSN.
-     *
-     * @return string
-     */
-    protected function buildDataSourceName(): string
-    {
-        $charset = (!empty($this->source->getCharset())) ? "charset={$this->source->getCharset()};" : "";
-        return parent::buildDataSourceName() . $charset;
     }
 }

@@ -30,6 +30,11 @@ abstract class DatabaseAdapter
         };
     }
 
+    public function __construct(DatabaseSource $source)
+    {
+        $this->source = $source;
+    }
+
     /**
      * Creates the PDO handle to allow for query to be executed to the configured database source. This can be
      * overridden if a specific driver requires additional verifications (e.g. sqlite) or more attributes. Will throw
@@ -41,7 +46,7 @@ abstract class DatabaseAdapter
     public function buildConnector(): DatabaseConnector
     {
         try {
-            $handle = new DatabaseConnector($this->buildDataSourceName(), $this->source->getUsername(),
+            $handle = new DatabaseConnector($this->getDsn(), $this->source->getUsername(),
                 $this->source->getPassword());
             $handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $handle;
@@ -66,20 +71,9 @@ abstract class DatabaseAdapter
      *
      * @return string
      */
-    protected function buildDataSourceName(): string
+    public function getDsn(): string
     {
         return $this->source->getDatabaseSourceName();
-    }
-
-    /**
-     * Builds the Adapter instance only accessible from the static build method. Cannot be instantiated otherwise to
-     * assure compatibility.
-     *
-     * @param DatabaseSource $source
-     */
-    private function __construct(DatabaseSource $source)
-    {
-        $this->source = $source;
     }
 
 

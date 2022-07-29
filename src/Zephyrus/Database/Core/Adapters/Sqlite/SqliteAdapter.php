@@ -30,7 +30,7 @@ class SqliteAdapter extends DatabaseAdapter
      *
      * @return string
      */
-    protected function buildDataSourceName(): string
+    public function getDsn(): string
     {
         $dsnPrefix = $this->source->getDatabaseManagementSystem() . ':';
         return $dsnPrefix . (($this->source->getDatabaseName() != ":memory:")
