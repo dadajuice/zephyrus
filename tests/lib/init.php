@@ -8,7 +8,7 @@ if (!$loader = @require __DIR__ . '/../../vendor/autoload.php') {
 ini_set('session.use_cookies', 1);
 ini_set('session.use_only_cookies', 1);
 
-define('ROOT_DIR', __DIR__ . '/..');
+define('ROOT_DIR', realpath(__DIR__ . '/..'));
 $loader->addPsr4('Controllers\\', ROOT_DIR . '/app/Controllers');
 require_once ROOT_DIR . '/../src/Zephyrus/functions.php';
 
