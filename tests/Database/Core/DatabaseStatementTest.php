@@ -20,4 +20,14 @@ class DatabaseStatementTest extends TestCase
         $row = $result->next();
         self::assertEquals('superman', $row->name);
     }
+
+    public function testEmptyResultSet()
+    {
+        $db = new Database(new DatabaseSource());
+        $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT NULL, enabled INTEGER, power REAL);');
+        $db->query("INSERT INTO heroes(id, name, enabled, power) VALUES (1, 'Batman', 1, 5.6);");
+        $result = $db->query("SELECT power FROM heroes WHERE id = 99");
+        self::assertEquals("SELECT power FROM heroes WHERE id = 99", $result->getPdoStatement()->queryString);
+        self::assertNull($result->next());
+    }
 }
