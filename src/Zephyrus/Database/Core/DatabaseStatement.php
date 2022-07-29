@@ -27,6 +27,8 @@ class DatabaseStatement
     public function __construct(PDOStatement $statement)
     {
         $this->statement = $statement;
+        // Incompatible with SQLite ...
+        //$this->statement->setAttribute(PDO::ATTR_CURSOR, PDO::CURSOR_SCROLL);
         $this->initializeTypeConversion();
     }
 
@@ -38,17 +40,7 @@ class DatabaseStatement
      */
     public function next(): ?stdClass
     {
-        $row = $this->statement->fetch(PDO::FETCH_OBJ);
-        if ($row === false) {
-            return null;
-        }
-        if (!empty($this->fetchColumnTypes)) {
-            $this->convertRowTypes($row);
-        }
-        if (!is_null($this->sanitizeCallback)) {
-            $this->sanitizeOutput($row);
-        }
-        return $row;
+        return $this->prepareRow($this->statement->fetch(PDO::FETCH_OBJ));
     }
 
     /**
@@ -79,6 +71,20 @@ class DatabaseStatement
     public function getPdoStatement(): PDOStatement
     {
         return $this->statement;
+    }
+
+    private function prepareRow(stdClass | bool $row): ?stdClass
+    {
+        if ($row === false) {
+            return null;
+        }
+        if (!empty($this->fetchColumnTypes)) {
+            $this->convertRowTypes($row);
+        }
+        if (!is_null($this->sanitizeCallback)) {
+            $this->sanitizeOutput($row);
+        }
+        return $row;
     }
 
     /**
