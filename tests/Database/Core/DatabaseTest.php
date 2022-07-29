@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Tests\Database\Core;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Database\Core\Adapters\Sqlite\SqliteAdapter;
 use Zephyrus\Database\Core\Database;
 use Zephyrus\Database\Core\DatabaseSource;
 use Zephyrus\Exceptions\DatabaseException;
@@ -48,6 +49,20 @@ class DatabaseTest extends TestCase
         $source = $db->getSource();
         self::assertEquals("sqlite", $source->getDatabaseManagementSystem());
         self::assertEquals(":memory:", $source->getDatabaseName());
+    }
+
+    public function testGetConnector()
+    {
+        $db = $this->initializeDatabase();
+        $connector = $db->getConnector();
+        self::assertInstanceOf(\PDO::class, $connector);
+    }
+
+    public function testGetAdapter()
+    {
+        $db = $this->initializeDatabase();
+        $adapter = $db->getAdapter();
+        self::assertInstanceOf(SqliteAdapter::class, $adapter);
     }
 
     public function testEvaluationOfTypes()
