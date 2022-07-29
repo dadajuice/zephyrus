@@ -129,7 +129,7 @@ class DatabaseStatement
             try {
                 $column = $this->statement->getColumnMeta($i);
                 $this->fetchColumnTypes[$column['name']] = $this->getMetaCallback(strtoupper($column['native_type']));
-            } catch (Exception) {
+            } catch (Exception) { // @codeCoverageIgnore
                 // With DBMS SQLite, if a query has no result, it cannot use the getColumnMeta method as this will
                 // throw an out of range exception even if the columnCount returns the correct result. Must be a bug
                 // within PDO statement with SQLite. To avoid any problem, an empty catch will make sure to ignore
