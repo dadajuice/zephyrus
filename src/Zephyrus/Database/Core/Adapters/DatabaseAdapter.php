@@ -46,10 +46,7 @@ abstract class DatabaseAdapter
     public function buildConnector(): DatabaseConnector
     {
         try {
-            $handle = new DatabaseConnector($this->getDsn(), $this->source->getUsername(),
-                $this->source->getPassword());
-            $handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            return $handle;
+            return new DatabaseConnector($this->getDsn(), $this->source->getUsername(), $this->source->getPassword());
         } catch (PDOException $e) {
             throw FatalDatabaseException::connectionFailed($e->getMessage());
         }
@@ -144,6 +141,6 @@ abstract class DatabaseAdapter
      */
     public function purify(string $data): string
     {
-        return htmlspecialchars(trim($data), ENT_QUOTES | ENT_HTML401, 'UTF-8');
+        return htmlspecialchars(trim($data), ENT_QUOTES | ENT_HTML401);
     }
 }

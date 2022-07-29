@@ -11,6 +11,12 @@ class DatabaseConnector extends PDO
 
     private int $currentTransactionLevel = 0;
 
+    public function __construct(string $dsn, string|null $username, string|null $password)
+    {
+        parent::__construct($dsn, $username, $password);
+        $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+
     /**
      * PDO begin transaction override to work with savepoint capabilities for supported DBMS. Allows for working nested
      * transactions.
