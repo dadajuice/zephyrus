@@ -1,9 +1,9 @@
-<?php namespace Zephyrus\Tests\Database\Components;
+<?php namespace Zephyrus\Tests\Utilities\Components;
 
 use PHPUnit\Framework\TestCase;
-use Zephyrus\Database\Components\PagerParser;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
+use Zephyrus\Utilities\Components\PagerParser;
 
 class PagerParserTest extends TestCase
 {
@@ -13,7 +13,8 @@ class PagerParserTest extends TestCase
         RequestFactory::set($request);
         $parser = new PagerParser();
         self::assertFalse($parser->hasRequested());
-        $clause = $parser->parse();
+        $model = $parser->parse();
+        $clause = $model->buildLimitClause();
         self::assertEquals("LIMIT 50 OFFSET 0", $clause->getSql());
     }
 
@@ -25,7 +26,8 @@ class PagerParserTest extends TestCase
         RequestFactory::set($request);
         $parser = new PagerParser();
         self::assertTrue($parser->hasRequested());
-        $clause = $parser->parse();
+        $model = $parser->parse();
+        $clause = $model->buildLimitClause();
         self::assertEquals("LIMIT 50 OFFSET 200", $clause->getSql());
     }
 
@@ -38,7 +40,8 @@ class PagerParserTest extends TestCase
         RequestFactory::set($request);
         $parser = new PagerParser();
         $parser->setMaxLimitAllowed(250);
-        $clause = $parser->parse();
+        $model = $parser->parse();
+        $clause = $model->buildLimitClause();
         self::assertEquals("LIMIT 100 OFFSET 400", $clause->getSql());
     }
 
@@ -52,7 +55,8 @@ class PagerParserTest extends TestCase
         $parser->setMaxLimitAllowed(120);
         $parser->setDefaultLimit(80);
         self::assertTrue($parser->hasRequested());
-        $clause = $parser->parse();
+        $model = $parser->parse();
+        $clause = $model->buildLimitClause();
         self::assertEquals("LIMIT 80 OFFSET 80", $clause->getSql());
     }
 
@@ -64,7 +68,8 @@ class PagerParserTest extends TestCase
         RequestFactory::set($request);
         $parser = new PagerParser();
         self::assertTrue($parser->hasRequested());
-        $clause = $parser->parse();
+        $model = $parser->parse();
+        $clause = $model->buildLimitClause();
         self::assertEquals("LIMIT 50 OFFSET 50", $clause->getSql());
     }
 }
