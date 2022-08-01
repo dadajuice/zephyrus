@@ -1,19 +1,20 @@
 <?php namespace Zephyrus\Database\QueryBuilder;
 
+use Zephyrus\Database\Core\Adapters\DatabaseAdapter;
+
 class LimitClause
 {
-    private string $limitSql;
+    private int $limit;
+    private ?int $offset;
 
     public function __construct(int $limit, ?int $offset = null)
     {
-        $this->limitSql = "LIMIT $limit";
-        if (!is_null($offset)) {
-            $this->limitSql .= " OFFSET $offset";
-        }
+        $this->limit = $limit;
+        $this->offset = $offset;
     }
 
-    public function getSql(): string
+    public function getSql(DatabaseAdapter $adapter): string
     {
-        return $this->limitSql;
+        return $adapter->getSqlLimit($this->limit, $this->offset);
     }
 }

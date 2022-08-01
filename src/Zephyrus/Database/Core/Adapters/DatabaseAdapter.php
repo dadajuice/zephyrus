@@ -73,7 +73,22 @@ abstract class DatabaseAdapter
         return $this->source->getDatabaseSourceName();
     }
 
-
+    /**
+     * Generates the correct SQL LIMIT clause corresponding to the given parameters. Redefine if needed for different
+     * definition (e.g. SQLite).
+     *
+     * @param int $limit
+     * @param int|null $offset
+     * @return string
+     */
+    public function getSqlLimit(int $limit, ?int $offset = null): string
+    {
+        $sql = "LIMIT $limit";
+        if (!is_null($offset)) {
+            $sql .= " OFFSET $offset";
+        }
+        return $sql;
+    }
 
 
 
@@ -120,7 +135,7 @@ abstract class DatabaseAdapter
      */
     public abstract function getAddEnvironmentVariableClause(string $name, string $value): string;
 
-    public abstract function getLimitClause(int $limit, int $offset): string;
+
 
     public abstract function buildSchemaInterrogator(Database $database): SchemaInterrogator;
 

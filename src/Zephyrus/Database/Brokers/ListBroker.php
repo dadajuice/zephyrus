@@ -40,7 +40,7 @@ abstract class ListBroker extends DatabaseBroker
     {
         parent::__construct($database); // TODO: REMOVE
         $this->configure();
-        $this->queryFilter = new QueryFilter();
+        $this->queryFilter = new QueryFilter($database); // TODO: USE CHILD ...
         $this->queryFilter->getFilterParser()->setAllowedColumns($this->allowedFilterColumns);
         $this->queryFilter->getFilterParser()->setAliasColumns($this->columnAlias);
         $this->queryFilter->getSortParser()->setAllowedColumns($this->allowedSortColumns);
@@ -66,7 +66,8 @@ abstract class ListBroker extends DatabaseBroker
         $query = $this->queryFilter->filter($query);
         $query = $this->queryFilter->sort($query);
         $query = $this->queryFilter->paginate($query);
-        return self::select($query, $parameters, $callback);
+        var_dump($query);
+        return self::select($query, $parameters + $this->queryFilter->getQueryParameters(), $callback);
     }
 
     /**

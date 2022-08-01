@@ -17,9 +17,12 @@ class MysqlAdapter extends DatabaseAdapter
         return parent::getDsn() . $charset;
     }
 
-    public function getLimitClause(int $limit, int $offset): string
+    public function getSqlLimit(int $limit, ?int $offset = null): string
     {
-        return " LIMIT $offset, $limit";
+        if (!is_null($offset)) {
+            return "LIMIT $offset, $limit";
+        }
+        return "LIMIT $limit";
     }
 
     public function getAddEnvironmentVariableClause(string $name, string $value): string

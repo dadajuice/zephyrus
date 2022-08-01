@@ -1,15 +1,19 @@
 <?php namespace Zephyrus\Database\Components;
 
+use Zephyrus\Database\Core\Database;
 use Zephyrus\Utilities\Components\PagerParser;
 
 class QueryFilter
 {
+    private Database $database;
     private FilterParser $filterParser;
     private SortParser $sortParser;
     private PagerParser $pagerParser;
+    private array $queryParameters = [];
 
-    public function __construct()
+    public function __construct(Database $database)
     {
+        $this->database = $database;
         $this->filterParser = new FilterParser();
         $this->pagerParser = new PagerParser();
         $this->sortParser = new SortParser();
@@ -52,6 +56,11 @@ class QueryFilter
     public function getPagerParser(): PagerParser
     {
         return $this->pagerParser;
+    }
+
+    public function getQueryParameters(): array
+    {
+        return $this->queryParameters;
     }
 
     /**
@@ -99,7 +108,7 @@ class QueryFilter
             return $rawQuery;
         }
         $limitClause = $this->pagerParser->parse()->buildLimitClause();
-        return rtrim($rawQuery) . ' ' . $limitClause->getSql();
+        return rtrim($rawQuery) . ' ' . $limitClause->getSql($this->database->getAdapter());
     }
 
     private function injectOrderByClause(string $query): string
@@ -139,6 +148,7 @@ class QueryFilter
         $end = substr($query, $insertionPosition);
         $clause = (($lastWhereByOccurrence !== false) ? " AND " : " WHERE ");
         $where = $whereClause->getSql();
+        $this->queryParameters += $whereClause->getQueryParameters();
         $where = str_replace('WHERE ', '', $where); // Remove WHERE to build manually ...
         return rtrim($begin) . $clause . $where . $end;
     }

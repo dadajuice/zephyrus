@@ -38,6 +38,12 @@ class SqliteAdapter extends DatabaseAdapter
                 : ':memory:');
     }
 
+    public function getLikeClause(): string
+    {
+        return "LIKE";
+    }
+
+
     /**
      * Non-existing feature in SQLite database.
      *
@@ -55,8 +61,11 @@ class SqliteAdapter extends DatabaseAdapter
         return new SqliteSchemaInterrogator($database);
     }
 
-    public function getLimitClause(int $limit, int $offset): string
+    public function getSqlLimit(int $limit, ?int $offset = null): string
     {
-        return " LIMIT $offset, $limit";
+        if (!is_null($offset)) {
+            return "LIMIT $offset, $limit";
+        }
+        return "LIMIT $limit";
     }
 }
