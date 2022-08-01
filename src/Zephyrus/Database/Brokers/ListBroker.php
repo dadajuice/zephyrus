@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Database\Brokers;
 
 use Zephyrus\Database\Components\QueryFilter;
+use Zephyrus\Database\Core\Database;
 use Zephyrus\Database\DatabaseBroker;
 use Zephyrus\Utilities\Components\PagerParser;
 
@@ -35,9 +36,9 @@ abstract class ListBroker extends DatabaseBroker
      */
     abstract public function count(): int;
 
-    public function __construct()
+    public function __construct(?Database $database = null)
     {
-        parent::__construct(null); // TODO: REMOVE
+        parent::__construct($database); // TODO: REMOVE
         $this->configure();
         $this->queryFilter = new QueryFilter();
         $this->queryFilter->getFilterParser()->setAllowedColumns($this->allowedFilterColumns);
