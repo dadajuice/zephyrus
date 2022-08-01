@@ -34,7 +34,7 @@ class SortParser
         $this->allowedColumns = $allowedColumns;
     }
 
-    public function setDefaultSort(array $defaultSorts)
+    public function setDefaultSorts(array $defaultSorts)
     {
         $this->defaultSorts = $defaultSorts;
     }
@@ -43,6 +43,11 @@ class SortParser
     {
         $request = RequestFactory::read();
         return !empty($request->getParameter(self::URL_PARAMETER, []));
+    }
+
+    public function hasDefaultSort(): bool
+    {
+        return !empty($this->defaultSorts);
     }
 
     /**
