@@ -1,18 +1,12 @@
 <?php namespace Zephyrus\Database\Components;
 
-use Zephyrus\Database\QueryBuilder\LimitClause;
-use Zephyrus\Database\QueryBuilder\OrderByClause;
-use Zephyrus\Database\QueryBuilder\WhereClause;
+use Zephyrus\Utilities\Components\PagerParser;
 
 class QueryFilter
 {
     private FilterParser $filterParser;
     private SortParser $sortParser;
     private PagerParser $pagerParser;
-
-    private LimitClause $limitClause;
-    private WhereClause $whereClause;
-    private OrderByClause $orderByClause;
 
     public function __construct()
     {
@@ -36,45 +30,81 @@ class QueryFilter
         return $this->pagerParser->hasRequested();
     }
 
-    public function setAllowedSortColumns(array $allowedSorts)
+    /**
+     * @return FilterParser
+     */
+    public function getFilterParser(): FilterParser
     {
-        $this->sortParser->setAllowedColumns($allowedSorts);
+        return $this->filterParser;
     }
 
-    public function setAllowedFilterColumns(array $allowedSorts)
+    /**
+     * @return SortParser
+     */
+    public function getSortParser(): SortParser
     {
-        $this->filterParser->setAllowedColumns($allowedSorts);
+        return $this->sortParser;
     }
 
+    /**
+     * @return PagerParser
+     */
+    public function getPagerParser(): PagerParser
+    {
+        return $this->pagerParser;
+    }
+
+    /**
+     * Proceeds to inject the SQL filtering (WHERE clause) to the given query. Will ignore if no filter has been
+     * specified in the request.
+     *
+     * @param string $rawQuery
+     * @return string
+     */
     public function filter(string $rawQuery): string
     {
         if (!$this->isFilterRequested()) {
             return $rawQuery;
         }
-        $this->whereClause = $this->filterParser->parse();
         return $this->injectWhereClause($rawQuery);
     }
 
+    /**
+     * Proceeds to inject SQL sorting (ORDER BY clause) to the given query. Will ignore if no sort has been specified in
+     * the request and no default sort is given.
+     *
+     * @param string $rawQuery
+     * @return string
+     */
     public function sort(string $rawQuery): string
     {
-        if (!$this->isSortRequested()) { // TODO: OR DEFAULT SORT
+        if (!$this->isSortRequested()
+            && !$this->sortParser->hasDefaultSort()) {
             return $rawQuery;
         }
-        $this->orderByClause = $this->sortParser->parse();
         return $this->injectOrderByClause($rawQuery);
     }
 
+    /**
+     * Proceeds to inject SQL pagination (LIMIT clause) to the given query. Will ignore if no page has been specified in
+     * the request and pagination is not forced.
+     *
+     * @param string $rawQuery
+     * @param bool $forcePaginate
+     * @return string
+     */
     public function paginate(string $rawQuery, bool $forcePaginate = true): string
     {
         if (!$this->isPaginationRequested() && !$forcePaginate) {
             return $rawQuery;
         }
-        $this->limitClause = $this->pagerParser->parse();
-        return rtrim($rawQuery) . ' ' . $this->limitClause->getSql();
+        $limitClause = $this->pagerParser->parse()->buildLimitClause();
+        return rtrim($rawQuery) . ' ' . $limitClause->getSql();
     }
 
     private function injectOrderByClause(string $query): string
     {
+        $orderByClause = $this->sortParser->parse();
         $lastFromByOccurrence = strripos($query, "from");
         $lastWhereByOccurrence = strripos($query, "where", $lastFromByOccurrence);
         $lastLimitOccurrence = strripos($query, "limit", $lastFromByOccurrence);
@@ -87,12 +117,13 @@ class QueryFilter
         }
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);
-        $orderBy = $this->orderByClause->getSql();
+        $orderBy = $orderByClause->getSql();
         return (!empty($orderBy)) ? rtrim($begin) . ' ' . $orderBy . $end : $query;
     }
 
     private function injectWhereClause(string $query): string
     {
+        $whereClause = $this->filterParser->parse();
         $lastFromByOccurrence = strripos($query, "from");
         $lastWhereByOccurrence = strripos($query, "where", $lastFromByOccurrence);
         $lastGroupByOccurrence = strripos($query, "group by", $lastFromByOccurrence);
@@ -107,7 +138,7 @@ class QueryFilter
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);
         $clause = (($lastWhereByOccurrence !== false) ? " AND " : " WHERE ");
-        $where = $this->whereClause->getSql();
+        $where = $whereClause->getSql();
         $where = str_replace('WHERE ', '', $where); // Remove WHERE to build manually ...
         return rtrim($begin) . $clause . $where . $end;
     }
