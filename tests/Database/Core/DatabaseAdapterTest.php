@@ -21,7 +21,7 @@ class DatabaseAdapterTest extends TestCase
             'host' => 'localhost'
         ]));
         self::assertEquals("", $adapter->getAddEnvironmentVariableClause('bob', 'lewis'));
-        self::assertEquals(" LIMIT 50, 4", $adapter->getLimitClause(4, 50));
+        self::assertEquals("LIMIT 50, 4", $adapter->getSqlLimit(4, 50));
         self::assertEquals("sqlite::memory:", $adapter->getDsn());
         self::assertInstanceOf(SqliteSchemaInterrogator::class, $adapter->buildSchemaInterrogator(new Database(new DatabaseSource())));
     }
@@ -61,7 +61,7 @@ class DatabaseAdapterTest extends TestCase
         ]));
         $clause = $adapter->getAddEnvironmentVariableClause('bob', 'lewis');
         self::assertEquals("SET @bob = 'lewis'", $clause);
-        self::assertEquals(" LIMIT 50, 4", $adapter->getLimitClause(4, 50));
+        self::assertEquals("LIMIT 50, 4", $adapter->getSqlLimit(4, 50));
         self::assertEquals("mysql:dbname=test;host=localhost;charset=utf8;", $adapter->getDsn());
         self::assertInstanceOf(MysqlSchemaInterrogator::class, $adapter->buildSchemaInterrogator(new Database(new DatabaseSource())));
     }

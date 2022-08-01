@@ -2,6 +2,8 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Database\Components\QueryFilter;
+use Zephyrus\Database\Core\Database;
+use Zephyrus\Database\Core\DatabaseSource;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 
@@ -11,7 +13,7 @@ class QueryFilterTest extends TestCase
     {
         $request = new Request("http://example.com/projects", "get", ['parameters' => []]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         self::assertFalse($filter->isPaginationRequested());
         self::assertFalse($filter->isSortRequested());
         self::assertFalse($filter->isFilterRequested());
@@ -33,24 +35,24 @@ class QueryFilterTest extends TestCase
             'page' => 3
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         self::assertTrue($filter->isPaginationRequested());
 
         $query = "SELECT * FROM view_project";
         $resultQuery = $filter->paginate($query);
-        self::assertEquals("SELECT * FROM view_project LIMIT 50 OFFSET 100", $resultQuery);
+        self::assertEquals("SELECT * FROM view_project LIMIT 100, 50", $resultQuery);
     }
 
     public function testForcePagination()
     {
         $request = new Request("http://example.com/projects", "get", ['parameters' => []]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         self::assertFalse($filter->isPaginationRequested());
 
         $query = "SELECT * FROM view_project";
         $resultQuery = $filter->paginate($query, true); // Default
-        self::assertEquals("SELECT * FROM view_project LIMIT 50 OFFSET 0", $resultQuery);
+        self::assertEquals("SELECT * FROM view_project LIMIT 0, 50", $resultQuery);
     }
 
     public function testSort()
@@ -59,7 +61,7 @@ class QueryFilterTest extends TestCase
             'sorts' => ['name' => 'desc']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         $filter->getSortParser()->setAllowedColumns(['name']);
         self::assertTrue($filter->isSortRequested());
 
@@ -74,7 +76,7 @@ class QueryFilterTest extends TestCase
             'sorts' => ['name' => 'desc']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         $filter->getSortParser()->setAllowedColumns(['name']);
         self::assertTrue($filter->isSortRequested());
 
@@ -89,7 +91,7 @@ class QueryFilterTest extends TestCase
             'sorts' => ['name' => 'desc']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         $filter->getSortParser()->setAllowedColumns(['name']);
         self::assertTrue($filter->isSortRequested());
 
@@ -104,7 +106,7 @@ class QueryFilterTest extends TestCase
             'sorts' => ['name' => 'desc']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         $filter->getSortParser()->setAllowedColumns(['name']);
         self::assertTrue($filter->isSortRequested());
 
@@ -119,7 +121,7 @@ class QueryFilterTest extends TestCase
             'sorts' => ['name' => 'desc']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         $filter->getSortParser()->setAllowedColumns(['name']);
         self::assertTrue($filter->isSortRequested());
 
@@ -134,7 +136,7 @@ class QueryFilterTest extends TestCase
             'filters' => ['name:contains' => 'micro']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         $filter->getFilterParser()->setAllowedColumns(['name']);
         self::assertTrue($filter->isFilterRequested());
 
@@ -149,7 +151,7 @@ class QueryFilterTest extends TestCase
             'filters' => ['name:contains' => 'micro']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         $filter->getFilterParser()->setAllowedColumns(['name']);
         self::assertTrue($filter->isFilterRequested());
 
@@ -164,7 +166,7 @@ class QueryFilterTest extends TestCase
             'filters' => ['name:contains' => 'micro']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         $filter->getFilterParser()->setAllowedColumns(['name']);
         self::assertTrue($filter->isFilterRequested());
 
@@ -179,7 +181,7 @@ class QueryFilterTest extends TestCase
             'filters' => ['name:contains' => 'micro']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         $filter->getFilterParser()->setAllowedColumns(['name']);
         self::assertTrue($filter->isFilterRequested());
 
@@ -194,7 +196,7 @@ class QueryFilterTest extends TestCase
             'filters' => ['name:contains' => 'micro']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         $filter->getFilterParser()->setAllowedColumns(['name']);
         self::assertTrue($filter->isFilterRequested());
 
@@ -209,7 +211,7 @@ class QueryFilterTest extends TestCase
             'filters' => ['name:contains' => 'micro']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(new Database(new DatabaseSource()));
         $filter->getFilterParser()->setAllowedColumns(['name']);
         self::assertTrue($filter->isFilterRequested());
 
