@@ -47,7 +47,7 @@ class ListBrokerTest extends TestCase
         self::assertEquals("Aquaman", $rows[0]->name);
     }
 
-    public function testWithFilters()
+    public function testWithEqualsFilters()
     {
         $db = $this->initializeDatabase();
 
@@ -84,6 +84,46 @@ class ListBrokerTest extends TestCase
         $rows = $instance->findAllRows();
         self::assertCount(1, $rows);
         self::assertEquals("Aquaman", $rows[0]->name);
+    }
+
+    public function testWithContainsFilters()
+    {
+        $db = $this->initializeDatabase();
+
+        $request = new Request("http://example.com?filters[name:sensible-contains]=man", "get", ['parameters' => [
+            'filters' => ['name:sensible-contains' => 'man']
+        ]]);
+        RequestFactory::set($request);
+
+        $instance = new class($db) extends ListBroker
+        {
+            public function configure()
+            {
+                $this->setAliasColumns(['amount' => 'price']);
+                $this->setSortAllowedColumns(['name', 'brand', 'price']);
+                $this->setFilterAllowedColumns(['name']);
+                $this->setSortDefaults(['name' => 'asc']);
+                $this->setPagerDefaultLimit(50); // Default
+                $this->setPagerMaxLimit(50); // Default
+                $this->setSortAscNullLast(true); // Default
+                $this->setSortDescNullLast(false); // Default
+            }
+
+            public function findAllRows(): array
+            {
+                return $this->filteredSelect("SELECT * FROM heroes");
+            }
+
+            public function count(): int
+            {
+                return 0;
+            }
+        };
+
+        $rows = $instance->findAllRows();
+        self::assertCount(4, $rows);
+        self::assertEquals("Aquaman", $rows[0]->name);
+        self::assertEquals("Batman", $rows[1]->name);
     }
 
     /**
