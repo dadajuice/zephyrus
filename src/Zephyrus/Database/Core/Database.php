@@ -14,12 +14,12 @@ class Database
     /**
      * Instantiates the database facade instance which will permit queries to be sent to the database.
      *
-     * @param DatabaseConfiguration $configuration
+     * @param array $configurations
      * @throws FatalDatabaseException
      */
-    public function __construct(DatabaseConfiguration $configuration)
+    public function __construct(array $configurations)
     {
-        $this->configuration = $configuration;
+        $this->configuration = new DatabaseConfiguration($configurations);
         $this->handle = $this->connect();
         $this->schemaInterrogator = new SchemaInterrogator($this);
     }
