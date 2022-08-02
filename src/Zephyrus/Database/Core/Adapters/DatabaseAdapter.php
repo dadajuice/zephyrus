@@ -90,41 +90,6 @@ abstract class DatabaseAdapter
         return $sql;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * Builds the correct SQL clause to send environnement variable to the database instance based on the given variable
      * name and variable value. Must be defined by the children classes.
@@ -133,7 +98,7 @@ abstract class DatabaseAdapter
      * @param string $value
      * @return string
      */
-    public abstract function getAddEnvironmentVariableClause(string $name, string $value): string;
+    public abstract function getSqlAddVariable(string $name, string $value): string;
 
 
 

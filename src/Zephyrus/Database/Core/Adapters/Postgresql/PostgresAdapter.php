@@ -19,7 +19,7 @@ class PostgresAdapter extends DatabaseAdapter
      * @param string $value
      * @return string
      */
-    public function getAddEnvironmentVariableClause(string $name, string $value): string
+    public function getSqlAddVariable(string $name, string $value): string
     {
         return "set session \"$name\" = '$value';";
     }

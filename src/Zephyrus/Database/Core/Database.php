@@ -53,6 +53,22 @@ class Database
     }
 
     /**
+     * Adds a variable to the database session that shall become available for following queries / triggers / store
+     * procedures and functions.
+     *
+     * @param string $name
+     * @param string $value
+     */
+    public function addSessionVariable(string $name, string $value)
+    {
+        $sql = $this->adapter->getSqlAddVariable($name, $value);
+        if (empty($sql)) {
+            return; // Ignore if it's an unsupported feature (e.g. SQLite)
+        }
+        $this->query($sql);
+    }
+
+    /**
      * Retrieves the interrogator instance to perform various meta database (schema) queries.
      *
      * @return SchemaInterrogator

@@ -38,12 +38,6 @@ class SqliteAdapter extends DatabaseAdapter
                 : ':memory:');
     }
 
-    public function getLikeClause(): string
-    {
-        return "LIKE";
-    }
-
-
     /**
      * Non-existing feature in SQLite database.
      *
@@ -51,7 +45,7 @@ class SqliteAdapter extends DatabaseAdapter
      * @param string $value
      * @return string
      */
-    public function getAddEnvironmentVariableClause(string $name, string $value): string
+    public function getSqlAddVariable(string $name, string $value): string
     {
         return "";
     }
