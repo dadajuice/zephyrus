@@ -66,7 +66,6 @@ abstract class ListBroker extends DatabaseBroker
         $query = $this->queryFilter->filter($query);
         $query = $this->queryFilter->sort($query);
         $query = $this->queryFilter->paginate($query);
-        var_dump($query);
         return self::select($query, $parameters + $this->queryFilter->getQueryParameters(), $callback);
     }
 
