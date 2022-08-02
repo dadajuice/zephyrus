@@ -3,12 +3,11 @@
 use PDO;
 
 /**
- * Wrapper class for the PDO instance including nested transaction functionality.
+ * Wrapper class for the PDO instance including nested transaction functionality known as SAVEPOINT. This is the main
+ * instance wrapped in the Database class to execute queries.
  */
 class DatabaseHandle extends PDO
 {
-    private static array $savepointEnabled = ["pgsql", "mysql", "mariadb", "sqlite", "sqlite2"];
-
     private int $currentTransactionLevel = 0;
 
     public function __construct(string $dsn, string|null $username, string|null $password)
@@ -25,11 +24,9 @@ class DatabaseHandle extends PDO
      */
     public function beginTransaction(): bool
     {
-        if ($this->currentTransactionLevel == 0 || !$this->nestable()) {
-            parent::beginTransaction();
-        } else {
-            $this->exec("SAVEPOINT LEVEL$this->currentTransactionLevel");
-        }
+        ($this->currentTransactionLevel == 0)
+            ? parent::beginTransaction()
+            : $this->exec("SAVEPOINT LEVEL$this->currentTransactionLevel");
         ++$this->currentTransactionLevel;
         return true;
     }
@@ -43,11 +40,10 @@ class DatabaseHandle extends PDO
     public function commit(): bool
     {
         --$this->currentTransactionLevel;
-        if ($this->currentTransactionLevel == 0 || !$this->nestable()) {
+        if ($this->currentTransactionLevel == 0) {
             return parent::commit();
-        } else {
-            $this->exec("RELEASE SAVEPOINT LEVEL$this->currentTransactionLevel");
         }
+        $this->exec("RELEASE SAVEPOINT LEVEL$this->currentTransactionLevel");
         return true;
     }
 
@@ -60,21 +56,10 @@ class DatabaseHandle extends PDO
     public function rollBack(): bool
     {
         --$this->currentTransactionLevel;
-        if ($this->currentTransactionLevel == 0 || !$this->nestable()) {
+        if ($this->currentTransactionLevel == 0) {
             return parent::rollBack();
-        } else {
-            $this->exec("ROLLBACK TO SAVEPOINT LEVEL$this->currentTransactionLevel");
         }
+        $this->exec("ROLLBACK TO SAVEPOINT LEVEL$this->currentTransactionLevel");
         return true;
-    }
-
-    /**
-     * Verifies if the current PDO driver supports save points.
-     *
-     * @return bool
-     */
-    private function nestable(): bool
-    {
-        return in_array($this->getAttribute(PDO::ATTR_DRIVER_NAME), self::$savepointEnabled);
     }
 }
