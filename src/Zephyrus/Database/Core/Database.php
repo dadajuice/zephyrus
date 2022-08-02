@@ -3,7 +3,6 @@
 use PDO;
 use PDOException;
 use Zephyrus\Database\Core\Adapters\DatabaseAdapter;
-use Zephyrus\Database\Core\Adapters\SchemaInterrogator;
 use Zephyrus\Exceptions\DatabaseException;
 use Zephyrus\Exceptions\FatalDatabaseException;
 
@@ -11,6 +10,7 @@ class Database
 {
     private DatabaseHandle $handle;
     private DatabaseAdapter $adapter;
+    private SchemaInterrogator $schemaInterrogator;
 
     /**
      * Instantiates the database facade instance which will permit queries to be sent to the database.
@@ -22,6 +22,7 @@ class Database
     {
         $this->adapter = DatabaseAdapter::build($source);
         $this->handle = $this->adapter->connect();
+        $this->schemaInterrogator = new SchemaInterrogator($this);
     }
 
     /**
@@ -75,7 +76,7 @@ class Database
      */
     public function getSchemaInterrogator(): SchemaInterrogator
     {
-        return $this->adapter->buildSchemaInterrogator($this);
+        return $this->schemaInterrogator;
     }
 
     /**
