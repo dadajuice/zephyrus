@@ -1,17 +1,15 @@
 <?php namespace Zephyrus\Database\Core;
 
 use PDO;
-use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\FatalDatabaseException;
 
 class DatabaseConfiguration
 {
     public const DEFAULT_CONFIGURATIONS = [
-        'dbms' => 'sqlite', // PDO Driver to use
         'host' => 'localhost', // Specifies the database's server address (without port)
         'port' => '', // Port to access the database's server, leave empty to use the default port of your dbms
         'charset' => 'utf8', // Charset used for encoding
-        'database' => ':memory:', // Database name (or filepath to database, :memory: for SQLite)
+        'database' => '', // Database name
         'username' => '', // Username for database authentication
         'password' => '' // Password for database authentication
     ];
@@ -24,16 +22,6 @@ class DatabaseConfiguration
     private string $username = '';
     private string $password = '';
     private string $charset = '';
-
-    /**
-     * Retrieves the list of currently supported DBMS by Zephyrus.
-     *
-     * @return string[]
-     */
-    public static function getSupportedDrivers(): array
-    {
-        return ['sqlite', 'sqlite2', 'mysql', 'mariadb', 'pgsql'];
-    }
 
     /**
      * Wrapper to retrieve the list of currently installed DBMS's drivers.
@@ -152,15 +140,8 @@ class DatabaseConfiguration
      */
     private function initializeDbms()
     {
-        if (!isset($this->configurations['dbms'])) {
-            throw FatalDatabaseException::missingConfiguration('dbms');
-        }
-        $this->dbms = $this->configurations['dbms'];
-        if (!in_array($this->dbms, self::getAvailableDrivers())) {
-            throw FatalDatabaseException::driverNotAvailable($this->dbms);
-        }
-        if (!in_array($this->dbms, self::getSupportedDrivers())) {
-            throw FatalDatabaseException::driverNotSupported($this->dbms); // @codeCoverageIgnore
+        if (!in_array('pgsql', self::getAvailableDrivers())) {
+            throw FatalDatabaseException::driverNotAvailable('pgsql');
         }
     }
 
