@@ -15,7 +15,6 @@ class DatabaseConfiguration
     ];
 
     private array $configurations;
-    private string $dbms = '';
     private string $host = '';
     private string $port = '';
     private string $databaseName = '';
@@ -45,16 +44,6 @@ class DatabaseConfiguration
         $this->initializeDatabaseName();
         $this->initializeCharset();
         $this->initializeAuthentication();
-    }
-
-    /**
-     * Retrieve the DBMS driver name. Will be one of the installed and supported drivers.
-     *
-     * @return string
-     */
-    public function getDatabaseManagementSystem(): string
-    {
-        return $this->dbms;
     }
 
     /**
@@ -127,7 +116,7 @@ class DatabaseConfiguration
     public function getDatabaseSourceName(): string
     {
         $port = (!empty($this->getPort())) ? "port={$this->getPort()};" : "";
-        return $this->getDatabaseManagementSystem() . ':dbname=' . $this->getDatabaseName() . ';host=' . $this->getHost() . ';' . $port;
+        return 'pgsql:dbname=' . $this->getDatabaseName() . ';host=' . $this->getHost() . ';' . $port;
     }
 
     private function initializeConfigurations(array $configurations)
