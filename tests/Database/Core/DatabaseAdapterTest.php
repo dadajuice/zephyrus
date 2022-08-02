@@ -20,7 +20,7 @@ class DatabaseAdapterTest extends TestCase
             'database' => ':memory:',
             'host' => 'localhost'
         ]));
-        self::assertEquals("", $adapter->getAddEnvironmentVariableClause('bob', 'lewis'));
+        self::assertEquals("", $adapter->getSqlAddVariable('bob', 'lewis'));
         self::assertEquals("LIMIT 50, 4", $adapter->getSqlLimit(4, 50));
         self::assertEquals("sqlite::memory:", $adapter->getDsn());
         self::assertInstanceOf(SqliteSchemaInterrogator::class, $adapter->buildSchemaInterrogator(new Database(new DatabaseConfiguration())));
@@ -59,7 +59,7 @@ class DatabaseAdapterTest extends TestCase
             'host' => 'localhost',
             'charset' => 'utf8'
         ]));
-        $clause = $adapter->getAddEnvironmentVariableClause('bob', 'lewis');
+        $clause = $adapter->getSqlAddVariable('bob', 'lewis');
         self::assertEquals("SET @bob = 'lewis'", $clause);
         self::assertEquals("LIMIT 50, 4", $adapter->getSqlLimit(4, 50));
         self::assertEquals("mysql:dbname=test;host=localhost;charset=utf8;", $adapter->getDsn());
@@ -74,7 +74,7 @@ class DatabaseAdapterTest extends TestCase
             'host' => 'localhost',
             'charset' => 'utf8'
         ]));
-        self::assertEquals("set session \"bob\" = 'lewis';", $adapter->getAddEnvironmentVariableClause('bob', 'lewis'));
+        self::assertEquals("set session \"bob\" = 'lewis';", $adapter->getSqlAddVariable('bob', 'lewis'));
         self::assertEquals(" LIMIT 50 OFFSET 4", $adapter->getLimitClause(4, 50));
         self::assertEquals("pgsql:dbname=test;host=localhost;", $adapter->getDsn());
         self::assertInstanceOf(PostgresSchemaInterrogator::class, $adapter->buildSchemaInterrogator(new Database(new DatabaseConfiguration())));
