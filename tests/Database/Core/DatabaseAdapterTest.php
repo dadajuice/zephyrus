@@ -35,7 +35,7 @@ class DatabaseAdapterTest extends TestCase
             'charset' => 'utf8'
         ]));
         self::assertEquals('/lib/db.sqlite', $adapter->getSource()->getDatabaseName());
-        $adapter->buildConnector(); // If fails, throws an exception ...
+        $adapter->connect(); // If fails, throws an exception ...
         self::assertTrue(true);
     }
 
@@ -48,7 +48,7 @@ class DatabaseAdapterTest extends TestCase
             'host' => 'localhost',
             'database' => ROOT_DIR . '/lib/db.sqlidfljsdfkjlsdkfjlte'
         ]));
-        $adapter->buildConnector();
+        $adapter->connect();
     }
 
     public function testMySql()

@@ -14,7 +14,7 @@ class SqliteAdapter extends DatabaseAdapter
      * @return DatabaseHandle
      * @throws FatalDatabaseException
      */
-    public function buildConnector(): DatabaseHandle
+    public function connect(): DatabaseHandle
     {
         if ($this->source->getDatabaseName() != ":memory:") {
             $path = ROOT_DIR . DIRECTORY_SEPARATOR . $this->source->getDatabaseName();
@@ -22,7 +22,7 @@ class SqliteAdapter extends DatabaseAdapter
                 throw FatalDatabaseException::sqliteInvalidDatabase($path);
             }
         }
-        return parent::buildConnector();
+        return parent::connect();
     }
 
     /**

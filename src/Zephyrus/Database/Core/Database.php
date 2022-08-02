@@ -21,7 +21,7 @@ class Database
     public function __construct(DatabaseConfiguration $source)
     {
         $this->adapter = DatabaseAdapter::build($source);
-        $this->connector = $this->adapter->buildConnector();
+        $this->connector = $this->adapter->connect();
     }
 
     /**

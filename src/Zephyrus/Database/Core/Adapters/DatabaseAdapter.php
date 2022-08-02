@@ -43,7 +43,7 @@ abstract class DatabaseAdapter
      * @return DatabaseHandle
      * @throws FatalDatabaseException
      */
-    public function buildConnector(): DatabaseHandle
+    public function connect(): DatabaseHandle
     {
         try {
             return new DatabaseHandle($this->getDsn(), $this->source->getUsername(), $this->source->getPassword());
