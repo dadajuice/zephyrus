@@ -63,7 +63,7 @@ class Database
     {
         $sql = $this->adapter->getSqlAddVariable($name, $value);
         if (empty($sql)) {
-            return; // Ignore if it's an unsupported feature (e.g. SQLite)
+            return; // Guard for non existent session environnement feature (e.g. sqlite).
         }
         $this->query($sql);
     }
