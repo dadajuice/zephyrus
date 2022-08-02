@@ -6,21 +6,19 @@ use Zephyrus\Exceptions\FatalDatabaseException;
 class DatabaseConfiguration
 {
     public const DEFAULT_CONFIGURATIONS = [
-        'host' => 'localhost', // Specifies the database's server address (without port)
+        'hostname' => 'localhost', // Specifies the database's server address (without port)
         'port' => '', // Port to access the database's server, leave empty to use the default port of your dbms
-        'charset' => 'utf8', // Charset used for encoding
         'database' => '', // Database name
         'username' => '', // Username for database authentication
         'password' => '' // Password for database authentication
     ];
 
     private array $configurations;
-    private string $host = '';
+    private string $hostname = '';
     private string $port = '';
     private string $databaseName = '';
     private string $username = '';
     private string $password = '';
-    private string $charset = '';
 
     /**
      * Wrapper to retrieve the list of currently installed DBMS's drivers.
@@ -39,10 +37,9 @@ class DatabaseConfiguration
     {
         $this->initializeConfigurations($configurations);
         $this->initializeDbms();
-        $this->initializeHost();
+        $this->initializeHostname();
         $this->initializePort();
         $this->initializeDatabaseName();
-        $this->initializeCharset();
         $this->initializeAuthentication();
     }
 
@@ -51,9 +48,9 @@ class DatabaseConfiguration
      *
      * @return string
      */
-    public function getHost(): string
+    public function getHostname(): string
     {
-        return $this->host;
+        return $this->hostname;
     }
 
     /**
@@ -98,17 +95,6 @@ class DatabaseConfiguration
     }
 
     /**
-     * Retrieve the configured charset (optional) to use for the communication with the database. Will affect the result
-     * set encoding.
-     *
-     * @return string
-     */
-    public function getCharset(): string
-    {
-        return $this->charset;
-    }
-
-    /**
      * Retrieves the PDO compatible DSN string for connection purpose.
      *
      * @return string
@@ -116,7 +102,7 @@ class DatabaseConfiguration
     public function getDatabaseSourceName(): string
     {
         $port = (!empty($this->getPort())) ? "port={$this->getPort()};" : "";
-        return 'pgsql:dbname=' . $this->getDatabaseName() . ';host=' . $this->getHost() . ';' . $port;
+        return 'pgsql:dbname=' . $this->getDatabaseName() . ';host=' . $this->getHostname() . ';' . $port;
     }
 
     private function initializeConfigurations(array $configurations)
@@ -137,12 +123,12 @@ class DatabaseConfiguration
     /**
      * @throws FatalDatabaseException
      */
-    private function initializeHost()
+    private function initializeHostname()
     {
-        if (!isset($this->configurations['host'])) {
-            throw FatalDatabaseException::missingConfiguration('host');
+        if (!isset($this->configurations['hostname'])) {
+            throw FatalDatabaseException::missingConfiguration('hostname');
         }
-        $this->host = $this->configurations['host'];
+        $this->hostname = $this->configurations['hostname'];
     }
 
     /**
@@ -176,13 +162,6 @@ class DatabaseConfiguration
         }
         if (isset($this->configurations['password']) && $this->configurations['password']) {
             $this->password = $this->configurations['password'];
-        }
-    }
-
-    private function initializeCharset()
-    {
-        if (isset($this->configurations['charset']) && $this->configurations['charset']) {
-            $this->charset = $this->configurations['charset'];
         }
     }
 }
