@@ -1,7 +1,5 @@
 <?php namespace Zephyrus\Database\QueryBuilder;
 
-use Zephyrus\Database\Core\Adapters\DatabaseAdapter;
-
 class LimitClause
 {
     private int $limit;
@@ -13,8 +11,12 @@ class LimitClause
         $this->offset = $offset;
     }
 
-    public function getSql(DatabaseAdapter $adapter): string
+    public function getSql(): string
     {
-        return $adapter->getSqlLimit($this->limit, $this->offset);
+        $sql = "LIMIT $this->limit";
+        if (!is_null($this->offset)) {
+            $sql .= " OFFSET $this->offset";
+        }
+        return $sql;
     }
 }
