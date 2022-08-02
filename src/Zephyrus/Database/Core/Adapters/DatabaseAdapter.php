@@ -7,21 +7,21 @@ use Zephyrus\Database\Core\Adapters\Postgresql\PostgresAdapter;
 use Zephyrus\Database\Core\Adapters\Sqlite\SqliteAdapter;
 use Zephyrus\Database\Core\Database;
 use Zephyrus\Database\Core\DatabaseConnector;
-use Zephyrus\Database\Core\DatabaseSource;
+use Zephyrus\Database\Core\DatabaseConfiguration;
 use Zephyrus\Exceptions\FatalDatabaseException;
 
 abstract class DatabaseAdapter
 {
-    protected DatabaseSource $source;
+    protected DatabaseConfiguration $source;
 
     /**
      * Builds the proper DatabaseAdapter instance based on the given database source. Cannot fail as the source is
      * verified beforehand.
      *
-     * @param DatabaseSource $source
+     * @param DatabaseConfiguration $source
      * @return DatabaseAdapter
      */
-    public static function build(DatabaseSource $source): DatabaseAdapter
+    public static function build(DatabaseConfiguration $source): DatabaseAdapter
     {
         return match ($source->getDatabaseManagementSystem()) {
             'sqlite', 'sqlite2' => new SqliteAdapter($source),
@@ -30,7 +30,7 @@ abstract class DatabaseAdapter
         };
     }
 
-    public function __construct(DatabaseSource $source)
+    public function __construct(DatabaseConfiguration $source)
     {
         $this->source = $source;
     }
@@ -55,9 +55,9 @@ abstract class DatabaseAdapter
     /**
      * Retrieves the configured database source instance for the adapter.
      *
-     * @return DatabaseSource
+     * @return DatabaseConfiguration
      */
-    final public function getSource(): DatabaseSource
+    final public function getSource(): DatabaseConfiguration
     {
         return $this->source;
     }

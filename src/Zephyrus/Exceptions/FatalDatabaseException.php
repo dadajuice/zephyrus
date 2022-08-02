@@ -1,7 +1,7 @@
 <?php namespace Zephyrus\Exceptions;
 
 use Exception;
-use Zephyrus\Database\Core\DatabaseSource;
+use Zephyrus\Database\Core\DatabaseConfiguration;
 
 class FatalDatabaseException extends Exception
 {
@@ -31,13 +31,13 @@ class FatalDatabaseException extends Exception
 
     public static function driverNotAvailable(string $dbms): self
     {
-        $availableDrivers = implode(',', DatabaseSource::getAvailableDrivers());
+        $availableDrivers = implode(',', DatabaseConfiguration::getAvailableDrivers());
         return new self(sprintf(self::codeToMessage(self::DRIVER_NOT_AVAILABLE), $dbms, $availableDrivers), self::DRIVER_NOT_AVAILABLE);
     }
 
     public static function driverNotSupported(string $dbms): self
     {
-        $supportedDrivers = implode(',', DatabaseSource::getSupportedDrivers());
+        $supportedDrivers = implode(',', DatabaseConfiguration::getSupportedDrivers());
         return new self(sprintf(self::codeToMessage(self::DRIVER_NOT_SUPPORTED), $dbms, $supportedDrivers), self::DRIVER_NOT_SUPPORTED);
     }
 

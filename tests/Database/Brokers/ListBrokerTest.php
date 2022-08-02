@@ -3,7 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Database\Brokers\ListBroker;
 use Zephyrus\Database\Core\Database;
-use Zephyrus\Database\Core\DatabaseSource;
+use Zephyrus\Database\Core\DatabaseConfiguration;
 use Zephyrus\Exceptions\FatalDatabaseException;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
@@ -94,7 +94,7 @@ class ListBrokerTest extends TestCase
      */
     private function initializeDatabase(): Database
     {
-        $db = new Database(new DatabaseSource());
+        $db = new Database(new DatabaseConfiguration());
         $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT NULL, brand TEXT NULL, price DECIMAL);');
         $db->query("INSERT INTO heroes(id, name, brand, price) VALUES (1, 'Batman', 'DC', 20.56);");
         $db->query("INSERT INTO heroes(id, name, brand, price) VALUES (2, 'Ironman', 'Marvel', 10.10);");

@@ -4,7 +4,7 @@ use PDO;
 use Zephyrus\Application\Configuration;
 use Zephyrus\Exceptions\FatalDatabaseException;
 
-class DatabaseSource
+class DatabaseConfiguration
 {
     public const DEFAULT_CONFIGURATIONS = [
         'dbms' => 'sqlite', // PDO Driver to use

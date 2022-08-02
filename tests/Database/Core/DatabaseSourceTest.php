@@ -2,14 +2,14 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Configuration;
-use Zephyrus\Database\Core\DatabaseSource;
+use Zephyrus\Database\Core\DatabaseConfiguration;
 use Zephyrus\Exceptions\FatalDatabaseException;
 
 class DatabaseSourceTest extends TestCase
 {
     public function testDefaultConfigurations()
     {
-        $source = new DatabaseSource();
+        $source = new DatabaseConfiguration();
         self::assertEquals("sqlite", $source->getDatabaseManagementSystem());
         self::assertEquals(":memory:", $source->getDatabaseName());
         self::assertEquals("localhost", $source->getHost());
@@ -18,7 +18,7 @@ class DatabaseSourceTest extends TestCase
 
     public function testConfigIniConfigurations()
     {
-        $source = new DatabaseSource(Configuration::getDatabaseConfiguration());
+        $source = new DatabaseConfiguration(Configuration::getDatabaseConfiguration());
         self::assertEquals("sqlite", $source->getDatabaseManagementSystem());
         self::assertEquals("", $source->getDatabaseName());
         self::assertEquals("localhost", $source->getHost());
@@ -27,7 +27,7 @@ class DatabaseSourceTest extends TestCase
 
     public function testManualConfigurations()
     {
-        $source = new DatabaseSource([
+        $source = new DatabaseConfiguration([
             'dbms' => 'pgsql',
             'host' => '10.10.4.36',
             'port' => '888',
@@ -49,7 +49,7 @@ class DatabaseSourceTest extends TestCase
     {
         self::expectException(FatalDatabaseException::class);
         self::expectExceptionCode(FatalDatabaseException::INVALID_PORT_CONFIGURATION);
-        new DatabaseSource([
+        new DatabaseConfiguration([
             'dbms' => 'pgsql',
             'host' => '10.10.4.36',
             'port' => 'dsfsdf',
@@ -64,7 +64,7 @@ class DatabaseSourceTest extends TestCase
     {
         self::expectException(FatalDatabaseException::class);
         self::expectExceptionCode(FatalDatabaseException::MISSING_CONFIGURATION);
-        new DatabaseSource([
+        new DatabaseConfiguration([
             'dbms' => 'pgsql',
             'port' => '888',
             'charset' => 'utf8',
@@ -78,7 +78,7 @@ class DatabaseSourceTest extends TestCase
     {
         self::expectException(FatalDatabaseException::class);
         self::expectExceptionCode(FatalDatabaseException::MISSING_CONFIGURATION);
-        new DatabaseSource([
+        new DatabaseConfiguration([
             'dbms' => 'pgsql',
             'host' => '10.10.4.36',
             'port' => '888',
@@ -92,7 +92,7 @@ class DatabaseSourceTest extends TestCase
     {
         self::expectException(FatalDatabaseException::class);
         self::expectExceptionCode(FatalDatabaseException::MISSING_CONFIGURATION);
-        new DatabaseSource([
+        new DatabaseConfiguration([
             'host' => '10.10.4.36',
             'port' => '888',
             'database' => 'test',
@@ -106,7 +106,7 @@ class DatabaseSourceTest extends TestCase
     {
         self::expectException(FatalDatabaseException::class);
         self::expectExceptionCode(FatalDatabaseException::DRIVER_NOT_AVAILABLE);
-        new DatabaseSource([
+        new DatabaseConfiguration([
             'dbms' => 'ibm-db2',
             'host' => '10.10.4.36',
             'port' => '888',

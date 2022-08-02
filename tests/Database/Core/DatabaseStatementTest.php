@@ -2,13 +2,13 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Database\Core\Database;
-use Zephyrus\Database\Core\DatabaseSource;
+use Zephyrus\Database\Core\DatabaseConfiguration;
 
 class DatabaseStatementTest extends TestCase
 {
     public function testHtmlSanitize()
     {
-        $db = new Database(new DatabaseSource());
+        $db = new Database(new DatabaseConfiguration());
         $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT NULL, enabled INTEGER, power REAL);');
         $db->query("INSERT INTO heroes(id, name, enabled, power) VALUES (1, 'Batman', 1, 5.6);");
 
@@ -23,7 +23,7 @@ class DatabaseStatementTest extends TestCase
 
     public function testEmptyResultSet()
     {
-        $db = new Database(new DatabaseSource());
+        $db = new Database(new DatabaseConfiguration());
         $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT NULL, enabled INTEGER, power REAL);');
         $db->query("INSERT INTO heroes(id, name, enabled, power) VALUES (1, 'Batman', 1, 5.6);");
         $result = $db->query("SELECT power FROM heroes WHERE id = 99");

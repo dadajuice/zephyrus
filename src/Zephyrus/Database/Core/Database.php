@@ -15,10 +15,10 @@ class Database
     /**
      * Instantiates the database facade instance which will permit queries to be sent to the database.
      *
-     * @param DatabaseSource $source
+     * @param DatabaseConfiguration $source
      * @throws FatalDatabaseException
      */
-    public function __construct(DatabaseSource $source)
+    public function __construct(DatabaseConfiguration $source)
     {
         $this->adapter = DatabaseAdapter::build($source);
         $this->connector = $this->adapter->buildConnector();
@@ -65,9 +65,9 @@ class Database
     /**
      * Retrieves the configured database source currently used by the instance.
      *
-     * @return DatabaseSource
+     * @return DatabaseConfiguration
      */
-    public function getSource(): DatabaseSource
+    public function getSource(): DatabaseConfiguration
     {
         return $this->adapter->getSource();
     }
