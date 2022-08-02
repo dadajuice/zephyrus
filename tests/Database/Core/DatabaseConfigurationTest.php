@@ -5,30 +5,27 @@ use Zephyrus\Application\Configuration;
 use Zephyrus\Database\Core\DatabaseConfiguration;
 use Zephyrus\Exceptions\FatalDatabaseException;
 
-class DatabaseSourceTest extends TestCase
+class DatabaseConfigurationTest extends TestCase
 {
     public function testDefaultConfigurations()
     {
         $source = new DatabaseConfiguration();
-        self::assertEquals("sqlite", $source->getDatabaseManagementSystem());
-        self::assertEquals(":memory:", $source->getDatabaseName());
+        self::assertEquals("", $source->getDatabaseName());
         self::assertEquals("localhost", $source->getHost());
-        self::assertEquals("sqlite:dbname=:memory:;host=localhost;", $source->getDatabaseSourceName());
+        self::assertEquals("pgsql:dbname=;host=localhost;", $source->getDatabaseSourceName());
     }
 
     public function testConfigIniConfigurations()
     {
         $source = new DatabaseConfiguration(Configuration::getDatabaseConfiguration());
-        self::assertEquals("sqlite", $source->getDatabaseManagementSystem());
-        self::assertEquals("", $source->getDatabaseName());
-        self::assertEquals("localhost", $source->getHost());
-        self::assertEquals("sqlite:dbname=;host=localhost;", $source->getDatabaseSourceName());
+        self::assertEquals("zephyrus", $source->getDatabaseName());
+        self::assertEquals("zephyrus_database", $source->getHost());
+        self::assertEquals("pgsql:dbname=zephyrus;host=zephyrus_database;", $source->getDatabaseSourceName());
     }
 
     public function testManualConfigurations()
     {
         $source = new DatabaseConfiguration([
-            'dbms' => 'pgsql',
             'host' => '10.10.4.36',
             'port' => '888',
             'charset' => 'utf8',
@@ -36,7 +33,6 @@ class DatabaseSourceTest extends TestCase
             'username' => 'admin',
             'password' => 'Passw0rd123!'
         ]);
-        self::assertEquals("pgsql", $source->getDatabaseManagementSystem());
         self::assertEquals("test", $source->getDatabaseName());
         self::assertEquals("10.10.4.36", $source->getHost());
         self::assertEquals("admin", $source->getUsername());
@@ -50,7 +46,6 @@ class DatabaseSourceTest extends TestCase
         self::expectException(FatalDatabaseException::class);
         self::expectExceptionCode(FatalDatabaseException::INVALID_PORT_CONFIGURATION);
         new DatabaseConfiguration([
-            'dbms' => 'pgsql',
             'host' => '10.10.4.36',
             'port' => 'dsfsdf',
             'charset' => 'utf8',
@@ -65,7 +60,6 @@ class DatabaseSourceTest extends TestCase
         self::expectException(FatalDatabaseException::class);
         self::expectExceptionCode(FatalDatabaseException::MISSING_CONFIGURATION);
         new DatabaseConfiguration([
-            'dbms' => 'pgsql',
             'port' => '888',
             'charset' => 'utf8',
             'database' => 'test',
@@ -79,38 +73,8 @@ class DatabaseSourceTest extends TestCase
         self::expectException(FatalDatabaseException::class);
         self::expectExceptionCode(FatalDatabaseException::MISSING_CONFIGURATION);
         new DatabaseConfiguration([
-            'dbms' => 'pgsql',
             'host' => '10.10.4.36',
             'port' => '888',
-            'charset' => 'utf8',
-            'username' => 'admin',
-            'password' => 'Passw0rd123!'
-        ]);
-    }
-
-    public function testMissingDbms()
-    {
-        self::expectException(FatalDatabaseException::class);
-        self::expectExceptionCode(FatalDatabaseException::MISSING_CONFIGURATION);
-        new DatabaseConfiguration([
-            'host' => '10.10.4.36',
-            'port' => '888',
-            'database' => 'test',
-            'charset' => 'utf8',
-            'username' => 'admin',
-            'password' => 'Passw0rd123!'
-        ]);
-    }
-
-    public function testUnavailableDbms()
-    {
-        self::expectException(FatalDatabaseException::class);
-        self::expectExceptionCode(FatalDatabaseException::DRIVER_NOT_AVAILABLE);
-        new DatabaseConfiguration([
-            'dbms' => 'ibm-db2',
-            'host' => '10.10.4.36',
-            'port' => '888',
-            'database' => 'test',
             'charset' => 'utf8',
             'username' => 'admin',
             'password' => 'Passw0rd123!'
