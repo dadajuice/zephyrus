@@ -2,26 +2,25 @@
 
 use PDO;
 use PDOException;
-use Zephyrus\Database\Core\Adapters\DatabaseAdapter;
 use Zephyrus\Exceptions\DatabaseException;
 use Zephyrus\Exceptions\FatalDatabaseException;
 
 class Database
 {
+    private DatabaseConfiguration $configuration;
     private DatabaseHandle $handle;
-    private DatabaseAdapter $adapter;
     private SchemaInterrogator $schemaInterrogator;
 
     /**
      * Instantiates the database facade instance which will permit queries to be sent to the database.
      *
-     * @param DatabaseConfiguration $source
+     * @param DatabaseConfiguration $configuration
      * @throws FatalDatabaseException
      */
-    public function __construct(DatabaseConfiguration $source)
+    public function __construct(DatabaseConfiguration $configuration)
     {
-        $this->adapter = DatabaseAdapter::build($source);
-        $this->handle = $this->adapter->connect();
+        $this->configuration = $configuration;
+        $this->handle = $this->connect();
         $this->schemaInterrogator = new SchemaInterrogator($this);
     }
 
@@ -54,19 +53,25 @@ class Database
     }
 
     /**
+     * Retrieves the configured database source currently used by the instance.
+     *
+     * @return DatabaseConfiguration
+     */
+    final public function getConfiguration(): DatabaseConfiguration
+    {
+        return $this->configuration;
+    }
+
+    /**
      * Adds a variable to the database session that shall become available for following queries / triggers / store
-     * procedures and functions.
+     * procedures and functions. For PostgreSQL the name must follow a prefix convention such as "myapp.var".
      *
      * @param string $name
      * @param string $value
      */
     public function addSessionVariable(string $name, string $value)
     {
-        $sql = $this->adapter->getSqlAddVariable($name, $value);
-        if (empty($sql)) {
-            return; // Guard for non existent session environnement feature (e.g. sqlite).
-        }
-        $this->query($sql);
+        $this->query("set session \"$name\" = '$value';");
     }
 
     /**
@@ -80,16 +85,6 @@ class Database
     }
 
     /**
-     * Retrieves the configured database source currently used by the instance.
-     *
-     * @return DatabaseConfiguration
-     */
-    public function getSource(): DatabaseConfiguration
-    {
-        return $this->adapter->getSource();
-    }
-
-    /**
      * Retrieves the wrapped native PDO instance used for database interaction.
      *
      * @return DatabaseHandle
@@ -97,16 +92,6 @@ class Database
     public function getHandle(): DatabaseHandle
     {
         return $this->handle;
-    }
-
-    /**
-     * Retrieves the configured database adapter based on the DBMS.
-     *
-     * @return DatabaseAdapter
-     */
-    public function getAdapter(): DatabaseAdapter
-    {
-        return $this->adapter;
     }
 
     /**
@@ -162,6 +147,23 @@ class Database
     }
 
     /**
+     * Creates the PDO handle to allow for query to be executed to the configured database source. Will throw
+     * a FatalDatabaseException when connection fails.
+     *
+     * @return DatabaseHandle
+     * @throws FatalDatabaseException
+     */
+    private function connect(): DatabaseHandle
+    {
+        try {
+            return new DatabaseHandle($this->configuration->getDatabaseSourceName(),
+                $this->configuration->getUsername(), $this->configuration->getPassword());
+        } catch (PDOException $e) {
+            throw FatalDatabaseException::connectionFailed($e->getMessage());
+        }
+    }
+
+    /**
      * Guesses the best PDO::PARAM_x type constant for a given variable. Ignored from coverage because test Database
      * sqlite doesn't have proper BOOL or NULL.
      *
@@ -182,5 +184,17 @@ class Database
             return PDO::PARAM_NULL;
         }
         return PDO::PARAM_STR;
+    }
+
+    /**
+     * Basic filtering to eliminate any tags and empty leading / trailing
+     * characters.
+     *
+     * @param string $data
+     * @return string
+     */
+    public function purify(string $data): string
+    {
+        return htmlspecialchars(trim($data), ENT_QUOTES | ENT_HTML401);
     }
 }
