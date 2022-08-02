@@ -9,7 +9,7 @@ use Zephyrus\Exceptions\FatalDatabaseException;
 
 class Database
 {
-    private DatabaseConnector $connector;
+    private DatabaseHandle $connector;
     private DatabaseAdapter $adapter;
 
     /**
@@ -75,9 +75,9 @@ class Database
     /**
      * Retrieves the wrapped native PDO instance used for database interaction.
      *
-     * @return DatabaseConnector
+     * @return DatabaseHandle
      */
-    public function getConnector(): DatabaseConnector
+    public function getConnector(): DatabaseHandle
     {
         return $this->connector;
     }

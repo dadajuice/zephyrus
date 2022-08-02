@@ -5,7 +5,7 @@ use PDO;
 /**
  * Wrapper class for the PDO instance including nested transaction functionality.
  */
-class DatabaseConnector extends PDO
+class DatabaseHandle extends PDO
 {
     private static array $savepointEnabled = ["pgsql", "mysql", "mariadb", "sqlite", "sqlite2"];
 

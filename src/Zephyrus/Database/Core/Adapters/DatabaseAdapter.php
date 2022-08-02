@@ -6,7 +6,7 @@ use Zephyrus\Database\Core\Adapters\Mysql\MysqlAdapter;
 use Zephyrus\Database\Core\Adapters\Postgresql\PostgresAdapter;
 use Zephyrus\Database\Core\Adapters\Sqlite\SqliteAdapter;
 use Zephyrus\Database\Core\Database;
-use Zephyrus\Database\Core\DatabaseConnector;
+use Zephyrus\Database\Core\DatabaseHandle;
 use Zephyrus\Database\Core\DatabaseConfiguration;
 use Zephyrus\Exceptions\FatalDatabaseException;
 
@@ -40,13 +40,13 @@ abstract class DatabaseAdapter
      * overridden if a specific driver requires additional verifications (e.g. sqlite) or more attributes. Will throw
      * a FatalDatabaseException when connection fails.
      *
-     * @return DatabaseConnector
+     * @return DatabaseHandle
      * @throws FatalDatabaseException
      */
-    public function buildConnector(): DatabaseConnector
+    public function buildConnector(): DatabaseHandle
     {
         try {
-            return new DatabaseConnector($this->getDsn(), $this->source->getUsername(), $this->source->getPassword());
+            return new DatabaseHandle($this->getDsn(), $this->source->getUsername(), $this->source->getPassword());
         } catch (PDOException $e) {
             throw FatalDatabaseException::connectionFailed($e->getMessage());
         }

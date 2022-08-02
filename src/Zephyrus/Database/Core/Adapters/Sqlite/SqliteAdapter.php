@@ -2,7 +2,7 @@
 
 use Zephyrus\Database\Core\Adapters\DatabaseAdapter;
 use Zephyrus\Database\Core\Database;
-use Zephyrus\Database\Core\DatabaseConnector;
+use Zephyrus\Database\Core\DatabaseHandle;
 use Zephyrus\Exceptions\FatalDatabaseException;
 
 class SqliteAdapter extends DatabaseAdapter
@@ -11,10 +11,10 @@ class SqliteAdapter extends DatabaseAdapter
      * Overrides the default buildHandle method to verify the existence of the database file if it was specified in the
      * configurations.
      *
-     * @return DatabaseConnector
+     * @return DatabaseHandle
      * @throws FatalDatabaseException
      */
-    public function buildConnector(): DatabaseConnector
+    public function buildConnector(): DatabaseHandle
     {
         if ($this->source->getDatabaseName() != ":memory:") {
             $path = ROOT_DIR . DIRECTORY_SEPARATOR . $this->source->getDatabaseName();
