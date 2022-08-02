@@ -22,11 +22,8 @@ RUN docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg
 RUN docker-php-ext-install gd
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql && \
-    docker-php-ext-install pdo_sqlite && \
-    docker-php-ext-install pdo_pgsql && \
+RUN docker-php-ext-install pdo_pgsql && \
     docker-php-ext-install pgsql && \
-    docker-php-ext-install mysqli && \
     docker-php-ext-install curl && \
     docker-php-ext-install tokenizer && \
     docker-php-ext-install zip && \
