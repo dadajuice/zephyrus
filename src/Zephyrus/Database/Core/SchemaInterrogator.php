@@ -4,7 +4,7 @@ use stdClass;
 
 final class SchemaInterrogator
 {
-    protected Database $database;
+    private Database $database;
 
     public function __construct(Database $database)
     {
