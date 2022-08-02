@@ -6,12 +6,6 @@ use Zephyrus\Database\Core\Database;
 
 class PostgresAdapter extends DatabaseAdapter
 {
-    // TODO: DIE ?
-    public function getLimitClause(int $offset, int $maxEntities): string
-    {
-        return " LIMIT $maxEntities OFFSET $offset";
-    }
-
     /**
      * For postgresql the name must follow a prefix convention such as "myapp.var".
      *

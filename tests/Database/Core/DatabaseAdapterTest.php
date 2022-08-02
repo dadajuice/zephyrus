@@ -62,6 +62,7 @@ class DatabaseAdapterTest extends TestCase
         $clause = $adapter->getSqlAddVariable('bob', 'lewis');
         self::assertEquals("SET @bob = 'lewis'", $clause);
         self::assertEquals("LIMIT 50, 4", $adapter->getSqlLimit(4, 50));
+        self::assertEquals("LIMIT 4", $adapter->getSqlLimit(4));
         self::assertEquals("mysql:dbname=test;host=localhost;charset=utf8;", $adapter->getDsn());
         self::assertInstanceOf(MysqlSchemaInterrogator::class, $adapter->buildSchemaInterrogator(new Database(new DatabaseConfiguration())));
     }
@@ -75,7 +76,8 @@ class DatabaseAdapterTest extends TestCase
             'charset' => 'utf8'
         ]));
         self::assertEquals("set session \"bob\" = 'lewis';", $adapter->getSqlAddVariable('bob', 'lewis'));
-        self::assertEquals(" LIMIT 50 OFFSET 4", $adapter->getLimitClause(4, 50));
+        self::assertEquals("LIMIT 50 OFFSET 4", $adapter->getSqlLimit(50, 4));
+        self::assertEquals("LIMIT 50", $adapter->getSqlLimit(50));
         self::assertEquals("pgsql:dbname=test;host=localhost;", $adapter->getDsn());
         self::assertInstanceOf(PostgresSchemaInterrogator::class, $adapter->buildSchemaInterrogator(new Database(new DatabaseConfiguration())));
     }
