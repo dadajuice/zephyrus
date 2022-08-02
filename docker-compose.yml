@@ -10,6 +10,20 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    links:
+      - database
     volumes:
       - ./:/var/www/html:cached
       - ./docker/vhosts:/etc/apache2/sites-enabled
+
+  database:
+    build:
+      context: "./docker/services/postgres"
+    container_name: 'zephyrus_database'
+    restart: 'always'
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: 'zephyrus'
+      POSTGRES_USER: 'demo'
+      POSTGRES_PASSWORD: 'demo123!'
