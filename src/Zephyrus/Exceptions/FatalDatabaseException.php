@@ -7,12 +7,11 @@ class FatalDatabaseException extends Exception
 {
     public const CONNECTION_FAILED = 901;
     public const DRIVER_NOT_AVAILABLE = 902;
-    public const DRIVER_NOT_SUPPORTED = 903;
-    public const MISSING_CONFIGURATION = 904;
-    public const INVALID_PORT_CONFIGURATION = 905;
-    public const SQLITE_INVALID_DATABASE = 906;
-    public const TRANSACTION_COMMIT_FAILED = 907;
-    public const TRANSACTION_ROLLBACK_FAILED = 908;
+    public const MISSING_CONFIGURATION = 903;
+    public const INVALID_PORT_CONFIGURATION = 904;
+    public const SQLITE_INVALID_DATABASE = 905;
+    public const TRANSACTION_COMMIT_FAILED = 906;
+    public const TRANSACTION_ROLLBACK_FAILED = 907;
 
     public static function connectionFailed(string $errorMessage): self
     {
@@ -35,12 +34,6 @@ class FatalDatabaseException extends Exception
         return new self(sprintf(self::codeToMessage(self::DRIVER_NOT_AVAILABLE), $dbms, $availableDrivers), self::DRIVER_NOT_AVAILABLE);
     }
 
-    public static function driverNotSupported(string $dbms): self
-    {
-        $supportedDrivers = implode(',', DatabaseConfiguration::getSupportedDrivers());
-        return new self(sprintf(self::codeToMessage(self::DRIVER_NOT_SUPPORTED), $dbms, $supportedDrivers), self::DRIVER_NOT_SUPPORTED);
-    }
-
     public static function sqliteInvalidDatabase(string $path): self
     {
         return new self(sprintf(self::codeToMessage(self::SQLITE_INVALID_DATABASE), $path), self::SQLITE_INVALID_DATABASE);
@@ -61,7 +54,6 @@ class FatalDatabaseException extends Exception
         return match ($code) {
             self::CONNECTION_FAILED => "Connection to database failed with message [%s].",
             self::DRIVER_NOT_AVAILABLE => "The configured database management system [%s] doesn't correspond to one of the available drivers [%s].",
-            self::DRIVER_NOT_SUPPORTED => "The configured database management system [%s] is currently unsupported by Zephyrus. Use one of the supported drivers [%s].",
             self::MISSING_CONFIGURATION => "The configuration key [%s] is needed for database initialisation.",
             self::INVALID_PORT_CONFIGURATION => "The database port configuration property must be int when specified.",
             self::SQLITE_INVALID_DATABASE => "The specified SQLite database file [%s] doesn't exists or is not readable (use database name [:memory:] to use in memory database).",
