@@ -9,7 +9,7 @@ use Zephyrus\Exceptions\FatalDatabaseException;
 
 class Database
 {
-    private DatabaseHandle $connector;
+    private DatabaseHandle $handle;
     private DatabaseAdapter $adapter;
 
     /**
@@ -21,7 +21,7 @@ class Database
     public function __construct(DatabaseConfiguration $source)
     {
         $this->adapter = DatabaseAdapter::build($source);
-        $this->connector = $this->adapter->connect();
+        $this->handle = $this->adapter->connect();
     }
 
     /**
@@ -36,7 +36,7 @@ class Database
     public function query(string $query, array $parameters = []): DatabaseStatement
     {
         try {
-            $statement = $this->connector->prepare($query, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
+            $statement = $this->handle->prepare($query, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
             foreach ($parameters as $name => &$variable) {
                 $statement->bindParam(
                     (is_string($name) ? ":$name" : intval($name) + 1),
@@ -77,9 +77,9 @@ class Database
      *
      * @return DatabaseHandle
      */
-    public function getConnector(): DatabaseHandle
+    public function getHandle(): DatabaseHandle
     {
-        return $this->connector;
+        return $this->handle;
     }
 
     /**
@@ -102,7 +102,7 @@ class Database
      */
     public function beginTransaction()
     {
-        $this->connector->beginTransaction();
+        $this->handle->beginTransaction();
     }
 
     /**
@@ -114,7 +114,7 @@ class Database
     public function commit()
     {
         try {
-            $this->connector->commit();
+            $this->handle->commit();
         } catch (PDOException $e) {
             throw FatalDatabaseException::transactionCommitFailed($e->getMessage());
         }
@@ -129,7 +129,7 @@ class Database
     public function rollback()
     {
         try {
-            $this->connector->rollBack();
+            $this->handle->rollBack();
         } catch (PDOException $e) {
             throw FatalDatabaseException::transactionRollbackFailed($e->getMessage());
         }
@@ -141,7 +141,7 @@ class Database
      */
     public function getLastInsertedId(string $name = null): string
     {
-        return $this->connector->lastInsertId($name);
+        return $this->handle->lastInsertId($name);
     }
 
     /**

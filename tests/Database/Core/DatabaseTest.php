@@ -54,7 +54,7 @@ class DatabaseTest extends TestCase
     public function testGetConnector()
     {
         $db = $this->initializeDatabase();
-        $connector = $db->getConnector();
+        $connector = $db->getHandle();
         self::assertInstanceOf(\PDO::class, $connector);
     }
 
