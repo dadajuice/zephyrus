@@ -68,6 +68,9 @@ class FilterParser
                 'contains' => $this->parseContains($column, $content),
                 'begins' => $this->parseBegins($column, $content),
                 'ends' => $this->parseEnds($column, $content),
+                'sensible-contains' => $this->parseContains($column, $content, false),
+                'sensible-begins' => $this->parseBegins($column, $content, false),
+                'sensible-ends' => $this->parseEnds($column, $content, false),
                 'equals' => $this->parseEquals($column, $content),
                 default => null
             };
@@ -75,19 +78,19 @@ class FilterParser
         return $this->whereClause;
     }
 
-    private function parseContains(string $column, mixed $content)
+    private function parseContains(string $column, mixed $content, bool $caseInsensitive = true)
     {
-        $this->whereClause->add(WhereCondition::like($this->aliasColumns[$column] ?? $column, "%$content%"), $this->aggregateOperator);
+        $this->whereClause->add(WhereCondition::like($this->aliasColumns[$column] ?? $column, "%$content%", $caseInsensitive), $this->aggregateOperator);
     }
 
-    private function parseBegins(string $column, mixed $content)
+    private function parseBegins(string $column, mixed $content, bool $caseInsensitive = true)
     {
-        $this->whereClause->add(WhereCondition::like($this->aliasColumns[$column] ?? $column, "$content%"), $this->aggregateOperator);
+        $this->whereClause->add(WhereCondition::like($this->aliasColumns[$column] ?? $column, "$content%", $caseInsensitive), $this->aggregateOperator);
     }
 
-    private function parseEnds(string $column, mixed $content)
+    private function parseEnds(string $column, mixed $content, bool $caseInsensitive = true)
     {
-        $this->whereClause->add(WhereCondition::like($this->aliasColumns[$column] ?? $column, "%$content"), $this->aggregateOperator);
+        $this->whereClause->add(WhereCondition::like($this->aliasColumns[$column] ?? $column, "%$content", $caseInsensitive), $this->aggregateOperator);
     }
 
     private function parseEquals(string $column, mixed $content)
