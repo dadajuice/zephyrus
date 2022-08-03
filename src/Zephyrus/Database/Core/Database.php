@@ -63,8 +63,9 @@ class Database
     }
 
     /**
-     * Adds a variable to the database session that shall become available for following queries / triggers / store
-     * procedures and functions. For PostgreSQL the name must follow a prefix convention such as "myapp.var".
+     * Proceeds to include the given variable into the database environnement so that the executed queries, triggers or
+     * stored procedures could have access to the variable. Useful for example to pass a user id to register for
+     * automated log triggers.
      *
      * @param string $name
      * @param string $value
