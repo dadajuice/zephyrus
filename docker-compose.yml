@@ -15,6 +15,7 @@ services:
     volumes:
       - ./:/var/www/html:cached
       - ./docker/vhosts:/etc/apache2/sites-enabled
+      - ./docker/services/php80/custom.ini:/usr/local/etc/php/conf.d/custom.ini
 
   database:
     build:
