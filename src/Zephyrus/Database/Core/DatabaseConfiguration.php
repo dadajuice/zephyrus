@@ -111,6 +111,7 @@ class DatabaseConfiguration
     }
 
     /**
+     * @codeCoverageIgnore
      * @throws FatalDatabaseException
      */
     private function initializeDbms()
