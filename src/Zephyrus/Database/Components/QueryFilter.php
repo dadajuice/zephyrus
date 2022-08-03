@@ -108,7 +108,7 @@ class QueryFilter
             return $rawQuery;
         }
         $limitClause = $this->pagerParser->parse()->buildLimitClause();
-        return rtrim($rawQuery) . ' ' . $limitClause->getSql($this->database->getAdapter());
+        return rtrim($rawQuery) . ' ' . $limitClause->getSql();
     }
 
     private function injectOrderByClause(string $query): string
