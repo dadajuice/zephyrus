@@ -1,19 +1,16 @@
 <?php namespace Zephyrus\Database\Components;
 
-use Zephyrus\Database\Core\Database;
 use Zephyrus\Utilities\Components\PagerParser;
 
 class QueryFilter
 {
-    private Database $database;
     private FilterParser $filterParser;
     private SortParser $sortParser;
     private PagerParser $pagerParser;
     private array $queryParameters = [];
 
-    public function __construct(Database $database)
+    public function __construct()
     {
-        $this->database = $database;
         $this->filterParser = new FilterParser();
         $this->pagerParser = new PagerParser();
         $this->sortParser = new SortParser();
