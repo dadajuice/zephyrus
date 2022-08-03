@@ -1,5 +1,14 @@
 <?xml version="1.0"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="tests/lib/init.php" colors="true" backupGlobals="false" backupStaticAttributes="false" processIsolation="false" stopOnFailure="false" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
+         bootstrap="tests/lib/init.php"
+         colors="true"
+         backupGlobals="false"
+         backupStaticAttributes="false"
+         processIsolation="false"
+         stopOnFailure="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true">
   <coverage processUncoveredFiles="true">
     <include>
       <directory suffix=".php">src</directory>
@@ -13,10 +22,10 @@
   <testsuites>
     <testsuite name="application">
       <directory>tests/Application</directory>
-      <directory>tests/Utilities</directory>
+      <directory>tests/Database</directory>
       <directory>tests/Network</directory>
       <directory>tests/Security</directory>
-      <directory>tests/database</directory>
+      <directory>tests/Utilities</directory>
     </testsuite>
   </testsuites>
   <logging/>
