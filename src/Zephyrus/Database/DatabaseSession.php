@@ -32,6 +32,11 @@ class DatabaseSession
         return $this->database;
     }
 
+    public function getSearchPaths(): array
+    {
+        return $this->searchPaths;
+    }
+
     private function __construct(Database $database, array $searchPaths)
     {
         $this->database = $database;
