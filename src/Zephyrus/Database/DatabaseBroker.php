@@ -92,6 +92,18 @@ abstract class DatabaseBroker
         $this->database->addSessionVariable($name, $value);
     }
 
+    /**
+     * Fetches the value associated with the given session variable's name. Returns NULL if not found (instead of an
+     * exception).
+     *
+     * @param string $name
+     * @return mixed
+     */
+    public function findSessionVariable(string $name): mixed
+    {
+        return $this->selectSingle("SELECT current_setting(?, true) as var", [$name])->var;
+    }
+
     private function prepareStatement(string $query, array $parameters = []): DatabaseStatement
     {
         // TODO: Sanitize input
