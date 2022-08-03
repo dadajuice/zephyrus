@@ -21,6 +21,28 @@ abstract class DatabaseBroker
     }
 
     /**
+     * Fetches the value associated with the given session variable's name. Returns NULL if not found (instead of an
+     * exception).
+     *
+     * @param string $name
+     * @return mixed
+     */
+    public function findSessionVariable(string $name): mixed
+    {
+        return $this->selectSingle("SELECT current_setting(?, true) as var", [$name])->var;
+    }
+
+    /**
+     * Retrieves the current database instance used for this broker.
+     *
+     * @return Database
+     */
+    public function getDatabase(): Database
+    {
+        return $this->database;
+    }
+
+    /**
      * Executes any type of query and simply returns the DatabaseStatement object ready to be fetched. Will throw a
      * DatabaseException (silent as a RuntimeException) is the query fails to execute.
      *
@@ -90,18 +112,6 @@ abstract class DatabaseBroker
     protected function addSessionVariable(string $name, string $value)
     {
         $this->database->addSessionVariable($name, $value);
-    }
-
-    /**
-     * Fetches the value associated with the given session variable's name. Returns NULL if not found (instead of an
-     * exception).
-     *
-     * @param string $name
-     * @return mixed
-     */
-    public function findSessionVariable(string $name): mixed
-    {
-        return $this->selectSingle("SELECT current_setting(?, true) as var", [$name])->var;
     }
 
     private function prepareStatement(string $query, array $parameters = []): DatabaseStatement
