@@ -139,12 +139,14 @@ class Database
     }
 
     /**
-     * @param string|null $name
+     * Finds the last inserted id for the specified sequence name.
+     *
+     * @param string $sequenceName
      * @return string
      */
-    public function getLastInsertedId(string $name = null): string
+    public function getLastInsertedId(string $sequenceName): string
     {
-        return $this->handle->lastInsertId($name);
+        return $this->handle->lastInsertId($sequenceName);
     }
 
     /**
