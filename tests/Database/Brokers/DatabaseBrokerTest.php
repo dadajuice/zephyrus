@@ -43,6 +43,7 @@ class DatabaseBrokerTest extends DatabaseTestCase
             'power' => 40
         ]);
         self::assertEquals(7, $result);
+        self::assertEquals(7, $instance->getDatabase()->getLastInsertedId('heroes_id_seq'));
         $result = $instance->findById(7);
         self::assertNotNull($result);
         self::assertEquals("Bob Lewis", $result->alter);
