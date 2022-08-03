@@ -11,12 +11,12 @@ abstract class DatabaseTestCase extends TestCase
         $db = new Database(Configuration::getDatabaseConfiguration());
         $db->query("DROP TABLE IF EXISTS heroes");
         $db->query('CREATE TABLE heroes(id SERIAL PRIMARY KEY, name TEXT NULL, alter TEXT NULL, power FLOAT)');
-        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (1, 'Batman', 'Bruce Wayne', 20.56);");
-        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (2, 'Superman', 'Clark Kent', 50.30);");
-        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (3, 'Aquaman', 'Arthur Curry', 23.50);");
-        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (4, 'Wonder Woman', 'Diana Prince', 12.67);");
-        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (5, 'Flash', 'Barry Allan', 5.89);");
-        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (6, 'Green Lantern', 'Hal Jordan', 12.12);");
+        $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Batman', 'Bruce Wayne', 20.56);");
+        $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Superman', 'Clark Kent', 50.30);");
+        $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Aquaman', 'Arthur Curry', 23.50);");
+        $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Wonder Woman', 'Diana Prince', 12.67);");
+        $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Flash', 'Barry Allan', 5.89);");
+        $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Green Lantern', 'Hal Jordan', 12.12);");
     }
 
     public static function tearDownAfterClass(): void
@@ -29,12 +29,12 @@ abstract class DatabaseTestCase extends TestCase
     {
         $db->query("DROP TABLE IF EXISTS heroes");
         $db->query('CREATE TABLE heroes(id SERIAL PRIMARY KEY, name TEXT NULL, alter TEXT NULL, power FLOAT)');
-        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (1, 'Batman', 'Bruce Wayne', 20.56);");
-        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (2, 'Superman', 'Clark Kent', 50.30);");
-        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (3, 'Aquaman', 'Arthur Curry', 23.50);");
-        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (4, 'Wonder Woman', 'Diana Prince', 12.67);");
-        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (5, 'Flash', 'Barry Allan', 5.89);");
-        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (6, 'Green Lantern', 'Hal Jordan', 12.12);");
+        $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Batman', 'Bruce Wayne', 20.56);");
+        $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Superman', 'Clark Kent', 50.30);");
+        $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Aquaman', 'Arthur Curry', 23.50);");
+        $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Wonder Woman', 'Diana Prince', 12.67);");
+        $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Flash', 'Barry Allan', 5.89);");
+        $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Green Lantern', 'Hal Jordan', 12.12);");
     }
 
     public function buildDatabase(): Database
