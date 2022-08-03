@@ -1,26 +1,23 @@
 <?php namespace Zephyrus\Tests\Database\Brokers;
 
-use PHPUnit\Framework\TestCase;
 use Zephyrus\Database\Brokers\SqlResult;
-use Zephyrus\Database\Core\Database;
-use Zephyrus\Database\Core\DatabaseConfiguration;
-use Zephyrus\Exceptions\FatalDatabaseException;
+use Zephyrus\Tests\Database\DatabaseTestCase;
 
-class SqlResultTest extends TestCase
+class SqlResultTest extends DatabaseTestCase
 {
     public function testToArray()
     {
-        $db = $this->initializeDatabase();
+        $db = $this->buildDatabase();
         $statement = $db->query("SELECT * FROM heroes");
         $result = new SqlResult($statement);
         $rows = $result->toArray();
         self::assertEquals("Wonder Woman", $rows[3]->name);
-        self::assertEquals("Green Lantern", $rows[4]->name);
+        self::assertEquals("Flash", $rows[4]->name);
     }
 
     public function testStream()
     {
-        $db = $this->initializeDatabase();
+        $db = $this->buildDatabase();
         $statement = $db->query("SELECT * FROM heroes");
         $result = new SqlResult($statement);
         $result->stream(function ($row) {
@@ -32,7 +29,7 @@ class SqlResultTest extends TestCase
 
     public function testChunks()
     {
-        $db = $this->initializeDatabase();
+        $db = $this->buildDatabase();
         $statement = $db->query("SELECT * FROM heroes");
         $result = new SqlResult($statement);
         $result->chunks(function ($rows) {
@@ -42,24 +39,5 @@ class SqlResultTest extends TestCase
             return false;
         }, 2);
         self::assertTrue(true);
-    }
-
-    /**
-     * Since the database is in memory, it will be destroyed if the instance changes.
-     *
-     * @return Database
-     * @throws FatalDatabaseException
-     */
-    private function initializeDatabase(): Database
-    {
-        $db = new Database(new DatabaseConfiguration());
-        $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT NULL);');
-        $db->query("INSERT INTO heroes(id, name) VALUES (1, 'Batman');");
-        $db->query("INSERT INTO heroes(id, name) VALUES (2, 'Superman');");
-        $db->query("INSERT INTO heroes(id, name) VALUES (3, 'Aquaman');");
-        $db->query("INSERT INTO heroes(id, name) VALUES (4, 'Wonder Woman');");
-        $db->query("INSERT INTO heroes(id, name) VALUES (5, 'Green Lantern');");
-        $db->query("INSERT INTO heroes(id, name) VALUES (6, 'Green Arrow');");
-        return $db;
     }
 }

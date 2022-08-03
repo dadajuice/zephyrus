@@ -1,19 +1,17 @@
 <?php namespace Zephyrus\Tests\Database\Brokers;
 
-use PHPUnit\Framework\TestCase;
+use Zephyrus\Application\Configuration;
 use Zephyrus\Database\Brokers\ListBroker;
 use Zephyrus\Database\Core\Database;
-use Zephyrus\Database\Core\DatabaseConfiguration;
-use Zephyrus\Exceptions\FatalDatabaseException;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
+use Zephyrus\Tests\Database\DatabaseTestCase;
 
-class ListBrokerTest extends TestCase
+class ListBrokerTest extends DatabaseTestCase
 {
     public function testWithoutFilters()
     {
-        $db = $this->initializeDatabase();
-
+        $db = new Database(Configuration::getDatabaseConfiguration());
         $request = new Request("http://example.com", "get", ['parameters' => []]);
         RequestFactory::set($request);
 
@@ -21,8 +19,8 @@ class ListBrokerTest extends TestCase
         {
             public function configure()
             {
-                $this->setAliasColumns(['amount' => 'price']);
-                $this->setSortAllowedColumns(['name', 'brand', 'price']);
+                $this->setAliasColumns(['force' => 'power']);
+                $this->setSortAllowedColumns(['name', 'alter', 'force']);
                 $this->setFilterAllowedColumns(['name']);
                 $this->setSortDefaults(['name' => 'asc']);
                 $this->setPagerDefaultLimit(50); // Default
@@ -49,8 +47,7 @@ class ListBrokerTest extends TestCase
 
     public function testWithEqualsFilters()
     {
-        $db = $this->initializeDatabase();
-
+        $db = new Database(Configuration::getDatabaseConfiguration());
         $request = new Request("http://example.com?filters[name:equals]=Aquaman", "get", ['parameters' => [
             'filters' => ['name:equals' => 'Aquaman']
         ]]);
@@ -60,8 +57,8 @@ class ListBrokerTest extends TestCase
         {
             public function configure()
             {
-                $this->setAliasColumns(['amount' => 'price']);
-                $this->setSortAllowedColumns(['name', 'brand', 'price']);
+                $this->setAliasColumns(['force' => 'power']);
+                $this->setSortAllowedColumns(['name', 'alter', 'force']);
                 $this->setFilterAllowedColumns(['name']);
                 $this->setSortDefaults(['name' => 'asc']);
                 $this->setPagerDefaultLimit(50); // Default
@@ -88,10 +85,9 @@ class ListBrokerTest extends TestCase
 
     public function testWithContainsFilters()
     {
-        $db = $this->initializeDatabase();
-
-        $request = new Request("http://example.com?filters[name:sensible-contains]=man", "get", ['parameters' => [
-            'filters' => ['name:sensible-contains' => 'man']
+        $db = new Database(Configuration::getDatabaseConfiguration());
+        $request = new Request("http://example.com?filters[name:contains]=man", "get", ['parameters' => [
+            'filters' => ['name:contains' => 'man']
         ]]);
         RequestFactory::set($request);
 
@@ -99,8 +95,8 @@ class ListBrokerTest extends TestCase
         {
             public function configure()
             {
-                $this->setAliasColumns(['amount' => 'price']);
-                $this->setSortAllowedColumns(['name', 'brand', 'price']);
+                $this->setAliasColumns(['force' => 'power']);
+                $this->setSortAllowedColumns(['name', 'alter', 'force']);
                 $this->setFilterAllowedColumns(['name']);
                 $this->setSortDefaults(['name' => 'asc']);
                 $this->setPagerDefaultLimit(50); // Default
@@ -124,24 +120,5 @@ class ListBrokerTest extends TestCase
         self::assertCount(4, $rows);
         self::assertEquals("Aquaman", $rows[0]->name);
         self::assertEquals("Batman", $rows[1]->name);
-    }
-
-    /**
-     * Since the database is in memory, it will be destroyed if the instance changes.
-     *
-     * @return Database
-     * @throws FatalDatabaseException
-     */
-    private function initializeDatabase(): Database
-    {
-        $db = new Database(new DatabaseConfiguration());
-        $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT NULL, brand TEXT NULL, price DECIMAL);');
-        $db->query("INSERT INTO heroes(id, name, brand, price) VALUES (1, 'Batman', 'DC', 20.56);");
-        $db->query("INSERT INTO heroes(id, name, brand, price) VALUES (2, 'Ironman', 'Marvel', 10.10);");
-        $db->query("INSERT INTO heroes(id, name, brand, price) VALUES (3, 'Aquaman', 'DC', 23.50);");
-        $db->query("INSERT INTO heroes(id, name, brand, price) VALUES (4, 'Wonder Woman', 'DC', 12.67);");
-        $db->query("INSERT INTO heroes(id, name, brand, price) VALUES (5, 'Captain America', 'Marvel', 5.89);");
-        $db->query("INSERT INTO heroes(id, name, brand, price) VALUES (6, 'Green Arrow', 'DC', 12.12);");
-        return $db;
     }
 }
