@@ -14,7 +14,7 @@ class DatabaseStatement
 {
     public const TYPE_INTEGER = ['LONGLONG', 'LONG', 'INTEGER', 'INT4'];
     public const TYPE_BOOLEAN = ['TINY', 'BOOL'];
-    public const TYPE_FLOAT = ['NEWDECIMAL', 'FLOAT', 'DOUBLE', 'DECIMAL', 'NUMERIC'];
+    public const TYPE_FLOAT = ['NEWDECIMAL', 'FLOAT', 'DOUBLE', 'DECIMAL', 'NUMERIC', 'FLOAT8'];
 
     private PDOStatement $statement;
     private array $fetchColumnTypes = [];
@@ -27,7 +27,6 @@ class DatabaseStatement
     public function __construct(PDOStatement $statement)
     {
         $this->statement = $statement;
-        // Incompatible with SQLite ...
         //$this->statement->setAttribute(PDO::ATTR_CURSOR, PDO::CURSOR_SCROLL);
         $this->initializeTypeConversion();
     }
@@ -139,7 +138,8 @@ class DatabaseStatement
     }
 
     /**
-     * Gets the native PHP function name to convert a string to a native type (either int, float or boolean).
+     * Gets the native PHP function name to convert a string to a native type (either int, float or boolean). Returns
+     * NULL for string evaluated types (VARCHAR, TEXT, etc.).
      *
      * @param string $pdoType
      * @return string|null
