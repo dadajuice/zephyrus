@@ -1,11 +1,12 @@
-<?php namespace Zephyrus\Tests\Application;
+<?php namespace Zephyrus\Tests\Application\Controllers;
 
+use;
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Controller;
 use Zephyrus\Exceptions\RouteArgumentException;
+use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router;
-use Zephyrus\Network\Request;
 
 class ControllerOverrideTest extends TestCase
 {
