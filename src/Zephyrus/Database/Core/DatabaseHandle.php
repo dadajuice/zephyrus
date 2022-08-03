@@ -40,11 +40,10 @@ class DatabaseHandle extends PDO
     public function commit(): bool
     {
         --$this->currentTransactionLevel;
-        if ($this->currentTransactionLevel <= 0) {
-            $this->currentTransactionLevel = 0;
+        if ($this->currentTransactionLevel == 0) {
             return parent::commit();
         }
-        $this->exec("RELEASE SAVEPOINT LEVEL$this->currentTransactionLevel");
+        $this->exec("RELEASE SAVEPOINT LEVEL" . $this->currentTransactionLevel);
         return true;
     }
 
@@ -57,11 +56,10 @@ class DatabaseHandle extends PDO
     public function rollBack(): bool
     {
         --$this->currentTransactionLevel;
-        if ($this->currentTransactionLevel <= 0) {
-            $this->currentTransactionLevel = 0;
+        if ($this->currentTransactionLevel == 0) {
             return parent::rollBack();
         }
-        $this->exec("ROLLBACK TO SAVEPOINT LEVEL$this->currentTransactionLevel");
+        $this->exec("ROLLBACK TO SAVEPOINT LEVEL_" . $this->currentTransactionLevel);
         return true;
     }
 }
