@@ -2,7 +2,6 @@
 
 use Zephyrus\Database\Components\QueryFilter;
 use Zephyrus\Database\Core\Database;
-use Zephyrus\Database\DatabaseBroker;
 use Zephyrus\Utilities\Components\PagerParser;
 
 abstract class ListBroker extends DatabaseBroker

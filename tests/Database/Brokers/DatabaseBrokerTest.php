@@ -1,8 +1,8 @@
 <?php namespace Zephyrus\Tests\Database\Brokers;
 
 use stdClass;
+use Zephyrus\Database\Brokers\DatabaseBroker;
 use Zephyrus\Database\Core\Database;
-use Zephyrus\Database\DatabaseBroker;
 use Zephyrus\Tests\Database\DatabaseTestCase;
 
 class DatabaseBrokerTest extends DatabaseTestCase
