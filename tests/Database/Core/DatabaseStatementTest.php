@@ -1,31 +1,24 @@
 <?php namespace Zephyrus\Tests\Database\Core;
 
-use PHPUnit\Framework\TestCase;
-use Zephyrus\Database\Core\Database;
-use Zephyrus\Database\Core\DatabaseConfiguration;
+use Zephyrus\Tests\Database\DatabaseTestCase;
 
-class DatabaseStatementTest extends TestCase
+class DatabaseStatementTest extends DatabaseTestCase
 {
     public function testHtmlSanitize()
     {
-        $db = new Database(new DatabaseConfiguration());
-        $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT NULL, enabled INTEGER, power REAL);');
-        $db->query("INSERT INTO heroes(id, name, enabled, power) VALUES (1, 'Batman', 1, 5.6);");
-
-        $db->query("INSERT INTO heroes(id, name) VALUES (2, '<p>superman</p>');");
-        $result = $db->query("SELECT * FROM heroes WHERE id = 2");
+        $db = $this->buildDatabase();
+        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (7, '<p>Nightwing</p>', 'Dick Grayson', 9.2);");
+        $result = $db->query("SELECT * FROM heroes WHERE id = 7");
         $result->setSanitizeCallback(function ($value) {
             return strip_tags($value);
         });
         $row = $result->next();
-        self::assertEquals('superman', $row->name);
+        self::assertEquals('Nightwing', $row->name);
     }
 
     public function testEmptyResultSet()
     {
-        $db = new Database(new DatabaseConfiguration());
-        $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT NULL, enabled INTEGER, power REAL);');
-        $db->query("INSERT INTO heroes(id, name, enabled, power) VALUES (1, 'Batman', 1, 5.6);");
+        $db = $this->buildDatabase();
         $result = $db->query("SELECT power FROM heroes WHERE id = 99");
         self::assertEquals("SELECT power FROM heroes WHERE id = 99", $result->getPdoStatement()->queryString);
         self::assertNull($result->next());

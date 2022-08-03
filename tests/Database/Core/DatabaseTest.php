@@ -1,73 +1,88 @@
 <?php namespace Zephyrus\Tests\Database\Core;
 
-use PHPUnit\Framework\TestCase;
-use Zephyrus\Database\Core\Adapters\Sqlite\SqliteAdapter;
 use Zephyrus\Database\Core\Database;
-use Zephyrus\Database\Core\DatabaseConfiguration;
 use Zephyrus\Exceptions\DatabaseException;
 use Zephyrus\Exceptions\FatalDatabaseException;
+use Zephyrus\Tests\Database\DatabaseTestCase;
 
-class DatabaseTest extends TestCase
+class DatabaseTest extends DatabaseTestCase
 {
-    public function testFailedConnection()
+    public function testFailedHostConnection()
     {
         self::expectException(FatalDatabaseException::class);
         self::expectExceptionCode(FatalDatabaseException::CONNECTION_FAILED);
-        new Database(new DatabaseConfiguration([
-            'dbms' => 'pgsql',
-            'host' => 'localhost',
+        new Database([
+            'hostname' => 'localhost',
             'port' => '',
-            'charset' => 'utf8',
             'database' => 'test',
             'username' => 'bob',
             'password' => 'lewis'
-        ]));
+        ]);
+    }
+
+    public function testFailedCredentialsConnection()
+    {
+        self::expectException(FatalDatabaseException::class);
+        self::expectExceptionCode(FatalDatabaseException::CONNECTION_FAILED);
+        new Database([
+            'hostname' => 'zephyrus_database',
+            'port' => '',
+            'database' => 'zephyrus',
+            'username' => 'bob',
+            'password' => 'lewis'
+        ]);
+    }
+
+    public function testFailedDatabaseConnection()
+    {
+        self::expectException(FatalDatabaseException::class);
+        self::expectExceptionCode(FatalDatabaseException::CONNECTION_FAILED);
+        new Database([
+            'hostname' => 'zephyrus_database',
+            'port' => '',
+            'database' => 'test',
+            'username' => 'bob',
+            'password' => 'lewis'
+        ]);
     }
 
     public function testLastInsertId()
     {
-        $db = $this->initializeDatabase();
-        $res = $db->query("INSERT INTO heroes(id, name, enabled, power) VALUES (2, 'Bob Gratton', 1, 1.2);");
+        $db = $this->buildDatabase();
+        $res = $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (7, 'Bob Gratton', 'Bob', 0.2);");
         self::assertEquals(1, $res->count());
-        self::assertEquals(2, $db->getLastInsertedId());
+        //self::assertEquals(7, $db->getLastInsertedId());
     }
 
     public function testMetaQueries()
     {
-        $db = $this->initializeDatabase();
+        $db = $this->buildDatabase();
         $interrogator = $db->getSchemaInterrogator();
         self::assertEquals(['heroes'], $interrogator->getAllTableNames());
-        self::assertEquals(['id', 'name', 'enabled', 'power'], $interrogator->getAllColumnNames('heroes'));
+        self::assertEquals(['id', 'name', 'alter', 'power'], $interrogator->getAllColumnNames('heroes'));
         self::assertEquals([(object) ['column' => 'id', 'type' => 'PRIMARY KEY']], $interrogator->getAllConstraints('heroes'));
         self::assertEquals(4, count($interrogator->getAllColumns('heroes')));
         self::assertEquals(1, count($interrogator->getAllTables()));
     }
 
-    public function testGetSource()
+    public function testGetConfigurations()
     {
-        $db = $this->initializeDatabase();
-        $source = $db->getSource();
-        self::assertEquals("sqlite", $source->getDatabaseManagementSystem());
-        self::assertEquals(":memory:", $source->getDatabaseName());
+        $db = $this->buildDatabase();
+        $source = $db->getConfiguration();
+        self::assertEquals("demo", $source->getUsername());
+        self::assertEquals("zephyrus", $source->getDatabaseName());
     }
 
-    public function testGetConnector()
+    public function testGetHandle()
     {
-        $db = $this->initializeDatabase();
+        $db = $this->buildDatabase();
         $connector = $db->getHandle();
         self::assertInstanceOf(\PDO::class, $connector);
     }
 
-    public function testGetAdapter()
-    {
-        $db = $this->initializeDatabase();
-        $adapter = $db->getAdapter();
-        self::assertInstanceOf(SqliteAdapter::class, $adapter);
-    }
-
     public function testEvaluationOfTypes()
     {
-        $db = $this->initializeDatabase();
+        $db = $this->buildDatabase();
         $db->query("SELECT * FROM heroes WHERE id = ?", [1]);
         $res = $db->query("SELECT * FROM heroes WHERE power > ?", [2.5]);
         $result = $res->next();
@@ -75,65 +90,74 @@ class DatabaseTest extends TestCase
         self::assertEquals("Batman", $result->name);
         self::assertEquals(1, $result->id);
         self::assertTrue(is_int($result->id));
-        self::assertEquals(5.6, $result->power);
+        self::assertEquals(20.56, $result->power);
         self::assertTrue(is_double($result->power));
     }
 
-    public function testQueryError()
+    public function testQueryDDLError()
     {
         self::expectException(DatabaseException::class);
-        $db = $this->initializeDatabase();
-        $db->query('CREATE TABL heroes(id NUMERIC PRIMARY KEY, name TEXT);');
+        $db = $this->buildDatabase();
+        $db->query('CREATE TABL heroes2(id SERIAL PRIMARY KEY, name TEXT)');
+    }
+
+    public function testQuerySelectError()
+    {
+        self::expectException(DatabaseException::class);
+        $db = $this->buildDatabase();
+        $db->query('SELECT * FROM hero');
     }
 
     public function testQueryParameterError()
     {
         self::expectException(DatabaseException::class);
-        $db = $this->initializeDatabase();
+        $db = $this->buildDatabase();
         $db->query('CREATE TABLE foes(? NUMERIC PRIMARY KEY, ? TEXT);', ['id']);
     }
 
     public function testTransaction()
     {
-        $db = $this->initializeDatabase();
+        $db = $this->buildDatabase();
+        $this->rebootDatabase($db);
+
         $db->beginTransaction();
-        $db->query("INSERT INTO heroes(id, name) VALUES (2, 'Superman');");
+        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (7, 'Elvis Gratton', 'Bob Gratton', 0.1)");
         $db->commit();
 
-        $statement = $db->query('SELECT * FROM heroes');
-        $statement->next();
+        $statement = $db->query('SELECT * FROM heroes ORDER BY id DESC');
         $res = $statement->next();
-        self::assertEquals('Superman', $res->name);
+        self::assertEquals('Elvis Gratton', $res->name);
         $db->beginTransaction();
-        $db->query("INSERT INTO heroes(id, name) VALUES (3, 'Flash');");
+        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (8, 'Green Arrow', '', 3.2);");
         $db->rollback();
         $statement = $db->query('SELECT * FROM heroes');
         $i = 0;
-        while ($statement->next()) {
+        $last = null;
+        while (($row = $statement->next()) != null) {
             ++$i;
+            $last = $row;
         }
-        self::assertEquals(2, $i);
+        self::assertEquals("Elvis Gratton", $last->name);
+        self::assertEquals(7, $i);
     }
 
     public function testNestedTransaction()
     {
-        $db = $this->initializeDatabase();
+        $db = $this->buildDatabase();
         $db->beginTransaction();
-        $db->query("INSERT INTO heroes(id, name) VALUES (2, 'Green Arrow');");
+        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (8, 'Green Arrow', 'Ouf', 3.2);");
         // -------------- NESTED TRANSACTION --------------
         $db->beginTransaction();
-        $db->query("INSERT INTO heroes(id, name) VALUES (3, 'Aquaman');");
-        $statement = $db->query('SELECT * FROM heroes');
-        $statement->next(); // Skip the one already in database
+        $db->query("INSERT INTO heroes(id, name, alter, power) VALUES (9, 'Darksied', 'Evil', 20.5);");
+        $statement = $db->query('SELECT * FROM heroes ORDER BY id DESC');
+        $resDarksied = $statement->next();
         $resGreenArrow = $statement->next();
-        $resAquaman = $statement->next();
+        self::assertEquals('Darksied', $resDarksied->name);
         self::assertEquals('Green Arrow', $resGreenArrow->name);
-        self::assertEquals('Aquaman', $resAquaman->name);
 
         // Cancel nested commit
         $db->rollback();
-        $statement = $db->query('SELECT * FROM heroes');
-        $statement->next(); // Skip the one already in database
+        $statement = $db->query('SELECT * FROM heroes ORDER BY id DESC');
         $resGreenArrow = $statement->next();
         self::assertEquals('Green Arrow', $resGreenArrow->name);
     }
@@ -141,28 +165,14 @@ class DatabaseTest extends TestCase
     public function testErrorCommit()
     {
         $this->expectException(FatalDatabaseException::class);
-        $db = $this->initializeDatabase();
+        $db = $this->buildDatabase();
         $db->commit();
     }
 
     public function testErrorRollback()
     {
         $this->expectException(FatalDatabaseException::class);
-        $db = $this->initializeDatabase();
+        $db = $this->buildDatabase();
         $db->rollback();
-    }
-
-    /**
-     * Since the database is in memory, it will be destroyed if the instance changes.
-     *
-     * @return Database
-     * @throws FatalDatabaseException
-     */
-    private function initializeDatabase(): Database
-    {
-        $db = new Database(new DatabaseConfiguration());
-        $db->query('CREATE TABLE heroes(id NUMERIC PRIMARY KEY, name TEXT NULL, enabled INTEGER, power REAL);');
-        $db->query("INSERT INTO heroes(id, name, enabled, power) VALUES (1, 'Batman', 1, 5.6);");
-        return $db;
     }
 }
