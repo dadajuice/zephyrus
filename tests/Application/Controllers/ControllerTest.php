@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Tests\Application\Controllers;
 
-use;
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Controller;
 use Zephyrus\Network\Request;

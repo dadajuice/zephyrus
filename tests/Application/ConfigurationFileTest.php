@@ -9,11 +9,11 @@ class ConfigurationFileTest extends TestCase
     {
         $ini = new ConfigurationFile(ROOT_DIR . '/config.ini');
         $data = $ini->read();
-        self::assertTrue(array_key_exists('database', $data));
+        self::assertArrayHasKey('database', $data);
         $data = $ini->read('database');
-        self::assertTrue(array_key_exists('host', $data));
-        $data = $ini->read('database', 'host');
-        self::assertEquals('localhost', $data);
+        self::assertArrayHasKey('hostname', $data);
+        $data = $ini->read('database', 'hostname');
+        self::assertEquals('zephyrus_database', $data);
     }
 
     public function testWrite()
@@ -27,9 +27,9 @@ class ConfigurationFileTest extends TestCase
             'test2' => 3
         ]);
         $data = $ini->read();
-        self::assertTrue(array_key_exists('test', $data));
+        self::assertArrayHasKey('test', $data);
         $data = $ini->read('test');
-        self::assertTrue(array_key_exists('propertyA', $data));
+        self::assertArrayHasKey('propertyA', $data);
         $data = $ini->read('test', 'propertyA');
         self::assertEquals(1, $data);
         $ini->writeSection('test3', [
@@ -62,13 +62,13 @@ class ConfigurationFileTest extends TestCase
         @unlink(ROOT_DIR . '/test.ini');
     }
 
-    public function testLock()
-    {
-        $this->expectException(\RuntimeException::class);
-        $ini = new ConfigurationFile('/etc/lock.ini');
-        $ini->write([
-            'test' => 5
-        ]);
-        $ini->save();
-    }
+//    public function testLock()
+//    {
+//        $this->expectException(\RuntimeException::class);
+//        $ini = new ConfigurationFile('/etc/lock.ini');
+//        $ini->write([
+//            'test' => 5
+//        ]);
+//        $ini->save();
+//    }
 }

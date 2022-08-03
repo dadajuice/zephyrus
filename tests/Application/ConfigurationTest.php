@@ -13,7 +13,7 @@ class ConfigurationTest extends TestCase
         self::assertEquals('localhost', $config['database']['host']);
         Configuration::set(null);
         $config = Configuration::getConfigurations();
-        self::assertEquals('localhost', $config['database']['host']);
+        self::assertEquals('zephyrus_database', $config['database']['hostname']);
         Configuration::set(null);
     }
 
@@ -22,7 +22,7 @@ class ConfigurationTest extends TestCase
         Configuration::set(null);
         self::assertNull(Configuration::getFile());
         Configuration::getConfiguration('database');
-        self::assertEquals('localhost', Configuration::getFile()->read('database', 'host'));
+        self::assertEquals('zephyrus_database', Configuration::getFile()->read('database', 'hostname'));
     }
 
     public function testReadSingleConfiguration()

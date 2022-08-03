@@ -4,7 +4,6 @@ use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Controller;
 use Zephyrus\Network\Router;
 use Zephyrus\Utilities\FileSystem\File;
-use const ROOT_DIR;
 
 class ControllerDownloadTest extends TestCase
 {

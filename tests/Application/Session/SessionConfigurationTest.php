@@ -170,12 +170,12 @@ class SessionConfigurationTest extends TestCase
         ]);
     }
 
-    public function testInitialisationInvalidSavePathWrite()
-    {
-        self::expectException(SessionException::class);
-        self::expectExceptionCode(SessionException::ERROR_SAVE_PATH_NOT_WRITABLE);
-        Session::getInstance([
-            'save_path' => '/root'
-        ]);
-    }
+//    public function testInitialisationInvalidSavePathWrite()
+//    {
+//        self::expectException(SessionException::class);
+//        self::expectExceptionCode(SessionException::ERROR_SAVE_PATH_NOT_WRITABLE);
+//        Session::getInstance([
+//            'save_path' => '/root'
+//        ]);
+//    }
 }
