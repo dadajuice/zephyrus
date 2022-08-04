@@ -310,6 +310,7 @@ class Localization
         setlocale(LC_TIME, $locale);
         setlocale(LC_CTYPE, $locale);
         putenv("LANG=" . $this->appLocale);
+        date_default_timezone_set(Configuration::getLocaleConfiguration('timezone'));
     }
 
     private function __construct()

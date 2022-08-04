@@ -2,20 +2,10 @@
 
 use ReflectionClass;
 use ReflectionException;
-use Zephyrus\Exceptions\LocalizationException;
 use Zephyrus\Network\Router;
 
 class Bootstrap
 {
-    /**
-     * @throws LocalizationException
-     */
-    public static function start(?string $locale = null)
-    {
-        self::initializeTimezone();
-        self::initializeLocalization($locale);
-    }
-
     /**
      * @param Router $router
      * @throws ReflectionException
@@ -49,18 +39,5 @@ class Bootstrap
         $file = str_replace(DIRECTORY_SEPARATOR, '\\', $file);
         $file = str_replace('.php', '', $file);
         return new ReflectionClass($file);
-    }
-
-    /**
-     * @throws LocalizationException
-     */
-    private static function initializeLocalization(?string $locale = null)
-    {
-        Localization::getInstance()->start($locale);
-    }
-
-    private static function initializeTimezone()
-    {
-        date_default_timezone_set(Configuration::getLocaleConfiguration('timezone'));
     }
 }
