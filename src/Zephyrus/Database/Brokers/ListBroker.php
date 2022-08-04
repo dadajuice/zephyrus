@@ -1,8 +1,8 @@
 <?php namespace Zephyrus\Database\Brokers;
 
+use Zephyrus\Database\Components\PagerParser;
 use Zephyrus\Database\Components\QueryFilter;
 use Zephyrus\Database\Core\Database;
-use Zephyrus\Utilities\Components\PagerParser;
 
 abstract class ListBroker extends DatabaseBroker
 {

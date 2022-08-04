@@ -1,7 +1,5 @@
 <?php namespace Zephyrus\Database\Components;
 
-use Zephyrus\Utilities\Components\PagerParser;
-
 class QueryFilter
 {
     private FilterParser $filterParser;
@@ -119,7 +117,7 @@ class QueryFilter
         if (!$this->isPaginationRequested() && !$forcePaginate) {
             return $rawQuery;
         }
-        $limitClause = $this->pagerParser->parse()->buildLimitClause();
+        $limitClause = $this->pagerParser->parse();
         return rtrim($rawQuery) . ' ' . $limitClause->getSql();
     }
 

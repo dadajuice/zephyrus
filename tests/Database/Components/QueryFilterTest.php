@@ -52,7 +52,7 @@ class QueryFilterTest extends TestCase
 
         $query = "SELECT * FROM view_project";
         $resultQuery = $filter->paginate($query, true); // Default
-        self::assertEquals("SELECT * FROM view_project LIMIT 50 OFFSET 0", $resultQuery);
+        self::assertEquals("SELECT * FROM view_project LIMIT 50", $resultQuery);
     }
 
     public function testSort()

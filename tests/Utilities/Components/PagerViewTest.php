@@ -1,10 +1,10 @@
 <?php namespace Zephyrus\Tests\Utilities\Components;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Database\Components\PagerParser;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 use Zephyrus\Utilities\Components\PagerModel;
-use Zephyrus\Utilities\Components\PagerParser;
 use Zephyrus\Utilities\Components\PagerView;
 
 class PagerViewTest extends TestCase

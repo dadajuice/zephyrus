@@ -1,14 +1,16 @@
 <?php namespace Zephyrus\Utilities\Components;
 
+use Zephyrus\Database\Components\PagerParser;
+
 class PagerView
 {
     public const MAIN_CSS_CLASSNAME = 'pager';
 
-    private PagerModel $model;
+    private PagerParser $model;
     private int $currentPage;
     private int $maxPage;
 
-    public function __construct(PagerModel $model, int $recordCount)
+    public function __construct(PagerParser $model, int $recordCount)
     {
         $this->model = $model;
         $this->currentPage = $this->model->getCurrentPage();
