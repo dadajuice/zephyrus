@@ -27,6 +27,8 @@ class FormatterTest extends TestCase
         self::assertEquals("12", $result);
         $result = Formatter::decimal(0, 0, 0);
         self::assertEquals("0", $result);
+        $result = Formatter::decimal(null, 0, 0);
+        self::assertEquals("-", $result);
     }
 
     public function testEllipsis()
@@ -55,6 +57,8 @@ class FormatterTest extends TestCase
         self::assertEquals('2,26 $', $result);
         $result = Formatter::money(0);
         self::assertEquals('0,00 $', $result);
+        $result = Formatter::money(null);
+        self::assertEquals('-', $result);
     }
 
     public function testFormatPercent()
@@ -65,6 +69,8 @@ class FormatterTest extends TestCase
         self::assertEquals('15 %', $result);
         $result = Formatter::percent(0.875, 1);
         self::assertEquals('87,5 %', $result);
+        $result = Formatter::percent(null, 1);
+        self::assertEquals('-', $result);
     }
 
     public function testFormatTime()
