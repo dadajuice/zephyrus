@@ -74,6 +74,11 @@ class PagerParser
         return $this->limit ?? self::DEFAULT_LIMIT;
     }
 
+    public function getMaxPage(int $recordCount): int
+    {
+        return ceil($recordCount / $this->getLimit());
+    }
+
     public function getSqlClause(): LimitClause
     {
         return $this->limitClause;

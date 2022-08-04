@@ -48,6 +48,11 @@ class ListBrokerTest extends DatabaseTestCase
         self::assertEquals("", $list->mark(null));
         self::assertEquals("man", $list->getSearch());
 
+        $json = json_decode(json_encode($list->toArray()));
+        self::assertCount(4, $json->results->rows);
+        self::assertEquals(1, $json->pager->maxPage);
+        self::assertEquals('man', $json->filter->search);
+
         $list->setQueryFilter(null);
         self::assertEquals("Superman", $list->mark("Superman"));
     }

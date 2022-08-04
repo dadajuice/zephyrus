@@ -93,7 +93,17 @@ class ListView
 
     public function getSearch(): string
     {
-        return $this->queryFilter->getFilterParser()->getSearch();
+        return $this->queryFilter->getSearch();
+    }
+
+    public function getFilters(): array
+    {
+        return $this->queryFilter->getFilters();
+    }
+
+    public function getSorts(): array
+    {
+        return $this->queryFilter->getSorts();
     }
 
     public function getCount(): int
@@ -141,17 +151,15 @@ class ListView
             ],
             'filter' => [
                 'search' => $this->getSearch(),
-                'sort' => $this->getSort(),
-                'order' => $this->getOrder()
+                'sorts' => $this->getSorts(),
+                'filters' => $this->getFilters()
+            ],
+            'pager' => [
+                'maxPage' => $this->queryFilter->getPagerParser()->getMaxPage($this->totalCount),
+                'currentPage' => $this->getCurrentPage(),
+                'maxEntitiesPerPage' => $this->queryFilter->getPagerParser()->getLimit()
             ]
         ];
-        if ($this->pagerLimit > 0) {
-            $json['pager'] = [
-                'maxPage' => $this->pager->getMaxPage(),
-                'currentPage' => $this->pager->getCurrentPage(),
-                'maxEntitiesPerPage' => $this->pager->getMaxEntitiesPerPage()
-            ];
-        }
         if (!empty($this->additionalData)) {
             $json['data'] = $this->additionalData;
         }
