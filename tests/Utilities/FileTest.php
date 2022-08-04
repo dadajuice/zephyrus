@@ -173,6 +173,34 @@ class FileTest extends TestCase
         self::assertEquals("One ring to rule them all", ob_get_clean());
     }
 
+    public function testMd5()
+    {
+        $file = new File(ROOT_DIR . '/lib/filesystem/existing.txt');
+        $hash = $file->md5();
+        self::assertEquals("bc713027e780c5d0a8d452b3df9f58dc", $hash);
+    }
+
+    public function testSha1()
+    {
+        $file = new File(ROOT_DIR . '/lib/filesystem/existing.txt');
+        $hash = $file->sha1();
+        self::assertEquals("a0f04b70b90227f205b9106a9ee1d440d5942d11", $hash);
+    }
+
+    public function testCurlFile()
+    {
+        $file = new File(ROOT_DIR . '/lib/filesystem/existing.txt');
+
+        $curlFile = $file->buildCurlFile();
+        self::assertEquals("existing.txt", $curlFile->postname);
+
+        $curlFile = $file->buildCurlFile("bob.log");
+        self::assertEquals("bob.log", $curlFile->postname);
+
+        $curlFile = $file->buildCurlFile("bob");
+        self::assertEquals("bob.txt", $curlFile->postname);
+    }
+
     public function testInvalidPath()
     {
         $this->expectException(\InvalidArgumentException::class);
