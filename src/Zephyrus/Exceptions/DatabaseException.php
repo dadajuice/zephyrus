@@ -1,19 +1,16 @@
 <?php namespace Zephyrus\Exceptions;
 
-class DatabaseException extends \Exception
+class DatabaseException extends \RuntimeException
 {
-    /**
-     * @var string
-     */
-    private $query;
+    private string $query;
 
-    public function __construct($message, $query = "")
+    public function __construct(string $message, string $query = "")
     {
         parent::__construct($message);
         $this->query = $query;
     }
 
-    public function getQuery()
+    public function getQuery(): string
     {
         return $this->query;
     }
