@@ -24,6 +24,34 @@ class ListBrokerTest extends DatabaseTestCase
         self::assertEquals("Batman", $list->getRow(1)->name);
     }
 
+    public function testListViewWithSearchAndSort()
+    {
+        $request = new Request("http://example.com?search=man&sorts[force]=desc", "get", ['parameters' => [
+            'search' => 'man',
+            'sorts' => ['force' => 'desc']
+        ]]);
+        RequestFactory::set($request);
+
+        $instance = $this->buildListBroker($this->buildDatabase());
+        $list = $instance->inflate();
+
+        $rows = $list->getRows();
+        self::assertCount(4, $rows);
+        self::assertEquals("Superman", $rows[0]->name);
+        self::assertEquals(4, $list->getCount());
+        self::assertEquals(6, $list->getTotalCount());
+        self::assertEquals(1, $list->getCurrentPage());
+        self::assertEquals("Super<mark>man</mark>", $list->mark("Superman"));
+        self::assertEquals("Super<mark>man</mark> & Bat<mark>man</mark>", $list->mark("Superman & Batman"));
+        self::assertEquals("dslkfjklsdf", $list->mark("dslkfjklsdf"));
+        self::assertEquals("", $list->mark(""));
+        self::assertEquals("", $list->mark(null));
+        self::assertEquals("man", $list->getSearch());
+
+        $list->setQueryFilter(null);
+        self::assertEquals("Superman", $list->mark("Superman"));
+    }
+
     public function testWithoutFilters()
     {
         $request = new Request("http://example.com", "get", ['parameters' => []]);
