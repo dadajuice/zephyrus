@@ -37,9 +37,9 @@ abstract class ListBroker extends DatabaseBroker
 
     public function __construct(?Database $database = null)
     {
-        parent::__construct($database); // TODO: REMOVE
+        parent::__construct($database);
         $this->configure();
-        $this->queryFilter = new QueryFilter($database); // TODO: USE CHILD ...
+        $this->queryFilter = new QueryFilter();
         $this->queryFilter->getFilterParser()->setAllowedColumns($this->allowedFilterColumns);
         $this->queryFilter->getFilterParser()->setAliasColumns($this->columnAlias);
         $this->queryFilter->getSortParser()->setAllowedColumns($this->allowedSortColumns);
