@@ -46,6 +46,10 @@ RUN a2enmod rewrite headers expires
 RUN locale-gen --no-archive fr_CA.UTF-8 \
     locale -a
 
+ENV LANG fr_CA.UTF-8
+ENV LANGUAGE fr_CA.UTF-8
+ENV LC_ALL fr_CA.UTF-8
+
 # Install cleanup
 RUN rm -rf /usr/src/*
 
