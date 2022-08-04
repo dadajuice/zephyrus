@@ -11,10 +11,21 @@ class FilterParser
     public const URL_SEARCH_PARAMETER = 'search';
 
     private WhereClause $whereClause;
+    private string $searchQuery;
+    private array $filters;
     private array $allowedColumns = [];
     private array $aliasColumns = [];
     private array $searchableColumns = [];
     private string $aggregateOperator = WhereClause::OPERATOR_OR;
+    private bool $parsed = false;
+
+    public function __construct()
+    {
+        $this->whereClause = new WhereClause();
+        $request = RequestFactory::read();
+        $this->searchQuery = $request->getParameter(self::URL_SEARCH_PARAMETER, "");
+        $this->filters = $request->getParameter(self::URL_PARAMETER, []);
+    }
 
     public function setAllowedColumns(array $allowedColumns)
     {
@@ -39,6 +50,24 @@ class FilterParser
         $this->aggregateOperator = $operator;
     }
 
+    public function getSearch(): string
+    {
+        return $this->searchQuery;
+    }
+
+    public function getFilters(): array
+    {
+        return $this->filters;
+    }
+
+    public function getSqlClause(): WhereClause
+    {
+        if (!$this->parsed) {
+            throw new \RuntimeException("Filters not yet parsed. Be sure to use the parse() method before.");
+        }
+        return $this->whereClause;
+    }
+
     public function hasRequested(): bool
     {
         $request = RequestFactory::read();
@@ -51,31 +80,25 @@ class FilterParser
      * public constants:
      *
      *     example.com?filters[column:type]=content
-     *
      *     example.com?search=batman
      *
      * The aliasColumn array allows specifying correspondance between request parameters and database column (if
      * developers don't want to expose database column directly in UI links). If a specified column is not allowed it
      * will be ignored. If no column type is given, the "contains" default will be considered.
-     *
-     * @return WhereClause
      */
-    public function parse(): WhereClause
+    public function parse()
     {
-        $this->whereClause = new WhereClause();
-        $request = RequestFactory::read();
-        $searchQuery = $request->getParameter(self::URL_SEARCH_PARAMETER);
-        $filterColumns = $request->getParameter(self::URL_PARAMETER, []);
-
-        if (!empty($searchQuery)) {
-            return $this->parseSearch($searchQuery);
+        if (!empty($this->searchQuery)) {
+            $this->parseSearch();
+        } else {
+            $this->parseFilters();
         }
-        return $this->parseFilters($filterColumns);
+        $this->parsed = true;
     }
 
-    private function parseFilters(array $filterColumns): WhereClause
+    private function parseFilters()
     {
-        foreach ($filterColumns as $columnDefinition => $content) {
+        foreach ($this->filters as $columnDefinition => $content) {
             if (!str_contains($columnDefinition, ":")) {
                 $columnDefinition = $columnDefinition . ':' . 'contains';
             }
@@ -83,7 +106,6 @@ class FilterParser
             if (!in_array($column, $this->allowedColumns)) {
                 continue;
             }
-            // TODO: Validate "content" for each type of clause (ex. date_range, number, etc.)
             match ($filterType) {
                 'contains' => $this->parseContains($column, $content),
                 'begins' => $this->parseBegins($column, $content),
@@ -95,21 +117,16 @@ class FilterParser
                 default => null
             };
         }
-        return $this->whereClause;
     }
 
     /**
      * Treat the search query as a simple "contains" filter request over all the searchable columns.
-     *
-     * @param string $searchQuery
-     * @return WhereClause
      */
-    private function parseSearch(string $searchQuery): WhereClause
+    private function parseSearch()
     {
         foreach ($this->searchableColumns as $searchableColumn) {
-            $this->parseContains($searchableColumn, $searchQuery);
+            $this->parseContains($searchableColumn, $this->searchQuery);
         }
-        return $this->whereClause;
     }
 
     private function parseContains(string $column, mixed $content, bool $caseInsensitive = true)

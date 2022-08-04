@@ -60,6 +60,16 @@ class QueryFilter
         return $this->queryParameters;
     }
 
+    public function getSearch(): string
+    {
+        return $this->filterParser->getSearch();
+    }
+
+    public function getFilters(): array
+    {
+        return $this->filterParser->getFilters();
+    }
+
     /**
      * Proceeds to inject the SQL filtering (WHERE clause) to the given query. Will ignore if no filter has been
      * specified in the request.
@@ -72,6 +82,7 @@ class QueryFilter
         if (!$this->isFilterRequested()) {
             return $rawQuery;
         }
+        $this->filterParser->parse();
         return $this->injectWhereClause($rawQuery);
     }
 
@@ -111,6 +122,11 @@ class QueryFilter
     private function injectOrderByClause(string $query): string
     {
         $orderByClause = $this->sortParser->parse();
+        $orderBy = $orderByClause->getSql();
+        if (empty($orderBy)) {
+            return $query;
+        }
+
         $lastFromByOccurrence = strripos($query, "from");
         $lastWhereByOccurrence = strripos($query, "where", $lastFromByOccurrence);
         $lastLimitOccurrence = strripos($query, "limit", $lastFromByOccurrence);
@@ -123,13 +139,17 @@ class QueryFilter
         }
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);
-        $orderBy = $orderByClause->getSql();
-        return (!empty($orderBy)) ? rtrim($begin) . ' ' . $orderBy . $end : $query;
+        return rtrim($begin) . ' ' . $orderBy . $end;
     }
 
     private function injectWhereClause(string $query): string
     {
-        $whereClause = $this->filterParser->parse();
+        $whereClause = $this->filterParser->getSqlClause();
+        $where = $whereClause->getSql();
+        if (empty($where)) {
+            return $query;
+        }
+
         $lastFromByOccurrence = strripos($query, "from");
         $lastWhereByOccurrence = strripos($query, "where", $lastFromByOccurrence);
         $lastGroupByOccurrence = strripos($query, "group by", $lastFromByOccurrence);
@@ -144,7 +164,7 @@ class QueryFilter
         $begin = substr($query, 0, $insertionPosition);
         $end = substr($query, $insertionPosition);
         $clause = (($lastWhereByOccurrence !== false) ? " AND " : " WHERE ");
-        $where = $whereClause->getSql();
+
         $this->queryParameters += $whereClause->getQueryParameters();
         $where = str_replace('WHERE ', '', $where); // Remove WHERE to build manually ...
         return rtrim($begin) . $clause . $where . $end;
