@@ -62,9 +62,9 @@ class Localization
      */
     public function start(?string $locale = null)
     {
-        if (!is_null($this->appLocale)) {
-            throw new \RuntimeException("Localization environment already started");
-        }
+//        if (!is_null($this->appLocale)) {
+//            throw new \RuntimeException("Localization environment already started");
+//        }
         $this->appLocale = $locale ?? Configuration::getLocaleConfiguration('language');
         $this->initializeLocale();
         if (file_exists(ROOT_DIR . '/locale')) {

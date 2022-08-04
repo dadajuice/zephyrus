@@ -5,23 +5,6 @@ use Zephyrus\Utilities\Formatter;
 trait SpecializedFormatter
 {
     /**
-     * Returns a SEO compatible url based on the specified string. Be sure to check the LC_CTYPE locale setting if
-     * getting any question marks in result. Run locale -a on server to see full list of supported locales.
-     *
-     * @param string $name
-     * @return string
-     */
-    public static function seourl(string $name): string
-    {
-        $url = mb_strtolower($name);
-        $url = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $url);
-        $url = preg_replace("/[^a-z0-9_\s-]/", "", $url);
-        $url = preg_replace("/[\s-]+/", " ", $url);
-        $url = trim($url);
-        return preg_replace("/[\s_]/", "-", $url);
-    }
-
-    /**
      * Returns the most human-readable file size based on the size given in byte. If null is provided, as with the other
      * formats, the string "-" is returned.
      *

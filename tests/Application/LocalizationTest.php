@@ -24,18 +24,6 @@ class LocalizationTest extends TestCase
     /**
      * @depends testLocalize
      */
-    public function testExceptionAlreadyStarted()
-    {
-        try {
-            Localization::getInstance()->start();
-        } catch (\RuntimeException $e) {
-            self::assertEquals("Localization environment already started", $e->getMessage());
-        }
-    }
-
-    /**
-     * @depends testExceptionAlreadyStarted
-     */
     public function testErrorInJson()
     {
         copy(ROOT_DIR . '/locale/broken.json', ROOT_DIR . '/locale/fr_CA/broken.json');

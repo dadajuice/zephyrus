@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Utilities\Formatters;
 
+use Locale;
 use Zephyrus\Application\Configuration;
 
 trait NumericFormatter
@@ -9,8 +10,7 @@ trait NumericFormatter
         if (is_null($number)) {
             return "-";
         }
-        $locale = Configuration::getApplicationConfiguration('locale');
-        $formatter = new \NumberFormatter($locale, \NumberFormatter::PERCENT);
+        $formatter = new \NumberFormatter(Locale::getDefault(), \NumberFormatter::PERCENT);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP);
@@ -23,12 +23,11 @@ trait NumericFormatter
         if (is_null($amount)) {
             return "-";
         }
-        $locale = Configuration::getApplicationConfiguration('locale');
-        $formatter = new \NumberFormatter($locale, \NumberFormatter::CURRENCY);
+        $formatter = new \NumberFormatter(Locale::getDefault(), \NumberFormatter::CURRENCY);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP);
-        $result = $formatter->formatCurrency($amount, Configuration::getApplicationConfiguration('currency'));
+        $result = $formatter->formatCurrency($amount, Configuration::getLocaleConfiguration('currency'));
         return $result === false ? "-" : $result;
     }
 
@@ -37,8 +36,7 @@ trait NumericFormatter
         if (is_null($number)) {
             return "-";
         }
-        $locale = Configuration::getApplicationConfiguration('locale');
-        $formatter = new \NumberFormatter($locale, \NumberFormatter::DECIMAL);
+        $formatter = new \NumberFormatter(Locale::getDefault(), \NumberFormatter::DECIMAL);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP);

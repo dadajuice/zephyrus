@@ -29,20 +29,6 @@ class FormatterTest extends TestCase
         self::assertEquals("0", $result);
     }
 
-    public function testFormatFrenchSeoUrl()
-    {
-        $this->enableFrenchSettings();
-        $result = Formatter::seourl("École en frAnçais");
-        self::assertEquals("ecole-en-francais", $result);
-    }
-
-    public function testFormatEnglishSeoUrl()
-    {
-        $this->enableEnglishSettings();
-        $result = Formatter::seourl("School in English");
-        self::assertEquals("school-in-english", $result);
-    }
-
     public function testEllipsis()
     {
         $result = Formatter::ellipsis("Lorem ipsum", 4);
@@ -92,19 +78,8 @@ class FormatterTest extends TestCase
 
     public function testFormatFrenchDate()
     {
-        $this->enableFrenchSettings();
         $result = Formatter::date('2016-01-01 23:15:00');
         self::assertEquals('1 janvier 2016', $result);
-
-        $result = Formatter::date(null);
-        self::assertEquals('-', $result);
-    }
-
-    public function testFormatEnglishDate()
-    {
-        $this->enableEnglishSettings();
-        $result = Formatter::date('2016-01-01 23:15:00');
-        self::assertEquals('1 January 2016', $result);
 
         $result = Formatter::date(null);
         self::assertEquals('-', $result);
@@ -117,18 +92,6 @@ class FormatterTest extends TestCase
 
         $result = Formatter::datetime('2016-01-01 01:15:00');
         self::assertEquals('1 janvier 2016, 01:15', $result);
-
-        $result = Formatter::datetime(null);
-        self::assertEquals('-', $result);
-    }
-
-    public function testFormatEnglishDateTime()
-    {
-        $result = Formatter::datetime('2016-01-01 23:15:00');
-        self::assertEquals('1 January 2016, 23:15', $result);
-
-        $result = Formatter::datetime('2016-01-01 01:15:00');
-        self::assertEquals('1 January 2016, 01:15', $result);
 
         $result = Formatter::datetime(null);
         self::assertEquals('-', $result);
@@ -181,19 +144,12 @@ class FormatterTest extends TestCase
         format('temperature', -5);
     }
 
-    private function enableFrenchSettings()
-    {
-        date_default_timezone_set('America/Montreal');
-        setlocale(LC_MESSAGES, 'fr_CA.utf8');
-        setlocale(LC_TIME, 'fr_CA.utf8');
-        setlocale(LC_CTYPE, 'fr_CA.utf8');
-    }
-
-    private function enableEnglishSettings()
-    {
-        date_default_timezone_set('America/New_York');
-        setlocale(LC_MESSAGES, 'en_CA.utf8');
-        setlocale(LC_TIME, 'en_CA.utf8');
-        setlocale(LC_CTYPE, 'en_CA.utf8');
-    }
+//    private function enableFrenchSettings()
+//    {
+//        date_default_timezone_set('America/Montreal');
+//        setlocale(LC_MESSAGES, 'fr_CA.utf8');
+//        setlocale(LC_TIME, 'fr_CA.utf8');
+//        setlocale(LC_CTYPE, 'fr_CA.utf8');
+//        putenv("LANG=fr_CA.utf8");
+//    }
 }

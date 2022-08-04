@@ -18,9 +18,7 @@ class BootstrapTest extends TestCase
     public function testStart()
     {
         Bootstrap::start();
-        self::assertEquals('America/New_York', date_default_timezone_get());
-        self::assertEquals('1', ini_get('display_errors'));
-        self::assertEquals('1', ini_get('display_startup_errors'));
+        self::assertEquals('America/Montreal', date_default_timezone_get());
     }
 
     public function testController()
