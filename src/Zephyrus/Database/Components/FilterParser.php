@@ -8,10 +8,12 @@ use Zephyrus\Network\RequestFactory;
 class FilterParser
 {
     public const URL_PARAMETER = 'filters';
+    public const URL_SEARCH_PARAMETER = 'search';
 
     private WhereClause $whereClause;
     private array $allowedColumns = [];
     private array $aliasColumns = [];
+    private array $searchableColumns = [];
     private string $aggregateOperator = WhereClause::OPERATOR_OR;
 
     public function setAllowedColumns(array $allowedColumns)
@@ -22,6 +24,11 @@ class FilterParser
     public function setAliasColumns(array $aliasColumns)
     {
         $this->aliasColumns = $aliasColumns;
+    }
+
+    public function setSearchableColumns(array $searchableColumns)
+    {
+        $this->searchableColumns = $searchableColumns;
     }
 
     public function setAggregateOperator(string $operator)
@@ -35,7 +42,8 @@ class FilterParser
     public function hasRequested(): bool
     {
         $request = RequestFactory::read();
-        return !empty($request->getParameter(self::URL_PARAMETER, []));
+        return !empty($request->getParameter(self::URL_PARAMETER, []))
+            || !empty($request->getParameter(self::URL_SEARCH_PARAMETER));
     }
 
     /**
@@ -43,6 +51,8 @@ class FilterParser
      * public constants:
      *
      *     example.com?filters[column:type]=content
+     *
+     *     example.com?search=batman
      *
      * The aliasColumn array allows specifying correspondance between request parameters and database column (if
      * developers don't want to expose database column directly in UI links). If a specified column is not allowed it
@@ -54,7 +64,17 @@ class FilterParser
     {
         $this->whereClause = new WhereClause();
         $request = RequestFactory::read();
+        $searchQuery = $request->getParameter(self::URL_SEARCH_PARAMETER);
         $filterColumns = $request->getParameter(self::URL_PARAMETER, []);
+
+        if (!empty($searchQuery)) {
+            return $this->parseSearch($searchQuery);
+        }
+        return $this->parseFilters($filterColumns);
+    }
+
+    private function parseFilters(array $filterColumns): WhereClause
+    {
         foreach ($filterColumns as $columnDefinition => $content) {
             if (!str_contains($columnDefinition, ":")) {
                 $columnDefinition = $columnDefinition . ':' . 'contains';
@@ -74,6 +94,20 @@ class FilterParser
                 'equals' => $this->parseEquals($column, $content),
                 default => null
             };
+        }
+        return $this->whereClause;
+    }
+
+    /**
+     * Treat the search query as a simple "contains" filter request over all the searchable columns.
+     *
+     * @param string $searchQuery
+     * @return WhereClause
+     */
+    private function parseSearch(string $searchQuery): WhereClause
+    {
+        foreach ($this->searchableColumns as $searchableColumn) {
+            $this->parseContains($searchableColumn, $searchQuery);
         }
         return $this->whereClause;
     }

@@ -181,4 +181,21 @@ class FilterParserTest extends TestCase
         self::assertEquals("WHERE (name = ?)", $clause->getSql());
         self::assertEquals(["bob"], $clause->getQueryParameters());
     }
+
+    public function testSearchFilter()
+    {
+        $request = new Request("http://example.com?search=bob", "get", ['parameters' => [
+            'search' => 'bob'
+        ]]);
+        RequestFactory::set($request);
+
+        $parser = new FilterParser();
+        $parser->setAllowedColumns(['name', 'price', 'brand']);
+        $parser->setSearchableColumns(['name', 'brand']);
+        self::assertTrue($parser->hasRequested());
+        $clause = $parser->parse();
+
+        self::assertEquals("WHERE (name ILIKE ?) OR (brand ILIKE ?)", $clause->getSql());
+        self::assertEquals(["%bob%", "%bob%"], $clause->getQueryParameters());
+    }
 }
