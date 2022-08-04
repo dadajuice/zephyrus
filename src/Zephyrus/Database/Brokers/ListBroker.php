@@ -11,6 +11,7 @@ abstract class ListBroker extends DatabaseBroker
     private array $allowedFilterColumns = []; // ['name', 'price', 'brand']
     private array $allowedSortColumns = []; // ['name', 'price', 'brand']
     private array $defaultSorts = []; // ['name' => 'asc', 'price' => 'desc']
+    private array $searchableColumns = []; // ['name', 'brand'] (no alias)
     private bool $ascNullLast = true;
     private bool $descNullLast = false;
     private int $defaultPagerLimit = PagerParser::DEFAULT_LIMIT;
@@ -42,6 +43,7 @@ abstract class ListBroker extends DatabaseBroker
         $this->queryFilter = new QueryFilter();
         $this->queryFilter->getFilterParser()->setAllowedColumns($this->allowedFilterColumns);
         $this->queryFilter->getFilterParser()->setAliasColumns($this->columnAlias);
+        $this->queryFilter->getFilterParser()->setSearchableColumns($this->searchableColumns);
         $this->queryFilter->getSortParser()->setAllowedColumns($this->allowedSortColumns);
         $this->queryFilter->getSortParser()->setAliasColumns($this->columnAlias);
         $this->queryFilter->getSortParser()->setDefaultSorts($this->defaultSorts);
@@ -108,6 +110,16 @@ abstract class ListBroker extends DatabaseBroker
     final protected function setSortDefaults(array $sorts)
     {
         $this->defaultSorts = $sorts;
+    }
+
+    /**
+     * Defines the columns used when a search request is performed on the list.
+     *
+     * @param array $columns
+     */
+    final protected function setSearchableColumns(array $columns)
+    {
+        $this->searchableColumns = $columns;
     }
 
     /**
