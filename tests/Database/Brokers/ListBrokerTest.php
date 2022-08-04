@@ -8,6 +8,22 @@ use Zephyrus\Tests\Database\DatabaseTestCase;
 
 class ListBrokerTest extends DatabaseTestCase
 {
+    public function testBasicListView()
+    {
+        $request = new Request("http://example.com", "get", ['parameters' => []]);
+        RequestFactory::set($request);
+
+        $instance = $this->buildListBroker($this->buildDatabase());
+        $list = $instance->inflate();
+        $rows = $list->getRows();
+        self::assertCount(6, $rows);
+        self::assertEquals("Aquaman", $rows[0]->name);
+        self::assertEquals(6, $list->getCount());
+        self::assertEquals(6, $list->getTotalCount());
+        self::assertEquals(1, $list->getCurrentPage());
+        self::assertEquals("Batman", $list->getRow(1)->name);
+    }
+
     public function testWithoutFilters()
     {
         $request = new Request("http://example.com", "get", ['parameters' => []]);
@@ -121,9 +137,14 @@ class ListBrokerTest extends DatabaseTestCase
                 return $this->filteredSelect("SELECT * FROM heroes");
             }
 
-            public function count(): int
+            public function count(): \stdClass
             {
-                return 0;
+                $total = $this->selectSingle("SELECT COUNT(*) as n FROM heroes")->n;
+                $current = $this->baseCount("SELECT COUNT(*) as n FROM heroes")->n;
+                return (object) [
+                    'current' => $current,
+                    'total' => $total
+                ];
             }
         };
     }
