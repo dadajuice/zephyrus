@@ -18,7 +18,7 @@ class ListView
         $this->count = $this->totalCount = count($rows);
     }
 
-    public function setQueryFilter(QueryFilter $queryFilter)
+    public function setQueryFilter(?QueryFilter $queryFilter)
     {
         $this->queryFilter = $queryFilter;
     }
