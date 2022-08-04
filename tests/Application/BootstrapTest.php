@@ -15,12 +15,6 @@ class BootstrapTest extends TestCase
         self::assertEquals("functions.php", $info);
     }
 
-    public function testStart()
-    {
-        Bootstrap::start();
-        self::assertEquals('America/Montreal', date_default_timezone_get());
-    }
-
     public function testController()
     {
         $server['REQUEST_METHOD'] = 'GET';

@@ -9,8 +9,9 @@ class LocalizationTest extends TestCase
     public function testLocalize()
     {
         copy(ROOT_DIR . '/locale/routes.json', ROOT_DIR . '/locale/fr_CA/routes.json');
-        Localization::getInstance()->start();
+        Localization::getInstance()->start(); // If test is standalone
         self::assertEquals('fr_CA', Localization::getInstance()->getLoadedLocale());
+        self::assertEquals('America/Montreal', date_default_timezone_get());
         self::assertEquals("Le courriel est invalide", Localization::getInstance()->localize("messages.errors.invalid_email"));
         self::assertEquals("L'utilisateur [bob] a été ajouté avec succès", Localization::getInstance()->localize("messages.success.add_user", ["bob"]));
         self::assertEquals("not.found", Localization::getInstance()->localize("not.found"));
@@ -19,6 +20,18 @@ class LocalizationTest extends TestCase
         self::assertEquals("/admin", Localization::getInstance()->localize("routes.administration")); // subfolder test
         self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", localize("messages.success.add_user", "martin"));
         self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", __("L'utilisateur [%s] a été ajouté avec succès", 'martin'));
+    }
+
+    /**
+     * @depends testLocalize
+     */
+    public function testExceptionAlreadyStarted()
+    {
+        try {
+            Localization::getInstance()->start();
+        } catch (\RuntimeException $e) {
+            self::assertEquals("Localization environment already started", $e->getMessage());
+        }
     }
 
     /**
