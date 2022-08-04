@@ -40,9 +40,9 @@ class Configuration
         return self::getConfiguration('application', $property, $defaultValue);
     }
 
-    public static function getSecurityConfiguration(?string $property = null, $defaultValue = null)
+    public static function getLocaleConfiguration(?string $property = null, $defaultValue = null)
     {
-        return self::getConfiguration('security', $property, $defaultValue);
+        return self::getConfiguration('locale', $property, $defaultValue);
     }
 
     public static function getDatabaseConfiguration(?string $property = null, $defaultValue = null)

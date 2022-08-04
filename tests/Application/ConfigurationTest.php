@@ -33,13 +33,13 @@ class ConfigurationTest extends TestCase
         Configuration::set(null);
     }
 
-    public function testReadSecurityConfiguration()
+    public function testReadLocaleConfiguration()
     {
-        Configuration::set(['security' => ['encryption_algorithm' => 'aes-256-cbc', 'ids_enabled' => true]]);
-        $config = Configuration::getSecurityConfiguration();
-        $precise = (bool) Configuration::getSecurityConfiguration('ids_enabled');
-        self::assertTrue($precise);
-        self::assertEquals('aes-256-cbc', $config['encryption_algorithm']);
+        Configuration::set(['locale' => ['currency' => 'CAD', 'charset' => 'utf8']]);
+        $config = Configuration::getLocaleConfiguration();
+        $precise = Configuration::getLocaleConfiguration('currency');
+        self::assertEquals("CAD", $precise);
+        self::assertEquals('utf8', $config['charset']);
         Configuration::set(null);
     }
 
