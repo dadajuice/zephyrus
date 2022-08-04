@@ -65,7 +65,7 @@ class Localization
         if (!is_null($this->appLocale)) {
             throw new \RuntimeException("Localization environment already started");
         }
-        $this->appLocale = $locale ?? Configuration::getApplicationConfiguration('locale');
+        $this->appLocale = $locale ?? Configuration::getLocaleConfiguration('language');
         $this->initializeLocale();
         if (file_exists(ROOT_DIR . '/locale')) {
             $this->generate();
@@ -304,7 +304,7 @@ class Localization
 
     private function initializeLocale()
     {
-        $charset = Configuration::getApplicationConfiguration('charset');
+        $charset = Configuration::getLocaleConfiguration('charset');
         $locale = $this->appLocale . '.' . $charset;
         setlocale(LC_MESSAGES, $locale);
         setlocale(LC_TIME, $locale);
