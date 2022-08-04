@@ -60,6 +60,45 @@ class ListBrokerTest extends DatabaseTestCase
         self::assertEquals("Superman", $rows[0]->name);
     }
 
+    public function testWithSearchAndSort()
+    {
+        $request = new Request("http://example.com?search=man&sorts[force]=desc", "get", ['parameters' => [
+            'search' => 'man',
+            'sorts' => ['force' => 'desc']
+        ]]);
+        RequestFactory::set($request);
+
+        $instance = $this->buildListBroker($this->buildDatabase());
+        $rows = $instance->findAllRows();
+        self::assertCount(4, $rows);
+        self::assertEquals("Superman", $rows[0]->name);
+    }
+
+    public function testWithSearch()
+    {
+        $request = new Request("http://example.com?search=diane", "get", ['parameters' => [
+            'search' => 'diana'
+        ]]);
+        RequestFactory::set($request);
+
+        $instance = $this->buildListBroker($this->buildDatabase());
+        $rows = $instance->findAllRows();
+        self::assertCount(1, $rows);
+        self::assertEquals("Wonder Woman", $rows[0]->name);
+    }
+
+    public function testWithSearchNoResult()
+    {
+        $request = new Request("http://example.com?search=kjsdhfksjdhfkjhsddfhks", "get", ['parameters' => [
+            'search' => 'kjsdhfksjdhfkjhsddfhks'
+        ]]);
+        RequestFactory::set($request);
+
+        $instance = $this->buildListBroker($this->buildDatabase());
+        $rows = $instance->findAllRows();
+        self::assertCount(0, $rows);
+    }
+
     private function buildListBroker(Database $database): ListBroker
     {
         return new class($database) extends ListBroker
@@ -70,6 +109,7 @@ class ListBrokerTest extends DatabaseTestCase
                 $this->setSortAllowedColumns(['name', 'alter', 'force']);
                 $this->setFilterAllowedColumns(['name']);
                 $this->setSortDefaults(['name' => 'asc']);
+                $this->setSearchableColumns(['name', 'alter']);
                 $this->setPagerDefaultLimit(50); // Default
                 $this->setPagerMaxLimit(50); // Default
                 $this->setSortAscNullLast(true); // Default
