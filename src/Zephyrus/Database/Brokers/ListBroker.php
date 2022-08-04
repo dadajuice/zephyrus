@@ -3,6 +3,7 @@
 use Zephyrus\Database\Components\PagerParser;
 use Zephyrus\Database\Components\QueryFilter;
 use Zephyrus\Database\Core\Database;
+use Zephyrus\Utilities\Components\ListView;
 
 abstract class ListBroker extends DatabaseBroker
 {
@@ -32,9 +33,9 @@ abstract class ListBroker extends DatabaseBroker
     /**
      * Retrieves from the database the total count for the findAllRows() corresponding query.
      *
-     * @return int
+     * @return \stdClass
      */
-    abstract public function count(): int;
+    abstract public function count(): \stdClass;
 
     public function __construct(?Database $database = null)
     {
@@ -53,6 +54,16 @@ abstract class ListBroker extends DatabaseBroker
         $this->queryFilter->getPagerParser()->setMaxLimitAllowed($this->maxPagerLimit);
     }
 
+    public function inflate(): ListView
+    {
+        $rows = $this->findAllRows();
+        $list = new ListView($rows);
+        $list->setQueryFilter($this->queryFilter);
+        $count = $this->count();
+        $list->setCount($count->current, $count->total);
+        return $list;
+    }
+
     /**
      * Execute a SELECT query which return the entire set of rows in an array. Will filter the query according to the
      * current filter loaded into the broker class. Returns null if the query did not fetch any result.
@@ -68,6 +79,19 @@ abstract class ListBroker extends DatabaseBroker
         $query = $this->queryFilter->sort($query);
         $query = $this->queryFilter->paginate($query);
         return self::select($query, $parameters + $this->queryFilter->getQueryParameters(), $callback);
+    }
+
+    /**
+     * Ignore sort and pagination for count queries.
+     *
+     * @param string $query
+     * @param array $parameters
+     * @return \stdClass
+     */
+    protected function baseCount(string $query, array $parameters = []): \stdClass
+    {
+        $query = $this->queryFilter->filter($query);
+        return self::selectSingle($query, $parameters + $this->queryFilter->getQueryParameters());
     }
 
     /**
