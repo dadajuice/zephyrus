@@ -18,7 +18,8 @@ class FilterParserTest extends TestCase
         $parser = new FilterParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
         self::assertTrue($parser->hasRequested());
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
 
         self::assertEquals("WHERE (name ILIKE ?)", $clause->getSql());
         self::assertEquals(["%bob%"], $clause->getQueryParameters());
@@ -31,7 +32,8 @@ class FilterParserTest extends TestCase
 
         $parser = new FilterParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
 
         self::assertFalse($parser->hasRequested());
         self::assertEquals("", $clause->getSql());
@@ -47,7 +49,8 @@ class FilterParserTest extends TestCase
         $parser = new FilterParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
         $parser->setAliasColumns(['name' => 'title']);
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
 
         self::assertEquals("WHERE (title ILIKE ?)", $clause->getSql());
         self::assertEquals(["%bob%"], $clause->getQueryParameters());
@@ -62,7 +65,8 @@ class FilterParserTest extends TestCase
 
         $parser = new FilterParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
 
         self::assertEquals("WHERE (name ILIKE ?) OR (brand ILIKE ?)", $clause->getSql());
         self::assertEquals(["%bob%", "%soft"], $clause->getQueryParameters());
@@ -78,7 +82,8 @@ class FilterParserTest extends TestCase
         $parser = new FilterParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
         $parser->setAggregateOperator(WhereClause::OPERATOR_AND);
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
 
         self::assertEquals("WHERE (name ILIKE ?) AND (brand ILIKE ?)", $clause->getSql());
         self::assertEquals(["%bob%", "%soft"], $clause->getQueryParameters());
@@ -93,7 +98,8 @@ class FilterParserTest extends TestCase
 
         $parser = new FilterParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
 
         self::assertEquals("WHERE (name ILIKE ?)", $clause->getSql());
         self::assertEquals(["bob%"], $clause->getQueryParameters());
@@ -108,7 +114,8 @@ class FilterParserTest extends TestCase
 
         $parser = new FilterParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
 
         self::assertEquals("WHERE (name ILIKE ?)", $clause->getSql());
         self::assertEquals(["%bob"], $clause->getQueryParameters());
@@ -123,7 +130,8 @@ class FilterParserTest extends TestCase
 
         $parser = new FilterParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
 
         self::assertEquals("WHERE (name = ?)", $clause->getSql());
         self::assertEquals(["bob"], $clause->getQueryParameters());
@@ -138,7 +146,8 @@ class FilterParserTest extends TestCase
 
         $parser = new FilterParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
 
         self::assertEquals("WHERE (name ILIKE ?)", $clause->getSql());
         self::assertEquals(["%bob%"], $clause->getQueryParameters());
@@ -149,7 +158,8 @@ class FilterParserTest extends TestCase
         $request = new Request("http://example.com", "get", ['parameters' => []]);
         RequestFactory::set($request);
         $parser = new FilterParser();
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
         self::assertEquals("", $clause->getSql());
     }
 
@@ -162,7 +172,8 @@ class FilterParserTest extends TestCase
 
         $parser = new FilterParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
 
         self::assertEquals("", $clause->getSql());
     }
@@ -176,7 +187,8 @@ class FilterParserTest extends TestCase
 
         $parser = new FilterParser();
         $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
 
         self::assertEquals("WHERE (name = ?)", $clause->getSql());
         self::assertEquals(["bob"], $clause->getQueryParameters());
@@ -193,7 +205,8 @@ class FilterParserTest extends TestCase
         $parser->setAllowedColumns(['name', 'price', 'brand']);
         $parser->setSearchableColumns(['name', 'brand']);
         self::assertTrue($parser->hasRequested());
-        $clause = $parser->parse();
+        $parser->parse();
+        $clause = $parser->getSqlClause();
 
         self::assertEquals("WHERE (name ILIKE ?) OR (brand ILIKE ?)", $clause->getSql());
         self::assertEquals(["%bob%", "%bob%"], $clause->getQueryParameters());
