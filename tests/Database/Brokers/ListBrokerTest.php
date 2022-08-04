@@ -36,6 +36,14 @@ class ListBrokerTest extends DatabaseTestCase
         $list = $instance->inflate();
 
         $rows = $list->getRows();
+
+        $list->addHeader('Name', 'name');
+        $list->addHeader('Power', 'force', 'right');
+        self::assertEquals((object)[
+            'title' => 'Name',
+            'sort' => 'name',
+            'align' => ''
+        ], $list->getHeaders()[0]);
         self::assertCount(4, $rows);
         self::assertEquals("Superman", $rows[0]->name);
         self::assertEquals(4, $list->getCount());
@@ -48,10 +56,19 @@ class ListBrokerTest extends DatabaseTestCase
         self::assertEquals("", $list->mark(null));
         self::assertEquals("man", $list->getSearch());
 
+        $pager = $list->getPager();
+        $html = $pager->getHtml();
+        self::assertEquals('<div class="pager"><span>1</span></div>', $html);
+
+        $list->addAdditionalData('key', 'test');
+        self::assertEquals('test', $list->getAdditionalData()['key']);
+
+        $list->setAdditionalData(['key' => 'test']);
         $json = json_decode(json_encode($list->toArray()));
         self::assertCount(4, $json->results->rows);
         self::assertEquals(1, $json->pager->maxPage);
         self::assertEquals('man', $json->filter->search);
+        self::assertEquals('test', $json->data->key);
 
         $list->setQueryFilter(null);
         self::assertEquals("Superman", $list->mark("Superman"));

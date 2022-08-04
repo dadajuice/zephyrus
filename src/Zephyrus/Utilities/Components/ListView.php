@@ -57,14 +57,6 @@ class ListView
     }
 
     /**
-     * @param array $headers
-     */
-    public function setHeaders(array $headers)
-    {
-        $this->headers = $headers;
-    }
-
-    /**
      * @param string $label
      * @param string|null $sort
      * @param string $align
