@@ -8,7 +8,6 @@ class Bootstrap
 {
     public static function start()
     {
-        self::initializeErrorReporting();
         self::initializeLocale();
     }
 
@@ -30,14 +29,6 @@ class Bootstrap
     public static function getHelperFunctionsPath(): string
     {
         return realpath(__DIR__ . '/../functions.php');
-    }
-
-    private static function initializeErrorReporting()
-    {
-        $dev = (Configuration::getApplicationConfiguration('env') == 'dev');
-        ini_set('display_startup_errors', $dev);
-        ini_set('display_errors', $dev);
-        ini_set('error_log', ROOT_DIR . '/logs/errors.log');
     }
 
     private static function initializeLocale()
