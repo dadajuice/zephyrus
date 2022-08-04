@@ -61,6 +61,6 @@ class Bootstrap
 
     private static function initializeTimezone()
     {
-        date_default_timezone_set(Configuration::getApplicationConfiguration('timezone'));
+        date_default_timezone_set(Configuration::getLocaleConfiguration('timezone'));
     }
 }
