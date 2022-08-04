@@ -17,7 +17,6 @@ class FilterParser
     private array $aliasColumns = [];
     private array $searchableColumns = [];
     private string $aggregateOperator = WhereClause::OPERATOR_OR;
-    private bool $parsed = false;
 
     public function __construct()
     {
@@ -62,17 +61,12 @@ class FilterParser
 
     public function getSqlClause(): WhereClause
     {
-        if (!$this->parsed) {
-            throw new \RuntimeException("Filters not yet parsed. Be sure to use the parse() method before.");
-        }
         return $this->whereClause;
     }
 
     public function hasRequested(): bool
     {
-        $request = RequestFactory::read();
-        return !empty($request->getParameter(self::URL_PARAMETER, []))
-            || !empty($request->getParameter(self::URL_SEARCH_PARAMETER));
+        return !empty($this->filters) || !empty($this->searchQuery);
     }
 
     /**
@@ -85,18 +79,18 @@ class FilterParser
      * The aliasColumn array allows specifying correspondance between request parameters and database column (if
      * developers don't want to expose database column directly in UI links). If a specified column is not allowed it
      * will be ignored. If no column type is given, the "contains" default will be considered.
+     *
+     * @return WhereClause
      */
-    public function parse()
+    public function parse(): WhereClause
     {
         if (!empty($this->searchQuery)) {
-            $this->parseSearch();
-        } else {
-            $this->parseFilters();
+            return $this->parseSearch();
         }
-        $this->parsed = true;
+        return $this->parseFilters();
     }
 
-    private function parseFilters()
+    private function parseFilters(): WhereClause
     {
         foreach ($this->filters as $columnDefinition => $content) {
             if (!str_contains($columnDefinition, ":")) {
@@ -117,16 +111,20 @@ class FilterParser
                 default => null
             };
         }
+        return $this->whereClause;
     }
 
     /**
      * Treat the search query as a simple "contains" filter request over all the searchable columns.
+     *
+     * @return WhereClause
      */
-    private function parseSearch()
+    private function parseSearch(): WhereClause
     {
         foreach ($this->searchableColumns as $searchableColumn) {
             $this->parseContains($searchableColumn, $this->searchQuery);
         }
+        return $this->whereClause;
     }
 
     private function parseContains(string $column, mixed $content, bool $caseInsensitive = true)

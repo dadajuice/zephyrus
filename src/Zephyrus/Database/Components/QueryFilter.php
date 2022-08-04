@@ -70,6 +70,11 @@ class QueryFilter
         return $this->filterParser->getFilters();
     }
 
+    public function getSorts(): array
+    {
+        return $this->sortParser->getSorts();
+    }
+
     /**
      * Proceeds to inject the SQL filtering (WHERE clause) to the given query. Will ignore if no filter has been
      * specified in the request.
@@ -82,7 +87,6 @@ class QueryFilter
         if (!$this->isFilterRequested()) {
             return $rawQuery;
         }
-        $this->filterParser->parse();
         return $this->injectWhereClause($rawQuery);
     }
 
@@ -144,7 +148,7 @@ class QueryFilter
 
     private function injectWhereClause(string $query): string
     {
-        $whereClause = $this->filterParser->getSqlClause();
+        $whereClause = $this->filterParser->parse();
         $where = $whereClause->getSql();
         if (empty($where)) {
             return $query;

@@ -8,11 +8,19 @@ class SortParser
     public const URL_PARAMETER = 'sorts';
 
     private OrderByClause $orderByClause;
+    private array $sorts;
     private array $allowedColumns = [];
     private array $defaultSorts = [];
     private array $aliasColumns = [];
     private bool $ascNullLast = true;
     private bool $descNullLast = false;
+
+    public function __construct()
+    {
+        $request = RequestFactory::read();
+        $this->sorts = $request->getParameter(self::URL_PARAMETER, []);
+        $this->orderByClause = new OrderByClause();
+    }
 
     public function setAscNullLast(bool $nullLast)
     {
@@ -39,10 +47,19 @@ class SortParser
         $this->defaultSorts = $defaultSorts;
     }
 
+    public function getSorts(): array
+    {
+        return $this->sorts;
+    }
+
+    public function getSqlClause(): OrderByClause
+    {
+        return $this->orderByClause;
+    }
+
     public function hasRequested(): bool
     {
-        $request = RequestFactory::read();
-        return !empty($request->getParameter(self::URL_PARAMETER, []));
+        return !empty($this->sorts);
     }
 
     public function hasDefaultSort(): bool
@@ -64,10 +81,8 @@ class SortParser
      */
     public function parse(): OrderByClause
     {
-        $request = RequestFactory::read();
-        $sortColumns = $request->getParameter(self::URL_PARAMETER, $this->defaultSorts);
-        $this->orderByClause = new OrderByClause();
-        foreach ($sortColumns as $column => $order) {
+        $sorts = empty($this->sorts) ? $this->defaultSorts : $this->sorts;
+        foreach ($sorts as $column => $order) {
             if (!in_array($column, $this->allowedColumns)) {
                 continue;
             }
