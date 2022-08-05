@@ -11,6 +11,7 @@ class ListView
     private int $count; // Count matching the filters (will be same as $totalCount if no filter are given)
     private int $totalCount; // Count total for virgin filters
     private ?QueryFilter $queryFilter = null;
+    private ?PagerView $pagerView = null;
 
     public function __construct(array $rows)
     {
@@ -27,6 +28,7 @@ class ListView
     {
         $this->count = $count;
         $this->totalCount = $totalCount ?? $count;
+        $this->pagerView = new PagerView($this->queryFilter->getPagerParser(), $count);
     }
 
     /**
@@ -115,7 +117,7 @@ class ListView
 
     public function getPager(): ?PagerView
     {
-        return new PagerView($this->queryFilter->getPagerParser(), $this->count);
+        return $this->pagerView;
     }
 
     public function addAdditionalData(string $key, $value)
