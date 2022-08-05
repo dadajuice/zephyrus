@@ -18,6 +18,16 @@ class PagerView
         $this->validate();
     }
 
+    public function getCurrentPage(): int
+    {
+        return $this->currentPage;
+    }
+
+    public function getMaxPage(): int
+    {
+        return $this->maxPage;
+    }
+
     /**
      * Displays directly to the output buffer the resulting HTML of the pager structure using an echo directive.
      */
