@@ -101,9 +101,16 @@ final class SchemaInterrogator
         return $columns;
     }
 
+    public function getTableSize(string $tableName): int
+    {
+        $statement = $this->database->query("SELECT pg_total_relation_size('$tableName') as size");
+        $row = $statement->next();
+        return $row->size;
+    }
+
     /**
      * Meta query to retrieve all table details of given database instance. Return an array of stdClasses with the
-     * following properties: name, columns and contraints.
+     * following properties: name, size, columns and contraints.
      *
      * @return stdClass[]
      */
@@ -113,6 +120,7 @@ final class SchemaInterrogator
         foreach ($this->getAllTableNames() as $name) {
             $results[] = (object) [
                 'name' => $name,
+                'size' => $this->getTableSize($name),
                 'columns' => $this->getAllColumns($name),
                 'constraints' => $this->getAllConstraints($name)
             ];
