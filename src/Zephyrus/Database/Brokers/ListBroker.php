@@ -4,6 +4,7 @@ use stdClass;
 use Zephyrus\Database\Components\PagerParser;
 use Zephyrus\Database\Components\QueryFilter;
 use Zephyrus\Database\Core\Database;
+use Zephyrus\Utilities\Components\ListGroupView;
 use Zephyrus\Utilities\Components\ListView;
 
 abstract class ListBroker extends DatabaseBroker
@@ -62,6 +63,20 @@ abstract class ListBroker extends DatabaseBroker
         $list->setQueryFilter($this->queryFilter);
         $count = $this->count();
         $list->setCount($count->current, $count->total);
+        return $list;
+    }
+
+    public function inflateGroupedList(string $groupColumn, ?callable $formatCallback = null): ListGroupView
+    {
+        $rows = $this->findRows();
+        $list = new ListGroupView($rows);
+        $list->setQueryFilter($this->queryFilter);
+        $count = $this->count();
+        $list->setCount($count->current, $count->total);
+        $list->setHeaderColumn($groupColumn);
+        if (!is_null($formatCallback)) {
+            $list->setHeaderFormatting($formatCallback);
+        }
         return $list;
     }
 
