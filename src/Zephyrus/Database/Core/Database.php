@@ -153,14 +153,17 @@ class Database
      * Creates the PDO handle to allow for query to be executed to the configured database source. Will throw
      * a FatalDatabaseException when connection fails.
      *
-     * @return DatabaseHandle
      * @throws FatalDatabaseException
+     * @return DatabaseHandle
      */
     private function connect(): DatabaseHandle
     {
         try {
-            return new DatabaseHandle($this->configuration->getDatabaseSourceName(),
-                $this->configuration->getUsername(), $this->configuration->getPassword());
+            return new DatabaseHandle(
+                $this->configuration->getDatabaseSourceName(),
+                $this->configuration->getUsername(),
+                $this->configuration->getPassword()
+            );
         } catch (PDOException $e) {
             throw FatalDatabaseException::connectionFailed($e->getMessage());
         }

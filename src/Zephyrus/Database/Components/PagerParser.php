@@ -86,7 +86,7 @@ class PagerParser
 
     /**
      * Parses the request parameters to build a corresponding PagerModel instance. The parameters should be given
-     * following the public constants:
+     * following the public constants:.
      *
      *     example.com?page=4&limit=96
      *

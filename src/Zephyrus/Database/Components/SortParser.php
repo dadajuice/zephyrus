@@ -69,7 +69,7 @@ class SortParser
 
     /**
      * Parses the request parameters to build a corresponding ORDER BY clause. The parameters should be given following
-     * the public constants:
+     * the public constants:.
      *
      *     example.com?sorts[column] = asc|desc
      *

@@ -75,7 +75,6 @@ class WhereCondition
     }
 
     /**
-     *
      * @see https://www.postgresql.org/docs/9.0/functions-matching.html#FUNCTIONS-SIMILARTO-REGEXP
      * @param string $column
      * @param string $sqlRegexPattern

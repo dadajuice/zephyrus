@@ -72,7 +72,7 @@ class DatabaseStatement
         return $this->statement;
     }
 
-    private function prepareRow(stdClass | bool $row): ?stdClass
+    private function prepareRow(stdClass|bool $row): ?stdClass
     {
         if ($row === false) {
             return null;
