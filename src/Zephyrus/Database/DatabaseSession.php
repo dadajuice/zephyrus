@@ -14,12 +14,12 @@ class DatabaseSession
     /**
      * @throws FatalDatabaseException
      */
-    public final static function initiate(array $configurations, array $searchPaths = ['public'])
+    final public static function initiate(array $configurations, array $searchPaths = ['public'])
     {
         self::$instance = new self(new Database($configurations), $searchPaths);
     }
 
-    public final static function getInstance(): self
+    final public static function getInstance(): self
     {
         if (is_null(self::$instance)) {
             throw new RuntimeException("DatabaseSession instance must first be initialized with [DatabaseSession::initiate(Database \$databaseInstance)].");

@@ -71,7 +71,7 @@ class FilterParser
 
     /**
      * Parses the request parameters to build a corresponding WHERE clause. The parameters should be given following the
-     * public constants:
+     * public constants:.
      *
      *     example.com?filters[column:type]=content
      *     example.com?search=batman
