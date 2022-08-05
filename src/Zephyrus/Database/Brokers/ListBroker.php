@@ -82,7 +82,8 @@ abstract class ListBroker extends DatabaseBroker
     }
 
     /**
-     * Ignore sort and pagination for count queries.
+     * Executes a given "SELECT count(*) as n" query to calculate the number of rows related to a list. Will return an
+     * object with two properties : current and total. The given query MUST have the "as n" column alias to work.
      *
      * @param string $query
      * @param array $parameters
@@ -90,8 +91,13 @@ abstract class ListBroker extends DatabaseBroker
      */
     protected function baseCount(string $query, array $parameters = []): \stdClass
     {
+        $total = self::selectSingle($query, $parameters)->n;
         $query = $this->queryFilter->filter($query);
-        return self::selectSingle($query, $parameters + $this->queryFilter->getQueryParameters());
+        $current = self::selectSingle($query, $parameters + $this->queryFilter->getQueryParameters())->n;
+        return (object) [
+            'current' => $current,
+            'total' => $total
+        ];
     }
 
     /**
