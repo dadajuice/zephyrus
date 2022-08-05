@@ -149,7 +149,7 @@ class Database
         return $this->handle->lastInsertId($sequenceName);
     }
 
-    public function getDatabaseSize(): int
+    public function getSize(): int
     {
         $statement = $this->query("SELECT pg_database_size('" . $this->configuration->getDatabaseName() . "') as size");
         $row = $statement->next();
