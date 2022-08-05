@@ -189,7 +189,7 @@ class ListBrokerTest extends DatabaseTestCase
 
             public function count(): \stdClass
             {
-                return $this->baseCount("SELECT COUNT(*) as n FROM heroes");
+                return $this->countQuery("SELECT COUNT(*) as n FROM heroes");
             }
         };
     }

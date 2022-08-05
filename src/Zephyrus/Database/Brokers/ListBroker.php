@@ -88,9 +88,9 @@ abstract class ListBroker extends DatabaseBroker
      *
      * @param string $query
      * @param array $parameters
-     * @return \stdClass
+     * @return stdClass
      */
-    protected function baseCount(string $query, array $parameters = []): \stdClass
+    protected function countQuery(string $query, array $parameters = []): stdClass
     {
         $total = self::selectSingle($query, $parameters)->n;
         $query = $this->queryFilter->filter($query);
