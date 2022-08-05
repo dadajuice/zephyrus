@@ -149,6 +149,13 @@ class Database
         return $this->handle->lastInsertId($sequenceName);
     }
 
+    public function getDatabaseSize(): int
+    {
+        $statement = $this->query("SELECT pg_database_size('" . $this->configuration->getDatabaseName() . "') as size");
+        $row = $statement->next();
+        return $row->size;
+    }
+
     /**
      * Creates the PDO handle to allow for query to be executed to the configured database source. Will throw
      * a FatalDatabaseException when connection fails.
