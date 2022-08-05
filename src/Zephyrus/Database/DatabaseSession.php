@@ -16,7 +16,7 @@ class DatabaseSession
      */
     final public static function initiate(array $configurations, array $searchPaths = ['public'])
     {
-        static::$instance = new self(new Database($configurations), $searchPaths);
+        static::$instance = new static(new Database($configurations), $searchPaths);
     }
 
     final public static function getInstance(): static
