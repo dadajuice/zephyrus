@@ -28,7 +28,7 @@ abstract class ListBroker extends DatabaseBroker
      *
      * @return array
      */
-    abstract public function findAllRows(): array;
+    abstract public function findRows(): array;
 
     /**
      * Retrieves from the database the total count for the findAllRows() corresponding query.
@@ -56,7 +56,7 @@ abstract class ListBroker extends DatabaseBroker
 
     public function inflate(): ListView
     {
-        $rows = $this->findAllRows();
+        $rows = $this->findRows();
         $list = new ListView($rows);
         $list->setQueryFilter($this->queryFilter);
         $count = $this->count();

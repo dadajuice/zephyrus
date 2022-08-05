@@ -80,7 +80,7 @@ class ListBrokerTest extends DatabaseTestCase
         RequestFactory::set($request);
 
         $instance = $this->buildListBroker($this->buildDatabase());
-        $rows = $instance->findAllRows();
+        $rows = $instance->findRows();
         self::assertCount(6, $rows);
         self::assertEquals("Aquaman", $rows[0]->name);
     }
@@ -93,7 +93,7 @@ class ListBrokerTest extends DatabaseTestCase
         RequestFactory::set($request);
 
         $instance = $this->buildListBroker($this->buildDatabase());
-        $rows = $instance->findAllRows();
+        $rows = $instance->findRows();
         self::assertCount(1, $rows);
         self::assertEquals("Aquaman", $rows[0]->name);
     }
@@ -106,7 +106,7 @@ class ListBrokerTest extends DatabaseTestCase
         RequestFactory::set($request);
 
         $instance = $this->buildListBroker($this->buildDatabase());
-        $rows = $instance->findAllRows();
+        $rows = $instance->findRows();
         self::assertCount(4, $rows);
         self::assertEquals("Aquaman", $rows[0]->name);
         self::assertEquals("Batman", $rows[1]->name);
@@ -121,7 +121,7 @@ class ListBrokerTest extends DatabaseTestCase
         RequestFactory::set($request);
 
         $instance = $this->buildListBroker($this->buildDatabase());
-        $rows = $instance->findAllRows();
+        $rows = $instance->findRows();
         self::assertCount(4, $rows);
         self::assertEquals("Superman", $rows[0]->name);
     }
@@ -135,7 +135,7 @@ class ListBrokerTest extends DatabaseTestCase
         RequestFactory::set($request);
 
         $instance = $this->buildListBroker($this->buildDatabase());
-        $rows = $instance->findAllRows();
+        $rows = $instance->findRows();
         self::assertCount(4, $rows);
         self::assertEquals("Superman", $rows[0]->name);
     }
@@ -148,7 +148,7 @@ class ListBrokerTest extends DatabaseTestCase
         RequestFactory::set($request);
 
         $instance = $this->buildListBroker($this->buildDatabase());
-        $rows = $instance->findAllRows();
+        $rows = $instance->findRows();
         self::assertCount(1, $rows);
         self::assertEquals("Wonder Woman", $rows[0]->name);
     }
@@ -161,7 +161,7 @@ class ListBrokerTest extends DatabaseTestCase
         RequestFactory::set($request);
 
         $instance = $this->buildListBroker($this->buildDatabase());
-        $rows = $instance->findAllRows();
+        $rows = $instance->findRows();
         self::assertCount(0, $rows);
     }
 
@@ -182,7 +182,7 @@ class ListBrokerTest extends DatabaseTestCase
                 $this->setSortDescNullLast(false); // Default
             }
 
-            public function findAllRows(): array
+            public function findRows(): array
             {
                 return $this->filteredSelect("SELECT * FROM heroes");
             }
