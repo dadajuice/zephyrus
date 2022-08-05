@@ -98,12 +98,12 @@ class ListView
         return $this->queryFilter->getSorts();
     }
 
-    public function getCount(): int
+    public function getCurrentRowCount(): int
     {
         return $this->count;
     }
 
-    public function getTotalCount(): int
+    public function getTotalRowCount(): int
     {
         return $this->totalCount;
     }

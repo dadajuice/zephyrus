@@ -18,8 +18,8 @@ class ListBrokerTest extends DatabaseTestCase
         $rows = $list->getRows();
         self::assertCount(6, $rows);
         self::assertEquals("Aquaman", $rows[0]->name);
-        self::assertEquals(6, $list->getCount());
-        self::assertEquals(6, $list->getTotalCount());
+        self::assertEquals(6, $list->getCurrentRowCount());
+        self::assertEquals(6, $list->getTotalRowCount());
         self::assertEquals(1, $list->getCurrentPage());
         self::assertEquals("Batman", $list->getRow(1)->name);
     }
@@ -46,8 +46,8 @@ class ListBrokerTest extends DatabaseTestCase
         ], $list->getHeaders()[0]);
         self::assertCount(4, $rows);
         self::assertEquals("Superman", $rows[0]->name);
-        self::assertEquals(4, $list->getCount());
-        self::assertEquals(6, $list->getTotalCount());
+        self::assertEquals(4, $list->getCurrentRowCount());
+        self::assertEquals(6, $list->getTotalRowCount());
         self::assertEquals(1, $list->getCurrentPage());
         self::assertEquals("Super<mark>man</mark>", $list->mark("Superman"));
         self::assertEquals("Super<mark>man</mark> & Bat<mark>man</mark>", $list->mark("Superman & Batman"));
