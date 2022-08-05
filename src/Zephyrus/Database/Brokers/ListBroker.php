@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Database\Brokers;
 
+use stdClass;
 use Zephyrus\Database\Components\PagerParser;
 use Zephyrus\Database\Components\QueryFilter;
 use Zephyrus\Database\Core\Database;
@@ -33,9 +34,9 @@ abstract class ListBroker extends DatabaseBroker
     /**
      * Retrieves from the database the total count for the findAllRows() corresponding query.
      *
-     * @return \stdClass
+     * @return stdClass
      */
-    abstract public function count(): \stdClass;
+    abstract public function count(): stdClass;
 
     public function __construct(?Database $database = null)
     {
