@@ -94,7 +94,7 @@ abstract class ListBroker extends DatabaseBroker
         $query = $this->queryFilter->filter($query);
         $query = $this->queryFilter->sort($query);
         $query = $this->queryFilter->paginate($query);
-        return self::select($query, $parameters + $this->queryFilter->getQueryParameters(), $callback);
+        return self::select($query, array_merge($parameters, $this->queryFilter->getQueryParameters()), $callback);
     }
 
     /**
@@ -109,7 +109,7 @@ abstract class ListBroker extends DatabaseBroker
     {
         $total = self::selectSingle($query, $parameters)->n;
         $query = $this->queryFilter->filter($query);
-        $current = self::selectSingle($query, $parameters + $this->queryFilter->getQueryParameters())->n;
+        $current = self::selectSingle($query, array_merge($parameters, $this->queryFilter->getQueryParameters()))->n;
         return (object) [
             'current' => $current,
             'total' => $total
