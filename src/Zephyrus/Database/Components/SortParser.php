@@ -49,7 +49,7 @@ class SortParser
 
     public function getSorts(): array
     {
-        return $this->sorts;
+        return empty($this->sorts) ? $this->defaultSorts : $this->sorts;
     }
 
     public function getSqlClause(): OrderByClause
@@ -81,7 +81,7 @@ class SortParser
      */
     public function parse(): OrderByClause
     {
-        $sorts = empty($this->sorts) ? $this->defaultSorts : $this->sorts;
+        $sorts = $this->getSorts();
         foreach ($sorts as $column => $order) {
             if (!in_array($column, $this->allowedColumns)) {
                 continue;
