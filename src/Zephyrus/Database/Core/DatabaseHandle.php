@@ -59,7 +59,7 @@ class DatabaseHandle extends PDO
         if ($this->currentTransactionLevel == 0) {
             return parent::rollBack();
         }
-        $this->exec("ROLLBACK TO SAVEPOINT LEVEL_" . $this->currentTransactionLevel);
+        $this->exec("ROLLBACK TO SAVEPOINT LEVEL" . $this->currentTransactionLevel);
         return true;
     }
 }
