@@ -149,6 +149,13 @@ class Database
         return $this->handle->lastInsertId($sequenceName);
     }
 
+    public function getVersion(): string
+    {
+        $statement = $this->query("SHOW server_version");
+        $row = $statement->next();
+        return $row->server_version;
+    }
+
     public function getSize(): int
     {
         $statement = $this->query("SELECT pg_database_size('" . $this->configuration->getDatabaseName() . "') as size");
