@@ -188,6 +188,18 @@ class File extends FileSystemNode
     }
 
     /**
+     * Returns the base64 encode format for inclusion as standard uri (e.g. in <img> tags).
+     *
+     * @return string
+     */
+    public function base64Uri(): string
+    {
+        $mime = $this->getMimeType();
+        $data = $this->read();
+        return 'data:' . $mime . ';base64,' . base64_encode($data);
+    }
+
+    /**
      * Creates an instance of CURLFile based on the current file destined to be used in a Curl upload session. If no
      * uploadFilename is given, the original filename will be used (including extension).
      *
