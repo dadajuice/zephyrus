@@ -81,6 +81,39 @@ abstract class ListBroker extends DatabaseBroker
     }
 
     /**
+     * Allows to manually apply the pagination (LIMIT) to the given SQL query.
+     *
+     * @param string $query
+     * @return string
+     */
+    protected function paginate(string $query): string
+    {
+        return $this->queryFilter->paginate($query);
+    }
+
+    /**
+     * Allows to manually apply the sort (ORDER BY) to the given SQL query.
+     *
+     * @param string $query
+     * @return string
+     */
+    protected function sort(string $query): string
+    {
+        return $this->queryFilter->sort($query);
+    }
+
+    /**
+     * Allows to manually apply the filter (WHERE) to the given SQL query.
+     *
+     * @param string $query
+     * @return string
+     */
+    protected function filter(string $query): string
+    {
+        return $this->queryFilter->filter($query);
+    }
+
+    /**
      * Execute a SELECT query which return the entire set of rows in an array. Will filter the query according to the
      * current filter loaded into the broker class. Returns null if the query did not fetch any result.
      *
