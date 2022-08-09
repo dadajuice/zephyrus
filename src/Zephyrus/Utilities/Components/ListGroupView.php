@@ -12,7 +12,7 @@ class ListGroupView extends ListView
     public function __construct(array $rows)
     {
         parent::__construct($rows);
-        $this->headerFormatting = function($value) {
+        $this->headerFormatting = function ($value) {
             return $value;
         };
     }
