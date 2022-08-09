@@ -56,20 +56,22 @@ abstract class ListBroker extends DatabaseBroker
         $this->queryFilter->getPagerParser()->setMaxLimitAllowed($this->maxPagerLimit);
     }
 
-    public function inflate(): ListView
+    public function inflate(array $defaultSorts = []): ListView
     {
         $rows = $this->findRows();
         $list = new ListView($rows);
+        $this->queryFilter->getSortParser()->setDefaultSorts(empty($defaultSorts) ? $this->defaultSorts : $defaultSorts);
         $list->setQueryFilter($this->queryFilter);
         $count = $this->count();
         $list->setCount($count->current, $count->total);
         return $list;
     }
 
-    public function inflateGroupedList(string $groupColumn, ?callable $formatCallback = null): ListGroupView
+    public function inflateGroupedList(string $groupColumn, ?callable $formatCallback = null, array $defaultSorts = []): ListGroupView
     {
         $rows = $this->findRows();
         $list = new ListGroupView($rows);
+        $this->queryFilter->getSortParser()->setDefaultSorts(empty($defaultSorts) ? $this->defaultSorts : $defaultSorts);
         $list->setQueryFilter($this->queryFilter);
         $count = $this->count();
         $list->setCount($count->current, $count->total);
