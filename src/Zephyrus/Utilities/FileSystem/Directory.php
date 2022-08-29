@@ -69,6 +69,52 @@ class Directory extends FileSystemNode
     }
 
     /**
+     * Retrieves all directory names in the root path.
+     *
+     * @return string[]
+     */
+    public function getAllRootDirectoryNames(): array
+    {
+        $directories = [];
+        $elements = scandir($this->path);
+        foreach ($elements as $element) {
+            $fullPath = $this->path . DIRECTORY_SEPARATOR . $element;
+            if ($element != "." && $element != "..") {
+                if (is_dir($fullPath)) {
+                    $directories[] = $element;
+                }
+            }
+        }
+        return $directories;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getAllRootDirectoryFilenames(): array
+    {
+        $directories = [];
+        $names = $this->getAllRootDirectoryNames();
+        foreach ($names as $name) {
+            $directories[] = $this->path . DIRECTORY_SEPARATOR . $name;
+        }
+        return $directories;
+    }
+
+    /**
+     * @return Directory[]
+     */
+    public function getAllRootDirectories(): array
+    {
+        $directories = [];
+        $names = $this->getAllRootDirectoryFilenames();
+        foreach ($names as $name) {
+            $directories[] = new Directory($name);
+        }
+        return $directories;
+    }
+
+    /**
      * Retrieves all directory's available file names (without the directory
      * name by default).
      *
