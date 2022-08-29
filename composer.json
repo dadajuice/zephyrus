@@ -22,7 +22,8 @@
     "ext-posix": "*",
     "ext-openssl": "*",
     "ext-mbstring": "*",
-    "ext-zip": "*"
+    "ext-zip": "*",
+    "ext-ctype": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "9.*.*",
@@ -36,6 +37,11 @@
   "autoload-dev": {
     "psr-4": {
       "Zephyrus\\Tests\\": "tests"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "nodejs-php-fallback/nodejs-php-fallback": true
     }
   }
 }
