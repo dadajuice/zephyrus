@@ -147,17 +147,21 @@ class QueryFilterTest extends TestCase
 
     public function testFilterWithPreExistingWhere()
     {
-        $request = new Request("http://example.com/projects?filters[name:contains]=micro", "get", ['parameters' => [
-            'filters' => ['name:contains' => 'micro']
+        $request = new Request("http://example.com/projects?filters[name:contains]=micro&filters[age:equals]=18", "get", ['parameters' => [
+            'filters' => [
+                'name:contains' => 'micro',
+                'age:equals' => '18'
+            ]
         ]]);
         RequestFactory::set($request);
         $filter = new QueryFilter();
-        $filter->getFilterParser()->setAllowedColumns(['name']);
+        $filter->getFilterParser()->setAllowedColumns(['name', 'age']);
         self::assertTrue($filter->isFilterRequested());
 
         $query = "SELECT * FROM view_project WHERE state = 'ACTIVE' AND archive_date IS NULL";
         $resultQuery = $filter->filter($query);
-        self::assertEquals("SELECT * FROM view_project WHERE state = 'ACTIVE' AND archive_date IS NULL AND (name ILIKE ?)", $resultQuery);
+        self::assertEquals("SELECT * FROM view_project WHERE state = 'ACTIVE' AND archive_date IS NULL AND ((name ILIKE ?) OR (age = ?))", $resultQuery);
+
     }
 
     public function testFilterWithPreExistingNestedWhere()
@@ -172,7 +176,7 @@ class QueryFilterTest extends TestCase
 
         $query = "SELECT * FROM view_project WHERE state = 'ACTIVE' AND (archive_date IS NULL OR project_id IN (SELECT id FROM test WHERE test_id = view_project.iterator))";
         $resultQuery = $filter->filter($query);
-        self::assertEquals("SELECT * FROM view_project WHERE state = 'ACTIVE' AND (archive_date IS NULL OR project_id IN (SELECT id FROM test WHERE test_id = view_project.iterator)) AND (name ILIKE ?)", $resultQuery);
+        self::assertEquals("SELECT * FROM view_project WHERE state = 'ACTIVE' AND (archive_date IS NULL OR project_id IN (SELECT id FROM test WHERE test_id = view_project.iterator)) AND ((name ILIKE ?))", $resultQuery);
     }
 
     public function testFilterWithHaving()
@@ -217,6 +221,6 @@ class QueryFilterTest extends TestCase
 
         $query = "SELECT customer_id, SUM(amount) FROM payment WHERE client_id = ? GROUP BY customer_id HAVING SUM (amount) > 200";
         $resultQuery = $filter->filter($query);
-        self::assertEquals("SELECT customer_id, SUM(amount) FROM payment WHERE client_id = ? AND (name ILIKE ?) GROUP BY customer_id HAVING SUM (amount) > 200", $resultQuery);
+        self::assertEquals("SELECT customer_id, SUM(amount) FROM payment WHERE client_id = ? AND ((name ILIKE ?)) GROUP BY customer_id HAVING SUM (amount) > 200", $resultQuery);
     }
 }

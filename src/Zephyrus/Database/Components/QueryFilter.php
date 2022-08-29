@@ -169,6 +169,6 @@ class QueryFilter
 
         $this->queryParameters += $whereClause->getQueryParameters();
         $where = str_replace('WHERE ', '', $where); // Remove WHERE to build manually ...
-        return rtrim($begin) . $clause . $where . $end;
+        return rtrim($begin) . $clause . (($clause == ' AND ') ? "(" . $where . ")" : $where) . $end;
     }
 }
