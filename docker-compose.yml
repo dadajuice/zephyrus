@@ -4,7 +4,7 @@ services:
   webserver:
     build:
       context: .
-      dockerfile: "./docker/services/php80/Dockerfile"
+      dockerfile: "./docker/services/php81/Dockerfile"
     container_name: "zephyrus_webserver"
     restart: 'always'
     ports:
@@ -15,7 +15,7 @@ services:
     volumes:
       - ./:/var/www/html:cached
       - ./docker/vhosts:/etc/apache2/sites-enabled
-      - ./docker/services/php80/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ./docker/services/php81/custom.ini:/usr/local/etc/php/conf.d/custom.ini
 
   database:
     build:
