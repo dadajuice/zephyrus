@@ -73,7 +73,7 @@ class EncryptedSessionHandlerTest extends TestCase
         $_COOKIE['key_phpsessid'] = "wrong"; // simulate invalid key
         $this->handler->open(sys_get_temp_dir(), 'phpsessid');
         $result = $this->handler->read($this->sessionId);
-        self::assertNull($result);
+        self::assertFalse($result);
     }
 
     /**

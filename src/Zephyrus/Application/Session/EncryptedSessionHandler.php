@@ -49,12 +49,12 @@ class EncryptedSessionHandler extends SessionHandler
      * encryption key store in the user's cookies.
      *
      * @param string $id
-     * @return string|null
+     * @return string|false
      */
-    public function read(string $id): ?string
+    public function read(string $id): string|false
     {
         $data = parent::read($id);
-        return (!$data) ? "" : Cryptography::decrypt($data, $this->encryptionKey);
+        return (!$data) ? "" : Cryptography::decrypt($data, $this->encryptionKey) ?? false;
     }
 
     /**
