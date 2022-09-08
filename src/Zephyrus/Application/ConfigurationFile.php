@@ -55,6 +55,8 @@ class ConfigurationFile
             if (is_array($sectionContent)) {
                 $data[] = "[$sectionName]";
                 $this->buildConfigurationProperty($data, $sectionContent);
+            } elseif (is_bool($sectionContent)) {
+                $data[] = $sectionName . ' = ' . var_export($sectionContent, true);
             } else {
                 $data[] = $sectionName . ' = ' . $this->formatConfigurationData($sectionContent);
             }
@@ -63,11 +65,9 @@ class ConfigurationFile
         return $data;
     }
 
-    private function formatConfigurationData($data): string
+    private function formatConfigurationData(string $data): string
     {
-        return (is_bool($data))
-            ? var_export($data, true)
-            : ((ctype_upper($data) || is_numeric($data)) ? $data : '"' . $data . '"');
+        return ((defined($data) || is_numeric($data)) ? $data : '"' . $data . '"');
     }
 
     private function buildConfigurationProperty(array &$data, array $sectionValue)
