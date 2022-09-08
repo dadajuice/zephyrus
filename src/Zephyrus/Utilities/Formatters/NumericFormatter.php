@@ -27,7 +27,7 @@ trait NumericFormatter
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP);
-        $result = $formatter->formatCurrency($amount, Configuration::getLocaleConfiguration('currency'));
+        $result = $formatter->formatCurrency(round($amount, $maxDecimals), Configuration::getLocaleConfiguration('currency'));
         return $result === false ? "-" : $result;
     }
 
@@ -40,7 +40,7 @@ trait NumericFormatter
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $maxDecimals);
         $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $minDecimals);
         $formatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP);
-        $result = $formatter->format($number, \NumberFormatter::TYPE_DOUBLE);
+        $result = $formatter->format(round($number, $maxDecimals), \NumberFormatter::TYPE_DOUBLE);
         return $result === false ? "-" : $result;
     }
 }

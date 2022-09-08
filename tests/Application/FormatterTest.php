@@ -2,9 +2,15 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Utilities\Formatter;
+use Locale;
 
 class FormatterTest extends TestCase
 {
+    public static function setUpBeforeClass(): void {
+        //Since locale test are written for "fr_CA" format, we have to enforce the locale here
+        Locale::setDefault('fr_CA');
+    }
+
     public function testFormatDecimal()
     {
         $result = Formatter::decimal(12.342743);
@@ -29,12 +35,16 @@ class FormatterTest extends TestCase
         self::assertEquals("0", $result);
         $result = Formatter::decimal(null, 0, 0);
         self::assertEquals("-", $result);
+        $result = Formatter::decimal(27.5*11.29, 0, 2); //Test of floating point errors
+        self::assertEquals("310,48", $result);
     }
 
     public function testEllipsis()
     {
         $result = Formatter::ellipsis("Lorem ipsum", 4);
         self::assertEquals("Lore...", $result);
+        $result = Formatter::ellipsis("6465784", 4);
+        self::assertEquals("6465...", $result);
     }
 
     public function testFormatMoney()
@@ -47,6 +57,10 @@ class FormatterTest extends TestCase
         self::assertEquals('501 $', $result);
         $result = Formatter::money(500.455);
         self::assertEquals('500,46 $', $result);
+        $result = Formatter::money(27.5*11.29);
+        self::assertEquals('310,48 $', $result); //Breaks because multiplication is float(310.47499999999997) so is rounded down...
+        $result = Formatter::money(310.475);
+        self::assertEquals('310,48 $', $result);
         $result = Formatter::money(2.265);
         self::assertEquals('2,27 $', $result);
         $result = Formatter::money(2.275);
@@ -71,6 +85,8 @@ class FormatterTest extends TestCase
         self::assertEquals('87,5 %', $result);
         $result = Formatter::percent(null, 1);
         self::assertEquals('-', $result);
+        $result = Formatter::percent(2.05*1.28, 1, 2);
+        self::assertEquals('262,4 %', $result);
     }
 
     public function testFormatTime()
