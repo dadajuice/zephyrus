@@ -1,60 +1,20 @@
 <?php namespace Zephyrus\Database\Components;
 
 use Zephyrus\Database\QueryBuilder\OrderByClause;
-use Zephyrus\Network\RequestFactory;
+use Zephyrus\Utilities\Components\Sort;
 
 class SortParser
 {
-    public const URL_PARAMETER = 'sorts';
-
     private OrderByClause $orderByClause;
     private array $sorts;
-    private array $allowedColumns = [];
-    private array $defaultSorts = [];
     private array $aliasColumns = [];
     private bool $ascNullLast = true;
     private bool $descNullLast = false;
 
-    public function __construct()
+    public function __construct(Sort $sort)
     {
-        $request = RequestFactory::read();
-        $this->sorts = $request->getParameter(self::URL_PARAMETER, []);
+        $this->sorts = $sort->getSorts();
         $this->orderByClause = new OrderByClause();
-    }
-
-    public function setAscNullLast(bool $nullLast)
-    {
-        $this->ascNullLast = $nullLast;
-    }
-
-    public function setDescNullLast(bool $nullLast)
-    {
-        $this->descNullLast = $nullLast;
-    }
-
-    public function setAliasColumns(array $aliasColumns)
-    {
-        $this->aliasColumns = $aliasColumns;
-    }
-
-    public function setAllowedColumns(array $allowedColumns)
-    {
-        $this->allowedColumns = $allowedColumns;
-    }
-
-    public function setDefaultSorts(array $defaultSorts)
-    {
-        $this->defaultSorts = $defaultSorts;
-    }
-
-    public function getSorts(): array
-    {
-        return empty($this->sorts) ? $this->defaultSorts : $this->sorts;
-    }
-
-    public function getSqlClause(): OrderByClause
-    {
-        return $this->orderByClause;
     }
 
     public function hasRequested(): bool
@@ -62,9 +22,29 @@ class SortParser
         return !empty($this->sorts);
     }
 
-    public function hasDefaultSort(): bool
+    public function setAscNullLast(bool $nullLast): void
     {
-        return !empty($this->defaultSorts);
+        $this->ascNullLast = $nullLast;
+    }
+
+    public function setDescNullLast(bool $nullLast): void
+    {
+        $this->descNullLast = $nullLast;
+    }
+
+    public function setAliasColumns(array $aliasColumns): void
+    {
+        $this->aliasColumns = $aliasColumns;
+    }
+
+    public function getSorts(): array
+    {
+        return $this->sorts;
+    }
+
+    public function getSqlClause(): OrderByClause
+    {
+        return $this->orderByClause;
     }
 
     /**
@@ -79,13 +59,10 @@ class SortParser
      *
      * @return OrderByClause
      */
-    public function parse(): OrderByClause
+    public function buildSqlClause(): OrderByClause
     {
         $sorts = $this->getSorts();
         foreach ($sorts as $column => $order) {
-            if (!in_array($column, $this->allowedColumns)) {
-                continue;
-            }
             // Invalid order are evaluated as asc sorting (default)
             match ($order) {
                 'desc' => $this->orderByClause->desc($this->aliasColumns[$column] ?? $column, !$this->descNullLast),

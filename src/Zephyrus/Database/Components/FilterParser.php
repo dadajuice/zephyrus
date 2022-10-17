@@ -3,45 +3,35 @@
 use InvalidArgumentException;
 use Zephyrus\Database\QueryBuilder\WhereClause;
 use Zephyrus\Database\QueryBuilder\WhereCondition;
-use Zephyrus\Network\RequestFactory;
+use Zephyrus\Utilities\Components\Funnel;
 
 class FilterParser
 {
-    public const URL_PARAMETER = 'filters';
-    public const URL_SEARCH_PARAMETER = 'search';
-
     private WhereClause $whereClause;
     private string $searchQuery;
     private array $filters;
-    private array $allowedColumns = [];
     private array $aliasColumns = [];
     private array $searchableColumns = [];
     private string $aggregateOperator = WhereClause::OPERATOR_OR;
 
-    public function __construct()
+    public function __construct(Funnel $funnel)
     {
         $this->whereClause = new WhereClause();
-        $request = RequestFactory::read();
-        $this->searchQuery = $request->getParameter(self::URL_SEARCH_PARAMETER, "");
-        $this->filters = $request->getParameter(self::URL_PARAMETER, []);
+        $this->searchQuery = $funnel->getSearch() ?? "";
+        $this->filters = $funnel->getFilters();
     }
 
-    public function setAllowedColumns(array $allowedColumns)
-    {
-        $this->allowedColumns = $allowedColumns;
-    }
-
-    public function setAliasColumns(array $aliasColumns)
+    public function setAliasColumns(array $aliasColumns): void
     {
         $this->aliasColumns = $aliasColumns;
     }
 
-    public function setSearchableColumns(array $searchableColumns)
+    public function setSearchableColumns(array $searchableColumns): void
     {
         $this->searchableColumns = $searchableColumns;
     }
 
-    public function setAggregateOperator(string $operator)
+    public function setAggregateOperator(string $operator): void
     {
         if (!in_array($operator, WhereClause::SUPPORTED_OPERATORS)) {
             throw new InvalidArgumentException("Invalid operator supplied. Supported aggregate operators are [OR, AND].");
@@ -82,7 +72,7 @@ class FilterParser
      *
      * @return WhereClause
      */
-    public function parse(): WhereClause
+    public function buildSqlClause(): WhereClause
     {
         if (!empty($this->searchQuery)) {
             return $this->parseSearch();
@@ -93,13 +83,7 @@ class FilterParser
     private function parseFilters(): WhereClause
     {
         foreach ($this->filters as $columnDefinition => $content) {
-            if (!str_contains($columnDefinition, ":")) {
-                $columnDefinition = $columnDefinition . ':' . 'contains';
-            }
             list($column, $filterType) = explode(':', $columnDefinition);
-            if (!in_array($column, $this->allowedColumns)) {
-                continue;
-            }
             match ($filterType) {
                 'contains' => $this->parseContains($column, $content),
                 'begins' => $this->parseBegins($column, $content),
@@ -127,22 +111,22 @@ class FilterParser
         return $this->whereClause;
     }
 
-    private function parseContains(string $column, mixed $content, bool $caseInsensitive = true)
+    private function parseContains(string $column, mixed $content, bool $caseInsensitive = true): void
     {
         $this->whereClause->add(WhereCondition::like($this->aliasColumns[$column] ?? $column, "%$content%", $caseInsensitive), $this->aggregateOperator);
     }
 
-    private function parseBegins(string $column, mixed $content, bool $caseInsensitive = true)
+    private function parseBegins(string $column, mixed $content, bool $caseInsensitive = true): void
     {
         $this->whereClause->add(WhereCondition::like($this->aliasColumns[$column] ?? $column, "$content%", $caseInsensitive), $this->aggregateOperator);
     }
 
-    private function parseEnds(string $column, mixed $content, bool $caseInsensitive = true)
+    private function parseEnds(string $column, mixed $content, bool $caseInsensitive = true): void
     {
         $this->whereClause->add(WhereCondition::like($this->aliasColumns[$column] ?? $column, "%$content", $caseInsensitive), $this->aggregateOperator);
     }
 
-    private function parseEquals(string $column, mixed $content)
+    private function parseEquals(string $column, mixed $content): void
     {
         $this->whereClause->add(WhereCondition::equals($this->aliasColumns[$column] ?? $column, $content), $this->aggregateOperator);
     }

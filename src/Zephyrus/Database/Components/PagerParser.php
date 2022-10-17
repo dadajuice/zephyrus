@@ -1,57 +1,24 @@
 <?php namespace Zephyrus\Database\Components;
 
 use Zephyrus\Database\QueryBuilder\LimitClause;
-use Zephyrus\Network\RequestFactory;
-use Zephyrus\Network\Uri;
+use Zephyrus\Utilities\Components\Pagination;
 
 class PagerParser
 {
-    public const URL_PARAMETER = 'page';
-    public const URL_LIMIT_PARAMETER = 'limit';
-    public const DEFAULT_LIMIT = 50;
-
     private LimitClause $limitClause;
-    private int $defaultLimit = self::DEFAULT_LIMIT;
-    private int $maxLimitAllowed = self::DEFAULT_LIMIT;
     private int $currentPage;
-    private ?int $limit;
-    private string $pageUrl;
-    private string $pageQuery;
+    private int $limit;
 
-    public function __construct()
+    public function __construct(Pagination $pagination)
     {
-        $request = RequestFactory::read();
-        $this->currentPage = $request->getParameter(self::URL_PARAMETER, 1);
-        $this->limit = $request->getParameter(self::URL_LIMIT_PARAMETER);
-        $this->pageUrl = $request->getUri()->getPath();
-        $this->pageQuery = Uri::removeArgument($request->getUri()->getQuery(), self::URL_PARAMETER);
+        $this->currentPage = $pagination->getCurrentPage();
+        $this->limit = $pagination->getLimit();
         $this->limitClause = new LimitClause();
-    }
-
-    public function setDefaultLimit(int $defaultLimit)
-    {
-        $this->defaultLimit = $defaultLimit;
-    }
-
-    public function setMaxLimitAllowed(int $maxLimitAllowed)
-    {
-        $this->maxLimitAllowed = $maxLimitAllowed;
     }
 
     public function hasRequested(): bool
     {
-        $request = RequestFactory::read();
-        return !empty($request->getParameter(self::URL_PARAMETER));
-    }
-
-    public function getPageUrl(): string
-    {
-        return $this->pageUrl;
-    }
-
-    public function getPageQuery(): string
-    {
-        return $this->pageQuery;
+        return $this->currentPage > 1;
     }
 
     /**
@@ -71,12 +38,7 @@ class PagerParser
      */
     public function getLimit(): int
     {
-        return $this->limit ?? self::DEFAULT_LIMIT;
-    }
-
-    public function getMaxPage(int $recordCount): int
-    {
-        return ceil($recordCount / $this->getLimit());
+        return $this->limit;
     }
 
     public function getSqlClause(): LimitClause
@@ -95,11 +57,9 @@ class PagerParser
      * page). Developers should indicate the maximum allowed when permitting user to change the row count. By default,
      * it is limited to 50 (same as the default rows per page).
      */
-    public function parse(): LimitClause
+    public function buildSqlClause(): LimitClause
     {
-        $this->limit = min($this->limit ?? $this->defaultLimit, $this->maxLimitAllowed);
-        $currentPage = (!is_numeric($this->currentPage) || $this->currentPage < 0) ? 1 : $this->currentPage;
-        $offset = $this->limit * ($currentPage - 1);
+        $offset = $this->limit * ($this->currentPage - 1);
         $this->limitClause->setLimit($this->limit);
         $this->limitClause->setOffset($offset);
         return $this->limitClause;

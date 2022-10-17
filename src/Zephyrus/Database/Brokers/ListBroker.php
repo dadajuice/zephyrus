@@ -1,15 +1,18 @@
 <?php namespace Zephyrus\Database\Brokers;
 
 use stdClass;
-use Zephyrus\Database\Components\PagerParser;
 use Zephyrus\Database\Components\QueryFilter;
 use Zephyrus\Database\Core\Database;
+use Zephyrus\Network\RequestFactory;
+use Zephyrus\Utilities\Components\ListFilter;
 use Zephyrus\Utilities\Components\ListGroupView;
 use Zephyrus\Utilities\Components\ListView;
+use Zephyrus\Utilities\Components\Pagination;
 
 abstract class ListBroker extends DatabaseBroker
 {
     private QueryFilter $queryFilter;
+    private ListFilter $filter;
     private array $columnAlias = []; // ['price' => 'amount']
     private array $allowedFilterColumns = []; // ['name', 'price', 'brand']
     private array $allowedSortColumns = []; // ['name', 'price', 'brand']
@@ -17,8 +20,8 @@ abstract class ListBroker extends DatabaseBroker
     private array $searchableColumns = []; // ['name', 'brand'] (no alias)
     private bool $ascNullLast = true;
     private bool $descNullLast = false;
-    private int $defaultPagerLimit = PagerParser::DEFAULT_LIMIT;
-    private int $maxPagerLimit = PagerParser::DEFAULT_LIMIT;
+    private int $defaultPagerLimit = Pagination::DEFAULT_LIMIT;
+    private int $maxPagerLimit = Pagination::DEFAULT_LIMIT;
 
     /**
      * Force the configuration of the list broker with the allowed columns, default sorts and alias if applicable.
@@ -43,36 +46,34 @@ abstract class ListBroker extends DatabaseBroker
     {
         parent::__construct($database);
         $this->configure();
-        $this->queryFilter = new QueryFilter();
-        $this->queryFilter->getFilterParser()->setAllowedColumns($this->allowedFilterColumns);
+
+        $this->filter = new ListFilter(RequestFactory::read()->getFilterConfiguration());
+        $this->filter->getSort()->setDefaultSorts($this->defaultSorts);
+        $this->filter->getFunnel()->setAllowedFields($this->allowedFilterColumns);
+        $this->filter->getSort()->setAllowedFields($this->allowedSortColumns);
+        $this->filter->getPagination()->setDefaultLimit($this->defaultPagerLimit, $this->maxPagerLimit);
+
+        $this->queryFilter = new QueryFilter($this->filter);
         $this->queryFilter->getFilterParser()->setAliasColumns($this->columnAlias);
         $this->queryFilter->getFilterParser()->setSearchableColumns($this->searchableColumns);
-        $this->queryFilter->getSortParser()->setAllowedColumns($this->allowedSortColumns);
         $this->queryFilter->getSortParser()->setAliasColumns($this->columnAlias);
-        $this->queryFilter->getSortParser()->setDefaultSorts($this->defaultSorts);
         $this->queryFilter->getSortParser()->setAscNullLast($this->ascNullLast);
         $this->queryFilter->getSortParser()->setDescNullLast($this->descNullLast);
-        $this->queryFilter->getPagerParser()->setDefaultLimit($this->defaultPagerLimit);
-        $this->queryFilter->getPagerParser()->setMaxLimitAllowed($this->maxPagerLimit);
     }
 
-    public function inflate(array $defaultSorts = []): ListView
+    public function inflate(): ListView
     {
-        $rows = $this->findRows();
-        $list = new ListView($rows);
-        $this->queryFilter->getSortParser()->setDefaultSorts(empty($defaultSorts) ? $this->defaultSorts : $defaultSorts);
-        $list->setQueryFilter($this->queryFilter);
+        $list = new ListView($this->findRows());
+        $list->setFilter($this->filter);
         $count = $this->count();
         $list->setCount($count->current, $count->total);
         return $list;
     }
 
-    public function inflateGroupedList(string $groupColumn, ?callable $formatCallback = null, array $defaultSorts = []): ListGroupView
+    public function inflateGroupedList(string $groupColumn, ?callable $formatCallback = null): ListGroupView
     {
-        $rows = $this->findRows();
-        $list = new ListGroupView($rows);
-        $this->queryFilter->getSortParser()->setDefaultSorts(empty($defaultSorts) ? $this->defaultSorts : $defaultSorts);
-        $list->setQueryFilter($this->queryFilter);
+        $list = new ListGroupView($this->findRows());
+        $list->setFilter($this->filter);
         $count = $this->count();
         $list->setCount($count->current, $count->total);
         $list->setHeaderColumn($groupColumn);

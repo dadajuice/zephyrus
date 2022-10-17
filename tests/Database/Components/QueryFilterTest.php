@@ -13,7 +13,7 @@ class QueryFilterTest extends TestCase
     {
         $request = new Request("http://example.com/projects", "get", ['parameters' => []]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertFalse($filter->isPaginationRequested());
         self::assertFalse($filter->isSortRequested());
         self::assertFalse($filter->isFilterRequested());
@@ -35,7 +35,7 @@ class QueryFilterTest extends TestCase
             'page' => 3
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertTrue($filter->isPaginationRequested());
 
         $query = "SELECT * FROM view_project";
@@ -47,7 +47,7 @@ class QueryFilterTest extends TestCase
     {
         $request = new Request("http://example.com/projects", "get", ['parameters' => []]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertFalse($filter->isPaginationRequested());
 
         $query = "SELECT * FROM view_project";
@@ -61,8 +61,7 @@ class QueryFilterTest extends TestCase
             'sorts' => ['name' => 'desc']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
-        $filter->getSortParser()->setAllowedColumns(['name']);
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertTrue($filter->isSortRequested());
 
         $query = "SELECT * FROM view_project";
@@ -76,8 +75,7 @@ class QueryFilterTest extends TestCase
             'sorts' => ['name' => 'desc']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
-        $filter->getSortParser()->setAllowedColumns(['name']);
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertTrue($filter->isSortRequested());
 
         $query = "SELECT * FROM view_project WHERE client_id IN (SELECT client_id FROM client) AND brand = ?";
@@ -91,8 +89,7 @@ class QueryFilterTest extends TestCase
             'sorts' => ['name' => 'desc']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
-        $filter->getSortParser()->setAllowedColumns(['name']);
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertTrue($filter->isSortRequested());
 
         $query = "SELECT * FROM view_project WHERE client_id IN (SELECT client_id FROM client WHERE contact = ?) AND brand = ?";
@@ -106,8 +103,7 @@ class QueryFilterTest extends TestCase
             'sorts' => ['name' => 'desc']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
-        $filter->getSortParser()->setAllowedColumns(['name']);
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertTrue($filter->isSortRequested());
 
         $query = "SELECT * FROM view_project WHERE client_id IN (SELECT client_id FROM client LIMIT 5) AND brand = ?";
@@ -121,8 +117,7 @@ class QueryFilterTest extends TestCase
             'sorts' => ['name' => 'desc']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
-        $filter->getSortParser()->setAllowedColumns(['name']);
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertTrue($filter->isSortRequested());
 
         $query = "SELECT * FROM view_project LIMIT 5";
@@ -136,8 +131,7 @@ class QueryFilterTest extends TestCase
             'filters' => ['name:contains' => 'micro']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
-        $filter->getFilterParser()->setAllowedColumns(['name']);
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertTrue($filter->isFilterRequested());
 
         $query = "SELECT * FROM view_project";
@@ -154,8 +148,7 @@ class QueryFilterTest extends TestCase
             ]
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
-        $filter->getFilterParser()->setAllowedColumns(['name', 'age']);
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertTrue($filter->isFilterRequested());
 
         $query = "SELECT * FROM view_project WHERE state = 'ACTIVE' AND archive_date IS NULL";
@@ -170,8 +163,7 @@ class QueryFilterTest extends TestCase
             'filters' => ['name:contains' => 'micro']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
-        $filter->getFilterParser()->setAllowedColumns(['name']);
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertTrue($filter->isFilterRequested());
 
         $query = "SELECT * FROM view_project WHERE state = 'ACTIVE' AND (archive_date IS NULL OR project_id IN (SELECT id FROM test WHERE test_id = view_project.iterator))";
@@ -185,8 +177,7 @@ class QueryFilterTest extends TestCase
             'filters' => ['name:contains' => 'micro']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
-        $filter->getFilterParser()->setAllowedColumns(['name']);
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertTrue($filter->isFilterRequested());
 
         $query = "SELECT customer_id, SUM(amount) FROM payment GROUP BY customer_id HAVING SUM (amount) > 200";
@@ -200,8 +191,7 @@ class QueryFilterTest extends TestCase
             'filters' => ['name:contains' => 'micro']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
-        $filter->getFilterParser()->setAllowedColumns(['name']);
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertTrue($filter->isFilterRequested());
 
         $query = "SELECT customer_id, SUM(amount) FROM payment HAVING SUM (amount) > 200";
@@ -215,8 +205,7 @@ class QueryFilterTest extends TestCase
             'filters' => ['name:contains' => 'micro']
         ]]);
         RequestFactory::set($request);
-        $filter = new QueryFilter();
-        $filter->getFilterParser()->setAllowedColumns(['name']);
+        $filter = new QueryFilter(RequestFactory::read()->getFilter());
         self::assertTrue($filter->isFilterRequested());
 
         $query = "SELECT customer_id, SUM(amount) FROM payment WHERE client_id = ? GROUP BY customer_id HAVING SUM (amount) > 200";

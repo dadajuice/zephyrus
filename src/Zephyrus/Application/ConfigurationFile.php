@@ -67,7 +67,7 @@ class ConfigurationFile
 
     private function formatConfigurationData(string $data): string
     {
-        return ((defined($data) || is_numeric($data)) ? $data : '"' . $data . '"');
+        return (defined($data) || is_numeric($data)) ? $data : '"' . $data . '"';
     }
 
     private function buildConfigurationProperty(array &$data, array $sectionValue)

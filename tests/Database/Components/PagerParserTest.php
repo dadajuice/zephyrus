@@ -11,9 +11,10 @@ class PagerParserTest extends TestCase
     {
         $request = new Request("http://example.com/projects", "get", ['parameters' => []]);
         RequestFactory::set($request);
-        $parser = new PagerParser();
+        $filter = RequestFactory::read()->getFilter();
+        $parser = new PagerParser($filter->getPagination());
         self::assertFalse($parser->hasRequested());
-        $clause = $parser->parse();
+        $clause = $parser->buildSqlClause();
         self::assertEquals("LIMIT 50", $clause->getSql());
     }
 
@@ -23,9 +24,10 @@ class PagerParserTest extends TestCase
             'page' => 5
         ]]);
         RequestFactory::set($request);
-        $parser = new PagerParser();
+        $filter = RequestFactory::read()->getFilter();
+        $parser = new PagerParser($filter->getPagination());
         self::assertTrue($parser->hasRequested());
-        $clause = $parser->parse();
+        $clause = $parser->buildSqlClause();
         self::assertEquals("LIMIT 50 OFFSET 200", $clause->getSql());
     }
 
@@ -36,9 +38,10 @@ class PagerParserTest extends TestCase
             'limit' => 100
         ]]);
         RequestFactory::set($request);
-        $parser = new PagerParser();
-        $parser->setMaxLimitAllowed(250);
-        $clause = $parser->parse();
+        $filter = RequestFactory::read()->getFilter();
+        $filter->getPagination()->setDefaultLimit(50, 250);
+        $parser = new PagerParser($filter->getPagination());
+        $clause = $parser->buildSqlClause();
         self::assertEquals("LIMIT 100 OFFSET 400", $clause->getSql());
     }
 
@@ -48,11 +51,11 @@ class PagerParserTest extends TestCase
             'page' => 2
         ]]);
         RequestFactory::set($request);
-        $parser = new PagerParser();
-        $parser->setMaxLimitAllowed(120);
-        $parser->setDefaultLimit(80);
+        $filter = RequestFactory::read()->getFilter();
+        $filter->getPagination()->setDefaultLimit(80, 120);
+        $parser = new PagerParser($filter->getPagination());
         self::assertTrue($parser->hasRequested());
-        $clause = $parser->parse();
+        $clause = $parser->buildSqlClause();
         self::assertEquals("LIMIT 80 OFFSET 80", $clause->getSql());
     }
 
@@ -62,9 +65,10 @@ class PagerParserTest extends TestCase
             'page' => 2, 'limit' => 500
         ]]);
         RequestFactory::set($request);
-        $parser = new PagerParser();
+        $filter = RequestFactory::read()->getFilter();
+        $parser = new PagerParser($filter->getPagination());
         self::assertTrue($parser->hasRequested());
-        $clause = $parser->parse();
+        $clause = $parser->buildSqlClause();
         self::assertEquals("LIMIT 50 OFFSET 50", $clause->getSql());
     }
 }

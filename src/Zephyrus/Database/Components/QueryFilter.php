@@ -1,5 +1,7 @@
 <?php namespace Zephyrus\Database\Components;
 
+use Zephyrus\Utilities\Components\ListFilter;
+
 class QueryFilter
 {
     private FilterParser $filterParser;
@@ -7,11 +9,11 @@ class QueryFilter
     private PagerParser $pagerParser;
     private array $queryParameters = [];
 
-    public function __construct()
+    public function __construct(ListFilter $filter)
     {
-        $this->filterParser = new FilterParser();
-        $this->pagerParser = new PagerParser();
-        $this->sortParser = new SortParser();
+        $this->filterParser = new FilterParser($filter->getFunnel());
+        $this->pagerParser = new PagerParser($filter->getPagination());
+        $this->sortParser = new SortParser($filter->getSort());
     }
 
     public function isFilterRequested(): bool
@@ -97,8 +99,7 @@ class QueryFilter
      */
     public function sort(string $rawQuery): string
     {
-        if (!$this->isSortRequested()
-            && !$this->sortParser->hasDefaultSort()) {
+        if (!$this->isSortRequested()) {
             return $rawQuery;
         }
         return $this->injectOrderByClause($rawQuery);
@@ -117,13 +118,13 @@ class QueryFilter
         if (!$this->isPaginationRequested() && !$forcePaginate) {
             return $rawQuery;
         }
-        $limitClause = $this->pagerParser->parse();
+        $limitClause = $this->pagerParser->buildSqlClause();
         return rtrim($rawQuery) . ' ' . $limitClause->getSql();
     }
 
     private function injectOrderByClause(string $query): string
     {
-        $orderByClause = $this->sortParser->parse();
+        $orderByClause = $this->sortParser->buildSqlClause();
         $orderBy = $orderByClause->getSql();
         if (empty($orderBy)) {
             return $query;
@@ -146,7 +147,7 @@ class QueryFilter
 
     private function injectWhereClause(string $query): string
     {
-        $whereClause = $this->filterParser->parse();
+        $whereClause = $this->filterParser->buildSqlClause();
         $where = $whereClause->getSql();
         if (empty($where)) {
             return $query;

@@ -1,7 +1,6 @@
 <?php namespace Zephyrus\Utilities\Components;
 
 use stdClass;
-use Zephyrus\Database\Components\QueryFilter;
 
 class ListView
 {
@@ -10,8 +9,7 @@ class ListView
     private array $additionalData = [];
     private int $count; // Count matching the filters (will be same as $totalCount if no filter are given)
     private int $totalCount; // Count total for virgin filters
-    private ?QueryFilter $queryFilter = null;
-    private ?PagerView $pagerView = null;
+    private ?ListFilter $filter = null;
 
     public function __construct(array $rows)
     {
@@ -19,16 +17,15 @@ class ListView
         $this->count = $this->totalCount = count($rows);
     }
 
-    public function setQueryFilter(?QueryFilter $queryFilter)
+    public function setFilter(?ListFilter $filter): void
     {
-        $this->queryFilter = $queryFilter;
+        $this->filter = $filter;
     }
 
-    public function setCount(int $count, ?int $totalCount = null)
+    public function setCount(int $count, ?int $totalCount = null): void
     {
         $this->count = $count;
         $this->totalCount = $totalCount ?? $count;
-        $this->pagerView = new PagerView($this->queryFilter->getPagerParser(), $count);
     }
 
     /**
@@ -40,14 +37,15 @@ class ListView
      */
     public function mark(?string $data): string
     {
-        if (is_null($this->queryFilter)) {
+        $search = $this->filter?->getFunnel()->getSearch();
+        if (is_null($search)) {
             return $data;
         }
         if (empty($data)) {
             return "";
         }
-        $pattern = "/" . preg_quote($this->queryFilter->getSearch(), '/') . "/i";
-        return (!$this->queryFilter->getSearch()) ? $data : preg_replace($pattern, "<mark>$0</mark>", $data);
+        $pattern = "/" . preg_quote($search, '/') . "/i";
+        return preg_replace($pattern, "<mark>$0</mark>", $data);
     }
 
     /**
@@ -63,7 +61,7 @@ class ListView
      * @param string|null $sort
      * @param string $align
      */
-    public function addHeader(string $label, ?string $sort = null, string $align = "")
+    public function addHeader(string $label, ?string $sort = null, string $align = ""): void
     {
         $this->headers[] = (object) [
             'title' => $label,
@@ -82,22 +80,27 @@ class ListView
 
     public function getCurrentPage(): int
     {
-        return $this->queryFilter->getPagerParser()->getCurrentPage();
+        return $this->filter?->getPagination()->getCurrentPage() ?? 1;
     }
 
-    public function getSearch(): string
+    public function getLimit(): int
     {
-        return $this->queryFilter->getSearch();
+        return $this->filter?->getPagination()->getLimit() ?? Pagination::DEFAULT_LIMIT;
     }
 
-    public function getFilters(): array
+    public function getSearch(): ?string
     {
-        return $this->queryFilter->getFilters();
+        return $this->filter?->getFunnel()->getSearch();
     }
 
-    public function getSorts(): array
+    public function getFilters(): ?array
     {
-        return $this->queryFilter->getSorts();
+        return $this->filter?->getFunnel()->getFilters();
+    }
+
+    public function getSorts(): ?array
+    {
+        return $this->filter?->getSort()->getSorts();
     }
 
     public function getCurrentRowCount(): int
@@ -115,17 +118,17 @@ class ListView
         return $this->rows[$index] ?? null;
     }
 
-    public function getPager(): ?PagerView
+    public function getPager(): PagerView
     {
-        return $this->pagerView;
+        return new PagerView($this->filter->getPagination(), $this->totalCount);
     }
 
-    public function addAdditionalData(string $key, $value)
+    public function addAdditionalData(string $key, mixed $value): void
     {
         $this->additionalData[$key] = $value;
     }
 
-    public function setAdditionalData(array $data)
+    public function setAdditionalData(array $data): void
     {
         $this->additionalData = $data;
     }
@@ -141,7 +144,7 @@ class ListView
             'results' => [
                 'rows' => $this->rows,
                 'count' => $this->count,
-                'totalCount' => $this->totalCount,
+                'total_count' => $this->totalCount,
             ],
             'filter' => [
                 'search' => $this->getSearch(),
@@ -149,9 +152,9 @@ class ListView
                 'filters' => $this->getFilters()
             ],
             'pager' => [
-                'maxPage' => $this->queryFilter->getPagerParser()->getMaxPage($this->totalCount),
-                'currentPage' => $this->getCurrentPage(),
-                'maxEntitiesPerPage' => $this->queryFilter->getPagerParser()->getLimit()
+                'max_page' => ceil($this->totalCount / $this->getLimit()),
+                'current_page' => $this->getCurrentPage(),
+                'limit' => $this->getLimit()
             ]
         ];
         if (!empty($this->additionalData)) {

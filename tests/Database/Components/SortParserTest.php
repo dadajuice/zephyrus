@@ -14,10 +14,11 @@ class SortParserTest extends TestCase
         ]]);
         RequestFactory::set($request);
 
-        $parser = new SortParser();
+        $filter = RequestFactory::read()->getFilter();
+        $filter->getSort()->setAllowedFields(['name', 'price', 'brand']);
+        $parser = new SortParser($filter->getSort());
         self::assertTrue($parser->hasRequested());
-        $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
+        $clause = $parser->buildSqlClause();
 
         self::assertEquals("ORDER BY name ASC", $clause->getSql());
     }
@@ -28,13 +29,13 @@ class SortParserTest extends TestCase
             'sorts' => ['name' => 'asc']
         ]]);
         RequestFactory::set($request);
+        $filter = RequestFactory::read()->getFilter();
+        $filter->getSort()->setAllowedFields(['name', 'price', 'brand']);
 
-        $parser = new SortParser();
+        $parser = new SortParser($filter->getSort());
         $parser->setAscNullLast(false); // Reverse order of NULLs
         self::assertTrue($parser->hasRequested());
-        $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
-
+        $clause = $parser->buildSqlClause();
         self::assertEquals("ORDER BY name ASC NULLS FIRST", $clause->getSql());
     }
 
@@ -44,13 +45,13 @@ class SortParserTest extends TestCase
             'sorts' => ['name' => 'desc']
         ]]);
         RequestFactory::set($request);
+        $filter = RequestFactory::read()->getFilter();
+        $filter->getSort()->setAllowedFields(['name', 'price', 'brand']);
+        $parser = new SortParser($filter->getSort());
 
-        $parser = new SortParser();
         $parser->setDescNullLast(true); // Reverse order of NULLs
         self::assertTrue($parser->hasRequested());
-        $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
-
+        $clause = $parser->buildSqlClause();
         self::assertEquals("ORDER BY name DESC NULLS LAST", $clause->getSql());
     }
 
@@ -58,13 +59,14 @@ class SortParserTest extends TestCase
     {
         $request = new Request("http://example.com", "get", ['parameters' => []]);
         RequestFactory::set($request);
+        $filter = RequestFactory::read()->getFilter();
+        $filter->getSort()->setAllowedFields(['name', 'price', 'brand']);
+        $filter->getSort()->setDefaultSorts(['name' => 'desc', 'price' => 'asc']);
+        $parser = new SortParser($filter->getSort());
 
-        $parser = new SortParser();
-        $parser->setDefaultSorts(['name' => 'desc', 'price' => 'asc']);
-        $parser->setAllowedColumns(['name', 'price', 'brand']);
-        self::assertFalse($parser->hasRequested());
-        $clause = $parser->parse();
-
+        self::assertTrue($parser->hasRequested());
+        self::assertFalse($filter->getSort()->isDefined());
+        $clause = $parser->buildSqlClause();
         self::assertEquals("ORDER BY name DESC, price ASC", $clause->getSql());
     }
 
@@ -72,9 +74,12 @@ class SortParserTest extends TestCase
     {
         $request = new Request("http://example.com", "get", ['parameters' => []]);
         RequestFactory::set($request);
-        $parser = new SortParser();
-        $parser->setDefaultSorts(['name' => 'desc', 'price' => 'asc']);
-        $clause = $parser->parse();
+        $filter = RequestFactory::read()->getFilter();
+        $filter->getSort()->setAllowedFields([]);
+        $filter->getSort()->setDefaultSorts(['name' => 'desc', 'price' => 'asc']);
+
+        $parser = new SortParser($filter->getSort());
+        $clause = $parser->buildSqlClause();
         self::assertEquals("", $clause->getSql());
     }
 
@@ -82,8 +87,9 @@ class SortParserTest extends TestCase
     {
         $request = new Request("http://example.com", "get", ['parameters' => []]);
         RequestFactory::set($request);
-        $parser = new SortParser();
-        $clause = $parser->parse();
+        $filter = RequestFactory::read()->getFilter();
+        $parser = new SortParser($filter->getSort());
+        $clause = $parser->buildSqlClause();
         self::assertEquals("", $clause->getSql());
     }
 
@@ -97,10 +103,10 @@ class SortParserTest extends TestCase
             ]
         ]]);
         RequestFactory::set($request);
-
-        $parser = new SortParser();
-        $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
+        $filter = RequestFactory::read()->getFilter();
+        $filter->getSort()->setAllowedFields(['name', 'price', 'brand']);
+        $parser = new SortParser($filter->getSort());
+        $clause = $parser->buildSqlClause();
 
         self::assertEquals("ORDER BY name ASC, price DESC, brand ASC", $clause->getSql());
     }
@@ -115,13 +121,13 @@ class SortParserTest extends TestCase
             ]
         ]]);
         RequestFactory::set($request);
-
-        $parser = new SortParser();
-        $parser->setAllowedColumns(['name', 'price', 'brand']);
+        $filter = RequestFactory::read()->getFilter();
+        $filter->getSort()->setAllowedFields(['name', 'price', 'brand']);
+        $parser = new SortParser($filter->getSort());
         $parser->setAliasColumns([
             'price' => 'amount'
         ]);
-        $clause = $parser->parse();
+        $clause = $parser->buildSqlClause();
 
         self::assertEquals("ORDER BY name ASC, amount DESC, brand ASC", $clause->getSql());
     }
@@ -136,10 +142,10 @@ class SortParserTest extends TestCase
             ]
         ]]);
         RequestFactory::set($request);
-
-        $parser = new SortParser();
-        $parser->setAllowedColumns(['name', 'brand']);
-        $clause = $parser->parse();
+        $filter = RequestFactory::read()->getFilter();
+        $filter->getSort()->setAllowedFields(['name', 'brand']);
+        $parser = new SortParser($filter->getSort());
+        $clause = $parser->buildSqlClause();
 
         // Skips the price since its not allowed
         self::assertEquals("ORDER BY name ASC, brand ASC", $clause->getSql());
@@ -151,10 +157,10 @@ class SortParserTest extends TestCase
             'sorts' => ['brand' => 'toto']
         ]]);
         RequestFactory::set($request);
-
-        $parser = new SortParser();
-        $parser->setAllowedColumns(['name', 'price', 'brand']);
-        $clause = $parser->parse();
+        $filter = RequestFactory::read()->getFilter();
+        $filter->getSort()->setAllowedFields(['name', 'price', 'brand']);
+        $parser = new SortParser($filter->getSort());
+        $clause = $parser->buildSqlClause();
 
         self::assertEquals("ORDER BY brand ASC", $clause->getSql());
     }

@@ -1,10 +1,10 @@
 <?php namespace Zephyrus\Database\QueryBuilder;
 
-use Zephyrus\Database\Components\PagerParser;
+use Zephyrus\Utilities\Components\Pagination;
 
 class LimitClause
 {
-    private int $limit = PagerParser::DEFAULT_LIMIT;
+    private int $limit = Pagination::DEFAULT_LIMIT;
     private int $offset = 0;
 
     public function setLimit(int $limit)

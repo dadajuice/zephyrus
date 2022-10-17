@@ -1,20 +1,26 @@
 <?php namespace Zephyrus\Utilities\Components;
 
-use Zephyrus\Database\Components\PagerParser;
+use Zephyrus\Network\RequestFactory;
+use Zephyrus\Network\Uri;
 
 class PagerView
 {
     public const MAIN_CSS_CLASSNAME = 'pager';
 
-    private PagerParser $model;
+    private Pagination $pagination;
     private int $currentPage;
     private int $maxPage;
+    private string $pageUrl;
+    private string $pageQuery;
 
-    public function __construct(PagerParser $model, int $recordCount)
+    public function __construct(Pagination $pagination, int $totalRecordCount)
     {
-        $this->model = $model;
-        $this->currentPage = $this->model->getCurrentPage();
-        $this->maxPage = ceil($recordCount / $this->model->getLimit());
+        $request = RequestFactory::read();
+        $this->pagination = $pagination;
+        $this->currentPage = $pagination->getCurrentPage();
+        $this->maxPage = $pagination->getMaxPage($totalRecordCount);
+        $this->pageUrl = $request->getUri()->getPath();
+        $this->pageQuery = Uri::removeArgument($request->getUri()->getQuery(), $pagination->getPageParameterName());
         $this->validate();
     }
 
@@ -31,7 +37,7 @@ class PagerView
     /**
      * Displays directly to the output buffer the resulting HTML of the pager structure using an echo directive.
      */
-    public function display()
+    public function display(): void
     {
         echo $this;
     }
@@ -43,7 +49,7 @@ class PagerView
      */
     public function getHtml(): string
     {
-        if (!is_numeric($this->model->getCurrentPage()) || $this->maxPage < 1) {
+        if (!is_numeric($this->currentPage) || $this->maxPage < 1) {
             return "";
         }
         ob_start();
@@ -65,7 +71,7 @@ class PagerView
      * Display the complete pager HTML architecture. The structure is quite simple: a root div with the pager class
      * wraps a series of a tags for the page links. Can be easily stylized with CSS.
      */
-    private function displayPager()
+    private function displayPager(): void
     {
         $pager = ($this->maxPage > 9) ? $this->createFullPages() : $this->createSimplePages();
         echo '<div class="' . self::MAIN_CSS_CLASSNAME . '">';
@@ -130,7 +136,7 @@ class PagerView
     /**
      * Displays go to previous and first page.
      */
-    private function displayLeftSide()
+    private function displayLeftSide(): void
     {
         if ($this->currentPage != 1) {
             if ($this->currentPage - 4 > 1) {
@@ -143,7 +149,7 @@ class PagerView
     /**
      * Displays go to next and go to last page.
      */
-    private function displayRightSide()
+    private function displayRightSide(): void
     {
         if ($this->currentPage != $this->maxPage) {
             echo '<a href="' . $this->buildHref($this->currentPage + 1) . '">&gt;</a>';
@@ -176,9 +182,9 @@ class PagerView
      */
     private function buildHref(string $pageNumber): string
     {
-        $page = PagerParser::URL_PARAMETER . '=' . $pageNumber;
-        $query = (!empty($this->model->getPageQuery())) ? '&' . $this->model->getPageQuery() : '';
-        return $this->model->getPageUrl() . '?' . $page . $query;
+        $page = $this->pagination->getPageParameterName() . '=' . $pageNumber;
+        $query = (!empty($this->pageQuery)) ? '&' . $this->pageQuery : '';
+        return $this->pageUrl . '?' . $page . $query;
     }
 
     /**
@@ -186,7 +192,7 @@ class PagerView
      * consider as if its page one. We don't want to cause an exception or an error as this class should serve as mere
      * displaying.
      */
-    private function validate()
+    private function validate(): void
     {
         if ($this->currentPage < 1 || $this->currentPage > $this->maxPage) {
             $this->currentPage = 1;
