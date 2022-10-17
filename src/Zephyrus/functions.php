@@ -123,6 +123,17 @@ function localize($key, ...$args): string
 }
 
 /**
+ * Shortcut function to convert anonymous objects into associative arrays.
+ *
+ * @param stdClass $object
+ * @return array
+ */
+function objectToArray(stdClass $object): array
+{
+    return json_decode(json_encode($object), true);
+}
+
+/**
  * Simple alias function to sprintf parameters into the defined message.
  *
  * @param string $message
