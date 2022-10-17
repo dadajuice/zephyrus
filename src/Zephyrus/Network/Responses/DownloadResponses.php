@@ -7,6 +7,36 @@ use Zephyrus\Utilities\FileSystem\File;
 trait DownloadResponses
 {
     /**
+     * Renders a given file as an inline downloadable content (meaning it shall be viewed directly in the browser and
+     * allow the client to manually download the file if needed). If no filename is given, it will automatically use
+     * the actual file basename.
+     *
+     * @param string $filePath
+     * @param string|null $filename
+     * @return Response
+     */
+    public function downloadInline(string $filePath, ?string $filename = null): Response
+    {
+        if (!file_exists($filePath)) {
+            throw new \InvalidArgumentException("Specified file doesn't exists");
+        }
+        if (is_null($filename)) {
+            $filename = basename($filePath);
+        }
+
+        $file = new File($filePath);
+        $response = new Response($file->getMimeType(), 200);
+        $response->addHeader('Cache-Control', 'public, must-revalidate, max-age=0');
+        $response->addHeader('Pragma', 'public');
+        $response->addHeader('Expires', 'Sat, 26 Jul 1997 05:00:00 GMT');
+        $response->addHeader('Last-Modified', gmdate('D, d M Y H:i:s') . ' GMT');
+        $response->addHeader("Content-Length", $file->size());
+        $response->addHeader('Content-Disposition', 'inline; filename="' . $filename . '";');
+        $response->setContent($file->read());
+        return $response;
+    }
+
+    /**
      * Renders a given file as a downloadable content with the file's content type. If no filename is given, it will
      * automatically use the actual file basename. If the deleteAfter argument is set to true, it will automatically
      * remove the file after sending it. Useful for temporary generated files. Will download the file in chunks which
