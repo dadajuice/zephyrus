@@ -39,6 +39,9 @@ class ListView
     {
         $search = $this->filter?->getFunnel()->getSearch();
         if (is_null($search)) {
+            if (is_null($data)) {
+                return "";
+            }
             return $data;
         }
         if (empty($data)) {
