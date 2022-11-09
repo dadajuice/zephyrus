@@ -88,14 +88,24 @@ class HttpRequester
      */
     public function execute(string|array $payload = ""): HttpRequesterResponse
     {
+        $responseHeaders = [];
         $curl = $this->buildCurl(new HttpPayload($this->contentType, $payload));
+        curl_setopt($curl, CURLOPT_HEADERFUNCTION, function($curl, $header) use (&$responseHeaders) {
+            $len = strlen($header);
+            $header = explode(':', $header, 2);
+            if (count($header) < 2) {
+                return $len;
+            }
+            $responseHeaders[strtolower(trim($header[0]))] = trim($header[1]);
+            return $len;
+        });
         $response = curl_exec($curl);
         if ($response === false) {
             throw new HttpRequesterException(curl_error($curl), $this->method, $this->url);
         }
         $information = curl_getinfo($curl);
         curl_close($curl);
-        return new HttpRequesterResponse($response, $information);
+        return new HttpRequesterResponse($response, $information, $responseHeaders);
     }
 
     /**
