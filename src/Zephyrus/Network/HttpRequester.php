@@ -376,6 +376,9 @@ class HttpRequester
      */
     private function setCurlPayload(CurlHandle $curl, HttpPayload $payload)
     {
+        if (empty($payload->getContent())) {
+            return;
+        }
         if ($this->method == 'get') {
             $requestedUrl = $this->url . (!str_contains($this->url, '?') ? '?' : '&') . $payload->getContent();
             curl_setopt($curl, CURLOPT_URL, $requestedUrl);
