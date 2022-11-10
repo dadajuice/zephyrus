@@ -304,6 +304,7 @@ class HttpRequester
         curl_setopt($curl, CURLOPT_HEADER, 0);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->connectionTimeout);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, $this->followRedirection);
+        curl_setopt($curl, CURLINFO_HEADER_OUT, true);
     }
 
     /**
