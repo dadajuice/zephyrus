@@ -47,7 +47,7 @@ class ListView
         if (empty($data)) {
             return "";
         }
-        $pattern = "/" . preg_quote($search, '/') . "/i";
+        $pattern = "/" . preg_quote($search, '/') . "/iu";
         return preg_replace($pattern, "<mark>$0</mark>", $data);
     }
 
