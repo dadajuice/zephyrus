@@ -69,7 +69,7 @@ class FilterConfiguration
     private function parsePage(): ?int
     {
         $source = $this->request->getParameter($this->pageParameter);
-        if (!ctype_digit($source ?? "")) {
+        if (!is_numeric($source ?? "")) {
             return null;
         }
         return $source;
@@ -78,7 +78,7 @@ class FilterConfiguration
     private function parseLimit(): ?int
     {
         $source = $this->request->getParameter($this->limitParameter);
-        if (!ctype_digit($source ?? "")) {
+        if (!is_numeric($source ?? "")) {
             return null;
         }
         return $source;
