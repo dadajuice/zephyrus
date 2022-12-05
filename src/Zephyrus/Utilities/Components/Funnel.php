@@ -9,7 +9,8 @@ class Funnel
         'sensible-contains',
         'sensible-begins',
         'sensible-ends',
-        'equals'
+        'equals',
+        'between'
     ];
     private ?array $allowedFields = null;
     private ?array $filters;

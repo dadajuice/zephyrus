@@ -92,10 +92,17 @@ class FilterParser
                 'sensible-begins' => $this->parseBegins($column, $content, false),
                 'sensible-ends' => $this->parseEnds($column, $content, false),
                 'equals' => $this->parseEquals($column, $content),
+                'between' => $this->parseBetween($column, $content),
                 default => null
             };
         }
         return $this->whereClause;
+    }
+
+    private function parseBetween(string $column, mixed $content): void
+    {
+        $contents = explode("~", $content);
+        $this->whereClause->add(WhereCondition::between($this->aliasColumns[$column] ?? $column, $contents[0], $contents[1]), $this->aggregateOperator);
     }
 
     /**

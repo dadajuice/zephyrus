@@ -194,6 +194,22 @@ class FilterParserTest extends TestCase
         self::assertEquals(["bob"], $clause->getQueryParameters());
     }
 
+    public function testBetweenContains()
+    {
+        $request = new Request("http://example.com?filters[price:between]=10~50", "get", ['parameters' => [
+            'filters' => ['price:between' => '10~50']
+        ]]);
+        RequestFactory::set($request);
+
+        $filter = RequestFactory::read()->getFilter();
+        $parser = new FilterParser($filter->getFunnel());
+        $parser->buildSqlClause();
+        $clause = $parser->getSqlClause();
+
+        self::assertEquals("WHERE (price BETWEEN ? AND ?)", $clause->getSql());
+        self::assertEquals(["10", "50"], $clause->getQueryParameters());
+    }
+
     public function testSearchFilter()
     {
         $request = new Request("http://example.com?search=bob", "get", ['parameters' => [
