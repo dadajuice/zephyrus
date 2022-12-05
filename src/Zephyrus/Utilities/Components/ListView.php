@@ -123,8 +123,10 @@ class ListView
 
     public function getPager(): PagerView
     {
-        return new PagerView($this->filter->getPagination(),
-            ($this->getSearch() || $this->getFilters()) ? $this->count : $this->totalCount);
+        return new PagerView(
+            $this->filter->getPagination(),
+            ($this->getSearch() || $this->getFilters()) ? $this->count : $this->totalCount
+        );
     }
 
     public function addAdditionalData(string $key, mixed $value): void
