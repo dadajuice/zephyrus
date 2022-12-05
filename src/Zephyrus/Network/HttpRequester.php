@@ -90,7 +90,7 @@ class HttpRequester
     {
         $responseHeaders = [];
         $curl = $this->buildCurl(new HttpPayload($this->contentType, $payload));
-        curl_setopt($curl, CURLOPT_HEADERFUNCTION, function($curl, $header) use (&$responseHeaders) {
+        curl_setopt($curl, CURLOPT_HEADERFUNCTION, function ($curl, $header) use (&$responseHeaders) {
             $len = strlen($header);
             $header = explode(':', $header, 2);
             if (count($header) < 2) {
