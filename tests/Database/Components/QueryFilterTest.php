@@ -4,6 +4,7 @@ use PHPUnit\Framework\TestCase;
 use Zephyrus\Database\Components\QueryFilter;
 use Zephyrus\Database\Core\Database;
 use Zephyrus\Database\Core\DatabaseConfiguration;
+use Zephyrus\Database\QueryBuilder\WhereClause;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 
@@ -149,6 +150,7 @@ class QueryFilterTest extends TestCase
         ]]);
         RequestFactory::set($request);
         $filter = new QueryFilter(RequestFactory::read()->getFilter());
+        $filter->getFilterParser()->setAggregateOperator(WhereClause::OPERATOR_OR);
         self::assertTrue($filter->isFilterRequested());
 
         $query = "SELECT * FROM view_project WHERE state = 'ACTIVE' AND archive_date IS NULL";

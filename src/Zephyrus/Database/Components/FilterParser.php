@@ -12,7 +12,7 @@ class FilterParser
     private array $filters;
     private array $aliasColumns = [];
     private array $searchableColumns = [];
-    private string $aggregateOperator = WhereClause::OPERATOR_OR;
+    private string $aggregateOperator = WhereClause::OPERATOR_AND;
 
     public function __construct(Funnel $funnel)
     {
@@ -114,6 +114,7 @@ class FilterParser
     {
         foreach ($this->searchableColumns as $searchableColumn) {
             $this->parseContains($searchableColumn, $this->searchQuery);
+            $this->setAggregateOperator(WhereClause::OPERATOR_OR);
         }
         return $this->whereClause;
     }
