@@ -16,6 +16,7 @@ class FilterParserTest extends TestCase
         RequestFactory::set($request);
         $filter = RequestFactory::read()->getFilter();
         $parser = new FilterParser($filter->getFunnel());
+        $parser->setAggregateOperator(WhereClause::OPERATOR_OR);
         self::assertTrue($parser->hasRequested());
         $parser->buildSqlClause();
         $clause = $parser->getSqlClause();
@@ -30,6 +31,7 @@ class FilterParserTest extends TestCase
         $filter = RequestFactory::read()->getFilter();
 
         $parser = new FilterParser($filter->getFunnel());
+        $parser->setAggregateOperator(WhereClause::OPERATOR_OR);
         $parser->buildSqlClause();
         $clause = $parser->getSqlClause();
 
@@ -46,6 +48,7 @@ class FilterParserTest extends TestCase
 
         $filter = RequestFactory::read()->getFilter();
         $parser = new FilterParser($filter->getFunnel());
+        $parser->setAggregateOperator(WhereClause::OPERATOR_OR);
         $parser->setAliasColumns(['name' => 'title']);
         $parser->buildSqlClause();
         $clause = $parser->getSqlClause();
@@ -62,6 +65,7 @@ class FilterParserTest extends TestCase
         RequestFactory::set($request);
         $filter = RequestFactory::read()->getFilter();
         $parser = new FilterParser($filter->getFunnel());
+        $parser->setAggregateOperator(WhereClause::OPERATOR_OR);
         
         $parser->buildSqlClause();
         $clause = $parser->getSqlClause();
@@ -96,6 +100,7 @@ class FilterParserTest extends TestCase
 
         $filter = RequestFactory::read()->getFilter();
         $parser = new FilterParser($filter->getFunnel());
+        $parser->setAggregateOperator(WhereClause::OPERATOR_OR);
         $parser->buildSqlClause();
         $clause = $parser->getSqlClause();
 
@@ -112,6 +117,7 @@ class FilterParserTest extends TestCase
 
         $filter = RequestFactory::read()->getFilter();
         $parser = new FilterParser($filter->getFunnel());
+        $parser->setAggregateOperator(WhereClause::OPERATOR_OR);
         $parser->buildSqlClause();
         $clause = $parser->getSqlClause();
 
@@ -128,6 +134,7 @@ class FilterParserTest extends TestCase
 
         $filter = RequestFactory::read()->getFilter();
         $parser = new FilterParser($filter->getFunnel());
+        $parser->setAggregateOperator(WhereClause::OPERATOR_OR);
         $parser->buildSqlClause();
         $clause = $parser->getSqlClause();
 
@@ -144,6 +151,7 @@ class FilterParserTest extends TestCase
 
         $filter = RequestFactory::read()->getFilter();
         $parser = new FilterParser($filter->getFunnel());
+        $parser->setAggregateOperator(WhereClause::OPERATOR_OR);
         $parser->buildSqlClause();
         $clause = $parser->getSqlClause();
 
@@ -157,6 +165,7 @@ class FilterParserTest extends TestCase
         RequestFactory::set($request);
         $filter = RequestFactory::read()->getFilter();
         $parser = new FilterParser($filter->getFunnel());
+        $parser->setAggregateOperator(WhereClause::OPERATOR_OR);
         $parser->buildSqlClause();
         $clause = $parser->getSqlClause();
         self::assertEquals("", $clause->getSql());
@@ -171,6 +180,7 @@ class FilterParserTest extends TestCase
 
         $filter = RequestFactory::read()->getFilter();
         $parser = new FilterParser($filter->getFunnel());
+        $parser->setAggregateOperator(WhereClause::OPERATOR_OR);
         $parser->buildSqlClause();
         $clause = $parser->getSqlClause();
 
@@ -187,6 +197,7 @@ class FilterParserTest extends TestCase
         $filter = RequestFactory::read()->getFilter();
         $filter->getFunnel()->setAllowedFields(['name']);
         $parser = new FilterParser($filter->getFunnel());
+        $parser->setAggregateOperator(WhereClause::OPERATOR_OR);
         $parser->buildSqlClause();
         $clause = $parser->getSqlClause();
 
@@ -203,6 +214,7 @@ class FilterParserTest extends TestCase
 
         $filter = RequestFactory::read()->getFilter();
         $parser = new FilterParser($filter->getFunnel());
+        $parser->setAggregateOperator(WhereClause::OPERATOR_OR);
         $parser->setSearchableColumns(['name', 'brand']);
         self::assertTrue($parser->hasRequested());
         $parser->buildSqlClause();
