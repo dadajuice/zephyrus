@@ -43,6 +43,7 @@ class Localization
                 'locale' => $dir,
                 'lang_code' => $parts[0],
                 'country_code' => $parts[1],
+                'flag_emoji' => self::getFlagEmoji($parts[1]),
                 'country' => locale_get_display_region($dir),
                 'lang' => locale_get_display_language($dir),
                 'count' => count($directory->getFilenames()),
@@ -325,5 +326,19 @@ class Localization
                 unlink($file);
             }
         }
+    }
+
+    /**
+     * Converts the 2 letters country code into the corresponding flag emoji.
+     *
+     * @param string $countryCode
+     * @return string
+     */
+    private static function getFlagEmoji(string $countryCode): string
+    {
+        $codePoints = array_map(function($char) {
+            return 127397 + ord($char);
+        }, str_split(strtoupper($countryCode)));
+        return mb_convert_encoding('&#' . implode(';&#', $codePoints) . ';', 'UTF-8', 'HTML-ENTITIES');
     }
 }
