@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Application;
 
+use stdClass;
 use Zephyrus\Exceptions\LocalizationException;
 use Zephyrus\Security\Cryptography;
 use Zephyrus\Utilities\FileSystem\Directory;
@@ -14,9 +15,11 @@ class Localization
     private static $instance = null;
 
     /**
-     * @var string
+     * Currently loaded application locale language. Maps to a directory within /locale.
+     *
+     * @var string|null
      */
-    private $appLocale;
+    private ?string $appLocale = null;
 
     public static function getInstance(): self
     {
@@ -37,19 +40,14 @@ class Localization
         });
         $languages = [];
         foreach ($dirs as $dir) {
-            $directory = new Directory(ROOT_DIR . '/locale/' . $dir);
-            $parts = explode("_", $dir);
-            $languages[] = (object) [
-                'locale' => $dir,
-                'lang_code' => $parts[0],
-                'country_code' => $parts[1],
-                'country' => locale_get_display_region($dir),
-                'lang' => locale_get_display_language($dir),
-                'count' => count($directory->getFilenames()),
-                'size' => $directory->size()
-            ];
+            $languages[] = self::getLanguage($dir);
         }
         return $languages;
+    }
+
+    public function getLoadedLanguage(): stdClass
+    {
+        return self::getLanguage($this->appLocale);
     }
 
     /**
@@ -325,5 +323,35 @@ class Localization
                 unlink($file);
             }
         }
+    }
+
+    /**
+     * Converts the 2 letters country code into the corresponding flag emoji.
+     *
+     * @param string $countryCode
+     * @return string
+     */
+    private static function getFlagEmoji(string $countryCode): string
+    {
+        $codePoints = array_map(function($char) {
+            return 127397 + ord($char);
+        }, str_split(strtoupper($countryCode)));
+        return mb_convert_encoding('&#' . implode(';&#', $codePoints) . ';', 'UTF-8', 'HTML-ENTITIES');
+    }
+
+    private static function getLanguage(string $locale): stdClass
+    {
+        $directory = new Directory(ROOT_DIR . '/locale/' . $locale);
+        $parts = explode("_", $locale);
+        return (object) [
+            'locale' => $locale,
+            'lang_code' => $parts[0],
+            'country_code' => $parts[1],
+            'flag_emoji' => self::getFlagEmoji($parts[1]),
+            'country' => locale_get_display_region($locale),
+            'lang' => locale_get_display_language($locale),
+            'count' => count($directory->getFilenames()),
+            'size' => $directory->size()
+        ];
     }
 }
