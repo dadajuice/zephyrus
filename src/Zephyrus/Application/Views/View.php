@@ -8,8 +8,9 @@ abstract class View
     private string $page;
     private string $path;
 
-    public abstract function render(array $args = []): Response;
-    protected abstract function buildPathFromPage(string $pageToRender): string;
+    abstract public function render(array $args = []): Response;
+
+    abstract protected function buildPathFromPage(string $pageToRender): string;
 
     public function __construct(string $pageToRender)
     {

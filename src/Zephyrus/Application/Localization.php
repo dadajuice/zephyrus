@@ -333,7 +333,7 @@ class Localization
      */
     private static function getFlagEmoji(string $countryCode): string
     {
-        $codePoints = array_map(function($char) {
+        $codePoints = array_map(function ($char) {
             return 127397 + ord($char);
         }, str_split(strtoupper($countryCode)));
         return mb_convert_encoding('&#' . implode(';&#', $codePoints) . ';', 'UTF-8', 'HTML-ENTITIES');

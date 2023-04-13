@@ -120,7 +120,7 @@ class IntrusionMonitor
     {
         // Only start detection if value isn't alphanumeric
         $preFilter = '([^\w\s/@!?\.]+|(?:\./)|(?:@@\w+)|(?:\+ADw)|(?:union\s+select))i';
-        if ((!$data || !preg_match($preFilter, $data))) {
+        if (!$data || !preg_match($preFilter, $data)) {
             return true;
         }
         return false;
