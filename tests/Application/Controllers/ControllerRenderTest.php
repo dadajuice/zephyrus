@@ -49,7 +49,7 @@ class ControllerRenderTest extends TestCase
 
             public function index(): Response
             {
-                return parent::render('test2', ['a' => 'allo']);
+                return parent::renderPhp('test2', ['a' => 'allo']);
             }
         };
         ob_start();
@@ -71,7 +71,7 @@ class ControllerRenderTest extends TestCase
             {
                 Flash::error("invalid");
                 Feedback::error(["email" => ["test"]]);
-                return parent::render('test3');
+                return parent::renderPhp('test3');
             }
         };
         ob_start();
