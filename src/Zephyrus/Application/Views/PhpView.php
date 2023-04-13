@@ -12,8 +12,8 @@ class PhpView extends View
      * Creates an HTML response with the given view arguments.
      *
      * @param array $args
-     * @return Response
      * @throws RuntimeException
+     * @return Response
      */
     public function render(array $args = []): Response
     {
@@ -29,6 +29,7 @@ class PhpView extends View
             Form::removeMemorizedValue();
             return $response;
         }
+
         throw new RuntimeException("The specified view file [{$this->getPath()}] is not available (not readable or does not exists)");
     }
 

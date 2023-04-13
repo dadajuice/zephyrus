@@ -61,6 +61,7 @@ class PugView extends View
             Form::removeMemorizedValue();
             return $this->buildResponse($output);
         }
+
         throw new RuntimeException("The specified view file [{$this->getPath()}] is not available (not readable or does not exists)");
     }
 
@@ -79,10 +80,10 @@ class PugView extends View
 
     private function initializeCache()
     {
-        $cacheEnabled = ((isset($this->configurations['cache_enabled'])))
+        $cacheEnabled = (isset($this->configurations['cache_enabled']))
             ? (bool) $this->configurations['cache_enabled']
             : self::DEFAULT_CONFIGURATIONS['cache_enabled'];
-        $cacheDirectory = ((isset($this->configurations['cache_directory'])))
+        $cacheDirectory = (isset($this->configurations['cache_directory']))
             ? (bool) $this->configurations['cache_directory']
             : self::DEFAULT_CONFIGURATIONS['cache_directory'];
         Phug::setOption('cache_dir', $cacheEnabled ? $cacheDirectory : false);
@@ -91,7 +92,7 @@ class PugView extends View
     private function initializeDebug()
     {
         Phug::addExtension(JsPhpizePhug::class);
-        $debugEnabled = ((isset($this->configurations['debug_enabled'])))
+        $debugEnabled = (isset($this->configurations['debug_enabled']))
             ? (bool) $this->configurations['debug_enabled']
             : self::DEFAULT_CONFIGURATIONS['debug_enabled'];
         Phug::setOption('debug', $debugEnabled);
@@ -99,7 +100,7 @@ class PugView extends View
 
     private function initializeJsExtension()
     {
-        $jsEnabled = ((isset($this->configurations['js_syntax'])))
+        $jsEnabled = (isset($this->configurations['js_syntax']))
             ? (bool) $this->configurations['js_syntax']
             : self::DEFAULT_CONFIGURATIONS['js_syntax'];
         if ($jsEnabled) {
