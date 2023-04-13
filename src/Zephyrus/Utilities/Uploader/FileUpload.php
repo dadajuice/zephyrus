@@ -88,9 +88,9 @@ class FileUpload
      */
     final public static function getMaxUploadSize(): int
     {
-        $maxUpload = (int) (ini_get('upload_max_filesize'));
-        $maxPost = (int) (ini_get('post_max_size'));
-        $memoryLimit = (int) (ini_get('memory_limit'));
+        $maxUpload = (int) ini_get('upload_max_filesize');
+        $maxPost = (int) ini_get('post_max_size');
+        $memoryLimit = (int) ini_get('memory_limit');
         return min($maxUpload, $maxPost, $memoryLimit);
     }
 

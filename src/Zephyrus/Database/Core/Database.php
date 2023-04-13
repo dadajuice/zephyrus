@@ -39,7 +39,7 @@ class Database
             $statement = $this->handle->prepare($query, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
             foreach ($parameters as $name => &$variable) {
                 $statement->bindParam(
-                    (is_string($name) ? ":$name" : intval($name) + 1),
+                    is_string($name) ? ":$name" : intval($name) + 1,
                     $variable,
                     $this->evaluatePdoType($variable)
                 );
