@@ -236,7 +236,7 @@ class FilterParserTest extends TestCase
         $parser->buildSqlClause();
         $clause = $parser->getSqlClause();
 
-        self::assertEquals("WHERE (name ILIKE ?) OR (brand ILIKE ?)", $clause->getSql());
+        self::assertEquals("WHERE ((name ILIKE ?) OR (brand ILIKE ?))", $clause->getSql());
         self::assertEquals(["%bob%", "%bob%"], $clause->getQueryParameters());
     }
 }
