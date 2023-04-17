@@ -74,68 +74,75 @@ class FilterParser
      */
     public function buildSqlClause(): WhereClause
     {
-        if (!empty($this->searchQuery)) {
-            return $this->parseSearch();
+        $filterConditions = $this->parseFilters();
+        foreach ($filterConditions as $condition) {
+            $this->whereClause->add($condition, $this->aggregateOperator);
         }
-        return $this->parseFilters();
-    }
-
-    private function parseFilters(): WhereClause
-    {
-        foreach ($this->filters as $columnDefinition => $content) {
-            list($column, $filterType) = explode(':', $columnDefinition);
-            match ($filterType) {
-                'contains' => $this->parseContains($column, $content),
-                'begins' => $this->parseBegins($column, $content),
-                'ends' => $this->parseEnds($column, $content),
-                'sensible-contains' => $this->parseContains($column, $content, false),
-                'sensible-begins' => $this->parseBegins($column, $content, false),
-                'sensible-ends' => $this->parseEnds($column, $content, false),
-                'equals' => $this->parseEquals($column, $content),
-                'between' => $this->parseBetween($column, $content),
-                default => null
-            };
+        if (!empty($this->searchQuery)) {
+            $searchCondition = call_user_func_array([WhereCondition::class, "or"], $this->parseSearch());
+            $this->whereClause->add($searchCondition, $this->aggregateOperator);
         }
         return $this->whereClause;
     }
 
-    private function parseBetween(string $column, mixed $content): void
+    private function parseFilters(): array
+    {
+        $conditions = [];
+        foreach ($this->filters as $columnDefinition => $content) {
+            list($column, $filterType) = explode(':', $columnDefinition);
+            match ($filterType) {
+                'contains' => $conditions[] = $this->parseContains($column, $content),
+                'begins' => $conditions[] = $this->parseBegins($column, $content),
+                'ends' => $conditions[] = $this->parseEnds($column, $content),
+                'sensible-contains' => $conditions[] = $this->parseContains($column, $content, false),
+                'sensible-begins' => $conditions[] = $this->parseBegins($column, $content, false),
+                'sensible-ends' => $this->parseEnds($column, $content, false),
+                'equals' => $conditions[] = $this->parseEquals($column, $content),
+                'between' => $conditions[] = $this->parseBetween($column, $content),
+                default => null
+            };
+        }
+        return $conditions;
+    }
+
+    private function parseBetween(string $column, mixed $content): WhereCondition
     {
         $contents = explode("~", $content);
-        $this->whereClause->add(WhereCondition::between($this->aliasColumns[$column] ?? $column, $contents[0], $contents[1]), $this->aggregateOperator);
+        //$this->whereClause->add(WhereCondition::between($this->aliasColumns[$column] ?? $column, $contents[0], $contents[1]), $this->aggregateOperator);
+        return WhereCondition::between($this->aliasColumns[$column] ?? $column, $contents[0], $contents[1]);
+    }
+
+    private function parseContains(string $column, mixed $content, bool $caseInsensitive = true): WhereCondition
+    {
+        return WhereCondition::like($this->aliasColumns[$column] ?? $column, "%$content%", $caseInsensitive);
+    }
+
+    private function parseBegins(string $column, mixed $content, bool $caseInsensitive = true): WhereCondition
+    {
+        return WhereCondition::like($this->aliasColumns[$column] ?? $column, "$content%", $caseInsensitive);
+    }
+
+    private function parseEnds(string $column, mixed $content, bool $caseInsensitive = true): WhereCondition
+    {
+        return WhereCondition::like($this->aliasColumns[$column] ?? $column, "%$content", $caseInsensitive);
+    }
+
+    private function parseEquals(string $column, mixed $content): WhereCondition
+    {
+        return WhereCondition::equals($this->aliasColumns[$column] ?? $column, $content);
     }
 
     /**
      * Treat the search query as a simple "contains" filter request over all the searchable columns.
      *
-     * @return WhereClause
+     * @return array
      */
-    private function parseSearch(): WhereClause
+    private function parseSearch(): array
     {
+        $conditions = [];
         foreach ($this->searchableColumns as $searchableColumn) {
-            $this->parseContains($searchableColumn, $this->searchQuery);
-            $this->setAggregateOperator(WhereClause::OPERATOR_OR);
+            $conditions[] = $this->parseContains($searchableColumn, $this->searchQuery);
         }
-        return $this->whereClause;
-    }
-
-    private function parseContains(string $column, mixed $content, bool $caseInsensitive = true): void
-    {
-        $this->whereClause->add(WhereCondition::like($this->aliasColumns[$column] ?? $column, "%$content%", $caseInsensitive), $this->aggregateOperator);
-    }
-
-    private function parseBegins(string $column, mixed $content, bool $caseInsensitive = true): void
-    {
-        $this->whereClause->add(WhereCondition::like($this->aliasColumns[$column] ?? $column, "$content%", $caseInsensitive), $this->aggregateOperator);
-    }
-
-    private function parseEnds(string $column, mixed $content, bool $caseInsensitive = true): void
-    {
-        $this->whereClause->add(WhereCondition::like($this->aliasColumns[$column] ?? $column, "%$content", $caseInsensitive), $this->aggregateOperator);
-    }
-
-    private function parseEquals(string $column, mixed $content): void
-    {
-        $this->whereClause->add(WhereCondition::equals($this->aliasColumns[$column] ?? $column, $content), $this->aggregateOperator);
+        return $conditions;
     }
 }
