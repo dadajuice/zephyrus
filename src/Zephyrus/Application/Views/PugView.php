@@ -49,8 +49,8 @@ class PugView extends View
         $this->initializeJsExtension();
         Phug::setOption('paths', [realpath(ROOT_DIR . '/public')]);
         Phug::share([
-            Flash::readAll(),
-            Feedback::readAll()
+            ["flash" => Flash::readAll()],
+            ["feedback" => Feedback::readAll()]
         ]);
     }
 

@@ -11,7 +11,7 @@ class Feedback
     {
         $feedback = Session::getInstance()->read('__FEEDBACK');
         $args = [];
-        $args["feedback"]["error"] = $feedback['ERROR'] ?? [];
+        $args["error"] = $feedback['ERROR'] ?? [];
         self::clearAll();
         return $args;
     }
