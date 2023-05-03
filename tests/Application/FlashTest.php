@@ -23,34 +23,39 @@ class FlashTest extends TestCase
     {
         Flash::error("alert");
         $args = Flash::readAll();
-        self::assertEquals("alert", $args['flash']['error']);
+        self::assertEquals("alert", $args->error);
+        Flash::clearAll();
     }
 
     public function testWarning()
     {
         Flash::warning("warning");
         $args = Flash::readAll();
-        self::assertEquals("warning", $args['flash']['warning']);
+        self::assertEquals("warning", $args->warning);
+        Flash::clearAll();
     }
 
     public function testSuccess()
     {
         Flash::success("success");
         $args = Flash::readAll();
-        self::assertEquals("success", $args['flash']['success']);
+        self::assertEquals("success", $args->success);
+        Flash::clearAll();
     }
 
     public function testNotice()
     {
         Flash::notice("notice");
         $args = Flash::readAll();
-        self::assertEquals("notice", $args['flash']['notice']);
+        self::assertEquals("notice", $args->notice);
+        Flash::clearAll();
     }
 
     public function testInfo()
     {
         Flash::info("info");
         $args = Flash::readAll();
-        self::assertEquals("info", $args['flash']['info']);
+        self::assertEquals("info", $args->info);
+        Flash::clearAll();
     }
 }

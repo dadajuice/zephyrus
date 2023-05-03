@@ -80,6 +80,28 @@ class ControllerRenderTest extends TestCase
         self::assertEquals('<h1>invalid</h1><h1>test</h1>', $output);
     }
 
+    public function testRenderPugWithFlashAndFeedback()
+    {
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index(): Response
+            {
+                Flash::error("invalid");
+                Feedback::error(["email" => ["test"]]);
+                return parent::render('test4');
+            }
+        };
+        ob_start();
+        $controller->index()->send();
+        $output = ob_get_clean();
+        self::assertEquals('<h1>invalid</h1><h1>test</h1>', $output);
+    }
+
     public function testJson()
     {
         $router = new Router();

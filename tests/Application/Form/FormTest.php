@@ -81,7 +81,7 @@ class FormTest extends TestCase
         $form->field('username')->validate(Rule::notEmpty('username not empty'));
         self::assertFalse($form->verify());
         $form->registerFeedback();
-        $feedback = Feedback::readAll()["feedback"]["error"];
+        $feedback = Feedback::readAll()->error;
         self::assertTrue(key_exists('username', $feedback));
         self::assertEquals('username not empty', $feedback['username'][0]);
         Session::kill();
