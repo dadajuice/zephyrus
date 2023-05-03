@@ -406,6 +406,7 @@ class Request
      */
     public function getHeader(string $name): ?string
     {
+        // TODO: Should be case insensitive
         return isset($this->headers[$name]) ? $this->headers[$name] : null;
     }
 

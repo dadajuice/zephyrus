@@ -22,11 +22,13 @@ class PhpView extends View
             foreach ($args as $name => $value) {
                 $$name = $value;
             }
-            $flash = Flash::readAll()["flash"];
-            $feedback = Feedback::readAll()["feedback"];
+            $flash = Flash::readAll();
+            $feedback = Feedback::readAll();
             include $this->getPath();
             $response = $this->buildResponse(ob_get_clean());
             Form::removeMemorizedValue();
+            Flash::clearAll();
+            Feedback::clearAll();
             return $response;
         }
 

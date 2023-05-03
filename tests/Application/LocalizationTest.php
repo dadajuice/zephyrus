@@ -20,6 +20,18 @@ class LocalizationTest extends TestCase
         self::assertEquals("/admin", Localization::getInstance()->localize("routes.administration")); // subfolder test
         self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", localize("messages.success.add_user", "martin"));
         self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", __("L'utilisateur [%s] a été ajouté avec succès", 'martin'));
+        $reservedKeywords = [
+            'abstract', 'and', 'array', 'as', 'break', 'callable', 'case', 'catch', 'clone',
+            'const', 'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 'empty', 'enddeclare',
+            'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile', 'eval', 'exit', 'extends', 'final', 'finally',
+            'fn', 'for', 'foreach', 'function', 'global', 'goto', 'if', 'implements', 'include', 'include_once',
+            'instanceof', 'insteadof', 'interface', 'isset', 'list', 'namespace', 'new', 'or', 'print', 'private',
+            'protected', 'public', 'require', 'require_once', 'return', 'static', 'throw', 'trait', 'try',
+            'unset', 'use', 'var', 'while', 'xor', 'yield'
+        ];
+        foreach ($reservedKeywords as $w) {
+            self::assertEquals('a', localize("test.$w"));
+        }
     }
 
     /**
@@ -76,7 +88,7 @@ class LocalizationTest extends TestCase
             self::assertTrue(false); // should not reach this point
         } catch (LocalizationException $e) {
             self::assertEquals(LocalizationException::ERROR_RESERVED_WORD, $e->getCode());
-            self::assertEquals("Cannot use the detected PHP reserved word [private] as localize key.", $e->getMessage());
+            self::assertEquals("Cannot use the detected PHP reserved word [class] as localize key.", $e->getMessage());
         }
         unlink(ROOT_DIR . '/locale/fr_CA/invalid_words.json');
     }
