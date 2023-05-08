@@ -6,27 +6,27 @@ class Flash
 {
     private const SESSION_KEY = '__ZF_FLASH';
 
-    public static function error(string $message): void
+    public static function error(string|array $message): void
     {
         self::addFlash('ERROR', $message);
     }
 
-    public static function success(string $message): void
+    public static function success(string|array $message): void
     {
         self::addFlash('SUCCESS', $message);
     }
 
-    public static function warning(string $message): void
+    public static function warning(string|array $message): void
     {
         self::addFlash('WARNING', $message);
     }
 
-    public static function info(string $message): void
+    public static function info(string|array $message): void
     {
         self::addFlash('INFO', $message);
     }
 
-    public static function notice(string $message): void
+    public static function notice(string|array $message): void
     {
         self::addFlash('NOTICE', $message);
     }
@@ -48,7 +48,7 @@ class Flash
         Session::getInstance()->remove(self::SESSION_KEY);
     }
 
-    private static function addFlash(string $type, string $message): void
+    private static function addFlash(string $type, string|array $message): void
     {
         $flash = Session::getInstance()->read(self::SESSION_KEY);
         if (is_null($flash)) {
