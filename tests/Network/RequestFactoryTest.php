@@ -123,14 +123,15 @@ class RequestFactoryTest extends TestCase
         $_SERVER['HTTP_HOST'] = 'test.local';
         $_SERVER['SERVER_PORT'] = '80';
         $_SERVER['CONTENT_TYPE'] = ContentType::PLAIN;
-        $_POST['test[]'] = ["1", "2", "3"];
+        $_POST['test'] = ["1", "2", "3"]; // Will add [] automatically ...
         $_POST['test2'] = ["4", "5", "6"];
         $_POST['__method'] = 'put';
         RequestFactory::set(null);
         $request = RequestFactory::read();
+        print_r($request->getParameters());
         self::assertEquals('PUT', $request->getMethod());
-        self::assertEquals('2', $request->getParameter('test')[1]);
-        self::assertEquals('5', $request->getParameter('test2')[1]);
+        self::assertEquals('2', $request->getParameter('test[]')[1]);
+        self::assertEquals('5', $request->getParameter('test2[]')[1]);
     }
 
     public function testCaptureDelete()

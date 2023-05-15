@@ -4,7 +4,7 @@ trait BaseValidations
 {
     public static function isDecimal($data): bool
     {
-        return preg_match("/^[0-9]+((\.|,)[0-9]+)?$/", $data);
+        return preg_match("/^[0-9]+(([.,])[0-9]+)?$/", $data);
     }
 
     public static function isInteger($data): bool
@@ -14,7 +14,7 @@ trait BaseValidations
 
     public static function isSignedDecimal($data): bool
     {
-        return preg_match("/^-?[0-9]+((\.|,)[0-9]+)?$/", $data);
+        return preg_match("/^-?[0-9]+(([.,])[0-9]+)?$/", $data);
     }
 
     public static function isSignedInteger($data): bool
@@ -22,7 +22,7 @@ trait BaseValidations
         return preg_match("/^-?[0-9]+$/", $data);
     }
 
-    public static function isInRange($data, $min, $max): bool
+    public static function isInRange(int $data, int $min, int $max): bool
     {
         return ($min <= $data) && ($data <= $max);
     }
@@ -30,10 +30,10 @@ trait BaseValidations
     /**
      * Verifies if an array is associative, meaning that the key must not be numerical and sequential (0 - x).
      *
-     * @param $data
+     * @param mixed $data
      * @return bool
      */
-    public static function isAssociativeArray($data): bool
+    public static function isAssociativeArray(mixed $data): bool
     {
         return is_array($data) && array_keys($data) != range(0, count($data) - 1);
     }
@@ -49,7 +49,7 @@ trait BaseValidations
             || $data == "1";
     }
 
-    public static function isOnlyWithin($data, array $allPossibleValues)
+    public static function isOnlyWithin($data, array $allPossibleValues): bool
     {
         if (!is_array($data)) {
             return in_array($data, $allPossibleValues);

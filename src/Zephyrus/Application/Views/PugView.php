@@ -64,7 +64,7 @@ class PugView extends View
             return $this->buildResponse($output);
         }
 
-        throw new RuntimeException("The specified view file [{$this->getPath()}] is not available (not readable or does not exists)");
+        throw new RuntimeException("The specified view file [{$this->getPage()}] is not available (not readable or does not exists)");
     }
 
     protected function buildPathFromPage(string $pageToRender): string
