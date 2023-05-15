@@ -1,8 +1,6 @@
 <?php namespace Zephyrus\Application;
 
 use ReflectionFunctionAbstract;
-use ReflectionMethod;
-use ReflectionObject;
 use stdClass;
 use Zephyrus\Application\Rules\BaseRules;
 use Zephyrus\Application\Rules\FileRules;
