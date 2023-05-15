@@ -58,6 +58,44 @@ class ControllerRenderTest extends TestCase
         self::assertEquals('<h1>allo</h1>', $output);
     }
 
+    public function testRenderUnavailablePhp()
+    {
+        self::expectException(\RuntimeException::class);
+        self::expectExceptionMessage("The specified view file [dfgdfgdfg] is not available (not readable or does not exists)");
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index(): Response
+            {
+                return parent::renderPhp('dfgdfgdfg', ['a' => 'allo']);
+            }
+        };
+        $controller->index()->send();
+    }
+
+    public function testRenderUnavailablePug()
+    {
+        self::expectException(\RuntimeException::class);
+        self::expectExceptionMessage("The specified view file [dfgdfgdfg] is not available (not readable or does not exists)");
+        $router = new Router();
+        $controller = new class($router) extends Controller {
+
+            public function initializeRoutes()
+            {
+            }
+
+            public function index(): Response
+            {
+                return parent::render('dfgdfgdfg', ['a' => 'allo']);
+            }
+        };
+        $controller->index()->send();
+    }
+
     public function testRenderPhpWithFlashAndFeedback()
     {
         $router = new Router();

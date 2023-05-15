@@ -89,16 +89,28 @@ trait StringValidations
      * Validates that the given string is compliant with PHP variable naming convention as defined in the official
      * documentation (https://www.php.net/manual/en/language.variables.basics.php).
      *
-     * @param $data
+     * @param string $data
      * @return bool
      */
-    public static function isVariable($data): bool
+    public static function isVariable(string $data): bool
     {
         return preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $data);
     }
 
-    public static function isRegex($data, $regex): bool
+    /**
+     * Validates that the given string is a valid hex color (including the optional alpha bytes). Must begin with a
+     * hash character (#).
+     *
+     * @param string $data
+     * @return bool
+     */
+    public static function isColor(string $data): bool
     {
-        return preg_match('/^' . $regex . '$/', $data);
+        return preg_match('/^#([0-9a-fA-F]{2}){3,4}$/', $data);
+    }
+
+    public static function isRegex(string $data, string $regex, string $modifiers = ""): bool
+    {
+        return preg_match('/^' . $regex . '$/' . $modifiers, $data);
     }
 }
