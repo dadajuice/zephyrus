@@ -139,11 +139,31 @@ class StringRulesTest extends TestCase
         self::assertFalse($rule->isValid(""));
     }
 
+    public function testIsRegexInsensitive()
+    {
+        $rule = Rule::regexInsensitive("[a-e]{2}-[0-9]+");
+        self::assertTrue($rule->isValid("AB-1"));
+    }
+
     public function testIsVariable()
     {
         $rule = Rule::variable();
         self::assertTrue($rule->isValid("mega"));
         self::assertFalse($rule->isValid("1234mega"));
+    }
+
+    public function testIsColor()
+    {
+        $rule = Rule::color();
+        self::assertEquals("color", $rule->getName());
+        self::assertTrue($rule->isValid("#000000"));
+        self::assertTrue($rule->isValid("#00000000"));
+        self::assertTrue($rule->isValid("#000000AA"));
+        self::assertFalse($rule->isValid("#000000AABB"));
+        self::assertFalse($rule->isValid("#000"));
+        self::assertFalse($rule->isValid("#GGGGGG"));
+        self::assertFalse($rule->isValid("AAAAAA"));
+        self::assertFalse($rule->isValid("AAAAAA"));
     }
 
     public function testIsJson()

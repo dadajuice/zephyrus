@@ -1,6 +1,8 @@
 <?php namespace Zephyrus\Application;
 
 use ReflectionFunctionAbstract;
+use ReflectionMethod;
+use ReflectionObject;
 use stdClass;
 use Zephyrus\Application\Rules\BaseRules;
 use Zephyrus\Application\Rules\FileRules;
@@ -136,6 +138,11 @@ class Rule
     public function getPathing(): string
     {
         return $this->pathing;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
     }
 
     /**

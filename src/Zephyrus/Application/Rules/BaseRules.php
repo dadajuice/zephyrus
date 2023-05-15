@@ -19,7 +19,7 @@ trait BaseRules
                 return true;
             }
             return !empty(is_string($data) ? trim($data) : $data);
-        }, $errorMessage, "required");
+        }, $errorMessage, 'required');
     }
 
     public static function decimal(string $errorMessage = "", $allowSigned = false): Rule
@@ -40,35 +40,35 @@ trait BaseRules
     {
         return new Rule(function ($data) use ($min, $max) {
             return Validation::isInRange($data, $min, $max);
-        }, $errorMessage);
+        }, $errorMessage, 'range');
     }
 
     public static function inArray(array $array, string $errorMessage = ""): Rule
     {
         return new Rule(function ($data) use ($array) {
             return in_array($data, $array);
-        }, $errorMessage);
+        }, $errorMessage, 'inArray');
     }
 
     public static function notInArray(array $array, string $errorMessage = ""): Rule
     {
         return new Rule(function ($data) use ($array) {
             return !in_array($data, $array);
-        }, $errorMessage);
+        }, $errorMessage, 'notInArray');
     }
 
     public static function sameAs(string $comparedFieldName, string $errorMessage = ""): Rule
     {
         return new Rule(function ($data, $values) use ($comparedFieldName) {
             return isset($values[$comparedFieldName]) && $data == $values[$comparedFieldName];
-        }, $errorMessage);
+        }, $errorMessage, 'sameAs');
     }
 
     public static function associativeArray(string $errorMessage = ""): Rule
     {
         return new Rule(function ($data) {
             return Validation::isAssociativeArray($data);
-        }, $errorMessage);
+        }, $errorMessage, 'associativeArray');
     }
 
     public static function array(string $errorMessage = ""): Rule
@@ -89,25 +89,32 @@ trait BaseRules
     {
         return new Rule(function ($data) {
             return is_array($data) && !empty($data);
-        }, $errorMessage);
+        }, $errorMessage, 'arrayNotEmpty');
     }
 
     public static function boolean(string $errorMessage = ""): Rule
     {
-        return new Rule(['Zephyrus\Utilities\Validation', 'isBoolean'], $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isBoolean'], $errorMessage, 'boolean');
     }
 
-    public static function regex(string $pattern, string $errorMessage = ""): Rule
+    public static function regex(string $pattern, string $errorMessage = "", string $modifiers = ""): Rule
+    {
+        return new Rule(function ($data) use ($pattern, $modifiers) {
+            return Validation::isRegex($data, $pattern, $modifiers);
+        }, $errorMessage, 'regex');
+    }
+
+    public static function regexInsensitive(string $pattern, string $errorMessage = ""): Rule
     {
         return new Rule(function ($data) use ($pattern) {
-            return Validation::isRegex($data, $pattern);
-        }, $errorMessage);
+            return Validation::isRegex($data, $pattern, "i");
+        }, $errorMessage, 'regexInsensitive');
     }
 
     public static function onlyWithin(array $possibleValues, string $errorMessage = ""): Rule
     {
         return new Rule(function ($data) use ($possibleValues) {
             return Validation::isOnlyWithin($data, $possibleValues);
-        }, $errorMessage);
+        }, $errorMessage, "onlyWithin");
     }
 }

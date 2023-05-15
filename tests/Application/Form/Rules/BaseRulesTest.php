@@ -8,6 +8,7 @@ class BaseRulesTest extends TestCase
     public function testIsDecimal()
     {
         $rule = Rule::decimal();
+        self::assertEquals("decimal", $rule->getName());
         self::assertTrue($rule->isValid(1.2));
         self::assertFalse($rule->isValid(-2.5));
         self::assertTrue($rule->isValid('10.45657'));
@@ -25,6 +26,7 @@ class BaseRulesTest extends TestCase
     public function testIsInteger()
     {
         $rule = Rule::integer();
+        self::assertEquals("integer", $rule->getName());
         self::assertTrue($rule->isValid('10'));
         self::assertFalse($rule->isValid('10.34'));
         self::assertFalse($rule->isValid('-10'));
@@ -92,6 +94,7 @@ class BaseRulesTest extends TestCase
     public function testIsArray()
     {
         $rule = Rule::array("err");
+        self::assertEquals("array", $rule->getName());
         self::assertTrue($rule->isValid(["1", 2, "hello"]));
         self::assertFalse($rule->isValid("e"));
         self::assertTrue($rule->isValid(["bat" => "man"]));
@@ -103,5 +106,15 @@ class BaseRulesTest extends TestCase
         self::assertTrue($rule->isValid((object) ["name" => 'Bob', "age" => 18]));
         self::assertFalse($rule->isValid("e"));
         self::assertFalse($rule->isValid(["bat" => "man"]));
+    }
+
+    public function testWithAnonymous()
+    {
+        $rule = new Rule(function ($value) {
+            return $value == "42";
+        }, "err", "test");
+        self::assertEquals("test", $rule->getName());
+        self::assertTrue($rule->isValid(42));
+        self::assertFalse($rule->isValid("e"));
     }
 }
