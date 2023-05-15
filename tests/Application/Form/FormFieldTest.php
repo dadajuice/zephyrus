@@ -92,11 +92,11 @@ class FormFieldTest extends TestCase
         ], $field->getErrors());
     }
 
-    public function testInvalidEachUsage()
+    public function testEachNested()
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage("Nested arrays for the [each] rule are not permitted.");
-        $field = new FormField("something[]", [['bob', 'lewis'], ['bob', '#0A0A0A'], ['%?%?%?', 'lewis']]);
+        $field = new FormField("something[]", [
+            ['bob', 'lewis'], ['bob', '#0A0A0A'], ['%?%?%?', 'lewis']
+        ]);
         $field->validate([
             Rule::required("Something must be defined."),
             Rule::array("Something must be a valid array."),
@@ -107,10 +107,14 @@ class FormFieldTest extends TestCase
                 ])
             ])
         ]);
-        $field->verify();
+        self::assertFalse($field->verify());
+        self::assertEquals([
+            'something[].1.1' => ['Something must be name.'],
+            'something[].2.0' => ['Something must be name.']
+        ], $field->getErrors());
     }
 
-    public function testInvalidEachUsage2()
+    public function testInvalidEachUsage()
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("Data argument for the [each] rule must be an array. Consider adding a Rule::array beforehand.");
@@ -125,7 +129,7 @@ class FormFieldTest extends TestCase
         $field->verify();
     }
 
-    public function testInvalidEachUsage3()
+    public function testInvalidEachUsage2()
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("Rules argument for [each] must be an array of Rule instances.");

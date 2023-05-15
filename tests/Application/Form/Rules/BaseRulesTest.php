@@ -64,6 +64,7 @@ class BaseRulesTest extends TestCase
         self::assertTrue($rule->isValid(4));
         self::assertFalse($rule->isValid(-5));
         self::assertFalse($rule->isValid(7));
+        self::assertTrue($rule->isValid(6));
     }
 
     public function testIsSameAs()
@@ -94,5 +95,13 @@ class BaseRulesTest extends TestCase
         self::assertTrue($rule->isValid(["1", 2, "hello"]));
         self::assertFalse($rule->isValid("e"));
         self::assertTrue($rule->isValid(["bat" => "man"]));
+    }
+
+    public function testIsObject()
+    {
+        $rule = Rule::object("err");
+        self::assertTrue($rule->isValid((object) ["name" => 'Bob', "age" => 18]));
+        self::assertFalse($rule->isValid("e"));
+        self::assertFalse($rule->isValid(["bat" => "man"]));
     }
 }
