@@ -2,113 +2,179 @@
 
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Feedback;
+use Zephyrus\Application\Flash;
 use Zephyrus\Application\Form;
 use Zephyrus\Application\Rule;
 use Zephyrus\Application\Session;
 
 class FormTest extends TestCase
 {
-    public function testUnregistered()
+    public function testBasicSuccessfulValidations()
     {
-        $form = new Form();
-        $form->addFields([
-            'username' => 'blewis'
+        $form = new Form([
+            'firstname' => 'Roland',
+            'lastname' => 'Balesque'
         ]);
-        // simulate unchecked checkbox
-        self::assertTrue($form->isRegistered('username'));
-        self::assertFalse($form->isRegistered('understand'));
-        $form->field('understand')->validate(Rule::notEmpty('you need to understand'));
-        self::assertTrue($form->isRegistered('understand'));
-        $form->verify();
-        self::assertEquals('you need to understand', $form->getErrors()['understand'][0]);
-        self::assertFalse($form->hasError('username'));
-        self::assertTrue($form->hasError('understand'));
+        $form->field('firstname', [
+            Rule::required("Firstname must not be empty."),
+            Rule::name("Firstname must be a valid name.")
+        ]);
+        $form->field('lastname', [
+            Rule::required("Lastname must not be empty."),
+            Rule::name("Lastname must be a valid name.")
+        ]);
+
+        self::assertEquals([
+            'firstname' => 'Roland',
+            'lastname' => 'Balesque'
+        ], $form->getFields());
+        self::assertEquals('Roland', $form->getValue('firstname'));
+        self::assertTrue($form->isRegistered('firstname'));
+        self::assertTrue($form->isRegistered('lastname'));
+        self::assertFalse($form->isRegistered('email')); // Not defined in form ...
+        self::assertEquals(null, $form->getValue('email')); // Not defined in form ...
+        self::assertTrue($form->verify());
+    }
+
+    public function testBasicFailedValidations()
+    {
+        $form = new Form([
+            'firstname' => 'Roland',
+            'lastname' => '#0A0A0A' // Invalid name rule will trigger ...
+        ]);
+        $form->field('firstname', [
+            Rule::required("Firstname must not be empty."),
+            Rule::name("Firstname must be a valid name.")
+        ]);
+        $form->field('lastname', [
+            Rule::required("Lastname must not be empty."),
+            Rule::name("Lastname must be a valid name.")
+        ]);
+
+        self::assertFalse($form->verify());
         self::assertTrue($form->hasError());
+        self::assertTrue($form->hasError('lastname'));
+        self::assertEquals([
+            'Lastname must be a valid name.'
+        ], $form->getErrorMessages());
+        self::assertEquals([
+            'lastname' => ['Lastname must be a valid name.']
+        ], $form->getErrors());
+        self::assertEquals('Roland', Form::readMemorizedValue('firstname'));
+        self::assertEquals('', Form::readMemorizedValue('lastname')); // Because error
+        Form::removeMemorizedValue(); // Empty all form values ...
+        self::assertEquals('', Form::readMemorizedValue('firstname'));
     }
 
-    public function testSimpleErrorMessages()
+    public function testBasicFailedValidationsKeepFields()
     {
-        $form = new Form();
-        $form->addFields([
-            'username' => ''
+        $form = new Form([
+            'firstname' => 'Roland',
+            'lastname' => '#0A0A0A' // Invalid name rule will trigger ...
         ]);
-        $form->field('username')
-            ->validate(Rule::notEmpty('username not empty'));
+        $form->field('firstname', [
+            Rule::required("Firstname must not be empty."),
+            Rule::name("Firstname must be a valid name.")
+        ]);
+        $form->field('lastname', [
+            Rule::required("Lastname must not be empty."),
+            Rule::name("Lastname must be a valid name.")
+        ])->keep(); // Keep in session variable even on error ...
 
         self::assertFalse($form->verify());
-        self::assertCount(1, $form->getErrorMessages());
-        self::assertTrue(key_exists('username', $form->getErrors()));
-        self::assertEquals('username not empty', $form->getErrors()['username'][0]);
+        self::assertTrue($form->hasError());
+        self::assertTrue($form->hasError('lastname'));
+        self::assertEquals([
+            'Lastname must be a valid name.'
+        ], $form->getErrorMessages());
+        self::assertEquals([
+            'lastname' => ['Lastname must be a valid name.']
+        ], $form->getErrors());
+        self::assertEquals('Roland', Form::readMemorizedValue('firstname'));
+        self::assertEquals('#0A0A0A', Form::readMemorizedValue('lastname'));
     }
 
-    public function testManualSimpleErrorMessages()
+    public function testOptionalFields()
     {
-        $form = new Form();
-        $form->addFields([
-            'username' => 'blewis'
+        $form = new Form([
+            'firstname' => 'Roland',
+            'lastname' => 'Balesque',
+            'phone' => '' // Optional field
         ]);
-        $form->field('username')->validate(Rule::notEmpty('username not empty'));
-        $form->addError('name', 'name must not be empty');
-        self::assertFalse($form->verify()); // The defined validation pass, but there has been a manual error entered
-        self::assertTrue(key_exists('name', $form->getErrors()));
-        self::assertEquals('name must not be empty', $form->getErrors()['name'][0]);
+        $form->field('firstname', [
+            Rule::required("Firstname must not be empty."),
+            Rule::name("Firstname must be a valid name.")
+        ]);
+        $form->field('lastname', [
+            Rule::required("Lastname must not be empty."),
+            Rule::name("Lastname must be a valid name.")
+        ]);
+        $form->field('phone', [
+            Rule::phone("Phone format is invalid.")
+        ])->optional();
+        $form->verify();
+
+        self::assertTrue($form->verify());
+        self::assertEquals('', $form->getValue('phone'));
     }
 
-    public function testCombinedErrorMessages()
+    public function testNullableFields()
     {
-        $form = new Form();
-        $form->addFields([
-            'username' => ''
+        $form = new Form([
+            'firstname' => 'Roland',
+            'lastname' => 'Balesque',
+            'bio' => '', // Nullable field with no validation
+            'favorite_pet' => '' // Nullable field
         ]);
-        $form->field('username')
-            ->validate(Rule::notEmpty('username not empty'));
-        $form->addError('name', 'err-1');
+        $form->field('firstname', [
+            Rule::required("Firstname must not be empty."),
+            Rule::name("Firstname must be a valid name.")
+        ]);
+        $form->field('lastname', [
+            Rule::required("Lastname must not be empty."),
+            Rule::name("Lastname must be a valid name.")
+        ]);
+        $form->field('bio')->nullable();
+        $form->field('favorite_pet', [
+            Rule::inArray(['cat', 'dog', 'bird'], "Pet is invalid.")
+        ])->optional()->nullable();
+
+        self::assertTrue($form->verify());
+        self::assertEquals(null, $form->getValue('bio'));
+        self::assertEquals(null, $form->getValue('favorite_pet'));
+        self::assertEquals((object) [
+            'firstname' => 'Roland',
+            'lastname' => 'Balesque',
+            'bio' => null,
+            'favorite_pet' => null
+        ], $form->buildObject());
+    }
+
+    public function testValidateAllRules()
+    {
+        $form = new Form([
+            'firstname' => '',
+        ]);
+        $form->field('firstname', [
+            Rule::required("Firstname must not be empty."),
+            Rule::name("Firstname must be a valid name.")
+        ])->all(); // Validate everything ...
+
         self::assertFalse($form->verify());
-        self::assertCount(2, $form->getErrorMessages());
-        self::assertTrue(key_exists('username', $form->getErrors()));
-        self::assertTrue(key_exists('name', $form->getErrors()));
-        self::assertEquals('username not empty', $form->getErrors()['username'][0]);
-        self::assertEquals('err-1', $form->getErrors()['name'][0]);
+        self::assertTrue($form->hasError());
+        self::assertEquals([
+            'Firstname must not be empty.',
+            'Firstname must be a valid name.'
+        ], $form->getErrorMessages());
+        self::assertEquals([
+            'firstname' => [
+                'Firstname must not be empty.',
+                'Firstname must be a valid name.'
+            ]
+        ], $form->getErrors());
     }
 
-    public function testFeedback()
-    {
-        Session::getInstance()->start();
-        $form = new Form();
-        $form->addFields([
-            'username' => ''
-        ]);
-        $form->field('username')->validate(Rule::notEmpty('username not empty'));
-        self::assertFalse($form->verify());
-        $form->registerFeedback();
-        $feedback = Feedback::readAll()->error;
-        self::assertTrue(key_exists('username', $feedback));
-        self::assertEquals('username not empty', $feedback['username'][0]);
-        Session::kill();
-    }
-
-    public function testReadDefinedValues()
-    {
-        $form = new Form();
-        $form->addFields([
-            'username' => 'blewis',
-            'firstname' => 'bob'
-        ]);
-        self::assertEquals('blewis', $form->getValue('username'));
-        self::assertEquals('bob', $form->getFields()['firstname']);
-    }
-
-    public function testReadDefaultValue()
-    {
-        $form = new Form();
-        $form->addFields([
-            'username' => 'blewis',
-            'firstname' => 'bob'
-        ]);
-        self::assertEquals('my_default', $form->getValue('test', 'my_default'));
-    }
-
-    public function testSimpleCustomRule()
+    public function testCustomRuleValidation()
     {
         $form = new Form();
         $form->addFields([
@@ -118,39 +184,97 @@ class FormTest extends TestCase
         // Custom rule, username must not be admin!
         $customRule = new Rule(function ($value) {
             return $value != 'admin';
-        }, 'username not valid');
-        $form->field('username')->validate($customRule);
+        }, 'Username is not valid.');
+        $form->field('username', [$customRule]);
         self::assertFalse($form->verify());
-        self::assertEquals('username not valid', $form->getErrorMessages()[0]);
+        self::assertEquals('Username is not valid.', $form->getErrorMessages()[0]);
     }
 
-    public function testSimpleCustomRule2()
+    public function testCustomRuleValidationWithFields()
     {
         $form = new Form();
         $form->addFields([
-            'password' => 'omega123',
-            'password-confirm' => 'omega'
+            'password' => 'omega1',
+            'password_confirm' => 'omega'
         ]);
 
         // Custom rule using all form fields
-        $form->field('password')->validate(new Rule(function ($value, $fields) {
-            return $value == $fields['password-confirm']; // Note that this specific case can use the Rule::sameAs
-        }, 'password not valid'));
+        $form->field('password', [
+            Rule::required("Password must not be empty."),
+            Rule::passwordCompliant("Password is not compliant.")
+        ]);
+        $form->field('password_confirm', [
+            Rule::required("Password confirmation must not be empty."),
+            Rule::sameAs('password', "Password confirmation is not the same.")
+        ]);
         self::assertFalse($form->verify());
-        self::assertEquals('password not valid', $form->getErrorMessages()[0]);
+        self::assertEquals([
+            'password' => [
+                'Password is not compliant.'
+            ],
+            'password_confirm' => [
+                'Password confirmation is not the same.'
+            ]
+        ], $form->getErrors());
     }
 
-    public function testRemoveField()
+    public function testUnregisteredValidations()
     {
-        $form = new Form();
-        $form->addField('name', 'oui');
-        $form->addField('name2', 'bob2');
-        self::assertTrue($form->isRegistered('name2'));
-        $form->removeField('name2');
-        self::assertFalse($form->isRegistered('name2'));
+        $form = new Form([
+            'firstname' => 'Roland',
+            'lastname' => 'Balesque' // Must have a checkbox "agree", but was not submitted ...
+        ]);
+        $form->field('firstname', [
+            Rule::required("Firstname must not be empty."),
+            Rule::name("Firstname must be a valid name.")
+        ]);
+        $form->field('lastname', [
+            Rule::required("Lastname must not be empty."),
+            Rule::name("Lastname must be a valid name.")
+        ]);
+        $form->field('agree', [
+            Rule::required("You must agree to the terms of service.")
+        ]);
+
+        self::assertFalse($form->verify());
+        self::assertEquals([
+            'You must agree to the terms of service.'
+        ], $form->getErrorMessages());
+        self::assertEquals([
+            'agree' => ['You must agree to the terms of service.']
+        ], $form->getErrors());
     }
 
-    public function testBuildStdClass()
+    public function testRemoveFields()
+    {
+        $form = new Form([
+            'firstname' => 'Roland',
+            'lastname' => 'Balesque',
+            'phone' => '555-555-5555'
+        ]);
+        $form->addField('email', 'test@test.com');
+
+        self::assertTrue($form->isRegistered('firstname'));
+        self::assertTrue($form->isRegistered('lastname'));
+        self::assertTrue($form->isRegistered('phone'));
+        self::assertTrue($form->isRegistered('email'));
+        self::assertEquals([
+            'firstname' => 'Roland',
+            'lastname' => 'Balesque',
+            'phone' => '555-555-5555',
+            'email' => 'test@test.com'
+        ], $form->getFields());
+        $form->removeField('phone');
+        $form->removeField('email');
+        self::assertFalse($form->isRegistered('phone'));
+        self::assertFalse($form->isRegistered('email'));
+        self::assertEquals([
+            'firstname' => 'Roland',
+            'lastname' => 'Balesque'
+        ], $form->getFields());
+    }
+
+    public function testBuildObject()
     {
         $form = new Form();
         $form->addFields(['name' => 'bob', 'price' => '10.00']);
@@ -159,20 +283,60 @@ class FormTest extends TestCase
         self::assertEquals('10.00', $object->price);
     }
 
-    /**
-     * Shall be removed once the setOptionalOnEmpty method is removed.
-     *
-     * @deprecated
-     */
-    public function testDeprecatedOptionalFieldMode()
+    public function testReadDefaultValue()
+    {
+        $form = new Form([
+            'username' => 'blewis',
+            'firstname' => 'bob'
+        ]);
+        self::assertEquals('my_default', $form->getValue('test', 'my_default'));
+    }
+
+    public function testManualErrorMessages()
     {
         $form = new Form();
-        $form->setOptionalOnEmpty(false);
-        self::assertFalse($form->isOptionalOnEmpty());
         $form->addFields([
-            'email' => ''
+            'username' => 'blewis'
         ]);
-        $form->validate('email', Rule::email('email not valid'), true);
+        $form->field('username', [
+            Rule::notEmpty('username not empty')
+        ]);
+        $form->addError('name', 'name must not be empty');
+        self::assertFalse($form->verify()); // The defined validation pass, but there has been a manual error entered
+        self::assertTrue(key_exists('name', $form->getErrors()));
+        self::assertEquals('name must not be empty', $form->getErrors()['name'][0]);
+    }
+
+    public function testFeedback()
+    {
+        Session::getInstance()->start();
+        $form = new Form([
+            'username' => ''
+        ]);
+        $form->field('username', [
+            Rule::notEmpty('Username must not be empty.')
+        ]);
         self::assertFalse($form->verify());
+        $form->registerFeedback();
+        $feedback = Feedback::readAll()->error;
+        self::assertTrue(key_exists('username', $feedback));
+        self::assertEquals('Username must not be empty.', $feedback['username'][0]);
+        Session::kill();
+    }
+
+    public function testFlash()
+    {
+        Session::getInstance()->start();
+        $form = new Form([
+            'username' => ''
+        ]);
+        $form->field('username', [
+            Rule::notEmpty('Username must not be empty.')
+        ]);
+        self::assertFalse($form->verify());
+        $form->registerFlash();
+        $flash = Flash::readAll()->error;
+        self::assertEquals('Username must not be empty.', $flash[0]);
+        Session::kill();
     }
 }
