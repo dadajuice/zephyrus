@@ -4,37 +4,33 @@ use stdClass;
 
 class Form
 {
-    private const SESSION_KEY = '_FIELDS';
+    private const SESSION_KEY = '__ZF__FIELDS';
 
     /**
+     * List of all the submitted fields.
+     *
      * @var FormField[]
      */
-    private $fields = [];
+    private array $fields = [];
 
     /**
+     * Contains all the triggered errors. Key are the name (with pathing if available) and value are an array or error
+     * messages.
+     *
      * @var array
      */
-    private $errors = [];
-
-    /**
-     * @deprecated
-     * @var bool
-     */
-    private $optionalOnEmpty = true;
+    private array $errors = [];
 
     /**
      * Reads a memorized value for a given fieldId. If value has not been set the specified default value is
-     * assigned (empty if not set). Excellent to set remembered data in forms.
+     * assigned (empty if not set). Used mostly to set remembered data in forms.
      *
      * @param string $fieldId
      * @param mixed $defaultValue
      * @return mixed
      */
-    public static function readMemorizedValue(string $fieldId, $defaultValue = "")
+    public static function readMemorizedValue(string $fieldId, mixed $defaultValue = ""): mixed
     {
-        if (session_status() == PHP_SESSION_NONE) {
-            return $defaultValue;
-        }
         return (isset($_SESSION[self::SESSION_KEY][$fieldId]))
             ? $_SESSION[self::SESSION_KEY][$fieldId]
             : $defaultValue;
@@ -47,11 +43,8 @@ class Form
      * @param string $fieldId
      * @param mixed $value
      */
-    public static function memorizeValue(string $fieldId, $value)
+    public static function memorizeValue(string $fieldId, mixed $value): void
     {
-        if (session_status() == PHP_SESSION_NONE) {
-            return;
-        }
         if (!isset($_SESSION[self::SESSION_KEY])) {
             $_SESSION[self::SESSION_KEY] = [];
         }
@@ -63,11 +56,8 @@ class Form
      *
      * @param string|null $fieldId
      */
-    public static function removeMemorizedValue(?string $fieldId = null)
+    public static function removeMemorizedValue(?string $fieldId = null): void
     {
-        if (session_status() == PHP_SESSION_NONE) {
-            return;
-        }
         if (isset($_SESSION[self::SESSION_KEY])) {
             if (is_null($fieldId)) {
                 $_SESSION[self::SESSION_KEY] = null;
@@ -79,84 +69,57 @@ class Form
     }
 
     /**
+     * Inserts a list of fields into the form data. formData is an associative array where the keys are the field name
+     * and the value the corresponding values.
+     *
+     * @param array $formData
+     */
+    public function __construct(array $formData = [])
+    {
+        $this->addFields($formData);
+    }
+
+    /**
      * Retrieves a field from the form. If the field doesn't exist, a corresponding field will be added to the form data
-     * with a NULL value. Useful to validate a required checkbox for example.
+     * with a NULL value. Useful to validate a required checkbox for example. If the rules are set, it will be applied
+     * to the field before returning it.
      *
      * @param string $name
+     * @param Rule[] $rules
      * @return FormField
      */
-    public function field(string $name): FormField
+    public function field(string $name, array $rules = []): FormField
     {
         if (!isset($this->fields[$name])) {
             $this->addField($name, null);
         }
-        return $this->fields[$name];
+        return empty($rules) ? $this->fields[$name] : $this->fields[$name]->validate($rules);
     }
 
     /**
-     * Old ways of validations. Should now use field($name)->validate(Rule $rule).
+     * Validates each submitted fields with their configured rules. Accumulates errors.
      *
-     * @deprecated
-     * @param string $field
-     * @param Rule $rule
-     * @param bool $optional
-     */
-    public function validate(string $field, Rule $rule, bool $optional = false)
-    {
-        $this->field($field)->validate($rule, $optional);
-    }
-
-    /**
-     * Old ways of validations. Should now use field($name)->validate(Rule $rule).
-     *
-     * @deprecated
-     * @param string $field
-     * @param Rule $rule
-     * @param bool $optional
-     */
-    public function validateWhenFieldHasNoError(string $field, Rule $rule, bool $optional = false)
-    {
-        $this->field($field)->validate($rule, $optional);
-    }
-
-    /**
-     * Old ways of validations. Should now use field($name)->validate(Rule $rule).
-     *
-     * @deprecated
-     * @param string $field
-     * @param Rule $rule
-     * @param bool $optional
-     */
-    public function validateWhenFormHasNoError(string $field, Rule $rule, bool $optional = false)
-    {
-        $this->field($field)->validate($rule, $optional);
-    }
-
-    /**
      * @return bool
      */
     public function verify(): bool
     {
-        foreach ($this->fields as $name => $field) {
+        foreach ($this->fields as $field) {
             if (!$field->verify($this->getFields())) {
-                foreach ($field->getErrorMessages() as $message) {
-                    $this->addError($name, $message);
-                }
-                self::removeMemorizedValue($name);
+                $this->errors = $this->errors + $field->getErrors();
             }
         }
         return empty($this->errors);
     }
 
     /**
-     * Inserts a list of fields into the form data. Parameters is an associative array where the keys are the field name
+     * Inserts a list of fields into the form data. formData is an associative array where the keys are the field name
      * and the value the corresponding values.
      *
-     * @param array $parameters
+     * @param array $formData
      */
-    public function addFields(array $parameters)
+    public function addFields(array $formData): void
     {
-        foreach ($parameters as $parameterName => $value) {
+        foreach ($formData as $parameterName => $value) {
             $this->addField($parameterName, $value);
         }
     }
@@ -165,57 +128,57 @@ class Form
      * Inserts a field into the form data.
      *
      * @param string $name
-     * @param $value
+     * @param mixed $value
      */
-    public function addField(string $name, $value)
+    public function addField(string $name, mixed $value): void
     {
         $this->fields[$name] = new FormField($name, $value);
-        // Remove once the optionalOnEmpty is no longer in this class
-        $this->fields[$name]->setOptionalOnEmpty($this->optionalOnEmpty);
         self::memorizeValue($name, $value);
     }
 
     /**
      * Removes the specified field from the form data.
      *
-     * @param string $field
+     * @param string $name
      */
-    public function removeField(string $field)
+    public function removeField(string $name): void
     {
-        if (isset($this->fields[$field])) {
-            unset($this->fields[$field]);
-            self::removeMemorizedValue($field);
+        if (isset($this->fields[$name])) {
+            unset($this->fields[$name]);
+            self::removeMemorizedValue($name);
         }
     }
 
     /**
-     * Adds an error to the form for the specified field.
+     * Manually adds an error to the form for the specified field.
      *
-     * @param string $field
+     * @param string $name
      * @param string $message
      */
-    public function addError(string $field, string $message)
+    public function addError(string $name, string $message): void
     {
-        $this->errors[$field][] = $message;
+        if (!isset($this->errors[$name])) {
+            $this->errors[$name] = [];
+        }
+        $this->errors[$name][] = $message;
     }
 
     /**
      * Verifies if the form has error for a specified field or the entire form (if no field is provided).
      *
-     * @param string|null $field
+     * @param string|null $name
      * @return bool
      */
-    public function hasError(?string $field = null): bool
+    public function hasError(?string $name = null): bool
     {
-        if (is_null($field)) {
-            return !empty($this->errors);
-        }
-        return isset($this->errors[$field]);
+        return (is_null($name))
+            ? !empty($this->errors)
+            : isset($this->errors[$name]);
     }
 
     /**
      * Retrieves all the registered errors of the form in an associative array which the keys are the field name and the
-     * values are an array of error messages.
+     * values are an array of error messages. The keys may contain pathing for nested object errors.
      *
      * @return array
      */
@@ -233,36 +196,41 @@ class Form
     {
         $messages = [];
         foreach ($this->errors as $errors) {
-            foreach ($errors as $error) {
-                $messages[] = $error;
+            foreach ($errors as $errorMessage) {
+                $messages[] = $errorMessage;
             }
         }
         return $messages;
     }
 
     /**
-     * Automatically prepare the feedbacks for the form fields with matching errors. The UI can then use the Feedback
+     * Automatically prepares the feedbacks for the form fields with matching errors. The UI can then use the Feedback
      * class to properly display the field errors.
      */
-    public function registerFeedback()
+    public function registerFeedback(): void
     {
         Feedback::error($this->getErrors());
+    }
+
+    /**
+     * Automatically prepares the flash errors from the accumulated error messages.
+     */
+    public function registerFlash(): void
+    {
+        Flash::error($this->getErrorMessages());
     }
 
     /**
      * Tries to retrieve the value of the specified field name. If the field is not registered, the default value is
      * then returned.
      *
-     * @param string $field
+     * @param string $name
      * @param mixed $defaultValue
      * @return mixed|null
      */
-    public function getValue(string $field, $defaultValue = null)
+    public function getValue(string $name, mixed $defaultValue = null): mixed
     {
-        if (isset($this->fields[$field])) {
-            return $this->fields[$field]->getValue();
-        }
-        return $defaultValue;
+        return isset($this->fields[$name]) ? $this->fields[$name]->getValue() : $defaultValue;
     }
 
     /**
@@ -289,24 +257,6 @@ class Form
     public function isRegistered(string $field): bool
     {
         return isset($this->fields[$field]);
-    }
-
-    /**
-     * @deprecated Should now be done directly on the field which ensure better flexibility.
-     * @return bool
-     */
-    public function isOptionalOnEmpty(): bool
-    {
-        return $this->optionalOnEmpty;
-    }
-
-    /**
-     * @deprecated Should now be done directly on the field which ensure better flexibility.
-     * @param bool $emptyIsOptional
-     */
-    public function setOptionalOnEmpty(bool $emptyIsOptional)
-    {
-        $this->optionalOnEmpty = $emptyIsOptional;
     }
 
     /**
