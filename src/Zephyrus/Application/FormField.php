@@ -1,39 +1,27 @@
 <?php namespace Zephyrus\Application;
 
-use stdClass;
-
 class FormField
 {
     /**
-     * Holds the field name as registered when the form has been submitted. E.g. if an array has been submitted with the
-     * name "selections[]", this name would be registered.
+     * Submitted field name.
      *
      * @var string
      */
     private string $name;
 
     /**
-     * Holds the given field value when the form has been submitted.
+     * Raw value as it was submitted.
      *
      * @var mixed
      */
     private mixed $value;
 
     /**
-     * Internal list of all rules assigned to the field in programmatic order. Meaning the order the addRule method is
-     * called is important as the rules will be executed in such order.
+     * Internal list of all rules assigned to the field in programmatic order.
      *
-     * @var stdClass[]
+     * @var Rule[]
      */
     private array $rules = [];
-
-    /**
-     * Determines if the form field has an error. Will change during the verification of the rules if at least one of
-     * them fails. Cannot rely exclusively on the error messages list because the rules could have empty messages.
-     *
-     * @var bool
-     */
-    private bool $hasError = false;
 
     /**
      * Associative array for all the registered error of the field with the key being the error pathing. Default pathing
@@ -44,31 +32,33 @@ class FormField
     private array $errors = [];
 
     /**
-     * Determines if the error keys should contain the full pathing for nested rules. If the field has nested errors the
-     * pathing could be "students.2.name" which means students[2]['name'] has the error.
+     * Determines if empty values should be interpreted as NULL when using the getValue method.
      *
      * @var bool
      */
-    private bool $useNestedPathing = true;
+    private bool $nullable = false;
 
     /**
-     * Dictates how to handle a field with an empty value with an optional rule. By default, an optional rule on an
-     * empty value is considered optional. Can be changed if for some reason a specific field is not considered optional
-     * when empty.
+     * Determines if the rules apply when the value is empty.
      *
      * @var bool
      */
-    private bool $optionalOnEmpty = true;
+    private bool $optional = false;
 
     /**
-     * Dictates if the rule verification should stop when an error is encountered or if all validation should be
-     * executed nonetheless. By default, the validation process ends when an error is encountered because traditionally
-     * all rules affected to a field are somewhat dependant (e.g. ->validate(Rule::notEmpty())->validate(Rule::name()))
-     * and thus would make the resulting errors redondant.
+     * Determines if all the rules should execute or bail on the first failure (default behavior).
      *
      * @var bool
      */
     private bool $verifyAll = false;
+
+    /**
+     * Determines if the field value should remain in the session to be displayed back on error. Default behavior is to
+     * remove it.
+     *
+     * @var bool
+     */
+    private bool $keepOnError = false;
 
     /**
      * Class constructor to initialize a field with its name and value.
@@ -83,48 +73,115 @@ class FormField
     }
 
     /**
-     * Registers a rule or a group of rules to be applied to the field. The optional argument allows the rule to be
-     * skipped if the value is undefined or empty (depending on the optionalOnEmpty). Rules are verified only when the
-     * verify method is called.
+     * Adds the given rules to the validation scheme of the field. Be mindful of the rule orders as they will be
+     * verified in programmatic order, so if some rules are dependent on others, be sure to add those beforehand.
      *
-     * @param Rule|array $rule
-     * @param bool $optional
-     * @return FormField
+     * @param Rule[] $rules
+     * @return self
      */
-    public function validate(Rule|array $rule, bool $optional = false): FormField
+    public function validate(array $rules): self
     {
-        if (is_array($rule)) {
-            foreach ($rule as $item) {
-                $this->addRule($item, $optional);
-            }
-        } else {
-            $this->addRule($rule, $optional);
+        foreach ($rules as $rule) {
+            $this->rules[] = $rule;
         }
         return $this;
+    }
+
+    /**
+     * Verify the validation rules on the field and register errors if any arise. The $fields argument should contain
+     * all the form data available because some rules may need to access other form fields. Returns true is all
+     * validation have passed or false otherwise. Field is considered valid if it is flagged as optional and the
+     * submitted value is considered empty (either null or empty string ['', ""]).
+     *
+     * @param array $fields
+     * @return bool
+     */
+    public function verify(array $fields = []): bool
+    {
+        if ($this->optional && $this->isEmpty()) {
+            return true;
+        }
+        foreach ($this->rules as $rule) {
+            $rule->setFieldName($this->name);
+            if (!$rule->isValid($this->value, $fields)) {
+                if (!$rule->isIterator()) { // Do not consider iterator
+                    $rule->triggerError($rule);
+                }
+                $this->addError($rule);
+                if (!$this->keepOnError) {
+                    Form::removeMemorizedValue($this->name);
+                }
+                if (!$this->verifyAll) {
+                    return false;
+                }
+            }
+        }
+        return empty($this->errors);
     }
 
     /**
      * Instead of stopping at the first failed rule validation, it will proceed to validate all given rules and
      * accumulate errors. Useful to retrieve all errors on a field at once. Default behavior is to stop and return the
      * first encountered error on a field.
+     *
+     * @return self
      */
-    public function all()
+    public function all(): self
     {
         $this->verifyAll = true;
+        return $this;
     }
 
     /**
-     * Retrieves the given value of the field.
+     * The field value will return NULL in case of an empty raw value. Useful for easier database submission into null
+     * fields. Note that zeros are not considered empty. Empty raw values are either empty string ['', ""] or null.
+     *
+     * @return self
+     */
+    public function nullable(): self
+    {
+        $this->nullable = true;
+        return $this;
+    }
+
+    /**
+     * Determines if the field is optional, meaning it will not execute rules on an empty value (string ['', ""] or
+     * null). Zeros are considered not empty and thus will execute validations.
+     *
+     * @return self
+     */
+    public function optional(): self
+    {
+        $this->optional = true;
+        return $this;
+    }
+
+    /**
+     * Determines if the value should be keep in form even when there's an error.
+     *
+     * @return self
+     */
+    public function keep(): self
+    {
+        $this->keepOnError = true;
+        return $this;
+    }
+
+    /**
+     * Retrieves the given value of the field. If nullable is set and the raw value is empty (either null or empty
+     * string ['', ""]), it will return null. Returns mixed because it could be a nested array, a number or an object
+     * in the case of a json content-type submission.
      *
      * @return mixed
      */
     public function getValue(): mixed
     {
-        return $this->value;
+        return $this->isEmpty() && $this->nullable ? null : $this->value;
     }
 
     /**
-     * Retrieves the given name of the field.
+     * Retrieves the given name of the field. E.g. if an array has been submitted with the name "selections[]", this
+     * name would be returned. Does not alter the submitted name.
      *
      * @return string
      */
@@ -141,7 +198,16 @@ class FormField
      */
     public function getErrors(): array
     {
-        return $this->errors;
+        $result = [];
+        foreach ($this->errors as $errors) {
+            foreach ($errors as $error) {
+                if (!isset($result[$error->pathing])) {
+                    $result[$error->pathing] = [];
+                }
+                $result[$error->pathing][] = $error->message;
+            }
+        }
+        return $result;
     }
 
     /**
@@ -154,92 +220,51 @@ class FormField
         $messages = [];
         foreach ($this->errors as $errors) {
             foreach ($errors as $error) {
-                $messages[] = $error;
+                $messages[] = $error->message;
             }
         }
         return $messages;
     }
 
     /**
-     * Verify the affected validation rules on the field. The $fields argument should contain all the form data
-     * available because some rules may need to access other form fields. Returns true is all validation have passed or
-     * false otherwise. If it returns false, the errors can be read with getErrorMessages().
+     * Checks if there is at least one error registered for the field.
      *
-     * @param array $fields
-     * @return bool
-     */
-    public function verify(array $fields = []): bool
-    {
-        foreach ($this->rules as $validation) {
-            if ($this->isRuleTriggered($validation) && !$validation->rule->isValid($this->value, $fields)) {
-                $pathing = "";
-                if ($this->useNestedPathing) {
-                    $pathing = $validation->rule->getPathing();
-                    if (!empty($pathing)) {
-                        $pathing = '.' . $pathing;
-                    }
-                }
-                $this->errors[$this->name . $pathing][] = $validation->rule->getErrorMessage();
-                $this->hasError = true;
-                if (!$this->verifyAll) {
-                    return false;
-                }
-            }
-        }
-        return !$this->hasError;
-    }
-
-    /**
      * @return bool
      */
     public function hasError(): bool
     {
-        return $this->hasError;
+        return !empty($this->errors);
     }
 
     /**
+     * Helper method to determine if the given raw value is considered empty (either null or empty string ['', ""]), in
+     * this case, zeros are considered not empty.
+     *
      * @return bool
      */
-    public function isOptionalOnEmpty(): bool
+    private function isEmpty(): bool
     {
-        return $this->optionalOnEmpty;
+        $data = $this->value;
+        if (is_numeric($data)) {
+            return false;
+        }
+        return empty(is_string($data) ? trim($data) : $data);
     }
 
     /**
-     * @param bool $emptyIsOptional
+     * Inserts the error message associated with the given rule. The internal error array key represents the pathing
+     * useful for nested errors. If the field has nested errors the pathing could be "students.2.name" which means
+     * students[2]['name'] has the error. By default, the pathing is simply the field name.
+     *
+     * @param Rule $rule
      */
-    public function setOptionalOnEmpty(bool $emptyIsOptional)
+    private function addError(Rule $rule): void
     {
-        $this->optionalOnEmpty = $emptyIsOptional;
-    }
-
-    public function isUsingNestedPathing(): bool
-    {
-        return $this->useNestedPathing;
-    }
-
-    public function setUseNestedPathing(bool $useNestedPathing)
-    {
-        $this->useNestedPathing = $useNestedPathing;
-    }
-
-    private function isRuleTriggered(stdClass $validation): bool
-    {
-        if (!$validation->optional) {
-            return true;
+        foreach ($rule->getErrors() as $error) {
+            if (!isset($this->errors[$error->field])) {
+                $this->errors[$error->field] = [];
+            }
+            $this->errors[$error->field][] = $error;
         }
-        if (is_null($this->value)
-            || ($this->optionalOnEmpty && empty($this->value))) {
-            return false;
-        }
-        return true;
-    }
-
-    private function addRule(Rule $rule, bool $optional)
-    {
-        $validation = new stdClass();
-        $validation->rule = $rule;
-        $validation->optional = $optional;
-        $this->rules[] = $validation;
     }
 }
