@@ -38,7 +38,7 @@ trait IterationRules
      */
     public static function nested(string $key, array $rules): Rule
     {
-        $resultRule = new Rule();
+        $resultRule = new Rule(null, "", "nested");
         foreach ($rules as $rule) {
             if (!($rule instanceof Rule)) {
                 throw new InvalidArgumentException("Rules argument for [nested] must be an array of Rule instances.");
@@ -85,7 +85,7 @@ trait IterationRules
      */
     private static function iteration(array $rules, string $mode = 'values'): Rule
     {
-        $resultRule = new Rule();
+        $resultRule = new Rule(null, "", ($mode == 'values') ? "each" : "eachKey");
         foreach ($rules as $rule) {
             if (!($rule instanceof Rule)) {
                 throw new InvalidArgumentException("Rules argument for [each] must be an array of Rule instances.");
@@ -98,9 +98,6 @@ trait IterationRules
             }
             $hasError = false;
             foreach ($data as $key => $value) {
-                if (is_array($value)) {
-                    throw new InvalidArgumentException("Nested arrays for the [each] rule are not permitted.");
-                }
                 foreach ($rules as $rule) {
                     if ($rule->isIterator()) {
                         $rule->setFieldName($key);
@@ -110,7 +107,9 @@ trait IterationRules
                     if (!$rule->isValid(($mode == 'values') ? $value : $key, $fields)) {
                         $resultRule->triggerError($rule);
                         $hasError = true;
-                        break;
+                        if (!$rule->isIterator()) {
+                            break;
+                        }
                     }
                 }
             }

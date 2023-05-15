@@ -64,6 +64,13 @@ class Rule
      */
     private mixed $value = "";
 
+    /**
+     * Applies the rule name.
+     *
+     * @var string
+     */
+    private string $name;
+
     /*
      * Includes all rules defined as trait classes
      */
@@ -74,10 +81,11 @@ class Rule
     use TimeRules;
     use FileRules;
 
-    public function __construct(?callable $validation = null, string $errorMessage = "")
+    public function __construct(?callable $validation = null, string $errorMessage = "", string $name = "")
     {
         $this->validation = $validation;
         $this->errorMessage = $errorMessage;
+        $this->name = $name;
     }
 
     /**
@@ -185,7 +193,7 @@ class Rule
     public function triggerError(Rule $fromRule): void
     {
         $pathing = $fromRule->getPathing();
-        if (!empty($pathing)) {
+        if (!empty($pathing) || is_numeric($pathing)) {
             $pathing = '.' . $pathing;
         }
         if ($fromRule->isIterator()) {
@@ -196,15 +204,18 @@ class Rule
                     'message' => $error->message,
                     'field' => $this->fieldName,
                     'pathing' => $this->fieldName . '.' . $error->pathing,
-                    'value' => $error->value
+                    'value' => $error->value,
+                    'failed_rule' => $error->failed_rule
                 ];
+                $fromRule->errors = [];
             }
         } else {
             $this->errors[] = (object) [
                 'message' => $fromRule->getErrorMessage(),
                 'field' => $this->fieldName,
                 'pathing' => $this->fieldName . $pathing,
-                'value' => $fromRule->value
+                'value' => $fromRule->value,
+                'failed_rule' => $fromRule->name
             ];
         }
     }

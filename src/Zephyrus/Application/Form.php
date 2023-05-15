@@ -79,6 +79,8 @@ class Form
         $this->addFields($formData);
     }
 
+    // TODO: SANITIZE
+
     /**
      * Retrieves a field from the form. If the field doesn't exist, a corresponding field will be added to the form data
      * with a NULL value. Useful to validate a required checkbox for example. If the rules are set, it will be applied

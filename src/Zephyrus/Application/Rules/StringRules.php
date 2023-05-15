@@ -12,7 +12,7 @@ trait StringRules
 
     public static function name(string $errorMessage = ""): Rule
     {
-        return new Rule(['Zephyrus\Utilities\Validation', 'isName'], $errorMessage);
+        return new Rule(['Zephyrus\Utilities\Validation', 'isName'], $errorMessage, 'name');
     }
 
     public static function passwordCompliant(string $errorMessage = ""): Rule

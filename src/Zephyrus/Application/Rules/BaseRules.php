@@ -5,17 +5,38 @@ use Zephyrus\Utilities\Validation;
 
 trait BaseRules
 {
+    /**
+     * Field is required for submission, meaning its value is not empty (empty string ['', ""], null and false). Zero
+     * values are considered okay in this context, e.g. 0, '0', 0.0, '0.0' would pass the required validation.
+     *
+     * @param string $errorMessage
+     * @return Rule
+     */
+    public static function required(string $errorMessage = ""): Rule
+    {
+        return new Rule(function (mixed $data) {
+            if (is_numeric($data)) {
+                return true;
+            }
+            return !empty(is_string($data) ? trim($data) : $data);
+        }, $errorMessage, "required");
+    }
+
     public static function decimal(string $errorMessage = "", $allowSigned = false): Rule
     {
-        return new Rule((!$allowSigned) ? ['Zephyrus\Utilities\Validation', 'isDecimal'] : ['Zephyrus\Utilities\Validation', 'isSignedDecimal'], $errorMessage);
+        return new Rule((!$allowSigned)
+            ? ['Zephyrus\Utilities\Validation', 'isDecimal']
+            : ['Zephyrus\Utilities\Validation', 'isSignedDecimal'], $errorMessage, 'decimal');
     }
 
     public static function integer(string $errorMessage = "", $allowSigned = false): Rule
     {
-        return new Rule((!$allowSigned) ? ['Zephyrus\Utilities\Validation', 'isInteger'] : ['Zephyrus\Utilities\Validation', 'isSignedInteger'], $errorMessage);
+        return new Rule((!$allowSigned)
+            ? ['Zephyrus\Utilities\Validation', 'isInteger']
+            : ['Zephyrus\Utilities\Validation', 'isSignedInteger'], $errorMessage, 'integer');
     }
 
-    public static function range($min, $max, string $errorMessage = ""): Rule
+    public static function range(int $min, int $max, string $errorMessage = ""): Rule
     {
         return new Rule(function ($data) use ($min, $max) {
             return Validation::isInRange($data, $min, $max);
@@ -54,7 +75,14 @@ trait BaseRules
     {
         return new Rule(function ($data) {
             return is_array($data);
-        }, $errorMessage);
+        }, $errorMessage, 'array');
+    }
+
+    public static function object(string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data) {
+            return is_object($data);
+        }, $errorMessage, 'object');
     }
 
     public static function arrayNotEmpty(string $errorMessage = ""): Rule
