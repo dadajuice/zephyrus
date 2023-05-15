@@ -1,7 +1,7 @@
 <?php namespace Zephyrus\Application\Rules;
 
+use InvalidArgumentException;
 use Zephyrus\Application\Rule;
-use Zephyrus\Utilities\Validation;
 
 trait IterationRules
 {
@@ -9,221 +9,112 @@ trait IterationRules
      * Applies the given rule to every value of an array. If one of the array element doesn't comply with the rule, it
      * evaluates to false.
      *
-     * @param Rule|array $rule
-     * @param string $errorMessage
+     * @param array $rules
      * @return Rule
      */
-    public static function all(Rule|array $rule, string $errorMessage = ""): Rule
+    public static function each(array $rules): Rule
     {
-        if (is_array($rule) && Validation::isAssociativeArray($rule)) {
-            return self::allNested($rule, $errorMessage);
-        }
-        return self::allSingleRule($rule, $errorMessage);
+        return self::iteration($rules);
     }
 
     /**
-     * Allows to add one or multiple rules to a nested child element (either an array or an object). The given error
-     * message for the nested rule is only used when something is wrong with the validated data (e.g. not an array or
-     * key doesn't exist).
+     * Applies the given rule to every key of an array. If one of the array kay doesn't comply with the rule, it
+     * evaluates to false.
      *
-     * @param string $key
-     * @param Rule|array $rule
-     * @param string $errorMessage
+     * @param array $rules
      * @return Rule
      */
-    public static function nested(string $key, Rule|array $rule, string $errorMessage = ""): Rule
+    public static function eachKey(array $rules): Rule
     {
-        if (is_array($rule) && Validation::isAssociativeArray($rule)) {
-            return self::nestedArray($key, $rule, $errorMessage);
+        return self::iteration($rules, 'keys');
+    }
+
+    /**
+     * Allows to add one or multiple rules to a nested child element (either an array or an object).
+     *
+     * @param string $key
+     * @param Rule[] $rules
+     * @return Rule
+     */
+    public static function nested(string $key, array $rules): Rule
+    {
+        $resultRule = new Rule();
+        foreach ($rules as $rule) {
+            if (!($rule instanceof Rule)) {
+                throw new InvalidArgumentException("Rules argument for [nested] must be an array of Rule instances.");
+            }
         }
-        return self::nestedRule($key, $rule, $errorMessage);
-    }
-
-    private static function nestedRule(string $key, Rule|array $rule, string $errorMessage = ""): Rule
-    {
-        $resultRule = new Rule();
-        $resultRule->setErrorMessage($errorMessage);
-        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rule, $key) {
+        $resultRule->iterator = true;
+        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rules, $key) {
             if (!is_object($data) && !is_array($data)) {
-                return false;
+                throw new InvalidArgumentException("Data argument for the [nested] rule must either be an associative array or an object. Consider adding a Rule::associativeArray or Rule::object beforehand.");
             }
             if (is_array($data) && !isset($data[$key])) {
-                return false;
+                $data[$key] = null;
             }
             if (is_object($data) && !property_exists($data, $key)) {
-                return false;
+                $data->$key = null;
             }
 
-            $rulesToValidate = [];
-            if (!is_array($rule)) {
-                $rulesToValidate[] = $rule;
-            } else {
-                $rulesToValidate = $rule;
-            }
-
-            foreach ($rulesToValidate as $ruleToValidate) {
-                if (!($ruleToValidate instanceof Rule)) {
-                    return false;
-                }
-                $valid = $ruleToValidate->isValid(is_array($data) ? $data[$key] : $data->$key, $fields);
-                if (!$valid) {
-                    $pathing = $ruleToValidate->getPathing();
-                    if (!empty($pathing)) {
-                        $pathing = '.' . $pathing;
-                    }
-                    $resultRule->setPathing($key . $pathing);
-                    $resultRule->setErrorMessage($ruleToValidate->getErrorMessage());
-                    return $valid;
-                }
-            }
-            return true;
-        });
-        return $resultRule;
-    }
-
-    private static function nestedArray(string $key, array $rules, string $errorMessage = ""): Rule
-    {
-        $resultRule = new Rule();
-        $resultRule->setErrorMessage($errorMessage);
-        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rules, $key, $errorMessage) {
-            if (!is_object($data) && !is_array($data)) {
-                return false;
-            }
-            if (is_array($data) && !isset($data[$key])) {
-                return false;
-            }
-            if (is_object($data) && !property_exists($data, $key)) {
-                return false;
-            }
-            if (!Validation::isAssociativeArray($rules)) {
-                return false;
-            }
-
-            foreach ($rules as $fieldName => $nestedRule) {
-                if (Validation::isAssociativeArray($nestedRule)) {
-                    $innerNestedRule = self::nested($fieldName, $nestedRule, $errorMessage);
-                    $valid = $innerNestedRule->isValid(is_array($data) ? $data[$key] : $data->$key, $fields);
-                    if (!$valid) {
-                        $pathing = $innerNestedRule->getPathing();
-                        if (!empty($pathing)) {
-                            $pathing = '.' . $pathing;
-                        }
-                        $resultRule->setPathing($key . $pathing);
-                        $resultRule->setErrorMessage($innerNestedRule->getErrorMessage());
-                        return false;
-                    }
+            $hasError = false;
+            foreach ($rules as $rule) {
+                if ($rule->isIterator()) {
+                    $rule->setFieldName($key);
                 } else {
-                    // Either Rule or array of Rules (no assoc)
-                    $rulesToValidate = [];
-                    if (!is_array($nestedRule)) {
-                        $rulesToValidate[] = $nestedRule;
-                    } else {
-                        $rulesToValidate = $nestedRule;
-                    }
-
-                    foreach ($rulesToValidate as $ruleToValidate) {
-                        if (!($ruleToValidate instanceof Rule)) {
-                            return false;
-                        }
-                        $nestedRule = self::nested($fieldName, $ruleToValidate, $errorMessage);
-                        $valid = $nestedRule->isValid(is_array($data) ? $data[$key] : $data->$key, $fields);
-                        if (!$valid) {
-                            $pathing = $nestedRule->getPathing();
-                            if (!empty($pathing)) {
-                                $pathing = '.' . $pathing;
-                            }
-                            $resultRule->setPathing($key . $pathing);
-                            $resultRule->setErrorMessage($nestedRule->getErrorMessage());
-                            return false;
-                        }
+                    $rule->setPathing($key);
+                }
+                if (!$rule->isValid(is_array($data) ? $data[$key] : $data->$key, $fields)) {
+                    $resultRule->triggerError($rule);
+                    $hasError = true;
+                    if (!$rule->isIterator()) {
+                        break;
                     }
                 }
             }
-
-            return true;
-        });
-
-        return $resultRule;
-    }
-
-    private static function allSingleRule(Rule|array $rule, string $errorMessage = ""): Rule
-    {
-        $resultRule = new Rule();
-        $resultRule->setErrorMessage($errorMessage);
-        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rule) {
-            if (!is_array($data)) {
-                return false;
-            }
-
-            $rulesToValidate = [];
-            if (!is_array($rule)) {
-                $rulesToValidate[] = $rule;
-            } else {
-                $rulesToValidate = $rule;
-            }
-
-            foreach ($data as $key => $value) {
-                foreach ($rulesToValidate as $ruleToValidate) {
-                    if (!($ruleToValidate instanceof Rule)) {
-                        return false;
-                    }
-
-                    $valid = $ruleToValidate->isValid($value, $fields);
-                    if (!$valid) {
-                        $pathing = $ruleToValidate->getPathing();
-                        if (!empty($pathing)) {
-                            $pathing = '.' . $pathing;
-                        }
-                        $resultRule->setPathing($key . $pathing);
-                        $resultRule->setErrorMessage($ruleToValidate->getErrorMessage());
-                        return false;
-                    }
-                }
-            }
-            return true;
+            return !$hasError;
         });
         return $resultRule;
     }
 
-    private static function allNested(array $rules, string $errorMessage = ""): Rule
+    /**
+     * Applies the given rules to every key or value of an array depending on the selected mode.
+     *
+     * @param array $rules
+     * @param string $mode
+     * @return Rule
+     */
+    private static function iteration(array $rules, string $mode = 'values'): Rule
     {
         $resultRule = new Rule();
-        $resultRule->setErrorMessage($errorMessage);
-        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rules, $errorMessage) {
+        foreach ($rules as $rule) {
+            if (!($rule instanceof Rule)) {
+                throw new InvalidArgumentException("Rules argument for [each] must be an array of Rule instances.");
+            }
+        }
+        $resultRule->iterator = true;
+        $resultRule->setValidationCallback(function ($data, $fields) use ($resultRule, $rules, $mode) {
             if (!is_array($data)) {
-                return false;
+                throw new InvalidArgumentException("Data argument for the [each] rule must be an array. Consider adding a Rule::array beforehand.");
             }
-            if (!Validation::isAssociativeArray($rules)) {
-                return false;
-            }
-
+            $hasError = false;
             foreach ($data as $key => $value) {
-                foreach ($rules as $field => $rule) {
-                    $rulesToValidate = [];
-                    if (!is_array($rule)) {
-                        $rulesToValidate[] = $rule;
+                if (is_array($value)) {
+                    throw new InvalidArgumentException("Nested arrays for the [each] rule are not permitted.");
+                }
+                foreach ($rules as $rule) {
+                    if ($rule->isIterator()) {
+                        $rule->setFieldName($key);
                     } else {
-                        $rulesToValidate = $rule;
+                        $rule->setPathing($key);
                     }
-                    foreach ($rulesToValidate as $ruleToValidate) {
-                        if (!($ruleToValidate instanceof Rule)) {
-                            return false;
-                        }
-                        $innerRule = self::nested($field, $ruleToValidate, $errorMessage);
-                        $valid = $innerRule->isValid($value, $fields);
-                        if (!$valid) {
-                            $pathing = $innerRule->getPathing();
-                            if (!empty($pathing)) {
-                                $pathing = '.' . $pathing;
-                            }
-                            $resultRule->setPathing($key . $pathing);
-                            $resultRule->setErrorMessage($innerRule->getErrorMessage());
-                            return false;
-                        }
+                    if (!$rule->isValid(($mode == 'values') ? $value : $key, $fields)) {
+                        $resultRule->triggerError($rule);
+                        $hasError = true;
+                        break;
                     }
                 }
             }
-            return true;
+            return !$hasError;
         });
         return $resultRule;
     }
