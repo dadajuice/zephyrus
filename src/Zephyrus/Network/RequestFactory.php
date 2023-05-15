@@ -1,7 +1,5 @@
 <?php namespace Zephyrus\Network;
 
-use Backpack\Utilities\Debug;
-
 class RequestFactory
 {
     public const CUSTOM_METHOD_PARAMETER = '__method';
