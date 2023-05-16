@@ -71,6 +71,13 @@ trait BaseRules
         }, $errorMessage, 'associativeArray');
     }
 
+    public static function count(int $length, string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data) use ($length) {
+            return count($data) == $length;
+        }, $errorMessage, 'count');
+    }
+
     public static function array(string $errorMessage = ""): Rule
     {
         return new Rule(function ($data) {
