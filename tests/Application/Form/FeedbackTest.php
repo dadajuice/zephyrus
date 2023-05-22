@@ -19,14 +19,27 @@ class FeedbackTest extends TestCase
         Session::kill();
     }
 
-    public function testError()
+    public function testErrors()
     {
-        Feedback::error(["email" => ["invalid"]]);
-        $args = Feedback::readAll();
-        self::assertEquals("invalid", $args->error['email'][0]);
-        self::assertEquals("invalid", Feedback::readError('email')[0]);
-        self::assertTrue(Feedback::hasError("email"));
-        Feedback::clearAll();
-        self::assertFalse(Feedback::hasError("email"));
+        Feedback::register([
+            'firstname' => ['Must not be empty'],
+            'email' => ['Must not be empty', 'Must be valid'],
+            'cart[].quantity.2' => ['Must not be empty'],
+            'cart[].amount.2' => ['Must be a number']
+        ]);
+        self::assertEquals(['Must not be empty'], Feedback::read('firstname'));
+        self::assertEquals(['Must not be empty'], feedback('firstname'));
+        self::assertEquals(['Must not be empty', 'Must be valid'], Feedback::read('email'));
+        self::assertEquals(['Must be a number'], Feedback::read('cart[].amount.2'));
+        self::assertEquals(['Must not be empty', 'Must be a number'], Feedback::read('cart[]'));
+        self::assertEquals([
+            'firstname' => ['Must not be empty'],
+            'email' => ['Must not be empty', 'Must be valid'],
+            'cart[].quantity.2' => ['Must not be empty'],
+            'cart[].amount.2' => ['Must be a number']
+        ], Feedback::readAll());
+        Feedback::clear();
+        self::assertEmpty(Feedback::readAll());
+        self::assertEmpty(Feedback::read('firstname'));
     }
 }

@@ -49,8 +49,7 @@ class PugView extends View
         $this->initializeJsExtension();
         Phug::setOption('paths', [realpath(ROOT_DIR . '/public')]);
         Phug::share([
-            'flash' => Flash::readAll(),
-            'feedback' => Feedback::readAll()
+            'flash' => Flash::readAll()
         ]);
     }
 
@@ -60,7 +59,7 @@ class PugView extends View
             $output = Phug::renderFile($this->getPath(), $args);
             Form::removeMemorizedValue();
             Flash::clearAll();
-            Feedback::clearAll();
+            Feedback::clear();
             return $this->buildResponse($output);
         }
 
