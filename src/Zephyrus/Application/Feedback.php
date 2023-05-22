@@ -1,54 +1,92 @@
 <?php namespace Zephyrus\Application;
 
-use stdClass;
-
 class Feedback
 {
     private const SESSION_KEY = '__ZF_FEEDBACK';
 
-    public static function error(array $fieldErrors): void
+    /**
+     * Registers the given error messages into the feedback session for later rendering. The given messages must be in
+     * an associative array form where the keys are the field names (including complete pathing if available) and the
+     * values are an array of error messages. E.g.
+     *
+     * 'firstname' => ['Must not be empty'],
+     * 'amount' => ['Must be a number', 'Must be positive'],
+     * 'cart[].quantity.2' => ['Must not be empty']
+     *
+     * @param array $fieldErrors
+     */
+    public static function register(array $fieldErrors): void
     {
-        self::addFeedback('ERROR', $fieldErrors);
-    }
-
-    public static function hasError(string $field): bool
-    {
-        $feedback = Session::getInstance()->read(self::SESSION_KEY);
-        if (is_null($feedback)) {
-            return false;
+        $feedback = self::getSavedFeedback();
+        foreach ($fieldErrors as $registeredName => $errorMessages) {
+            if (!isset($feedback[$registeredName])) {
+                $feedback[$registeredName] = [];
+            }
+            $feedback[$registeredName] = array_merge($feedback[$registeredName], $errorMessages);
         }
-        return key_exists($field, $feedback['ERROR']);
+        Session::getInstance()->set(self::SESSION_KEY, $feedback);
     }
 
-    public static function readError(string $field): array
+    /**
+     * Retrieves the error messages associated with the given field name. If there is no direct key matching the field
+     * name, it will try to find key starting with the given name and join the messages. Useful to group pathing
+     * errors. E.g.
+     *
+     * 'firstname' => ['Must not be empty'],
+     * 'amount' => ['Must be a number', 'Must be positive'],
+     * 'cart[].quantity.2' => ['Must not be empty'],
+     * 'cart[].amount.2' => ['Must be a number']
+     *
+     * Feedback::read('firstname'); // ['Must not be empty']
+     * Feedback::read('cart[]'); // ['Must not be empty', 'Must be a number']
+     *
+     * @param string $field
+     * @return array
+     */
+    public static function read(string $field): array
     {
-        $feedback = Session::getInstance()->read(self::SESSION_KEY);
-        if (is_null($feedback)) {
-            return [];
+        $feedback = self::getSavedFeedback();
+        if (isset($feedback[$field])) {
+            return $feedback[$field];
         }
-        return $feedback['ERROR'][$field] ?? [];
+        $results = [];
+        foreach ($feedback as $registeredName => $errorMessages) {
+            if (str_starts_with($registeredName, $field)) {
+                $results = array_merge($results, $errorMessages);
+            }
+        }
+        return $results;
     }
 
-    public static function readAll(): stdClass
+    /**
+     * Retrieves the whole feedback structure as it is saved in the session.
+     *
+     * @return array
+     */
+    public static function readAll(): array
     {
-        $feedback = Session::getInstance()->read(self::SESSION_KEY);
-        $args = [];
-        $args["error"] = $feedback['ERROR'] ?? [];
-        return (object) $args;
+        return self::getSavedFeedback();
     }
 
-    public static function clearAll(): void
+    /**
+     * Empty all saved feedback messages in the session.
+     */
+    public static function clear(): void
     {
         Session::getInstance()->remove(self::SESSION_KEY);
     }
 
-    private static function addFeedback(string $type, array $fieldErrors): void
+    /**
+     * Retrieves the feedbacks from the session. Returns an empty array if none exist.
+     *
+     * @return array
+     */
+    private static function getSavedFeedback(): array
     {
         $feedback = Session::getInstance()->read(self::SESSION_KEY);
         if (is_null($feedback)) {
             $feedback = [];
         }
-        $feedback[$type] = $fieldErrors;
-        Session::getInstance()->set(self::SESSION_KEY, $feedback);
+        return $feedback;
     }
 }

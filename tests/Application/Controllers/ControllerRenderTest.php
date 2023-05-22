@@ -108,7 +108,7 @@ class ControllerRenderTest extends TestCase
             public function index(): Response
             {
                 Flash::error("invalid");
-                Feedback::error(["email" => ["test"]]);
+                Feedback::register(["email" => ["test"]]);
                 return parent::renderPhp('test3');
             }
         };
@@ -130,7 +130,7 @@ class ControllerRenderTest extends TestCase
             public function index(): Response
             {
                 Flash::error("invalid");
-                Feedback::error(["email" => ["test"]]);
+                Feedback::register(["email" => ["test"]]);
                 return parent::render('test4');
             }
         };

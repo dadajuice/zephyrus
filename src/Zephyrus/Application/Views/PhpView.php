@@ -28,7 +28,7 @@ class PhpView extends View
             $response = $this->buildResponse(ob_get_clean());
             Form::removeMemorizedValue();
             Flash::clearAll();
-            Feedback::clearAll();
+            Feedback::clear();
             return $response;
         }
 
