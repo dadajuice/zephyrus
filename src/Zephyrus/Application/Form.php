@@ -38,7 +38,7 @@ class Form
 
     /**
      * Memorizes the specified value for the given fieldId. Allows to be read by the readMemorizedValue() function
-     * afterward.
+     * afterward. Works with submitted array type values.
      *
      * @param string $fieldId
      * @param mixed $value
@@ -48,7 +48,14 @@ class Form
         if (!isset($_SESSION[self::SESSION_KEY])) {
             $_SESSION[self::SESSION_KEY] = [];
         }
-        $_SESSION[self::SESSION_KEY][$fieldId] = $value;
+        if (is_array($value)) {
+            foreach ($value as $key => $val) {
+                $fieldId = str_replace("[]", "", $fieldId);
+                self::memorizeValue("$fieldId" . "[" . $key . "]", $val);
+            }
+        } else {
+            $_SESSION[self::SESSION_KEY][$fieldId] = $value;
+        }
     }
 
     /**

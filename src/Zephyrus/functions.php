@@ -41,12 +41,26 @@ function session($data, $defaultValue = null)
  * Feedback::read('firstname'); // ['Must not be empty']
  * Feedback::read('cart[]'); // ['Must not be empty', 'Must be a number']
  *
- * @param string $fieldName
+ * @param ?string $fieldName
  * @return array
  */
-function feedback(string $fieldName): array
+function feedback(?string $fieldName = null): array
 {
-    return Feedback::read($fieldName);
+    return is_null($fieldName)
+        ? Feedback::readAll()
+        : Feedback::read($fieldName);
+}
+
+/**
+ * Shorthand function to quickly access feedback field names from anywhere including within Pug views. Retrieves the
+ * field names which contains error messages. This will return the array notation instead of the pathing for easier html
+ * manipulation. E.g. cart[].quantity.2 -> cart[quantity][2].
+ *
+ * @return array
+ */
+function feedbackFields(): array
+{
+    return Feedback::getFieldNames();
 }
 
 /**
