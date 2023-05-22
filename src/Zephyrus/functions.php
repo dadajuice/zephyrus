@@ -1,6 +1,7 @@
 <?php
 
 use Zephyrus\Application\Configuration;
+use Zephyrus\Application\Feedback;
 use Zephyrus\Application\Form;
 use Zephyrus\Application\Localization;
 use Zephyrus\Application\Session;
@@ -25,6 +26,27 @@ function session($data, $defaultValue = null)
         return;
     }
     return Session::getInstance()->read($data, $defaultValue);
+}
+
+/**
+ * Shorthand function to quickly access feedback error messages from anywhere including within Pug views. Retrieves the
+ * error messages associated with the given field name. If there is no direct key matching the field name, it will try
+ * to find key starting with the given name and join the messages. Useful to group pathing errors. E.g.
+ *
+ * 'firstname' => ['Must not be empty'],
+ * 'amount' => ['Must be a number', 'Must be positive'],
+ * 'cart[].quantity.2' => ['Must not be empty']
+ * 'cart[].amount.2' => ['Must be a number']
+ *
+ * Feedback::read('firstname'); // ['Must not be empty']
+ * Feedback::read('cart[]'); // ['Must not be empty', 'Must be a number']
+ *
+ * @param string $fieldName
+ * @return array
+ */
+function feedback(string $fieldName): array
+{
+    return Feedback::read($fieldName);
 }
 
 /**
@@ -93,7 +115,7 @@ function config(string $section, string $property, string $defaultValue = null)
  * @param mixed $defaultValue
  * @return mixed
  */
-function val(string $fieldId, $defaultValue = "")
+function val(string $fieldId, mixed $defaultValue = ""): mixed
 {
     return Form::readMemorizedValue($fieldId, $defaultValue);
 }
