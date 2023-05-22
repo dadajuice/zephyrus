@@ -19,6 +19,7 @@ class Feedback
     {
         $feedback = self::getSavedFeedback();
         foreach ($fieldErrors as $registeredName => $errorMessages) {
+            $registeredName = self::pathingToFieldName($registeredName);
             if (!isset($feedback[$registeredName])) {
                 $feedback[$registeredName] = [];
             }
@@ -59,6 +60,21 @@ class Feedback
     }
 
     /**
+     * Retrieves the field names which contains error messages. This will return the array notation instead of the
+     * pathing for easier html manipulation. E.g. cart[].quantity.2 -> cart[quantity][2].
+     *
+     * @return array
+     */
+    public static function getFieldNames(): array
+    {
+        $feedbackKeys = [];
+        foreach (self::readAll() as $key => $messages) {
+            $feedbackKeys[] = self::pathingToFieldName($key);
+        }
+        return $feedbackKeys;
+    }
+
+    /**
      * Retrieves the whole feedback structure as it is saved in the session.
      *
      * @return array
@@ -88,5 +104,21 @@ class Feedback
             $feedback = [];
         }
         return $feedback;
+    }
+
+    /**
+     * Transforms the pathing into HTML array notation. E.g. cart[].quantity.2 -> cart[quantity][2].
+     *
+     * @param string $inputString
+     * @return string
+     */
+    private static function pathingToFieldName(string $inputString): string
+    {
+        if (!str_contains($inputString, '.')) {
+            return $inputString;
+        }
+        $transformedString = str_replace(['[].', '.'], ['[', ']['], $inputString);
+        $transformedString .= ']';
+        return $transformedString;
     }
 }
