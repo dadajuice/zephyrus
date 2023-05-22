@@ -100,6 +100,33 @@ class BaseRulesTest extends TestCase
         self::assertTrue($rule->isValid(["bat" => "man"]));
     }
 
+    public function testLength()
+    {
+        $rule = Rule::length(3, "err");
+        self::assertEquals("length", $rule->getName());
+        self::assertTrue($rule->isValid(["1", 2, "hello"]));
+        self::assertFalse($rule->isValid("e"));
+        self::assertFalse($rule->isValid(["bat" => "man"]));
+        self::assertFalse($rule->isValid([1, 2, 3, 4]));
+        self::assertTrue($rule->isValid("hel"));
+        self::assertFalse($rule->isValid("hello"));
+        self::assertFalse($rule->isValid("he"));
+        self::assertFalse($rule->isValid(123));
+        self::assertFalse($rule->isValid(true));
+    }
+
+    public function testSameLengthAs()
+    {
+        $rule = Rule::sameLengthAs('test', "err");
+        self::assertEquals("sameLengthAs", $rule->getName());
+        self::assertTrue($rule->isValid(["1", 2, "hello"], ['test' => [1, 2, 3]]));
+        self::assertFalse($rule->isValid("e", ['test' => [1, 2, 3]]));
+        self::assertFalse($rule->isValid(["bat" => "man"], ['test' => [1, 2, 3]]));
+        self::assertFalse($rule->isValid([1, 2, 3, 4], ['test' => [1, 2, 3]]));
+        self::assertTrue($rule->isValid("bat", ['test' => 'man']));
+        self::assertFalse($rule->isValid("bat", ['test' => 'mano']));
+    }
+
     public function testIsObject()
     {
         $rule = Rule::object("err");

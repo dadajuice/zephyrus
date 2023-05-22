@@ -71,11 +71,21 @@ trait BaseRules
         }, $errorMessage, 'associativeArray');
     }
 
-    public static function count(int $length, string $errorMessage = ""): Rule
+    public static function length(int $length, string $errorMessage = ""): Rule
     {
         return new Rule(function ($data) use ($length) {
-            return count($data) == $length;
-        }, $errorMessage, 'count');
+            return (is_array($data) && count($data) == $length)
+                || (is_string($data) && strlen($data) == $length);
+        }, $errorMessage, 'length');
+    }
+
+    public static function sameLengthAs(string $comparedFieldName, string $errorMessage = ""): Rule
+    {
+        return new Rule(function ($data, $values) use ($comparedFieldName) {
+            return isset($values[$comparedFieldName])
+                && ((is_array($data) && is_array($values[$comparedFieldName]) && count($data) == count($values[$comparedFieldName]))
+                    || (is_string($data) && is_string($values[$comparedFieldName]) && strlen($data) == strlen($values[$comparedFieldName])));
+        }, $errorMessage, 'sameLengthAs');
     }
 
     public static function array(string $errorMessage = ""): Rule
