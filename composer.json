@@ -37,7 +37,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Zephyrus\\Tests\\": "tests"
+      "Zephyrus\\Tests\\": "tests",
+      "Locale\\": "tests/locale/cache"
     }
   },
   "config": {
