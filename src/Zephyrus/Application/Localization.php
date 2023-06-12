@@ -176,8 +176,8 @@ class Localization
      *
      * @param string $locale
      * @param array $array
-     * @return array
      * @throws LocalizationException
+     * @return array
      */
     private function buildClassFile(string $locale, array $array): array
     {
@@ -337,8 +337,8 @@ class Localization
      * Builds an associative array containing all the json values to generate.
      *
      * @param string $locale
-     * @return array
      * @throws LocalizationException
+     * @return array
      */
     private function buildGlobalArrayFromJsonFiles(string $locale): array
     {
