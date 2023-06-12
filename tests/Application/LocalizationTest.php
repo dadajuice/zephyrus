@@ -11,8 +11,10 @@ class LocalizationTest extends TestCase
         copy(ROOT_DIR . '/locale/routes.json', ROOT_DIR . '/locale/fr_CA/routes.json');
         Localization::getInstance()->start(); // If test is standalone
         self::assertEquals('fr_CA', Localization::getInstance()->getLoadedLocale());
+        self::assertEquals('fr_CA', Localization::getInstance()->getLoadedLanguage()->locale);
         self::assertEquals('America/Montreal', date_default_timezone_get());
         self::assertEquals("Le courriel est invalide", Localization::getInstance()->localize("messages.errors.invalid_email"));
+        self::assertEquals("Email is invalid", Localization::getInstance()->localize("en_CA.messages.errors.invalid_email"));
         self::assertEquals("L'utilisateur [bob] a été ajouté avec succès", Localization::getInstance()->localize("messages.success.add_user", ["bob"]));
         self::assertEquals("not.found", Localization::getInstance()->localize("not.found"));
         self::assertEquals("messages.success.bob", Localization::getInstance()->localize("messages.success.bob"));
@@ -20,17 +22,28 @@ class LocalizationTest extends TestCase
         self::assertEquals("/admin", Localization::getInstance()->localize("routes.administration")); // subfolder test
         self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", localize("messages.success.add_user", "martin"));
         self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", __("L'utilisateur [%s] a été ajouté avec succès", 'martin'));
-    }
 
-    /**
-     * @depends testLocalize
-     */
-    public function testExceptionAlreadyStarted()
-    {
-        try {
-            Localization::getInstance()->start();
-        } catch (\RuntimeException $e) {
-            self::assertEquals("Localization environment already started", $e->getMessage());
+        // Rest should be english
+        Localization::getInstance()->changeLanguage("en_CA");
+        self::assertEquals("Email is invalid", Localization::getInstance()->localize("messages.errors.invalid_email"));
+        self::assertEquals("Password does not respect established constraints", Localization::getInstance()->localize("messages.errors.invalid_password"));
+
+        // Back to normal
+        Localization::getInstance()->changeLanguage("fr_CA");
+        self::assertEquals("Le courriel est invalide", Localization::getInstance()->localize("messages.errors.invalid_email"));
+        self::assertEquals("Le mot de passe ne respecte pas les contraintes", Localization::getInstance()->localize("messages.errors.invalid_password"));
+
+        $reservedKeywords = [
+            'abstract', 'and', 'array', 'as', 'break', 'callable', 'case', 'catch', 'clone',
+            'const', 'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 'empty', 'enddeclare',
+            'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile', 'eval', 'exit', 'extends', 'final', 'finally',
+            'fn', 'for', 'foreach', 'function', 'global', 'goto', 'if', 'implements', 'include', 'include_once',
+            'instanceof', 'insteadof', 'interface', 'isset', 'list', 'namespace', 'new', 'or', 'print', 'private',
+            'protected', 'public', 'require', 'require_once', 'return', 'static', 'throw', 'trait', 'try',
+            'unset', 'use', 'var', 'while', 'xor', 'yield'
+        ];
+        foreach ($reservedKeywords as $w) {
+            self::assertEquals('a', localize("test.$w"));
         }
     }
 
@@ -76,7 +89,7 @@ class LocalizationTest extends TestCase
             self::assertTrue(false); // should not reach this point
         } catch (LocalizationException $e) {
             self::assertEquals(LocalizationException::ERROR_RESERVED_WORD, $e->getCode());
-            self::assertEquals("Cannot use the detected PHP reserved word [private] as localize key.", $e->getMessage());
+            self::assertEquals("Cannot use the detected PHP reserved word [class] as localize key.", $e->getMessage());
         }
         unlink(ROOT_DIR . '/locale/fr_CA/invalid_words.json');
     }
