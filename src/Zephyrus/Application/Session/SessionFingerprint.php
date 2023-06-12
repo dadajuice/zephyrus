@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Application\Session;
 
-use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 
 class SessionFingerprint

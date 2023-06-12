@@ -7,12 +7,9 @@ use Zephyrus\Utilities\FileSystem\Directory;
 
 class Localization
 {
-    public const GENERATED_CLASS_NAME = "Localize";
-
-    /**
-     * @var Localization
-     */
-    private static $instance = null;
+    private const GENERATED_CLASS_NAME = "Localize";
+    private const DEFAULT_NAMESPACE = "Locale";
+    private static ?Localization $instance = null;
 
     /**
      * Currently loaded application locale language. Maps to a directory within /locale.
@@ -29,6 +26,12 @@ class Localization
         return self::$instance;
     }
 
+    /**
+     * Retrieves the list of all installed languages. Meaning all the directories under /locale. Will return an array
+     * of stdClass containing all the details for each language.
+     *
+     * @return stdClass[]
+     */
     public static function getInstalledLanguages(): array
     {
         $dirs = array_filter(glob(ROOT_DIR . '/locale/*'), 'is_dir');
@@ -45,29 +48,52 @@ class Localization
         return $languages;
     }
 
+    /**
+     * Retrieves simply the names of the installed locales. For the complete object reference, use
+     * getInstalledLanguages.
+     *
+     * @return string[]
+     */
+    public static function getInstalledLocales(): array
+    {
+        $results = [];
+        foreach (self::getInstalledLanguages() as $language) {
+            $results[] = $language->locale;
+        }
+        return $results;
+    }
+
+    /**
+     * Retrieves the actual loaded language. Will return an stdClass containing all the details.
+     *
+     * @return stdClass
+     */
     public function getLoadedLanguage(): stdClass
     {
         return self::getLanguage($this->appLocale);
     }
 
     /**
-     * Initialize the localization environment. If no locale is given, it will
-     * be initialized with the default locale set in the config.ini file. Will
-     * throw an exception if environment is already started.
+     * Initialize the localization environment. If no locale is given, it will be initialized with the default locale
+     * set in the config.ini file.
      *
      * @param string|null $locale
      * @throws LocalizationException
      */
-    public function start(?string $locale = null)
+    public function start(?string $locale = null): void
     {
-        if (!is_null($this->appLocale)) {
-            throw new \RuntimeException("Localization environment already started");
-        }
         $this->appLocale = $locale ?? Configuration::getLocaleConfiguration('language');
         $this->initializeLocale();
-        if (file_exists(ROOT_DIR . '/locale')) {
-            $this->generate();
-        }
+        $this->generate();
+    }
+
+    /**
+     * @param string $locale
+     * @throws LocalizationException
+     */
+    public function changeLanguage(string $locale): void
+    {
+        $this->start($locale);
     }
 
     public function getLoadedLocale(): string
@@ -75,15 +101,23 @@ class Localization
         return $this->appLocale;
     }
 
-    public function localize($key, array $args = []): string
+    public function localize(string $key, array $args = []): string
     {
+        $locale = $this->appLocale;
         $segments = explode(".", $key);
+        $localizeIdentifier = $segments[0];
+        if (in_array($localizeIdentifier, self::getInstalledLocales())) {
+            $locale = $localizeIdentifier;
+            array_shift($segments);
+        }
         $lastConstant = array_pop($segments);
         $object = null;
 
         try {
             foreach ($segments as $segment) {
-                $object = (is_null($object)) ? \Localize::{$segment}() : $object::{$segment}();
+                $object = (is_null($object))
+                    ? call_user_func(self::DEFAULT_NAMESPACE . "\\$locale\\Localize::$segment")
+                    : $object::{$segment}();
             }
         } catch (\Error $e) {
             return $key;
@@ -103,37 +137,59 @@ class Localization
     }
 
     /**
+     * Generates the localization cache for all installed languages if they are outdated or never created. Optionally,
+     * you can force the whole regeneration with the boolean argument (will ignore the conditions and generate
+     * everything from scratch). Throws an exception if json cannot be properly parsed.
+     *
      * @param bool $force
      * @throws LocalizationException
      */
-    public function generate(bool $force = false)
+    public function generate(bool $force = false): void
     {
-        if ($force || $this->prepareCache() || $this->isCacheOutdated()) {
-            $this->clearCacheDirectory();
-            $globalArray = $this->buildGlobalArrayFromJsonFiles();
-            list($constants, $methods, $classes) = $this->buildClassFile($globalArray);
-            if (!empty($methods)) {
-                $className = self::GENERATED_CLASS_NAME;
-                $class = $this->createLocalizeClass($className, $constants, $methods, $classes);
-                file_put_contents(ROOT_DIR . "/locale/cache/{$this->appLocale}/" . self::GENERATED_CLASS_NAME . ".php", $class);
+        foreach (self::getInstalledLocales() as $locale) {
+            if ($force || $this->prepareCache($locale) || $this->isCacheOutdated($locale)) {
+                $this->generateCache($locale);
             }
-        }
-        if (!class_exists(self::GENERATED_CLASS_NAME)) {
-            require ROOT_DIR . "/locale/cache/{$this->appLocale}/Localize.php";
         }
     }
 
-    private function buildClassFile($array)
+    /**
+     * Generates a single language cache. Will completely remove any existing directories concerning this locale
+     * beforehand and completely generate cache. Throws an exception if json cannot be properly parsed.
+     *
+     * @param string $locale
+     * @throws LocalizationException
+     */
+    private function generateCache(string $locale): void
+    {
+        $this->clearCacheDirectory($locale);
+        $globalArray = $this->buildGlobalArrayFromJsonFiles($locale);
+        list($constants, $methods, $classes) = $this->buildClassFile($locale, $globalArray);
+        if (!empty($methods)) {
+            $class = $this->createLocalizeClass($locale, self::GENERATED_CLASS_NAME, $constants, $methods, $classes);
+            file_put_contents(ROOT_DIR . "/locale/cache/$locale/" . self::GENERATED_CLASS_NAME . ".php", $class);
+        }
+    }
+
+    /**
+     * Generates the Localize class file for the specified locale using the values from buildGlobalArrayFromJsonFiles.
+     *
+     * @param string $locale
+     * @param array $array
+     * @throws LocalizationException
+     * @return array
+     */
+    private function buildClassFile(string $locale, array $array): array
     {
         $constants = "";
         $methods = [];
         $classes = [];
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                list($returnedConstants, $returnedMethods, $returnedClasses) = $this->buildClassFile($value);
+                list($returnedConstants, $returnedMethods, $returnedClasses) = $this->buildClassFile($locale, $value);
                 $className = 'C' . Cryptography::randomString(20);
-                $class = $this->createLocalizeClass($className, $returnedConstants, $returnedMethods, $returnedClasses);
-                file_put_contents(ROOT_DIR . "/locale/cache/{$this->appLocale}/$className.php", $class);
+                $class = $this->createLocalizeClass($locale, $className, $returnedConstants, $returnedMethods, $returnedClasses);
+                file_put_contents(ROOT_DIR . "/locale/cache/$locale/$className.php", $class);
                 $methods[] = $key;
                 $classes[] = $className;
             } else {
@@ -143,9 +199,9 @@ class Localization
         return [$constants, $methods, $classes];
     }
 
-    private function createLocalizeClass(string $className, string $constants, array $methods, array $classes)
+    private function createLocalizeClass(string $locale, string $className, string $constants, array $methods, array $classes): string
     {
-        $output = "<?php" . PHP_EOL . PHP_EOL;
+        $output = "<?php namespace " . self::DEFAULT_NAMESPACE . "\\$locale;" . PHP_EOL . PHP_EOL;
         if (!empty($classes)) {
             foreach ($classes as $class) {
                 $output .= $this->addRequire($class);
@@ -243,35 +299,51 @@ class Localization
         return "}" . PHP_EOL;
     }
 
-    private function isCacheOutdated()
+    /**
+     * Verifies if the cache needs to be regenerated for the specified locale.
+     *
+     * @param string $locale
+     * @return bool
+     */
+    private function isCacheOutdated(string $locale): bool
     {
-        $lastModifiedLocaleJson = $this->getDirectoryLastModifiedTime(ROOT_DIR . "/locale/{$this->appLocale}");
-        $lastModifiedLocaleCache = $this->getDirectoryLastModifiedTime(ROOT_DIR . "/locale/cache/{$this->appLocale}");
+        $lastModifiedLocaleJson = $this->getDirectoryLastModifiedTime(ROOT_DIR . "/locale/$locale");
+        $lastModifiedLocaleCache = $this->getDirectoryLastModifiedTime(ROOT_DIR . "/locale/cache/$locale");
         return $lastModifiedLocaleJson > $lastModifiedLocaleCache;
     }
 
-    private function prepareCache()
+    /**
+     * Creates the cache directory for the specified locale if they do not exist. Returns true if a directory was
+     * created, false otherwise.
+     *
+     * @param string $locale
+     * @return bool
+     */
+    private function prepareCache(string $locale): bool
     {
         $newlyCreated = false;
         if (!file_exists(ROOT_DIR . "/locale/cache")) {
             mkdir(ROOT_DIR . "/locale/cache");
             $newlyCreated = true;
         }
-        if (!file_exists(ROOT_DIR . "/locale/cache/{$this->appLocale}")) {
-            mkdir(ROOT_DIR . "/locale/cache/{$this->appLocale}");
+        if (!file_exists(ROOT_DIR . "/locale/cache/$locale")) {
+            mkdir(ROOT_DIR . "/locale/cache/$locale");
             $newlyCreated = true;
         }
         return $newlyCreated;
     }
 
     /**
+     * Builds an associative array containing all the json values to generate.
+     *
+     * @param string $locale
      * @throws LocalizationException
      * @return array
      */
-    private function buildGlobalArrayFromJsonFiles()
+    private function buildGlobalArrayFromJsonFiles(string $locale): array
     {
         $globalArray = [];
-        foreach (recursiveGlob(ROOT_DIR . "/locale/{$this->appLocale}/*.json") as $file) {
+        foreach (recursiveGlob(ROOT_DIR . "/locale/$locale/*.json") as $file) {
             $string = file_get_contents($file);
             $jsonAssociativeArray = json_decode($string, true);
             $jsonLastError = json_last_error();
@@ -301,7 +373,7 @@ class Localization
         return $lastModifiedTime;
     }
 
-    private function initializeLocale()
+    private function initializeLocale(): void
     {
         $charset = Configuration::getLocaleConfiguration('charset');
         $locale = $this->appLocale . '.' . $charset;
@@ -316,28 +388,17 @@ class Localization
     {
     }
 
-    private function clearCacheDirectory()
-    {
-        $files = recursiveGlob(ROOT_DIR . "/locale/cache/{$this->appLocale}/*");
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                unlink($file);
-            }
-        }
-    }
-
     /**
-     * Converts the 2 letters country code into the corresponding flag emoji.
+     * Removes the cache directory for the specified locale. Ignores if the directory does not exist (nothing to
+     * empty).
      *
-     * @param string $countryCode
-     * @return string
+     * @param string $locale
      */
-    private static function getFlagEmoji(string $countryCode): string
+    private function clearCacheDirectory(string $locale): void
     {
-        $codePoints = array_map(function ($char) {
-            return 127397 + ord($char);
-        }, str_split(strtoupper($countryCode)));
-        return mb_convert_encoding('&#' . implode(';&#', $codePoints) . ';', 'UTF-8', 'HTML-ENTITIES');
+        if (Directory::exists($locale)) {
+            (new Directory(ROOT_DIR . "/locale/cache/$locale"))->remove();
+        }
     }
 
     private static function getLanguage(string $locale): stdClass
@@ -354,5 +415,19 @@ class Localization
             'count' => count($directory->getFilenames()),
             'size' => $directory->size()
         ];
+    }
+
+    /**
+     * Converts the 2 letters country code into the corresponding flag emoji.
+     *
+     * @param string $countryCode
+     * @return string
+     */
+    private static function getFlagEmoji(string $countryCode): string
+    {
+        $codePoints = array_map(function ($char) {
+            return 127397 + ord($char);
+        }, str_split(strtoupper($countryCode)));
+        return mb_convert_encoding('&#' . implode(';&#', $codePoints) . ';', 'UTF-8', 'HTML-ENTITIES');
     }
 }
