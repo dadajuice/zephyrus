@@ -47,19 +47,6 @@ class Uri
      */
     private $fragment;
 
-    /**
-     * Removes the specified named argument from the given query string. Useful for replacement in the uri query string
-     * like in a pager (e.g. remove the 'page' argument from the URI).
-     *
-     * @param string $query
-     * @param string $name
-     * @return string
-     */
-    public static function removeArgument(string $query, string $name): string
-    {
-        return preg_replace("/(" . $name . "=[0-9A-Za-z_-]*&?)/", "", $query);
-    }
-
     public function __construct(string $uri)
     {
         $urlParts = parse_url($uri);
@@ -80,6 +67,11 @@ class Uri
         return $this->getScheme() . '://'
             . $this->getHost()
             . (($this->getPort() != $defaultPorts[$this->getScheme()] && !empty($this->getPort())) ? ":" . $this->getPort() : "");
+    }
+
+    public function buildQueryString(): QueryString
+    {
+        return new QueryString($this->query);
     }
 
     /**
