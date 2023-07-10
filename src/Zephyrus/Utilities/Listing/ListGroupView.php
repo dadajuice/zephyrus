@@ -1,28 +1,54 @@
-<?php namespace Zephyrus\Utilities\Components;
+<?php namespace Zephyrus\Utilities\Listing;
+
+use RuntimeException;
 
 class ListGroupView extends ListView
 {
-    private ?string $headerColumn = null;
+    /**
+     * Column name from the given result set that should be used as the list header. Must exists as part of the given
+     * rows.
+     *
+     * @var string
+     */
+    private string $headerColumn;
 
     /**
+     * Defines the callback function for header formatting (optional, default to simply the header value). For example,
+     * useful for date time formatted column.
+     *
      * @var callable
      */
     private $headerFormatting;
 
-    public function __construct(array $rows)
+    public function __construct(array $rows, string $headerColumn)
     {
         parent::__construct($rows);
+        $this->setHeaderColumn($headerColumn);
         $this->headerFormatting = function ($value) {
             return $value;
         };
     }
 
-    public function setHeaderColumn(string $column)
+    /**
+     * Applies the given column as list header. Column must exist in result set, otherwise an exception is thrown.
+     *
+     * @param string $column
+     */
+    public function setHeaderColumn(string $column): void
     {
         $this->headerColumn = $column;
+        $row = $this->getRow(0);
+        if ($row && !property_exists($row, $this->headerColumn)) {
+            throw new RuntimeException("The header column property [$this->headerColumn] must be defined in the result set.");
+        }
     }
 
-    public function setHeaderFormatting(callable $callback)
+    /**
+     * Sets the callback used to display the header value.
+     *
+     * @param callable $callback
+     */
+    public function setHeaderFormatting(callable $callback): void
     {
         $this->headerFormatting = $callback;
     }
@@ -34,10 +60,6 @@ class ListGroupView extends ListView
 
     public function getRows(): array
     {
-        if (is_null($this->headerColumn)) {
-            throw new \RuntimeException("The header column property must be defined to build the group listview.");
-        }
-
         $results = [];
 
         // Should be sorted by header column

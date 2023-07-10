@@ -1,9 +1,8 @@
-<?php namespace Zephyrus\Database\Brokers;
+<?php namespace Zephyrus\Database;
 
 use stdClass;
 use Zephyrus\Database\Core\Database;
 use Zephyrus\Database\Core\DatabaseStatement;
-use Zephyrus\Database\DatabaseSession;
 
 abstract class DatabaseBroker
 {
