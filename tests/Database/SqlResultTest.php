@@ -1,7 +1,6 @@
-<?php namespace Zephyrus\Tests\Database\Brokers;
+<?php namespace Zephyrus\Tests\Database;
 
 use Zephyrus\Database\SqlResult;
-use Zephyrus\Tests\Database\DatabaseTestCase;
 
 class SqlResultTest extends DatabaseTestCase
 {
