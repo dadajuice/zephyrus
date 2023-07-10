@@ -18,7 +18,7 @@ class ListSort
 
     public function getSorts(): array
     {
-        $sorts = $this->sorts ?? $this->defaultSorts;
+        $sorts = empty($this->sorts) ? $this->defaultSorts : $this->sorts;
         $allowedFields = $this->whiteList;
         $aliasColumns = $this->aliasColumns;
         $sorts = array_filter($sorts, function ($value, $field) use ($allowedFields) {
