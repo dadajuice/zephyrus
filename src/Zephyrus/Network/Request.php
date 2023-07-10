@@ -1,8 +1,5 @@
 <?php namespace Zephyrus\Network;
 
-use Zephyrus\Utilities\Components\FilterConfiguration;
-use Zephyrus\Utilities\Components\ListFilter;
-
 class Request
 {
     /**

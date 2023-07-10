@@ -18,14 +18,14 @@ class ListFunnel
     ];
 
     /**
-     * Raw request filters
+     * Raw request filters.
      *
      * @var array
      */
     private array $filters;
 
     /**
-     * Raw request search
+     * Raw request search.
      *
      * @var ?string
      */

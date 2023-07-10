@@ -25,18 +25,24 @@ abstract class ListModel
      */
     private array $filterViews = [];
 
-    protected abstract function configureOptions(): void;
-    protected abstract function configureFilters(): void;
-    protected abstract function findRows(): array;
+    abstract protected function configureOptions(): void;
+
+    abstract protected function configureFilters(): void;
+
+    abstract protected function findRows(): array;
 
     public function __construct(array $configurations)
     {
-        $this->funnel = new ListFunnel($configurations[self::FILTERS_PARAMETER] ?? [],
-            $configurations[self::SEARCH_PARAMETER] ?? null);
-        $this->pagination = new ListPagination($configurations[self::PAGE_PARAMETER] ?? null,
-            $configurations[self::LIMIT_PARAMETER] ?? null);
+        $this->funnel = new ListFunnel(
+            $configurations[self::FILTERS_PARAMETER] ?? [],
+            $configurations[self::SEARCH_PARAMETER] ?? null
+        );
+        $this->pagination = new ListPagination(
+            $configurations[self::PAGE_PARAMETER] ?? null,
+            $configurations[self::LIMIT_PARAMETER] ?? null
+        );
         $this->sort = new ListSort($configurations[self::SORTS_PARAMETER] ?? []);
-        $this->setDatabaseBroker(new class extends DatabaseBroker {});
+        $this->setDatabaseBroker(new class() extends DatabaseBroker {});
         $this->configureFilters();
         $this->configureOptions();
     }
