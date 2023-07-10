@@ -2,6 +2,8 @@
 
 use JsPhpize\JsPhpizePhug;
 use Phug\Phug;
+use Phug\PhugException;
+use Phug\RendererException;
 use RuntimeException;
 use Zephyrus\Application\Configuration;
 use Zephyrus\Application\Feedback;
@@ -13,7 +15,7 @@ class PugView extends View
 {
     public const DEFAULT_CONFIGURATIONS = [
         'cache_enabled' => false, // Enable the cache feature
-        'cache_directory' => "/var/cache/pug", // Cache directory for generated files
+        'cache_directory' => ROOT_DIR . "/cache/pug", // Cache directory for generated files
         'js_syntax' => true, // Enable JsPhpizePhug extension
         'debug_enabled' => true, // Enable Pug debugging
     ];
@@ -30,16 +32,22 @@ class PugView extends View
         return Phug::render($pugCode, $args);
     }
 
+    /**
+     * @throws RendererException
+     */
     public static function generateCache(): array
     {
         return Phug::cacheDirectory(realpath(ROOT_DIR . '/app/Views/'));
     }
 
-    public static function addFunction($name, $action)
+    public static function addFunction($name, $action): void
     {
         Phug::share([$name => $action]);
     }
 
+    /**
+     * @throws PhugException
+     */
     public function __construct(string $pageToRender, array $configurations = [])
     {
         parent::__construct($pageToRender);
@@ -71,7 +79,7 @@ class PugView extends View
         return realpath(ROOT_DIR . '/app/Views/' . $pageToRender . '.pug');
     }
 
-    private function initializeConfigurations(array $configurations)
+    private function initializeConfigurations(array $configurations): void
     {
         if (empty($configurations)) {
             $configurations = Configuration::getConfiguration('pug') ?? self::DEFAULT_CONFIGURATIONS;
@@ -79,7 +87,7 @@ class PugView extends View
         $this->configurations = $configurations;
     }
 
-    private function initializeCache()
+    private function initializeCache(): void
     {
         $cacheEnabled = (isset($this->configurations['cache_enabled']))
             ? (bool) $this->configurations['cache_enabled']
@@ -90,7 +98,10 @@ class PugView extends View
         Phug::setOption('cache_dir', $cacheEnabled ? $cacheDirectory : false);
     }
 
-    private function initializeDebug()
+    /**
+     * @throws PhugException
+     */
+    private function initializeDebug(): void
     {
         Phug::addExtension(JsPhpizePhug::class);
         $debugEnabled = (isset($this->configurations['debug_enabled']))
@@ -99,7 +110,10 @@ class PugView extends View
         Phug::setOption('debug', $debugEnabled);
     }
 
-    private function initializeJsExtension()
+    /**
+     * @throws PhugException
+     */
+    private function initializeJsExtension(): void
     {
         $jsEnabled = (isset($this->configurations['js_syntax']))
             ? (bool) $this->configurations['js_syntax']
