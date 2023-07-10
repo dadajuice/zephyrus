@@ -1,18 +1,18 @@
 <?php namespace Zephyrus\Database\QueryBuilder;
 
-use Zephyrus\Utilities\Components\Pagination;
+use Zephyrus\Utilities\Listing\ListPagination;
 
 class LimitClause
 {
-    private int $limit = Pagination::DEFAULT_LIMIT;
+    private int $limit = ListPagination::DEFAULT_LIMIT;
     private int $offset = 0;
 
-    public function setLimit(int $limit)
+    public function setLimit(int $limit): void
     {
         $this->limit = $limit;
     }
 
-    public function setOffset(int $offset)
+    public function setOffset(int $offset): void
     {
         $this->offset = $offset;
     }
