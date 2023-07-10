@@ -80,11 +80,6 @@ class ListView
         return $this->filterViews;
     }
 
-    public function getOptionView(): OptionView
-    {
-        return new OptionView();
-    }
-
     /**
      * @param string $label
      * @param string|null $sort

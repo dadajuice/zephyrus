@@ -1,7 +1,5 @@
 <?php namespace Zephyrus\Utilities\Listing;
 
-use Zephyrus\Network\QueryString;
-
 class FilterView
 {
     private string $columnName;
@@ -54,22 +52,6 @@ class FilterView
     {
         $this->columnName = $columnName;
         $this->allowedColumnFilters = $allowedColumnFilters;
-    }
-
-    public function getQuery(string $rawQueryString): string
-    {
-        return (new QueryString($rawQueryString))
-            ->removeArgumentEquals('page')
-            ->removeArgumentStartsWith("filters[" . $this->columnName)
-            ->buildString();
-    }
-
-    public function getQueryArguments(string $rawQueryString): array
-    {
-        return (new QueryString($rawQueryString))
-            ->removeArgumentEquals('page')
-            ->removeArgumentStartsWith("filters[" . $this->columnName)
-            ->getArguments();
     }
 
     /**

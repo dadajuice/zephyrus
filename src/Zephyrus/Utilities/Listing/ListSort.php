@@ -1,5 +1,7 @@
 <?php namespace Zephyrus\Utilities\Listing;
 
+use Zephyrus\Network\QueryString;
+
 class ListSort
 {
     private array $sorts;
@@ -66,5 +68,21 @@ class ListSort
     public function isDescNullLast(): bool
     {
         return $this->descNullLast;
+    }
+
+    public function getLimitQueryArguments(string $rawQueryString): array
+    {
+        return (new QueryString($rawQueryString))
+            ->removeArgumentEquals('page')
+            ->removeArgumentEquals('limit')
+            ->getArguments();
+    }
+
+    public function getSortQueryArguments(string $rawQueryString): array
+    {
+        return (new QueryString($rawQueryString))
+            ->removeArgumentEquals('page')
+            ->removeArgumentStartsWith('sorts[')
+            ->getArguments();
     }
 }

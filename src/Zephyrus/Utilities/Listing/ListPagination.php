@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Utilities\Listing;
 
 use InvalidArgumentException;
+use Zephyrus\Network\QueryString;
 
 class ListPagination
 {
@@ -44,6 +45,13 @@ class ListPagination
         }
         $this->defaultLimit = $defaultLimit;
         $this->maxLimitAllowed = $maxLimitAllowed;
+    }
+
+    public function getPagerQuery(string $rawQueryString): string
+    {
+        return (new QueryString($rawQueryString))
+            ->removeArgumentEquals('page')
+            ->buildString();
     }
 
     private function parseValue(mixed $rawPage): ?int

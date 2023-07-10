@@ -1,5 +1,7 @@
 <?php namespace Zephyrus\Utilities\Listing;
 
+use Zephyrus\Network\QueryString;
+
 class ListFunnel
 {
     public const AVAILABLE_FILTERS = [
@@ -96,6 +98,38 @@ class ListFunnel
     public function getSearchableColumns(): array
     {
         return $this->searchableColumns;
+    }
+
+    public function getSearchQueryArguments(string $rawQueryString): array
+    {
+        return (new QueryString($rawQueryString))
+            ->removeArgumentEquals('page')
+            ->removeArgumentEquals('search')
+            ->getArguments();
+    }
+
+    public function getSearchQuery(string $rawQueryString): string
+    {
+        return (new QueryString($rawQueryString))
+            ->removeArgumentEquals('page')
+            ->removeArgumentEquals('search')
+            ->buildString();
+    }
+
+    public function getFilterQuery(string $rawQueryString, string $column): string
+    {
+        return (new QueryString($rawQueryString))
+            ->removeArgumentEquals('page')
+            ->removeArgumentStartsWith("filters[" . $column)
+            ->buildString();
+    }
+
+    public function getFilterQueryArguments(string $rawQueryString, string $column): array
+    {
+        return (new QueryString($rawQueryString))
+            ->removeArgumentEquals('page')
+            ->removeArgumentStartsWith("filters[" . $column)
+            ->getArguments();
     }
 
     private function parseFilters(array $rawFilters): array
