@@ -14,7 +14,7 @@ trait ListQuery
         $query = $this->paginate($query);
         $query = $this->count($query);
         $parameters = array_merge($parameters, $this->queryParameters);
-        return $this->databaseBroker->select($query, $parameters, $callback);
+        return $this->databaseBroker->filteredSelect($query, $parameters, $callback);
     }
 
     /**

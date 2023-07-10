@@ -42,7 +42,12 @@ abstract class ListModel
             $configurations[self::LIMIT_PARAMETER] ?? null
         );
         $this->sort = new ListSort($configurations[self::SORTS_PARAMETER] ?? []);
-        $this->setDatabaseBroker(new class() extends DatabaseBroker {});
+        $this->setDatabaseBroker(new class() extends DatabaseBroker {
+            public function filteredSelect(string $query, array $parameters = [], ?callable $callback = null): array
+            {
+                return $this->select($query, $parameters, $callback);
+            }
+        });
         $this->configureFilters();
         $this->configureOptions();
     }
@@ -93,7 +98,7 @@ abstract class ListModel
     }
 
     /**
-     * Overrides the default baseline database broker instance to be used. Must have the select method defined.
+     * Overrides the default baseline database broker instance to be used. Must have the filteredSelect method defined.
      *
      * @param DatabaseBroker $databaseBroker
      */
