@@ -80,8 +80,6 @@ class Request
      */
     private $secure;
 
-    private FilterConfiguration $filterConfiguration;
-
     /**
      * Request constructor which need the option array data to populate the
      * request. E.g.
@@ -108,29 +106,6 @@ class Request
         $this->headers = $options['headers'] ?? [];
         $this->initializeServer();
         $this->initializeBaseUrl();
-        $this->filterConfiguration = new FilterConfiguration($this);
-    }
-
-    /**
-     * Builds a filter instance containing the requested sorting, paging, searching and filtering. Can be extended with
-     * default sorting and pager limit configuration.
-     *
-     * @return ListFilter
-     */
-    public function getFilter(): ListFilter
-    {
-        return new ListFilter($this->filterConfiguration);
-    }
-
-    /**
-     * Retrieves the request filter configurations (parameter naming for various filters such as sorting, filtering,
-     * searching and paging). This configuration is used when calling the getFilter() method.
-     *
-     * @return FilterConfiguration
-     */
-    public function getFilterConfiguration(): FilterConfiguration
-    {
-        return $this->filterConfiguration;
     }
 
     /**
