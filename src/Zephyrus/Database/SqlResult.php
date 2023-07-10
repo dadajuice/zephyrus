@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Database\Brokers;
+<?php namespace Zephyrus\Database;
 
 use Zephyrus\Database\Core\DatabaseStatement;
 
