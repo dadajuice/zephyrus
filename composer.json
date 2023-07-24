@@ -12,7 +12,7 @@
   "require": {
     "php": ">=8.0",
     "phug/phug": "^1.11",
-    "js-phpize/js-phpize-phug": "^1.2",
+    "js-phpize/js-phpize-phug": "2.*",
     "ext-pdo": "*",
     "ext-json": "*",
     "ext-simplexml": "*",
