@@ -4,7 +4,7 @@ services:
   webserver:
     build:
       context: .
-      dockerfile: "./docker/services/php81/Dockerfile"
+      dockerfile: "./docker/services/php82/Dockerfile"
     container_name: "zephyrus_webserver"
     restart: 'always'
     ports:
