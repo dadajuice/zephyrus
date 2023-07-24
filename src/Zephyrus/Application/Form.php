@@ -273,6 +273,10 @@ class Form
      */
     public function buildObject(): stdClass
     {
-        return (object) $this->getFields();
+        $objectProperties = [];
+        foreach ($this->getFields() as $field => $value) {
+            $objectProperties[rtrim($field, "[]")] = $value;
+        }
+        return (object) $objectProperties;
     }
 }
