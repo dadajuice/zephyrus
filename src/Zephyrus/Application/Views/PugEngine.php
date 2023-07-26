@@ -1,8 +1,8 @@
 <?php namespace Zephyrus\Application\Views;
 
 use JsPhpize\JsPhpizePhug;
-use Phug\Phug;
 use Phug\Optimizer;
+use Phug\Phug;
 use Phug\PhugException;
 use Zephyrus\Application\Configuration;
 

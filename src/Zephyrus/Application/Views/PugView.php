@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Application\Views;
 
-use Phug\PhugException;
 use RuntimeException;
 use Zephyrus\Application\Feedback;
 use Zephyrus\Application\Flash;
