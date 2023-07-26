@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Tests\Application;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Application\Flash;
 use Zephyrus\Application\Views\PugEngine;
 use Zephyrus\Application\Views\PugView;
 
@@ -52,10 +53,10 @@ class ViewBuilderTest extends TestCase
         self::assertEquals('<p>Example Bob Lewis is 12,300 $</p>', $output);
     }
 
-    public function testAddFunction()
+    public function testShare()
     {
         $engine = new PugEngine(['cache_enabled' => false]);
-        $engine->addFunction('test', function($amount) {
+        $engine->share('test', function($amount) {
             return $amount * 2;
         });
         $output = $engine->renderFromString('p Example #{test(item.price)}', ['item' => ['price' => 4]]);
