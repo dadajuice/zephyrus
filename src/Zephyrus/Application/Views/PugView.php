@@ -1,6 +1,5 @@
 <?php namespace Zephyrus\Application\Views;
 
-use Phug\PhugException;
 use RuntimeException;
 use Zephyrus\Application\Feedback;
 use Zephyrus\Application\Flash;
@@ -11,19 +10,18 @@ class PugView extends View
 {
     private PugEngine $engine;
 
-    /**
-     * @throws PhugException
-     */
-    public function __construct(string $pageToRender, array $configurations = [])
+    public function __construct(string $pageToRender, ?PugEngine $engine = null)
     {
         parent::__construct($pageToRender);
-        $this->engine = new PugEngine($configurations);
+        $this->engine = $engine ?? new PugEngine();
     }
 
     public function render(array $args = []): Response
     {
         if ($this->isAvailable()) {
-            $output = $this->engine->renderFromFile($this->getPath(), $args);
+            ob_start();
+            $this->engine->renderFromFile($this->getPath(), $args);
+            $output = ob_get_clean();
             Form::removeMemorizedValue();
             Flash::clearAll();
             Feedback::clear();

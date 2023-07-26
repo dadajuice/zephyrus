@@ -1,19 +1,20 @@
 <?php namespace Zephyrus\Application\Views;
 
 use JsPhpize\JsPhpizePhug;
+use Phug\Optimizer;
 use Phug\Phug;
 use Phug\PhugException;
-use Phug\RendererException;
 use Zephyrus\Application\Configuration;
-use Zephyrus\Application\Flash;
 
 class PugEngine
 {
     public const DEFAULT_CONFIGURATIONS = [
         'cache_enabled' => true, // Enable the cache feature
         'cache_directory' => ROOT_DIR . "/cache/pug", // Cache directory for generated files
+        'cache_update' => 'always', // always|never (useful in production if cache is done manually)
         'js_syntax' => true, // Enable JsPhpizePhug extension
         'debug_enabled' => true, // Enable Pug debugging
+        'optimizer_enabled' => true // Enable Pug Optimizer
     ];
 
     /**
@@ -24,6 +25,20 @@ class PugEngine
     private array $configurations;
 
     /**
+     * Determine if the rendering should use the optimized call.
+     *
+     * @var bool
+     */
+    private bool $optimizerEnabled = false;
+
+    /**
+     * Keeps the internal Phug instance options.
+     *
+     * @var array
+     */
+    private array $options = [];
+
+    /**
      * @throws PhugException
      */
     public function __construct(array $configurations = [])
@@ -31,34 +46,61 @@ class PugEngine
         $this->initializeConfigurations($configurations);
         $this->initializeCache();
         $this->initializeDebug();
+        $this->initializeOptimizer();
         $this->initializeJsExtension();
-        Phug::setOption('paths', [realpath(ROOT_DIR . '/public')]);
-        Phug::share([
-            'flash' => Flash::readAll()
-        ]);
+        $this->initializeDefaultSharedVariables();
+    }
+
+    /**
+     * Prepares a PugView instance from this engine (will include the shared variables and other settings).
+     *
+     * @param string $page
+     * @return PugView
+     */
+    public function buildView(string $page): PugView
+    {
+        return new PugView($page, $this);
     }
 
     public function renderFromString(string $pugCode, array $args = []): string
     {
-        return Phug::render($pugCode, $args);
+        return Phug::render($pugCode, $args, $this->options);
     }
 
-    public function renderFromFile(string $path, array $args = []): string
+    public function renderFromFile(string $path, array $args = []): void
     {
-        return Phug::renderFile($path, $args);
+        if ($this->optimizerEnabled) {
+            Optimizer::call('displayFile', [$path, $args], $this->options);
+            return;
+        }
+        Phug::displayFile($path, $args, $this->options);
     }
 
     /**
-     * @throws RendererException
+     * Includes a variable or callback to Pug files rendered with this Pug Engine instance.
+     *
+     * @param string $name
+     * @param mixed $action
+     * @return void
      */
-    public function generateCache(): array
+    public function share(string $name, mixed $action): void
     {
-        return Phug::cacheDirectory(realpath(ROOT_DIR . '/app/Views/'));
+        $this->options['shared_variables'][$name] = $action;
     }
 
-    public function addFunction($name, $action): void
+    /**
+     * Add a filter which can then be used in every Pug files. E.g :add(value=4) 5. The callback must have 2 arguments:
+     * the first one is the text and the second one the options given. In the above example, the text would be 5 and the
+     * options would be an associative array with value=4.
+     *
+     * @param string $name
+     * @param callable $callback
+     * @throws PhugException
+     * @return void
+     */
+    public function addFilter(string $name, callable $callback): void
     {
-        Phug::share([$name => $action]);
+        Phug::setFilter($name, $callback);
     }
 
     private function initializeConfigurations(array $configurations): void
@@ -77,18 +119,26 @@ class PugEngine
         $cacheDirectory = (isset($this->configurations['cache_directory']))
             ? (bool) $this->configurations['cache_directory']
             : self::DEFAULT_CONFIGURATIONS['cache_directory'];
-        Phug::setOption('cache_dir', $cacheEnabled ? $cacheDirectory : false);
+        $cacheUpdate = (isset($this->configurations['cache_update']))
+            ? (bool) $this->configurations['cache_update']
+            : self::DEFAULT_CONFIGURATIONS['cache_update'];
+        $this->options['cache_dir'] = $cacheEnabled ? $cacheDirectory : false;
+        $this->options['up_to_date_check'] = ($cacheUpdate == "always");
     }
 
-    /**
-     * @throws PhugException
-     */
     private function initializeDebug(): void
     {
         $debugEnabled = (isset($this->configurations['debug_enabled']))
             ? (bool) $this->configurations['debug_enabled']
             : self::DEFAULT_CONFIGURATIONS['debug_enabled'];
-        Phug::setOption('debug', $debugEnabled);
+        $this->options['debug'] = $debugEnabled;
+    }
+
+    private function initializeOptimizer(): void
+    {
+        $this->optimizerEnabled = (isset($this->configurations['optimizer_enabled']))
+            ? (bool) $this->configurations['optimizer_enabled']
+            : self::DEFAULT_CONFIGURATIONS['optimizer_enabled'];
     }
 
     /**
@@ -102,5 +152,10 @@ class PugEngine
         if ($jsEnabled) {
             Phug::addExtension(JsPhpizePhug::class);
         }
+    }
+
+    private function initializeDefaultSharedVariables(): void
+    {
+        $this->options['shared_variables'] = [];
     }
 }
