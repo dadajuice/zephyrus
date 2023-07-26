@@ -22,8 +22,6 @@ class PhpView extends View
             foreach ($args as $name => $value) {
                 $$name = $value;
             }
-            $flash = Flash::readAll();
-            $feedback = Feedback::readAll();
             include $this->getPath();
             $response = $this->buildResponse(ob_get_clean());
             Form::removeMemorizedValue();

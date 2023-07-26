@@ -4,6 +4,7 @@ use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Controller;
 use Zephyrus\Application\Feedback;
 use Zephyrus\Application\Flash;
+use Zephyrus\Application\Views\PugEngine;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\RequestFactory;
 use Zephyrus\Network\Response;
@@ -109,7 +110,10 @@ class ControllerRenderTest extends TestCase
             {
                 Flash::error("invalid");
                 Feedback::register(["email" => ["test"]]);
-                return parent::renderPhp('test3');
+                return parent::renderPhp('test3', [
+                    'flash' => Flash::readAll(),
+                    'feedback' => Feedback::readAll()
+                ]);
             }
         };
         ob_start();
@@ -131,6 +135,11 @@ class ControllerRenderTest extends TestCase
             {
                 Flash::error("invalid");
                 Feedback::register(["email" => ["test"]]);
+                $engine = new PugEngine(['cache_enabled' => false]);
+                $engine->share('pug_flash', function () {
+                    return Flash::readAll();
+                });
+                $this->setRenderEngine($engine);
                 return parent::render('test4');
             }
         };

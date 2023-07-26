@@ -1,14 +1,17 @@
 <?php namespace Zephyrus\Network\Responses;
 
 use Zephyrus\Application\Views\PhpView;
-use Zephyrus\Application\Views\PugView;
+use Zephyrus\Application\Views\PugEngine;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Response;
 
 trait RenderResponses
 {
+    private ?PugEngine $pugEngine = null;
+
     /**
-     * Renders the specified Pug view with corresponding arguments.
+     * Renders the specified view with corresponding arguments using the configured rendering engine. By default, the
+     * PugEngine is built if none specific is given.
      *
      * @param string $page
      * @param array $args
@@ -16,8 +19,10 @@ trait RenderResponses
      */
     public function render(string $page, array $args = []): Response
     {
-        $view = new PugView($page);
-        return $view->render($args);
+        if (is_null($this->pugEngine)) {
+            $this->pugEngine = new PugEngine();
+        }
+        return $this->pugEngine->buildView($page)->render($args);
     }
 
     /**
@@ -44,5 +49,16 @@ trait RenderResponses
         $response = new Response(ContentType::HTML, 200);
         $response->setContent($data);
         return $response;
+    }
+
+    /**
+     * Applies the rendering engine that should be used when calling the "render" method. As of now, only Pug is
+     * supported.
+     *
+     * @param PugEngine $engine
+     */
+    public function setRenderEngine(PugEngine $engine): void
+    {
+        $this->pugEngine = $engine;
     }
 }
