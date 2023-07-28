@@ -12,7 +12,7 @@ use stdClass;
  */
 class DatabaseStatement
 {
-    public const TYPE_INTEGER = ['LONGLONG', 'LONG', 'INTEGER', 'INT4'];
+    public const TYPE_INTEGER = ['LONGLONG', 'LONG', 'INTEGER', 'INT4', 'INT8'];
     public const TYPE_BOOLEAN = ['TINY', 'BOOL'];
     public const TYPE_FLOAT = ['NEWDECIMAL', 'FLOAT', 'DOUBLE', 'DECIMAL', 'NUMERIC', 'FLOAT8'];
 
@@ -144,7 +144,7 @@ class DatabaseStatement
      * @param string $pdoType
      * @return string|null
      */
-    private function getMetaCallback(string $pdoType): ?string
+    private function getMetaCallback(string $pdoType): mixed
     {
         if (in_array($pdoType, self::TYPE_INTEGER)) {
             return "intval";
@@ -157,6 +157,12 @@ class DatabaseStatement
         // @codeCoverageIgnoreEnd
         if (in_array($pdoType, self::TYPE_FLOAT)) {
             return "floatval";
+        }
+        if (str_starts_with($pdoType, "_")) {
+            return function ($value) {
+                $array = str_replace(array("{", "}"), "", $value);
+                return explode(",", $array);
+            };
         }
         return null;
     }

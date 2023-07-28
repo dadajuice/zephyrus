@@ -92,6 +92,15 @@ class DatabaseTest extends DatabaseTestCase
         self::assertTrue(is_int($result->id));
         self::assertEquals(20.56, $result->power);
         self::assertTrue(is_double($result->power));
+
+        $db->query("CREATE VIEW view_test as SELECT ARRAY(SELECT id FROM heroes) as hero_ids, ARRAY(SELECT name FROM heroes) as hero_names");
+        $res = $db->query("SELECT * FROM view_test");
+        $result = $res->next();
+        self::assertTrue(is_array($result->hero_ids));
+        self::assertTrue(is_array($result->hero_names));
+        self::assertEquals(1, $result->hero_ids[0]);
+        self::assertEquals("Batman", $result->hero_names[0]);
+        $db->query("DROP VIEW view_test");
     }
 
     public function testQueryDDLError()
