@@ -20,13 +20,10 @@ class ListSort
     {
         $sorts = empty($this->sorts) ? $this->defaultSorts : $this->sorts;
         $allowedFields = $this->whiteList;
-        $aliasColumns = $this->aliasColumns;
         $sorts = array_filter($sorts, function ($value, $field) use ($allowedFields) {
             return in_array($value, ['asc', 'desc']) && (!$allowedFields || in_array($field, $allowedFields));
         }, ARRAY_FILTER_USE_BOTH);
-        return array_map(function ($key) use ($aliasColumns) {
-            return $aliasColumns[$key] ?? $key;
-        }, $sorts);
+        return $this->updateAliasColumns($sorts);
     }
 
     public function setAliasColumns(array $aliasColumns): void
@@ -84,5 +81,24 @@ class ListSort
             ->removeArgumentEquals('page')
             ->removeArgumentStartsWith('sorts[')
             ->getArguments();
+    }
+
+    private function updateAliasColumns(array $sorts): array
+    {
+        foreach ($this->aliasColumns as $aliasColumn => $realColumn) {
+            $sorts = $this->updateAliasColumn($sorts, $aliasColumn, $realColumn);
+        }
+        return $sorts;
+    }
+
+    private function updateAliasColumn(array $array, string $oldKey, string $newKey): array
+    {
+        if (array_key_exists($oldKey, $array)) {
+            $oldKeyPosition = array_search($oldKey, array_keys($array));
+            $arrayKeys = array_keys($array);
+            $arrayKeys[$oldKeyPosition] = $newKey;
+            return array_combine($arrayKeys, $array);
+        }
+        return $array;
     }
 }
