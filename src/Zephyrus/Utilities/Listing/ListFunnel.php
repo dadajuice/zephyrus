@@ -97,7 +97,14 @@ class ListFunnel
 
     public function getSearchableColumns(): array
     {
-        return $this->searchableColumns;
+        $searchColumns = $this->searchableColumns;
+        foreach ($this->aliasColumns as $aliasColumn => $realColumn) {
+            if (in_array($aliasColumn, $searchColumns)) {
+                $oldKeyPosition = array_search($aliasColumn, $searchColumns);
+                $searchColumns[$oldKeyPosition] = $realColumn;
+            }
+        }
+        return $searchColumns;
     }
 
     public function getSearchQueryArguments(string $rawQueryString): array
@@ -146,7 +153,9 @@ class ListFunnel
             if ($this->whiteList && !in_array($column, $this->whiteList)) {
                 continue; // Ignore non-whitelisted fields
             }
-            $column = $this->aliasColumns[$column] ?? $column;
+            if (array_key_exists($column, $this->aliasColumns)) {
+                $column = $this->aliasColumns[$column];
+            }
             if (!isset($filters[$column])) {
                 $filters[$column] = [];
             }
