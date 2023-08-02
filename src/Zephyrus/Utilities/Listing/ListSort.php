@@ -16,14 +16,14 @@ class ListSort
         $this->sorts = $sorts;
     }
 
-    public function getSorts(): array
+    public function getSorts(bool $convertAlias = true): array
     {
         $sorts = empty($this->sorts) ? $this->defaultSorts : $this->sorts;
         $allowedFields = $this->whiteList;
         $sorts = array_filter($sorts, function ($value, $field) use ($allowedFields) {
             return in_array($value, ['asc', 'desc']) && (!$allowedFields || in_array($field, $allowedFields));
         }, ARRAY_FILTER_USE_BOTH);
-        return $this->updateAliasColumns($sorts);
+        return $convertAlias ? $this->updateAliasColumns($sorts) : $sorts;
     }
 
     public function setAliasColumns(array $aliasColumns): void
