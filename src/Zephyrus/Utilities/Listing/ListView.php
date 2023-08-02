@@ -143,12 +143,12 @@ class ListView
 
     public function getFilters(?string $column = null): array
     {
-        return $this->model?->getFunnel()->getFilters($column);
+        return $this->model?->getFunnel()->getFilters($column, false);
     }
 
     public function getSorts(): array
     {
-        return $this->model?->getSort()->getSorts();
+        return $this->model?->getSort()->getSorts(false);
     }
 
     public function getCurrentRowCount(): int

@@ -61,9 +61,9 @@ class ListFunnel
         return new SqlFunnelParser($this);
     }
 
-    public function getFilters(?string $columnName = null): array
+    public function getFilters(?string $columnName = null, bool $convertAlias = true): array
     {
-        $filters = $this->parseFilters($this->filters);
+        $filters = $this->parseFilters($this->filters, $convertAlias);
         if (is_null($columnName)) {
             return $filters;
         }
@@ -139,7 +139,7 @@ class ListFunnel
             ->getArguments();
     }
 
-    private function parseFilters(array $rawFilters): array
+    private function parseFilters(array $rawFilters, bool $convertAlias = true): array
     {
         $filters = [];
         foreach ($rawFilters as $columnFilter => $content) {
@@ -153,7 +153,7 @@ class ListFunnel
             if ($this->whiteList && !in_array($column, $this->whiteList)) {
                 continue; // Ignore non-whitelisted fields
             }
-            if (array_key_exists($column, $this->aliasColumns)) {
+            if ($convertAlias && array_key_exists($column, $this->aliasColumns)) {
                 $column = $this->aliasColumns[$column];
             }
             if (!isset($filters[$column])) {
