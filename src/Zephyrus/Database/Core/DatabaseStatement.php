@@ -160,7 +160,7 @@ class DatabaseStatement
         }
         if (str_starts_with($pdoType, "_")) {
             return function ($value) {
-                $array = str_replace(array("{", "}"), "", $value);
+                $array = str_replace(["{", "}"], "", $value);
                 return explode(",", $array);
             };
         }
