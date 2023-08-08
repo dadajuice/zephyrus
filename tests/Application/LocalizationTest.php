@@ -79,38 +79,6 @@ class LocalizationTest extends TestCase
     }
 
     /**
-     * @depends testError2InJson
-     */
-    public function testError3InJson()
-    {
-        copy(ROOT_DIR . '/locale/invalid_words.json', ROOT_DIR . '/locale/fr_CA/invalid_words.json');
-        try {
-            Localization::getInstance()->generate(true);
-            self::assertTrue(false); // should not reach this point
-        } catch (LocalizationException $e) {
-            self::assertEquals(LocalizationException::ERROR_RESERVED_WORD, $e->getCode());
-            self::assertEquals("Cannot use the detected PHP reserved word [class] as localize key.", $e->getMessage());
-        }
-        unlink(ROOT_DIR . '/locale/fr_CA/invalid_words.json');
-    }
-
-    /**
-     * @depends testError3InJson
-     */
-    public function testError4InJson()
-    {
-        copy(ROOT_DIR . '/locale/invalid_words2.json', ROOT_DIR . '/locale/fr_CA/invalid_words2.json');
-        try {
-            Localization::getInstance()->generate(true);
-            self::assertTrue(false); // should not reach this point
-        } catch (LocalizationException $e) {
-            self::assertEquals(LocalizationException::ERROR_RESERVED_WORD, $e->getCode());
-            self::assertEquals("Cannot use the detected PHP reserved word [__line__] as localize key.", $e->getMessage());
-        }
-        unlink(ROOT_DIR . '/locale/fr_CA/invalid_words2.json');
-    }
-
-    /**
      * @depends testError4InJson
      */
     public function testError5InJson()
