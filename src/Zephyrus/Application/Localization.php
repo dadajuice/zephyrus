@@ -403,7 +403,6 @@ class Localization
 
     private static function getLanguage(string $locale): stdClass
     {
-        $directory = new Directory(ROOT_DIR . '/locale/' . $locale);
         $parts = explode("_", $locale);
         return (object) [
             'locale' => $locale,
@@ -411,9 +410,7 @@ class Localization
             'country_code' => $parts[1],
             'flag_emoji' => self::getFlagEmoji($parts[1]),
             'country' => locale_get_display_region($locale),
-            'lang' => locale_get_display_language($locale),
-            'count' => count($directory->getFilenames()),
-            'size' => $directory->size()
+            'lang' => locale_get_display_language($locale)
         ];
     }
 
