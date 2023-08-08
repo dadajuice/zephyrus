@@ -128,7 +128,7 @@ class Localization
             }
         }
 
-        if (is_null($result)) { // Localize not found
+        if (is_null($result) || is_array($result)) { // Localize not found
             return $key;
         }
 
