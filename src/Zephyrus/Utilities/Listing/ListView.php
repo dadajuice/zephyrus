@@ -83,14 +83,14 @@ class ListView
     /**
      * @param string $label
      * @param string|null $sort
-     * @param string $align
+     * @param array $attributes
      */
-    public function addHeader(string $label, ?string $sort = null, string $align = ""): void
+    public function addHeader(string $label, ?string $sort = null, array $attributes = []): void
     {
         $this->headers[] = (object) [
             'title' => $label,
             'sort' => $sort,
-            'align' => $align
+            'attributes' => $attributes
         ];
     }
 
