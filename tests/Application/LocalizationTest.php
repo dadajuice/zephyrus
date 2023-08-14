@@ -9,7 +9,7 @@ class LocalizationTest extends TestCase
     public function testLocalize()
     {
         copy(ROOT_DIR . '/locale/routes.json', ROOT_DIR . '/locale/fr_CA/routes.json');
-        Localization::getInstance()->start(); // If test is standalone
+        Localization::getInstance()->start();
         self::assertEquals('fr_CA', Localization::getInstance()->getLoadedLocale());
         self::assertEquals('fr_CA', Localization::getInstance()->getLoadedLanguage()->locale);
         self::assertEquals('America/Montreal', date_default_timezone_get());
@@ -127,11 +127,11 @@ class LocalizationTest extends TestCase
 
     public function testInstalledLanguages()
     {
-        $languages = Localization::getInstalledLanguages();
+        $languages = Localization::getInstance()->getInstalledLanguages();
         self::assertEquals(2, count($languages));
-        self::assertEquals('en', $languages[0]->lang_code);
-        self::assertEquals('CA', $languages[0]->country_code);
-        self::assertEquals('fr', $languages[1]->lang_code);
+        self::assertEquals('en', $languages['en_CA']->lang_code);
+        self::assertEquals('CA', $languages['en_CA']->country_code);
+        self::assertEquals('fr', $languages['fr_CA']->lang_code);
     }
 
     private function removeDirectory($path)

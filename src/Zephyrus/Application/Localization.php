@@ -15,6 +15,28 @@ class Localization
      */
     private ?string $appLocale = null;
 
+    /**
+     * Keeps a global reference for future uses of the complete language properties of the installed locale.
+     *
+     * @var array
+     */
+    private array $installedLanguages = [];
+
+    /**
+     * Holds the currently installed locales. Fetches the /locale directory and see what directories are available.
+     *
+     * @var array
+     */
+    private array $installedLocales = [];
+
+    /**
+     * Contains the complete cached localize texts as associative arrays. The keys are the locale (e.g. en_CA) and the
+     * value is the whole associative array of localize keys.
+     *
+     * @var array
+     */
+    private array $cachedLocalizations = [];
+
     public static function getInstance(): self
     {
         if (is_null(self::$instance)) {
@@ -25,24 +47,14 @@ class Localization
 
     /**
      * Retrieves the list of all installed languages. Meaning all the directories under /locale. Will return an array
-     * of stdClass containing all the details for each language.
+     * of stdClass containing all the details for each language : locale, lang_code, country_code, flag_emoji, country,
+     * lang.
      *
      * @return stdClass[]
      */
-    public static function getInstalledLanguages(): array
+    public function getInstalledLanguages(): array
     {
-        $dirs = array_filter(glob(ROOT_DIR . '/locale/*'), 'is_dir');
-        array_walk($dirs, function (&$value) {
-            $value = basename($value);
-        });
-        $dirs = array_filter($dirs, function ($value) {
-            return $value != "cache";
-        });
-        $languages = [];
-        foreach ($dirs as $dir) {
-            $languages[] = self::getLanguage($dir);
-        }
-        return $languages;
+        return $this->installedLanguages;
     }
 
     /**
@@ -51,23 +63,20 @@ class Localization
      *
      * @return string[]
      */
-    public static function getInstalledLocales(): array
+    public function getInstalledLocales(): array
     {
-        $results = [];
-        foreach (self::getInstalledLanguages() as $language) {
-            $results[] = $language->locale;
-        }
-        return $results;
+        return $this->installedLocales;
     }
 
     /**
-     * Retrieves the actual loaded language. Will return an stdClass containing all the details.
+     * Retrieves the actual loaded language. Will return an stdClass containing all the details : locale, lang_code,
+     * country_code, flag_emoji, country, lang.
      *
      * @return stdClass
      */
     public function getLoadedLanguage(): stdClass
     {
-        return self::getLanguage($this->appLocale);
+        return $this->installedLanguages[$this->appLocale];
     }
 
     /**
@@ -82,6 +91,7 @@ class Localization
         $this->appLocale = $locale ?? Configuration::getLocaleConfiguration('language');
         $this->initializeLocale();
         $this->generate();
+        $this->initializeCache();
     }
 
     /**
@@ -103,12 +113,12 @@ class Localization
         $locale = $this->appLocale;
         $segments = explode(".", $key);
         $localizeIdentifier = $segments[0];
-        if (in_array($localizeIdentifier, self::getInstalledLocales())) {
+        if (in_array($localizeIdentifier, $this->getInstalledLocales())) {
             $locale = $localizeIdentifier;
             array_shift($segments);
         }
 
-        $keys = require ROOT_DIR . "/locale/cache/$locale/generated.php";
+        $keys = $this->cachedLocalizations[$locale];
         $result = null;
         foreach ($segments as $segment) {
             if (is_array($result)) {
@@ -128,7 +138,7 @@ class Localization
             }
         }
 
-        if (is_null($result) || is_array($result)) { // Localize not found
+        if (is_null($result) || is_array($result)) {
             return $key;
         }
 
@@ -146,7 +156,7 @@ class Localization
      */
     public function generate(bool $force = false): void
     {
-        foreach (self::getInstalledLocales() as $locale) {
+        foreach ($this->installedLocales as $locale) {
             if ($force || $this->prepareCache($locale) || $this->isCacheOutdated($locale)) {
                 $this->generateCache($locale);
             }
@@ -253,8 +263,17 @@ class Localization
         date_default_timezone_set(Configuration::getLocaleConfiguration('timezone'));
     }
 
+    private function initializeCache(): void
+    {
+        foreach ($this->installedLocales as $locale) {
+            $this->cachedLocalizations[$locale] = require ROOT_DIR . "/locale/cache/$locale/generated.php";
+        }
+    }
+
     private function __construct()
     {
+        $this->buildInstalledLanguages();
+        $this->buildInstalledLocales();
     }
 
     /**
@@ -270,30 +289,51 @@ class Localization
         }
     }
 
-    private static function getLanguage(string $locale): stdClass
-    {
-        $parts = explode("_", $locale);
-        return (object) [
-            'locale' => $locale,
-            'lang_code' => $parts[0],
-            'country_code' => $parts[1],
-            'flag_emoji' => self::getFlagEmoji($parts[1]),
-            'country' => locale_get_display_region($locale),
-            'lang' => locale_get_display_language($locale)
-        ];
-    }
-
     /**
      * Converts the 2 letters country code into the corresponding flag emoji.
      *
      * @param string $countryCode
      * @return string
      */
-    private static function getFlagEmoji(string $countryCode): string
+    private function getFlagEmoji(string $countryCode): string
     {
         $codePoints = array_map(function ($char) {
             return 127397 + ord($char);
         }, str_split(strtoupper($countryCode)));
         return mb_convert_encoding('&#' . implode(';&#', $codePoints) . ';', 'UTF-8', 'HTML-ENTITIES');
+    }
+
+    private function buildInstalledLocales(): void
+    {
+        $this->installedLocales = array_keys($this->installedLanguages);
+    }
+
+    private function buildInstalledLanguages(): void
+    {
+        $dirs = array_filter(glob(ROOT_DIR . '/locale/*'), 'is_dir');
+        array_walk($dirs, function (&$value) {
+            $value = basename($value);
+        });
+        $dirs = array_filter($dirs, function ($value) {
+            return $value != "cache";
+        });
+        $languages = [];
+        foreach ($dirs as $dir) {
+            $languages[$dir] = $this->buildLanguage($dir);
+        }
+        $this->installedLanguages = $languages;
+    }
+
+    private function buildLanguage(string $locale): stdClass
+    {
+        $parts = explode("_", $locale);
+        return (object) [
+            'locale' => $locale,
+            'lang_code' => $parts[0],
+            'country_code' => $parts[1],
+            'flag_emoji' => $this->getFlagEmoji($parts[1]),
+            'country' => locale_get_display_region($locale),
+            'lang' => locale_get_display_language($locale)
+        ];
     }
 }

@@ -83,14 +83,14 @@ class ListView
     /**
      * @param string $label
      * @param string|null $sort
-     * @param string $align
+     * @param array $attributes
      */
-    public function addHeader(string $label, ?string $sort = null, string $align = ""): void
+    public function addHeader(string $label, ?string $sort = null, array $attributes = []): void
     {
         $this->headers[] = (object) [
             'title' => $label,
             'sort' => $sort,
-            'align' => $align
+            'attributes' => $attributes
         ];
     }
 
@@ -118,22 +118,22 @@ class ListView
 
     public function getCurrentPage(): int
     {
-        return $this->model?->getPagination()->getCurrentPage();
+        return $this->model?->getPagination()->getCurrentPage() ?? 1;
     }
 
     public function getMaxPage(): int
     {
-        return $this->model?->getPagination()->getMaxPage($this->count);
+        return $this->model?->getPagination()->getMaxPage($this->count) ?? 0;
     }
 
     public function getLimit(): int
     {
-        return $this->model?->getPagination()->getLimit();
+        return $this->model?->getPagination()->getLimit() ?? 0;
     }
 
     public function getMaxLimit(): int
     {
-        return $this->model?->getPagination()->getMaxLimit();
+        return $this->model?->getPagination()->getMaxLimit() ?? 0;
     }
 
     public function getSearch(): ?string
@@ -143,12 +143,12 @@ class ListView
 
     public function getFilters(?string $column = null): array
     {
-        return $this->model?->getFunnel()->getFilters($column, false);
+        return $this->model?->getFunnel()->getFilters($column, false) ?? [];
     }
 
     public function getSorts(): array
     {
-        return $this->model?->getSort()->getSorts(false);
+        return $this->model?->getSort()->getSorts(false) ?? [];
     }
 
     public function getCurrentRowCount(): int
