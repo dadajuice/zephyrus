@@ -142,8 +142,31 @@ class Localization
             return $key;
         }
 
+        $sprintfParameters = [];
+        $namedParameters = [];
+        foreach ($args as $index => $arg) {
+            if (is_array($arg)) { // When used from localize function, it will be an array
+                foreach ($arg as $innerIndex => $innerArg) {
+                    if (is_string($innerIndex)) {
+                        $namedParameters[$innerIndex] = $innerArg;
+                    } else {
+                        $sprintfParameters[] = $innerArg;
+                    }
+                }
+            }
+            if (is_string($index)) {
+                $namedParameters[$index] = $arg;
+            } else {
+                $sprintfParameters[] = $arg;
+            }
+        }
+
+        foreach ($namedParameters as $index => $arg) {
+            $result = str_replace('{' . $index . '}', $arg ?? "", $result);
+        }
+
         $parameters[] = $result;
-        return call_user_func_array('sprintf', array_merge($parameters, $args));
+        return call_user_func_array('sprintf', array_merge($parameters, $sprintfParameters));
     }
 
     /**
