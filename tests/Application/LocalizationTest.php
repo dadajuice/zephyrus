@@ -22,6 +22,7 @@ class LocalizationTest extends TestCase
         self::assertEquals("/admin", Localization::getInstance()->localize("routes.administration")); // subfolder test
         self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", localize("messages.success.add_user", "martin"));
         self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", __("L'utilisateur [%s] a été ajouté avec succès", 'martin'));
+        self::assertEquals("/no/key/3", Localization::getInstance()->localize("/no/%s/{id}", ['id' => 3, 'key']));
 
         // Rest should be english
         Localization::getInstance()->changeLanguage("en_CA");
