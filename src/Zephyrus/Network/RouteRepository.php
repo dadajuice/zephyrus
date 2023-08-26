@@ -1,7 +1,5 @@
 <?php namespace Zephyrus\Network;
 
-use ReflectionClass;
-use ReflectionException;
 use Zephyrus\Utilities\Cache;
 
 class RouteRepository
@@ -24,18 +22,6 @@ class RouteRepository
     public function __construct()
     {
 
-    }
-
-    public function initializeFromControllers(): void
-    {
-        foreach (recursiveGlob(ROOT_DIR . '/app/Controllers/*.php') as $file) {
-            $reflection = $this->fileToReflectionClass($file);
-            if ($reflection->implementsInterface('Zephyrus\Network\Routable') && !$reflection->isAbstract()) {
-                $controllerInstance = $reflection->newInstance();
-                $controllerInstance->setRouteRepository($this);
-                $controllerInstance->initializeRoutes();
-            }
-        }
     }
 
     public function getRoutes(?string $forHttpMethod = null): array
@@ -164,23 +150,5 @@ class RouteRepository
             'callback' => (is_array($callback)) ? null : $callback,
             'acceptedRequestFormats' => $acceptedFormats
         ];
-    }
-
-    /**
-     * Builds a ReflectionClass instance from a given file path. Should normally be a controller instance in this
-     * context.
-     *
-     * @param string $file
-     * @throws ReflectionException
-     * @return ReflectionClass
-     */
-    private function fileToReflectionClass(string $file): ReflectionClass
-    {
-        $appPosition = strpos($file, '/app/');
-        $file = substr($file, $appPosition + 5);
-        $file = str_replace('../app/', '', $file);
-        $file = str_replace(DIRECTORY_SEPARATOR, '\\', $file);
-        $file = str_replace('.php', '', $file);
-        return new ReflectionClass($file);
     }
 }

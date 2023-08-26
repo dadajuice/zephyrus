@@ -1,6 +1,8 @@
 <?php namespace Zephyrus\Application;
 
 use InvalidArgumentException;
+use ReflectionClass;
+use ReflectionMethod;
 use RuntimeException;
 use Zephyrus\Exceptions\RouteArgumentException;
 use Zephyrus\Network\ContentType;
@@ -12,10 +14,14 @@ use Zephyrus\Network\Responses\RenderResponses;
 use Zephyrus\Network\Responses\StreamResponses;
 use Zephyrus\Network\Responses\SuccessResponse;
 use Zephyrus\Network\Responses\XmlResponses;
-use Zephyrus\Network\Routable;
+use Zephyrus\Network\Router\Delete;
+use Zephyrus\Network\Router\Get;
+use Zephyrus\Network\Router\Patch;
+use Zephyrus\Network\Router\Post;
+use Zephyrus\Network\Router\Put;
 use Zephyrus\Network\RouteRepository;
 
-abstract class Controller implements Routable
+abstract class Controller
 {
     protected ?Request $request = null;
     private ?RouteRepository $repository = null;
@@ -29,10 +35,45 @@ abstract class Controller implements Routable
     use XmlResponses;
     use DownloadResponses;
 
-//    public function __construct(Request $request)
-//    {
-//        $this->request = &$request;
-//    }
+    /**
+     * Defines all the routes supported by this controller associated with inner methods.
+     */
+    public function initializeRoutes(): void
+    {
+
+    }
+
+    public function initializeRoutesFromAttributes(RouteRepository $repository): void
+    {
+        $reflection = new ReflectionClass($this);
+        $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
+        $supportedAttributes = [Get::class, Post::class, Put::class, Patch::class, Delete::class];
+        foreach ($methods as $method) {
+            $attributes = $method->getAttributes();
+            foreach ($attributes as $attribute) {
+                if (in_array($attribute->getName(), $supportedAttributes)) {
+                    $instance = $attribute->newInstance();
+                }
+                switch ($attribute->getName()) {
+                    case Get::class:
+                        $repository->get($instance->getRoute(), [$this, $method->name]);
+                        break;
+                    case Post::class:
+                        $repository->post($instance->getRoute(), [$this, $method->name]);
+                        break;
+                    case Put::class:
+                        $repository->put($instance->getRoute(), [$this, $method->name]);
+                        break;
+                    case Patch::class:
+                        $repository->patch($instance->getRoute(), [$this, $method->name]);
+                        break;
+                    case Delete::class:
+                        $repository->delete($instance->getRoute(), [$this, $method->name]);
+                        break;
+                }
+            }
+        }
+    }
 
     /**
      * Applies the route collection instance to be used with the inner get, post, put, patch and delete method. These
