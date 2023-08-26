@@ -5,7 +5,6 @@ use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Exceptions\UnauthorizedAccessException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Response;
-use Zephyrus\Network\Router;
 
 abstract class Controller extends \Zephyrus\Application\Controller
 {
@@ -14,14 +13,7 @@ abstract class Controller extends \Zephyrus\Application\Controller
     private Authorization $authorization;
     private IntrusionDetection $ids;
 
-    public function __construct(Router $router)
-    {
-        parent::__construct($router);
-        $this->csrfGuard = new CsrfGuard($this->request);
-        $this->authorization = new Authorization($this->request);
-        $this->secureHeader = new SecureHeader();
-        $this->ids = new IntrusionDetection($this->request);
-    }
+    public abstract function setupSecurity(): void;
 
     /**
      * @throws UnauthorizedAccessException
@@ -30,6 +22,8 @@ abstract class Controller extends \Zephyrus\Application\Controller
      */
     public function before(): ?Response
     {
+        $this->initializeSecurity();
+        $this->setupSecurity();
         $failedRequirements = [];
         if (!$this->authorization->isAuthorized($this->request->getUri()->getPath(), $failedRequirements)) {
             throw new UnauthorizedAccessException($this->request->getUri()->getPath(), $failedRequirements);
@@ -86,5 +80,13 @@ abstract class Controller extends \Zephyrus\Application\Controller
     public function getSecureHeader(): SecureHeader
     {
         return $this->secureHeader;
+    }
+
+    private function initializeSecurity(): void
+    {
+        $this->csrfGuard = new CsrfGuard($this->request);
+        $this->authorization = new Authorization($this->request);
+        $this->secureHeader = new SecureHeader();
+        $this->ids = new IntrusionDetection($this->request);
     }
 }

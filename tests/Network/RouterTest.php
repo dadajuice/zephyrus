@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Tests\Network;
 
 use PHPUnit\Framework\TestCase;
+use Zephyrus\Network\ResponseFactory;
 use Zephyrus\Network\Router;
 use Zephyrus\Exceptions\RouteMethodUnsupportedException;
 use Zephyrus\Exceptions\RouteNotAcceptedException;
@@ -8,97 +9,99 @@ use Zephyrus\Exceptions\RouteNotFoundException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
+use Zephyrus\Network\RouteRepository;
 
 class RouterTest extends TestCase
 {
     public function testSimpleGetHome()
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionCode(501);
         $req = new Request('http://test.local/', 'GET');
-        $router = new Router();
-        $ref = $this;
-        $router->get('/', function() use ($ref) {
-            throw new \Exception('success', 501);
+        $repository = new RouteRepository();
+        $repository->get('/', function() {
+            return ResponseFactory::getInstance()->plain("success");
         });
-        $router->run($req);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals("success", $response->getContent());
     }
 
     public function testSimpleGetResponse()
     {
         $req = new Request('http://test.local/', 'GET');
-        $router = new Router();
-        $router->get('/', function() {
+        $repository = new RouteRepository();
+        $repository->get('/', function() {
             $response = new Response();
             $response->setContent('test');
             return $response;
         });
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        $this->assertEquals('test', $output);
+        $response = (new Router($repository))->resolve($req);
+        $this->assertEquals('test', $response->getContent());
     }
 
     public function testSimpleGet()
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionCode(500);
+        $repository = new RouteRepository();
         $req = new Request('http://test.local/bob', 'GET');
-        $router = new Router();
-        $router->get('/bob', function() {
-            throw new \Exception('success', 500);
+        $repository->get('/bob', function() {
+            $response = new Response();
+            $response->setContent('test');
+            return $response;
         });
-        $router->run($req);
+        $response = (new Router($repository))->resolve($req);
+        $this->assertEquals('test', $response->getContent());
     }
 
     public function testParameterGet()
     {
+        $repository = new RouteRepository();
         $req = new Request('http://test.local/bob/3', 'GET');
-        $router = new Router();
+
         $ref = $this;
-        $router->get('/bob/{id}', function($id) use ($ref, $req) {
+        $repository->get('/bob/{id}', function($id) use ($ref, $req) {
             $ref->assertEquals('3', $id);
             $ref->assertEquals('3', $req->getArgument('id'));
         });
-        $router->run($req);
+        (new Router($repository))->resolve($req);
     }
 
     public function testGetRequest()
     {
+        $repository = new RouteRepository();
         $req = new Request('http://test.local/bob/3', 'GET');
-        $router = new Router();
+        $router = new Router($repository);
         $ref = $this;
-        $router->get('/bob/{id}', function($id) use ($ref, $router) {
+        $repository->get('/bob/{id}', function($id) use ($ref, $router) {
             $ref->assertEquals('3', $id);
             $ref->assertEquals('3', $router->getRequest()->getArgument('id'));
         });
-        $router->run($req);
+        $router->resolve($req);
     }
 
     public function testGetRequestWithLeadingSlash()
     {
+        $repository = new RouteRepository();
         $req = new Request('http://test.local/bob/3/', 'GET');
-        $router = new Router();
+        $router = new Router($repository);
         $ref = $this;
-        $router->get('/bob/{id}', function($id) use ($ref, $router) {
+        $repository->get('/bob/{id}', function($id) use ($ref, $router) {
             $ref->assertEquals('3', $id);
             $ref->assertEquals('3', $router->getRequest()->getArgument('id'));
         });
-        $router->run($req);
+        $router->resolve($req);
     }
 
     public function testMultipleGetRequest()
     {
+        $repository = new RouteRepository();
         $req = new Request('http://test.local/bob/3/8', 'GET');
-        $router = new Router();
+        $router = new Router($repository);
         $ref = $this;
-        $router->get('/bob/{id}/{id2}', function($id, $id2) use ($ref, $router) {
+        $repository->get('/bob/{id}/{id2}', function($id, $id2) use ($ref, $router) {
             $ref->assertEquals('3', $id);
             $ref->assertEquals('8', $id2);
             $ref->assertEquals('3', $router->getRequest()->getArgument('id'));
             $ref->assertEquals('8', $router->getRequest()->getArgument('id2'));
         });
-        $router->run($req);
+        $router->resolve($req);
     }
 
     public function testAccept()
@@ -110,11 +113,12 @@ class RouterTest extends TestCase
         $req = new Request('http://test.local/bob', 'GET', [
             'server' => $server
         ]);
-        $router = new Router();
-        $router->get('/bob', function() {
+        $repository = new RouteRepository();
+        $router = new Router($repository);
+        $repository->get('/bob', function() {
             throw new \Exception('success', 500);
         }, ContentType::JSON);
-        $router->run($req);
+        $router->resolve($req);
     }
 
     public function testRouteNotAcceptedException()
@@ -125,11 +129,12 @@ class RouterTest extends TestCase
         $req = new Request('http://test.local/bob', 'GET', [
             'server' => $server
         ]);
-        $router = new Router();
-        $router->get('/bob', function() {
+        $repository = new RouteRepository();
+        $router = new Router($repository);
+        $repository->get('/bob', function() {
 
         }, [ContentType::JSON]);
-        $router->run($req);
+        $router->resolve($req);
     }
 
     public function testRouteNotAcceptedCatch()
@@ -140,11 +145,12 @@ class RouterTest extends TestCase
             $req = new Request('http://test.local/bob', 'GET', [
                 'server' => $server
             ]);
-            $router = new Router();
-            $router->get('/bob', function() {
+            $repository = new RouteRepository();
+            $router = new Router($repository);
+            $repository->get('/bob', function() {
 
             }, [ContentType::JSON]);
-            $router->run($req);
+            $router->resolve($req);
         } catch (RouteNotAcceptedException $e) {
             self::assertEquals(ContentType::HTML, $e->getAccept());
         }
@@ -159,27 +165,30 @@ class RouterTest extends TestCase
         $req = new Request('http://test.local/bob', 'GET', [
             'server' => $server
         ]);
-        $router = new Router();
-        $router->get('/bob', function() {
+        $repository = new RouteRepository();
+        $router = new Router($repository);
+        $repository->get('/bob', function() {
             throw new \Exception('success', 500);
         }, [ContentType::JSON, ContentType::HTML]);
-        $router->run($req);
+        $router->resolve($req);
     }
 
     public function testInvalidRouteMethod()
     {
         $this->expectException(RouteMethodUnsupportedException::class);
         $req = new Request('http://test.local/bob/3', 'INV');
-        $router = new Router();
-        $router->run($req);
+        $repository = new RouteRepository();
+        $router = new Router($repository);
+        $router->resolve($req);
     }
 
     public function testInvalidRouteMethodCatch()
     {
         try {
             $req = new Request('http://test.local/bob/3', 'INV');
-            $router = new Router();
-            $router->run($req);
+            $repository = new RouteRepository();
+            $router = new Router($repository);
+            $router->resolve($req);
         } catch (RouteMethodUnsupportedException $e) {
             self::assertEquals('INV', $e->getMethod());
         }
@@ -188,17 +197,19 @@ class RouterTest extends TestCase
     public function testInvalidRoute()
     {
         $this->expectException(RouteNotFoundException::class);
+        $repository = new RouteRepository();
         $req = new Request('http://test.local/bob/3', 'GET');
-        $router = new Router();
-        $router->run($req);
+        $router = new Router($repository);
+        $router->resolve($req);
     }
 
     public function testInvalidRouteCatch()
     {
         try {
             $req = new Request('http://test.local/bob/3', 'GET');
-            $router = new Router();
-            $router->run($req);
+            $repository = new RouteRepository();
+            $router = new Router($repository);
+            $router->resolve($req);
         } catch (RouteNotFoundException $e) {
             self::assertEquals('GET', $e->getMethod());
             self::assertEquals('/bob/3', $e->getUri());
@@ -209,44 +220,45 @@ class RouterTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $req = new Request('http://test.local/bob/3/5', 'GET');
-        $router = new Router();
-        $router->get('/bob/{id}/{id}', function() {
+        $repository = new RouteRepository();
+        $router = new Router($repository);
+        $repository->get('/bob/{id}/{id}', function() {
             throw new \Exception('success', 500);
         });
-        $router->run($req);
+        $router->resolve($req);
     }
 
     public function testRouteNotFoundException()
     {
         $this->expectException(RouteNotFoundException::class);
         $req = new Request('http://test.local/sdfgg', 'GET');
-        $router = new Router();
-        $router->get('/bob', function() {
+        $repository = new RouteRepository();
+        $router = new Router($repository);
+        $repository->get('/bob', function() {
         });
-        $router->run($req);
+        $router->resolve($req);
     }
 
     public function testRouteConflictOrder()
     {
         $req = new Request('http://test.local/test/test', 'GET');
-        $router = new Router();
+        $repository = new RouteRepository();
+        $router = new Router($repository);
 
-        $router->get('/test/{id}', function($id) {
+        $repository->get('/test/{id}', function($id) {
             $response = new Response();
             $response->setContent('test1');
             return $response;
 
         });
-        $router->get('/test/test', function() {
+        $repository->get('/test/test', function() {
             $response = new Response();
             $response->setContent('test2');
             return $response;
 
         });
 
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals("test2", $output);
+        $response = $router->resolve($req);
+        self::assertEquals("test2", $response->getContent());
     }
 }

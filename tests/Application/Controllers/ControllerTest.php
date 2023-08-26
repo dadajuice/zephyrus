@@ -5,15 +5,16 @@ use Zephyrus\Application\Controller;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router;
+use Zephyrus\Network\RouteRepository;
 
 class ControllerTest extends TestCase
 {
     public function testGetRouting()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
                 parent::get('/', 'index');
             }
@@ -23,20 +24,19 @@ class ControllerTest extends TestCase
                 return $this->html('test');
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('test', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('test', $response->getContent());
     }
 
     public function testBeforeMiddleware()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
                 parent::get('/', 'index');
             }
@@ -51,20 +51,19 @@ class ControllerTest extends TestCase
                 return $this->html('test html');
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('{"test":"success"}', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('{"test":"success"}', $response->getContent());
     }
 
     public function testAfterMiddleware()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
                 parent::get('/', 'index');
             }
@@ -79,112 +78,107 @@ class ControllerTest extends TestCase
                 return $this->html('test html');
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('{"test":"success"}', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('{"test":"success"}', $response->getContent());
     }
 
     public function testGetRoutingWithParameter()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
                 parent::get('/bob/{id}', 'index');
             }
 
             public function index($id)
             {
-                echo 'test' . $id;
+                return $this->plain('test' . $id);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/bob/4', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('test4', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('test4', $response->getContent());
     }
 
     public function testPostRouting()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
                 parent::post('/insert', 'insert');
             }
 
             public function insert()
             {
-                echo 'test';
+                return $this->plain('test');
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/insert', 'post');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('test', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('test', $response->getContent());
     }
 
     public function testPutRouting()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
                 parent::put('/update', 'update');
             }
 
             public function update()
             {
-                echo 'test';
+                return $this->plain('test');
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/update', 'put');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('test', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('test', $response->getContent());
     }
 
     public function testPatchRouting()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
                 parent::patch('/update', 'update');
             }
 
             public function update()
             {
-                echo 'test';
+                return $this->plain('test');
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/update', 'patch');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('test', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('test', $response->getContent());
     }
 
     public function testDeleteRouting()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
                 parent::delete('/delete', 'remove');
             }
@@ -192,23 +186,22 @@ class ControllerTest extends TestCase
             public function remove()
             {
                 $t = $this->request->getParameter('t');
-                echo 'test' . $t;
+                return $this->plain('test' . $t);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/delete', 'delete', ['parameters' => ['t' => '4']]);
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('test4', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('test4', $response->getContent());
     }
 
     public function testBuildForm()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
                 parent::delete('/delete', 'remove');
             }
@@ -217,25 +210,24 @@ class ControllerTest extends TestCase
             {
                 $form = parent::buildForm();
                 $t = $form->getValue('t');
-                echo 'test' . $t;
+                return $this->plain('test' . $t);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/delete', 'delete', [
             'parameters' => ['t' => '4']
         ]);
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('test4', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('test4', $response->getContent());
     }
 
     public function testBuildFormWithArguments()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
                 parent::get('/users/{id}', 'read');
             }
@@ -245,16 +237,15 @@ class ControllerTest extends TestCase
                 $form = parent::buildForm(true);
                 $t = $form->getValue('t');
                 $id = $form->getValue('id');
-                echo 'test' . $t . $id;
+                return $this->plain('test' . $t . $id);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users/99?t=4', 'get', [
             'parameters' => ['t' => '4']
         ]);
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('test499', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('test499', $response->getContent());
     }
 }

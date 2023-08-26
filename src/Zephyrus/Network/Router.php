@@ -14,41 +14,58 @@ class Router
     private const SUPPORTED_HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
     /**
-     * @var stdClass[] Associative array that contains all defined routes
+     * HTTP method associated with current request.
+     *
+     * @var string
      */
-    private $routes = [];
+    private string $requestedMethod;
 
     /**
-     * @var string HTTP method associated with current request
+     * Complete uri request.
+     *
+     * @var string
      */
-    private $requestedMethod;
+    private string $requestedUri;
 
     /**
-     * @var string Complete uri request
+     * HTTP accept directive specified by the client.
+     *
+     * @var array
      */
-    private $requestedUri;
+    private array $requestedRepresentations;
 
     /**
-     * @var array HTTP accept directive specified by the client
-     */
-    private $requestedRepresentations;
-
-    /**
+     * Holds the current HTTP request that must be resolved.
+     *
      * @var Request
      */
-    private $request;
+    private Request $request;
 
     /**
-     * Launch the routing process to determine, according to the initiated request, the best route to execute. Cannot be
-     * overridden to ensure proper functionality.
+     * Contains the listing of every available routes for the application.
+     *
+     * @var RouteRepository
+     */
+    private RouteRepository $routeRepository;
+
+    public function __construct(RouteRepository $routeRepository)
+    {
+        $this->routeRepository = $routeRepository;
+    }
+
+    /**
+     * Launch the routing process to resolve, according to the initiated request, the best route to execute. Cannot be
+     * overridden to ensure proper functionality. Will return a proper Response instance if the method is able to
+     * properly resolve the requested route. Returns null otherwise.
      *
      * @param Request $request
-     * @throws RouteNotFoundException
+     * @return Response|null
+     * @throws RouteArgumentException
      * @throws RouteMethodUnsupportedException
      * @throws RouteNotAcceptedException
-     * @throws RouteArgumentException
+     * @throws RouteNotFoundException
      */
-    final public function run(Request $request)
+    final public function resolve(Request $request): ?Response
     {
         $this->request = $request;
         $path = $this->request->getUri()->getPath();
@@ -57,7 +74,7 @@ class Router
         $this->requestedRepresentations = $this->request->getAcceptedRepresentations();
         $this->verifyRequestMethod();
         $route = $this->findRouteFromRequest();
-        $this->prepareResponse($route);
+        return $this->prepareResponse($route);
     }
 
     /**
@@ -65,112 +82,25 @@ class Router
      *
      * @return Request
      */
-    final public function &getRequest()
+    final public function &getRequest(): Request
     {
         return $this->request;
     }
 
     /**
-     * Adds a new GET route for the application. The GET method must be used to represent a specific resource (or
-     * collection) in some representational format (HTML, JSON, XML, ...). Normally, a GET request must only present
-     * data and not alter them in any way.
+     * Retrieves the route repository containing all the route definition for the application.
      *
-     * E.g. GET /books
-     *      GET /book/{id}
-     *
-     * @param string $uri
-     * @param callable $callback
-     * @param string | array $acceptedFormats
+     * @return RouteRepository
      */
-    public function get(string $uri, $callback, $acceptedFormats = ContentType::ANY)
+    final public function getRepository(): RouteRepository
     {
-        $this->addRoute('GET', $uri, $callback, $acceptedFormats);
-    }
-
-    /**
-     * Adds a new POST route for the application. The POST method must be used to create a new entry in a collection. It
-     * is rarely used on a specific resource.
-     *
-     * E.g. POST /books
-     *
-     * @param string $uri
-     * @param callable $callback
-     * @param string | array $acceptedFormats
-     */
-    public function post(string $uri, $callback, $acceptedFormats = ContentType::ANY)
-    {
-        $this->addRoute('POST', $uri, $callback, $acceptedFormats);
-    }
-
-    /**
-     * Adds a new PUT route for the application. The PUT method must be used to update a specific resource or
-     * collection and must be considered idempotent.
-     *
-     * E.g. PUT /book/{id}
-     *
-     * @param string $uri
-     * @param callable $callback
-     * @param string | array $acceptedFormats
-     */
-    public function put(string $uri, $callback, $acceptedFormats = ContentType::ANY)
-    {
-        $this->addRoute('PUT', $uri, $callback, $acceptedFormats);
-    }
-
-    /**
-     * Adds a new PATCH route for the application. The PATCH method must be used to update a specific resource or
-     * collection and must be considered idempotent. Should be used instead of PUT when it is possible to update only
-     * given fields to update and not the entire resource.
-     *
-     * E.g. PATCH /book/{id}
-     *
-     * @param string $uri
-     * @param callable $callback
-     * @param string | array $acceptedFormats
-     */
-    public function patch(string $uri, $callback, $acceptedFormats = ContentType::ANY)
-    {
-        $this->addRoute('PATCH', $uri, $callback, $acceptedFormats);
-    }
-
-    /**
-     * Adds a new DELETE route for the application. The DELETE method must be used only to delete a specific resource or
-     * collection and must be considered idempotent.
-     *
-     * E.g. DELETE /book/{id}
-     *      DELETE /books
-     *
-     * @param string $uri
-     * @param callable $callback
-     * @param string | array $acceptedFormats
-     */
-    public function delete(string $uri, $callback, $acceptedFormats = ContentType::ANY)
-    {
-        $this->addRoute('DELETE', $uri, $callback, $acceptedFormats);
-    }
-
-    /**
-     * Adds a new route for the application. Make sure to create the adequate structure with corresponding parameters
-     * regex pattern if needed.
-     *
-     * @param string $method
-     * @param string $uri
-     * @param callable $callback
-     * @param string | array $acceptedFormats
-     */
-    private function addRoute($method, $uri, $callback, $acceptedFormats)
-    {
-        $this->routes[$method][] = (object) [
-            'route' => new Route($uri),
-            'callback' => $callback,
-            'acceptedRequestFormats' => $acceptedFormats
-        ];
+        return $this->routeRepository;
     }
 
     /**
      * Finds a route corresponding to the client request. Matches direct URIs and parametrised URIs. When a match is
      * found, there's a last verification to check if the route is accepted. The first route to properly match the
-     * request is then returned. Hence the need to declare routes in correct order.
+     * request is then returned. Hence, the need to declare routes in correct order.
      *
      * @throws RouteNotFoundException
      * @throws RouteNotAcceptedException
@@ -178,27 +108,15 @@ class Router
      */
     private function findRouteFromRequest(): stdClass
     {
-        $routes = $this->routes[$this->requestedMethod];
-        $matchingRoutes = [];
-        foreach ($routes as $routeDefinition) {
-            if ($routeDefinition->route->match($this->requestedUri)) {
-                $matchingRoutes[] = $routeDefinition;
-            }
-        }
+        $matchingRoutes = $this->routeRepository->findRoutes($this->requestedMethod, $this->requestedUri);
         if (empty($matchingRoutes)) {
             throw new RouteNotFoundException($this->requestedUri, $this->requestedMethod);
         }
-
-        usort($matchingRoutes, function ($a, $b) {
-            return strcmp($a->route->getUri(), $b->route->getUri());
-        });
-
         foreach ($matchingRoutes as $routeDefinition) {
             if ($this->isRequestAcceptedForRoute($routeDefinition)) {
                 return $routeDefinition;
             }
         }
-
         throw new RouteNotAcceptedException($this->request->getAccept());
     }
 
@@ -208,7 +126,7 @@ class Router
      * @param stdClass $route
      * @return bool
      */
-    private function isRequestAcceptedForRoute(stdClass $route)
+    private function isRequestAcceptedForRoute(stdClass $route): bool
     {
         if (empty($this->requestedRepresentations)) {
             return true;
@@ -230,16 +148,14 @@ class Router
      * been executed. Makes sure to load the route parameters which could be used inside the callback function.
      *
      * @param stdClass $route
+     * @return Response|null
      * @throws RouteArgumentException
      */
-    private function prepareResponse(stdClass $route)
+    private function prepareResponse(stdClass $route): ?Response
     {
         $arguments = $route->route->getArguments($this->requestedUri);
         $this->loadRequestArguments($arguments);
-        $response = $this->createResponse($route, $arguments);
-        if (!is_null($response)) {
-            $response->send();
-        }
+        return $this->createResponse($route, $arguments);
     }
 
     /**
@@ -253,7 +169,15 @@ class Router
      */
     private function createResponse(stdClass $route, array $arguments): ?Response
     {
-        $controller = $this->getRouteControllerInstance($route);
+        // Simple callback execution
+        if (!is_null($route->callback)) {
+            $callback = new Callback($route->callback);
+            $arguments = $this->getFunctionArguments($callback->getReflection(), array_values($arguments));
+            return $callback->executeArray($arguments);
+        }
+
+        $controller = new $route->controllerClass();
+        $controller->setRequest($this->request);
         $responseBefore = $this->beforeMiddleware($controller);
         if (!is_null($controller) && !empty($arguments) && is_null($responseBefore)) {
             try {
@@ -266,7 +190,14 @@ class Router
                 return $controller->handleRouteArgumentException($exception);
             }
         }
-        $response = $this->executeRoute($route, $arguments, $responseBefore);
+
+        if ($responseBefore instanceof Response) {
+            return $responseBefore;
+        }
+
+        $callback = new Callback([$controller, $route->controllerMethod]);
+        $arguments = $this->getFunctionArguments($callback->getReflection(), array_values($arguments));
+        $response = $callback->executeArray($arguments);
         return $this->afterMiddleware($controller, $response);
     }
 
@@ -275,7 +206,7 @@ class Router
      * @param array $arguments
      * @throws RouteArgumentException
      */
-    private function restrictArguments(Controller $controller, array $arguments)
+    private function restrictArguments(Controller $controller, array $arguments): void
     {
         $parameterNames = array_keys($arguments);
         foreach ($controller->getRestrictedArguments() as $name => $rules) {
@@ -291,8 +222,12 @@ class Router
     }
 
     /**
+     * Overrides the arguments for a specified route argument. If the result of the override is a Response instance, we
+     * must stop the processing and return this response (mostly for error cases).
+     *
      * @param Controller $controller
      * @param array $arguments
+     * @return Response|null
      */
     private function overrideArguments(Controller $controller, array &$arguments): ?Response
     {
@@ -320,7 +255,7 @@ class Router
     {
         if (!is_null($controller)) {
             $responseBefore = $controller->before();
-            if (!is_null($responseBefore) && $responseBefore instanceof Response) {
+            if ($responseBefore instanceof Response) {
                 return $responseBefore;
             }
         }
@@ -328,53 +263,22 @@ class Router
     }
 
     /**
-     * Executes the route aimed by the client request. At first it will verify if the before callback has returned a
-     * Response. If its the case the chain of execution is immediately broke and this method returns the obtained
-     * previous response.
-     *
-     * @param stdClass $route
-     * @param array $arguments
-     * @param Response | null $previousResponse
-     * @return Response | null
-     */
-    private function executeRoute(stdClass $route, array $arguments, ?Response $previousResponse): ?Response
-    {
-        if ($previousResponse instanceof Response) {
-            return $previousResponse;
-        }
-        $callback = new Callback($route->callback);
-        $arguments = $this->getFunctionArguments($callback->getReflection(), array_values($arguments));
-        return $callback->executeArray($arguments);
-    }
-
-    /**
      * Executes the after method of the given controller class. Previous response can be null if the route callback
      * doesn't produce any proper response. E.g. doing only echo or var_dump, etc.
      *
      * @param Controller|null $controller
-     * @param Response $previousResponse
+     * @param Response|null $previousResponse
      * @return Response|null
      */
     private function afterMiddleware(?Controller $controller, ?Response $previousResponse): ?Response
     {
         if (!is_null($controller)) {
             $responseAfter = $controller->after($previousResponse);
-            if (!is_null($responseAfter) && $responseAfter instanceof Response) {
+            if ($responseAfter instanceof Response) {
                 return $responseAfter;
             }
         }
         return $previousResponse;
-    }
-
-    /**
-     * Retrieves the controller instance provided as the route action.
-     *
-     * @param $route
-     * @return Controller | null
-     */
-    private function getRouteControllerInstance(stdClass $route): ?Controller
-    {
-        return (is_array($route->callback)) ? $route->callback[0] : null;
     }
 
     /**
@@ -384,7 +288,7 @@ class Router
      * @param array $values
      * @return array
      */
-    private function getFunctionArguments(ReflectionFunctionAbstract $reflection, array $values)
+    private function getFunctionArguments(ReflectionFunctionAbstract $reflection, array $values): array
     {
         $arguments = [];
         if (!empty($reflection->getParameters())) {
@@ -400,7 +304,7 @@ class Router
      *
      * @param array $values
      */
-    private function loadRequestArguments(array $values)
+    private function loadRequestArguments(array $values): void
     {
         foreach ($values as $param => $value) {
             $this->request->addArgument($param, $value);
@@ -408,19 +312,18 @@ class Router
     }
 
     /**
-     * Verifies if the HTTP method used in the request is valid (GET, PATCH, POST, DELETE, PUT) and check if the method
-     * has at least one route specified (through the veryMethodDefinition method). An exception is thrown if one of
-     * these conditions are not satisfied.
+     * Verifies if the HTTP method used in the request is valid (GET, PATCH, POST, DELETE, PUT) and checks if the method
+     * has at least one route specified. An exception is thrown if one of these conditions are not satisfied.
      *
      * @throws RouteMethodUnsupportedException
      * @throws RouteNotFoundException
      */
-    private function verifyRequestMethod()
+    private function verifyRequestMethod(): void
     {
         if (!in_array($this->requestedMethod, self::SUPPORTED_HTTP_METHODS)) {
             throw new RouteMethodUnsupportedException($this->requestedMethod);
         }
-        if (!array_key_exists($this->requestedMethod, $this->routes)) {
+        if (empty($this->routeRepository->getRoutes($this->requestedMethod))) {
             throw new RouteNotFoundException($this->requestedUri, $this->requestedMethod);
         }
     }

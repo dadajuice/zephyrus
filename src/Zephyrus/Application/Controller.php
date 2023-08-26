@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Application;
 
 use InvalidArgumentException;
+use RuntimeException;
 use Zephyrus\Exceptions\RouteArgumentException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
@@ -12,12 +13,12 @@ use Zephyrus\Network\Responses\StreamResponses;
 use Zephyrus\Network\Responses\SuccessResponse;
 use Zephyrus\Network\Responses\XmlResponses;
 use Zephyrus\Network\Routable;
-use Zephyrus\Network\Router;
+use Zephyrus\Network\RouteRepository;
 
 abstract class Controller implements Routable
 {
     protected ?Request $request = null;
-    private Router $router;
+    private ?RouteRepository $repository = null;
     private array $overrideArguments = [];
     private array $restrictedArguments = [];
 
@@ -28,10 +29,27 @@ abstract class Controller implements Routable
     use XmlResponses;
     use DownloadResponses;
 
-    public function __construct(Router $router)
+//    public function __construct(Request $request)
+//    {
+//        $this->request = &$request;
+//    }
+
+    /**
+     * Applies the route collection instance to be used with the inner get, post, put, patch and delete method. These
+     * will register the route into the given repository. This method is necessary to make sure we keep the controller
+     * instance reference.
+     *
+     * @param RouteRepository $repository
+     * @return void
+     */
+    public function setRouteRepository(RouteRepository $repository): void
     {
-        $this->router = $router;
-        $this->request = &$router->getRequest();
+        $this->repository = $repository;
+    }
+
+    public function setRequest(Request $request): void
+    {
+        $this->request = &$request;
     }
 
     /**
@@ -68,7 +86,7 @@ abstract class Controller implements Routable
      * @param string $argumentName
      * @param callable $callback
      */
-    public function overrideArgument(string $argumentName, callable $callback)
+    public function overrideArgument(string $argumentName, callable $callback): void
     {
         if (count((new Callback($callback))->getReflection()->getParameters()) != 1) {
             throw new InvalidArgumentException("Override callback should have only one argument which will contain the value of the associated argument name");
@@ -84,7 +102,7 @@ abstract class Controller implements Routable
      * @param string $parameterName
      * @param Rule[] $rules
      */
-    public function restrictArgument(string $parameterName, array $rules)
+    public function restrictArgument(string $parameterName, array $rules): void
     {
         foreach ($rules as $rule) {
             if (!($rule instanceof Rule)) {
@@ -139,9 +157,12 @@ abstract class Controller implements Routable
      * @param string $instanceMethod
      * @param string | array $acceptedFormats
      */
-    final protected function get(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY)
+    final protected function get(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY): void
     {
-        $this->router->get($uri, [$this, $instanceMethod], $acceptedFormats);
+        if (is_null($this->repository)) {
+            throw new RuntimeException("You must first set a RouteRepository instance on which the route definition will apply. Be sure to use the setRouteRepository method before any calls to get, post, put, patch and delete methods.");
+        }
+        $this->repository->get($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
     /**
@@ -154,9 +175,12 @@ abstract class Controller implements Routable
      * @param string $instanceMethod
      * @param string | array $acceptedFormats
      */
-    final protected function post(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY)
+    final protected function post(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY): void
     {
-        $this->router->post($uri, [$this, $instanceMethod], $acceptedFormats);
+        if (is_null($this->repository)) {
+            throw new RuntimeException("You must first set a RouteRepository instance on which the route definition will apply. Be sure to use the setRouteRepository method before any calls to get, post, put, patch and delete methods.");
+        }
+        $this->repository->post($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
     /**
@@ -169,9 +193,12 @@ abstract class Controller implements Routable
      * @param string $instanceMethod
      * @param string | array $acceptedFormats
      */
-    final protected function put(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY)
+    final protected function put(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY): void
     {
-        $this->router->put($uri, [$this, $instanceMethod], $acceptedFormats);
+        if (is_null($this->repository)) {
+            throw new RuntimeException("You must first set a RouteRepository instance on which the route definition will apply. Be sure to use the setRouteRepository method before any calls to get, post, put, patch and delete methods.");
+        }
+        $this->repository->put($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
     /**
@@ -185,9 +212,12 @@ abstract class Controller implements Routable
      * @param string $instanceMethod
      * @param string | array $acceptedFormats
      */
-    final protected function patch(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY)
+    final protected function patch(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY): void
     {
-        $this->router->patch($uri, [$this, $instanceMethod], $acceptedFormats);
+        if (is_null($this->repository)) {
+            throw new RuntimeException("You must first set a RouteRepository instance on which the route definition will apply. Be sure to use the setRouteRepository method before any calls to get, post, put, patch and delete methods.");
+        }
+        $this->repository->patch($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
     /**
@@ -201,9 +231,12 @@ abstract class Controller implements Routable
      * @param string $instanceMethod
      * @param string | array $acceptedFormats
      */
-    final protected function delete(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY)
+    final protected function delete(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY): void
     {
-        $this->router->delete($uri, [$this, $instanceMethod], $acceptedFormats);
+        if (is_null($this->repository)) {
+            throw new RuntimeException("You must first set a RouteRepository instance on which the route definition will apply. Be sure to use the setRouteRepository method before any calls to get, post, put, patch and delete methods.");
+        }
+        $this->repository->delete($uri, [$this, $instanceMethod], $acceptedFormats);
     }
 
     /**

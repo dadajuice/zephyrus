@@ -7,18 +7,23 @@ use Zephyrus\Exceptions\RouteArgumentException;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router;
+use Zephyrus\Network\RouteRepository;
 
 class ControllerRestrictedParameterTest extends TestCase
 {
     public function testSuccessfulRestrictedArguments()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function __construct()
+            {
+                parent::restrictArgument('id', [Rule::integer("Invalid route argument")]);
+            }
+
+            public function initializeRoutes(): void
             {
                 parent::get('/users/{id}', 'read');
-                parent::restrictArgument('id', [Rule::integer("Invalid route argument")]);
             }
 
             public function read(int $userId)
@@ -26,24 +31,27 @@ class ControllerRestrictedParameterTest extends TestCase
                 return $this->plain($userId);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users/4', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('4', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('4', $response->getContent());
     }
 
     public function testSuccessfulRestrictedArgumentsMerge()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function __construct()
             {
-                parent::get('/users/{id}', 'read');
                 parent::restrictArgument('id', [Rule::integer("Invalid route argument")]);
                 parent::restrictArgument('id', [Rule::range(1, 10, "Invalid route range")]);
+            }
+
+            public function initializeRoutes(): void
+            {
+                parent::get('/users/{id}', 'read');
             }
 
             public function handleRouteArgumentException(RouteArgumentException $exception): Response
@@ -56,26 +64,29 @@ class ControllerRestrictedParameterTest extends TestCase
                 return $this->plain($userId);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users/40', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('failed!1', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('failed!1', $response->getContent());
     }
 
     public function testSuccessfulMultipleRestrictedArguments()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function __construct()
             {
-                parent::get('/users/{date}', 'read');
                 parent::restrictArgument('date', [
                     Rule::date("Invalid route argument"),
                     Rule::dateBefore('2020-05-01', "Date too far")
                 ]);
+            }
+
+            public function initializeRoutes(): void
+            {
+                parent::get('/users/{date}', 'read');
             }
 
             public function read($date)
@@ -83,16 +94,15 @@ class ControllerRestrictedParameterTest extends TestCase
                 return $this->plain($date);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users/2020-01-01', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('2020-01-01', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('2020-01-01', $response->getContent());
 
         $req = new Request('http://test.local/users/2020-06-01', 'get');
         try {
-            $router->run($req);
+            (new Router($repository))->resolve($req);
             self::assertEquals('yes', 'no'); // should never reach
         } catch (RouteArgumentException $exception) {
             self::assertEquals('Date too far', $exception->getErrorMessage());
@@ -101,23 +111,25 @@ class ControllerRestrictedParameterTest extends TestCase
 
     public function testInvalidRestrictedArguments()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
-
-            public function initializeRoutes()
-            {
-                parent::get('/users/{id}', 'read');
-                parent::restrictArgument('id', ["assf"]); // invalid rule
-            }
-
-            public function read(int $userId)
-            {
-                return $this->plain($userId);
-            }
-        };
-
         try {
-            $controller->initializeRoutes();
+            $controller = new class() extends Controller {
+
+                public function __construct()
+                {
+                    parent::restrictArgument('id', ["assf"]); // invalid rule
+                }
+
+                public function initializeRoutes(): void
+                {
+                    parent::get('/users/{id}', 'read');
+
+                }
+
+                public function read(int $userId)
+                {
+                    return $this->plain($userId);
+                }
+            };
             self::assertEquals('yes', 'no'); // should never reach
         } catch (\InvalidArgumentException $exception) {
             self::assertEquals("Specified rules for argument restrictions should be instance of Rule class", $exception->getMessage());
@@ -126,15 +138,19 @@ class ControllerRestrictedParameterTest extends TestCase
 
     public function testUnhandledErrorRestrictedArguments()
     {
+        $repository = new RouteRepository();
         $this->expectException(RouteArgumentException::class);
         $this->expectExceptionMessage("The route argument {id} with value {jdsfjdsf} did not comply with defined rule and returned the following message : Invalid route argument");
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function __construct()
+            {
+                parent::restrictArgument('id', [Rule::integer("Invalid route argument")]);
+            }
+
+            public function initializeRoutes(): void
             {
                 parent::get('/users/{id}', 'read');
-                parent::restrictArgument('id', [Rule::integer("Invalid route argument")]);
             }
 
             public function read(int $userId)
@@ -142,20 +158,25 @@ class ControllerRestrictedParameterTest extends TestCase
                 return $this->plain($userId);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users/jdsfjdsf', 'get');
-        $router->run($req);
+        (new Router($repository))->resolve($req);
     }
 
     public function testHandledErrorRestrictedArguments()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function __construct()
+            {
+                parent::restrictArgument('id', [Rule::integer("Invalid route argument")]);
+            }
+
+            public function initializeRoutes(): void
             {
                 parent::get('/users/{id}', 'read');
-                parent::restrictArgument('id', [Rule::integer("Invalid route argument")]);
             }
 
             public function handleRouteArgumentException(RouteArgumentException $exception): Response
@@ -168,23 +189,26 @@ class ControllerRestrictedParameterTest extends TestCase
                 return $this->plain($userId);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users/jdsfjdsf', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('An error occurred for field id with value jdsfjdsf producing error Invalid route argument', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('An error occurred for field id with value jdsfjdsf producing error Invalid route argument', $response->getContent());
     }
 
     public function testHandledErrorRestrictedArgumentsWithId()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function __construct()
+            {
+                parent::restrictArgument('id', ['BAD' => Rule::integer("Invalid route argument")]);
+            }
+
+            public function initializeRoutes(): void
             {
                 parent::get('/users/{id}', 'read');
-                parent::restrictArgument('id', ['BAD' => Rule::integer("Invalid route argument")]);
             }
 
             public function handleRouteArgumentException(RouteArgumentException $exception): Response
@@ -200,11 +224,10 @@ class ControllerRestrictedParameterTest extends TestCase
                 return $this->plain($userId);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users/jdsfjdsf', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('An error occurred for field id with value jdsfjdsf producing error Invalid route argument', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('An error occurred for field id with value jdsfjdsf producing error Invalid route argument', $response->getContent());
     }
 }
