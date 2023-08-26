@@ -10,7 +10,7 @@
   ],
   "license": "MIT",
   "require": {
-    "php": ">=8.0",
+    "php": ">=8.2",
     "phug/phug": "^1.11",
     "js-phpize/js-phpize-phug": "2.*",
     "ext-pdo": "*",
