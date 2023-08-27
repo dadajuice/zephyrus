@@ -118,7 +118,7 @@ class Localization
             array_shift($segments);
         }
 
-        $keys = $this->cachedLocalizations[$locale];
+        $keys = $this->cachedLocalizations[$locale] ?? [];
         $result = null;
         foreach ($segments as $segment) {
             if (is_array($result)) {
@@ -138,10 +138,7 @@ class Localization
             }
         }
 
-        if (is_null($result) || is_array($result)) {
-            return $key;
-        }
-
+        $resultString = (is_null($result) || is_array($result)) ? $key : $result;
         $sprintfParameters = [];
         $namedParameters = [];
         foreach ($args as $index => $arg) {
@@ -162,10 +159,10 @@ class Localization
         }
 
         foreach ($namedParameters as $index => $arg) {
-            $result = str_replace('{' . $index . '}', $arg ?? "", $result);
+            $resultString = str_replace('{' . $index . '}', $arg ?? "", $resultString);
         }
 
-        $parameters[] = $result;
+        $parameters[] = $resultString;
         return call_user_func_array('sprintf', array_merge($parameters, $sprintfParameters));
     }
 
