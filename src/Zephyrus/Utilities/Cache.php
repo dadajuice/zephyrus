@@ -89,4 +89,9 @@ class Cache
     {
         return apcu_key_info($this->cacheKey)['creation_time'] ?? 0;
     }
+
+    public function getLastUpdateTime(): int
+    {
+        return apcu_key_info($this->cacheKey)['mtime'] ?? 0;
+    }
 }

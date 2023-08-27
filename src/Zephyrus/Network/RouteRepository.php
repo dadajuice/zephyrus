@@ -5,6 +5,7 @@ use Zephyrus\Utilities\Cache;
 class RouteRepository
 {
     private const CACHE_ROUTE_KEY = '__router_repository';
+    private const CACHE_UPDATE_KEY = '__router_repository_update_time';
 
     /**
      * Associative array that contains all defined routes. Routes are organized by HTTP method as main key, value is an
@@ -21,9 +22,17 @@ class RouteRepository
      */
     private Cache $cache;
 
+    /**
+     * APCu php cache to keep a reference to the last time the route were updated.
+     *
+     * @var Cache
+     */
+    private Cache $cacheUpdate;
+
     public function __construct()
     {
         $this->cache = new Cache(self::CACHE_ROUTE_KEY);
+        $this->cacheUpdate = new Cache(self::CACHE_UPDATE_KEY);
     }
 
     /**
@@ -38,7 +47,8 @@ class RouteRepository
         if (!$this->cache->exists()) {
             return true;
         }
-        return $this->cache->getCreationTime() < $time;
+        $lastUpdate = $this->cacheUpdate->read() ?? 0;
+        return $lastUpdate < $time;
     }
 
     /**
@@ -50,6 +60,7 @@ class RouteRepository
     public function cache(): void
     {
         $this->cache->cache($this->routes);
+        $this->cacheUpdate->cache(time());
     }
 
     /**
