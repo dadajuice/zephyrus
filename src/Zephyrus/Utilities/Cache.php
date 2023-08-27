@@ -84,4 +84,9 @@ class Cache
             // @codeCoverageIgnoreEnd
         }
     }
+
+    public function getCreationTime(): int
+    {
+        return apcu_key_info($this->cacheKey)['creation_time'] ?? 0;
+    }
 }

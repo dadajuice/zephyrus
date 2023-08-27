@@ -4,6 +4,8 @@ use Zephyrus\Utilities\Cache;
 
 class RouteRepository
 {
+    private const CACHE_ROUTE_KEY = '__router_repository';
+
     /**
      * Associative array that contains all defined routes. Routes are organized by HTTP method as main key, value is an
      * array of stdClass representing the route.
@@ -21,7 +23,44 @@ class RouteRepository
 
     public function __construct()
     {
+        $this->cache = new Cache(self::CACHE_ROUTE_KEY);
+    }
 
+    /**
+     * Verifies if the currently cached route definitions (if it exists) are outdated and need regeneration. Returns
+     * true if the given time is newer than the cache creation time or if no cache exist.
+     *
+     * @param int $time
+     * @return bool
+     */
+    public function isCacheOutdated(int $time): bool
+    {
+        if (!$this->cache->exists()) {
+            return true;
+        }
+        return $this->cache->getCreationTime() < $time;
+    }
+
+    /**
+     * Saves the instance currently defined routes into the APCu PHP cache. To optimize futur calls, the method
+     * initializeFromCache() should be called.
+     *
+     * @return void
+     */
+    public function cache(): void
+    {
+        $this->cache->cache($this->routes);
+    }
+
+    /**
+     * Initializes the application route definitions from the APCu PHP cache and thus avoiding unnecessary looping
+     * through the various project controllers.
+     *
+     * @return void
+     */
+    public function initializeFromCache(): void
+    {
+        $this->routes = $this->cache->read() ?? [];
     }
 
     public function getRoutes(?string $forHttpMethod = null): array
