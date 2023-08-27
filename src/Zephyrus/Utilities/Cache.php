@@ -20,6 +20,21 @@ class Cache
     }
 
     /**
+     * Clears the entire APCu cache.
+     *
+     * @return void
+     */
+    public static function clear(): void
+    {
+        apcu_clear_cache();
+    }
+
+    public static function getList(): array
+    {
+        return apcu_cache_info()['cache_list'] ?? [];
+    }
+
+    /**
      * Instantiates a cache instance for the given key. Throws an exception is APCu is not supported.
      *
      * @param string $cacheKey
@@ -62,7 +77,7 @@ class Cache
     /**
      * Removes the cached data from APCu (PHP Cache).
      */
-    public function clear()
+    public function remove()
     {
         apcu_delete($this->cacheKey);
     }
@@ -83,15 +98,5 @@ class Cache
             throw new RuntimeException("Failed to cache specified data");
             // @codeCoverageIgnoreEnd
         }
-    }
-
-    public function getCreationTime(): int
-    {
-        return apcu_key_info($this->cacheKey)['creation_time'] ?? 0;
-    }
-
-    public function getLastUpdateTime(): int
-    {
-        return apcu_key_info($this->cacheKey)['mtime'] ?? 0;
     }
 }
