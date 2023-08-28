@@ -21,10 +21,9 @@ class ControllerRenderTest extends TestCase
         ]);
         RequestFactory::set($req);
 
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -41,10 +40,9 @@ class ControllerRenderTest extends TestCase
 
     public function testRenderPhp()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -63,10 +61,9 @@ class ControllerRenderTest extends TestCase
     {
         self::expectException(\RuntimeException::class);
         self::expectExceptionMessage("The specified view file [dfgdfgdfg] is not available (not readable or does not exists)");
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -82,10 +79,9 @@ class ControllerRenderTest extends TestCase
     {
         self::expectException(\RuntimeException::class);
         self::expectExceptionMessage("The specified view file [dfgdfgdfg] is not available (not readable or does not exists)");
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -99,10 +95,9 @@ class ControllerRenderTest extends TestCase
 
     public function testRenderPhpWithFlashAndFeedback()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -124,10 +119,9 @@ class ControllerRenderTest extends TestCase
 
     public function testRenderPugWithFlashAndFeedback()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -151,10 +145,9 @@ class ControllerRenderTest extends TestCase
 
     public function testJson()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -171,10 +164,9 @@ class ControllerRenderTest extends TestCase
 
     public function testHtml()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -191,10 +183,9 @@ class ControllerRenderTest extends TestCase
 
     public function testPlain()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 

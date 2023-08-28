@@ -10,7 +10,7 @@
   ],
   "license": "MIT",
   "require": {
-    "php": ">=8.0",
+    "php": ">=8.2",
     "phug/phug": "^1.11",
     "js-phpize/js-phpize-phug": "2.*",
     "ext-pdo": "*",
@@ -24,7 +24,8 @@
     "ext-openssl": "*",
     "ext-mbstring": "*",
     "ext-zip": "*",
-    "ext-ctype": "*"
+    "ext-ctype": "*",
+    "ext-apcu": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "9.*.*",
@@ -37,8 +38,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Zephyrus\\Tests\\": "tests",
-      "Locale\\": "tests/locale/cache"
+      "Zephyrus\\Tests\\": "tests"
     }
   },
   "config": {

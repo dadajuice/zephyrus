@@ -118,7 +118,7 @@ class Localization
             array_shift($segments);
         }
 
-        $keys = $this->cachedLocalizations[$locale];
+        $keys = $this->cachedLocalizations[$locale] ?? [];
         $result = null;
         foreach ($segments as $segment) {
             if (is_array($result)) {

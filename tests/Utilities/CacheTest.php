@@ -42,7 +42,7 @@ class CacheTest extends TestCase
     public function testClearCachedValue()
     {
         $cache = new Cache("TEST");
-        $cache->clear();
+        $cache->remove();
         self::assertFalse($cache->exists());
         self::assertEquals(null, $cache->read());
         self::assertEquals(false, apcu_fetch("TEST"));

@@ -2,6 +2,7 @@ composer.phar
 .idea/
 /vendor/
 /tests/coverage
+/tests/cache
 /tests/php_input.txt
 /logs/*
 composer.lock

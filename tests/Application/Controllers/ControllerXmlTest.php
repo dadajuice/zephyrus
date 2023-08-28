@@ -8,10 +8,9 @@ class ControllerXmlTest extends TestCase
 {
     public function testXmlArray()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -29,10 +28,9 @@ class ControllerXmlTest extends TestCase
     public function testXmlException()
     {
         $this->expectException(\RuntimeException::class);
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -46,10 +44,9 @@ class ControllerXmlTest extends TestCase
 
     public function testXmlObject()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
