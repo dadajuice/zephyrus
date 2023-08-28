@@ -13,7 +13,7 @@ abstract class Controller extends \Zephyrus\Application\Controller
     private Authorization $authorization;
     private IntrusionDetection $ids;
 
-    public abstract function setupSecurity(): void;
+    abstract public function setupSecurity(): void;
 
     /**
      * @throws UnauthorizedAccessException
