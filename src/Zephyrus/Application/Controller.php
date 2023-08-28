@@ -40,7 +40,6 @@ abstract class Controller
      */
     public function initializeRoutes(): void
     {
-
     }
 
     public function initializeRoutesFromAttributes(RouteRepository $repository): void

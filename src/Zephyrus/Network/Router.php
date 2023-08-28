@@ -59,11 +59,11 @@ class Router
      * properly resolve the requested route. Returns null otherwise.
      *
      * @param Request $request
-     * @return Response|null
      * @throws RouteArgumentException
      * @throws RouteMethodUnsupportedException
      * @throws RouteNotAcceptedException
      * @throws RouteNotFoundException
+     * @return Response|null
      */
     final public function resolve(Request $request): ?Response
     {
@@ -117,6 +117,7 @@ class Router
                 return $routeDefinition;
             }
         }
+
         throw new RouteNotAcceptedException($this->request->getAccept());
     }
 
@@ -148,8 +149,8 @@ class Router
      * been executed. Makes sure to load the route parameters which could be used inside the callback function.
      *
      * @param stdClass $route
-     * @return Response|null
      * @throws RouteArgumentException
+     * @return Response|null
      */
     private function prepareResponse(stdClass $route): ?Response
     {
