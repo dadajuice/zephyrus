@@ -4,8 +4,8 @@ use Zephyrus\Utilities\Cache;
 
 class RouteRepository
 {
-    private const CACHE_ROUTE_KEY = '__router_repository';
-    private const CACHE_UPDATE_KEY = '__router_repository_update_time';
+    private const CACHE_ROUTE_KEY = 'router_repository';
+    private const CACHE_UPDATE_KEY = 'router_repository_update_time';
 
     /**
      * Associative array that contains all defined routes. Routes are organized by HTTP method as main key, value is an
@@ -61,6 +61,13 @@ class RouteRepository
     {
         $this->cache->cache($this->routes);
         $this->cacheUpdate->cache(time());
+    }
+
+    public function clear(): void
+    {
+        $this->cache->remove();
+        $this->cacheUpdate->remove();
+        $this->routes = [];
     }
 
     /**

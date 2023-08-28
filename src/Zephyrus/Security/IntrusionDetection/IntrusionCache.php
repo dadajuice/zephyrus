@@ -8,7 +8,7 @@ class IntrusionCache
     /**
      * Key used with APCU (PHP Cache) that keeps the previously loaded intrusion rule instances.
      */
-    private const CACHE_KEY = "intrusion_detection_rules";
+    private const CACHE_KEY = "ids_rules";
 
     /**
      * @var Cache
@@ -51,7 +51,7 @@ class IntrusionCache
      *
      * @param array $intrusionRules
      */
-    public function cache(array $intrusionRules)
+    public function cache(array $intrusionRules): void
     {
         $this->cache->cache($intrusionRules);
         $this->rules = $intrusionRules;
@@ -60,16 +60,16 @@ class IntrusionCache
     /**
      * Removes the rules from APCu (PHP Cache).
      */
-    public function clear()
+    public function clear(): void
     {
-        $this->cache->clear();
+        $this->cache->remove();
         $this->rules = [];
     }
 
     /**
      * Retrieves the rules from the APCu (PHP Cache) if it exists.
      */
-    private function load()
+    private function load(): void
     {
         $this->cache = new Cache(self::CACHE_KEY);
         if ($this->cache->exists()) {
