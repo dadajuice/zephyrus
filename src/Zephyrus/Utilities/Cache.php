@@ -29,6 +29,11 @@ class Cache
         apcu_clear_cache();
     }
 
+    /**
+     * Retrieves all custom added elements to the APCu cache.
+     *
+     * @return array
+     */
     public static function getList(): array
     {
         return apcu_cache_info()['cache_list'] ?? [];
@@ -77,7 +82,7 @@ class Cache
     /**
      * Removes the cached data from APCu (PHP Cache).
      */
-    public function remove()
+    public function remove(): void
     {
         apcu_delete($this->cacheKey);
     }
@@ -90,7 +95,7 @@ class Cache
      * @param mixed $data
      * @param int $timeToLive
      */
-    public function cache(mixed $data, int $timeToLive = 0)
+    public function cache(mixed $data, int $timeToLive = 0): void
     {
         $result = apcu_store($this->cacheKey, $data, $timeToLive);
         if ($result === false) {
