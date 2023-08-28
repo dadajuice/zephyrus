@@ -9,10 +9,9 @@ class ControllerSuccessTest extends TestCase
 {
     public function testCreated()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -29,10 +28,9 @@ class ControllerSuccessTest extends TestCase
 
     public function testCreatedWithBody()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -50,10 +48,9 @@ class ControllerSuccessTest extends TestCase
 
     public function testRedirect()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -69,10 +66,9 @@ class ControllerSuccessTest extends TestCase
 
     public function testNoContent()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 

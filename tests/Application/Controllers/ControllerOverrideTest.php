@@ -1,24 +1,25 @@
 <?php namespace Zephyrus\Tests\Application\Controllers;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use Zephyrus\Application\Controller;
 use Zephyrus\Exceptions\RouteArgumentException;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router;
+use Zephyrus\Network\RouteRepository;
 
 class ControllerOverrideTest extends TestCase
 {
     public function testOverrideArguments()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function __construct()
             {
-                parent::get('/users/{user}', 'read');
-
-                parent::overrideArgument('user', function ($value) {
+                $this->overrideArgument('user', function ($value) {
                     return (object) [
                         'id' => $value,
                         'username' => 'msandwich'
@@ -26,31 +27,33 @@ class ControllerOverrideTest extends TestCase
                 });
             }
 
-            public function read(\stdClass $user)
+            public function initializeRoutes(): void
+            {
+                $this->get('/users/{user}', 'read');
+            }
+
+            public function read(stdClass $user)
             {
                 $test = $this->request->getArgument("non-exist", "yes");
                 $id = $this->request->getArgument('user')->id; // request should be overridden too
                 return $this->plain($user->username . $id . $user->id . $test);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users/4', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('msandwich44yes', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('msandwich44yes', $response->getContent());
     }
 
     public function testOverrideArgumentsWithThrow()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function __construct()
             {
-                parent::get('/users/{user}', 'read');
-
-                parent::overrideArgument('user', function ($value) {
+                $this->overrideArgument('user', function ($value) {
                     if ($value != 4) { // simulate not found
                         $e = new RouteArgumentException("user", $value, 0, "user not found");
                         $e->addOption('something', 'yes');
@@ -63,6 +66,11 @@ class ControllerOverrideTest extends TestCase
                 });
             }
 
+            public function initializeRoutes(): void
+            {
+                $this->get('/users/{user}', 'read');
+            }
+
             public function handleRouteArgumentException(RouteArgumentException $exception): Response
             {
                 $options = $exception->getOptions();
@@ -70,30 +78,27 @@ class ControllerOverrideTest extends TestCase
                 return $this->plain("user not found" . $exception->getOption('something'));
             }
 
-            public function read(\stdClass $user)
+            public function read(stdClass $user)
             {
                 $id = $this->request->getArgument('user')->id; // request should be overridden too
                 return $this->plain($user->username . $id . $user->id);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users/5', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('user not foundyes', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('user not foundyes', $response->getContent());
     }
 
     public function testOverrideArgumentsWithResponse()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function __construct()
             {
-                parent::get('/users/{user}', 'read');
-
-                parent::overrideArgument('user', function ($value) {
+                $this->overrideArgument('user', function ($value) {
                     if ($value != 4) { // simulate not found
                         return $this->plain("it worked");
                     }
@@ -104,31 +109,32 @@ class ControllerOverrideTest extends TestCase
                 });
             }
 
-            public function read(\stdClass $user)
+            public function initializeRoutes(): void
+            {
+                $this->get('/users/{user}', 'read');
+            }
+
+            public function read(stdClass $user)
             {
                 $id = $this->request->getArgument('user')->id; // request should be overridden too
                 return $this->plain($user->username . $id . $user->id);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users/5', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-
-        self::assertEquals('it worked', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('it worked', $response->getContent());
     }
 
     public function testOverrideNullArgument()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function __construct()
             {
-                parent::get('/users/{user}', 'read');
-
-                parent::overrideArgument('user', function ($value) {
+                $this->overrideArgument('user', function ($value) {
                     if ($value == 4) {
                         return (object) [
                             'id' => $value,
@@ -139,7 +145,12 @@ class ControllerOverrideTest extends TestCase
                 });
             }
 
-            public function read(?\stdClass $user)
+            public function initializeRoutes(): void
+            {
+                $this->get('/users/{user}', 'read');
+            }
+
+            public function read(?stdClass $user)
             {
                 if (is_null($user)) {
                     return $this->plain("entity not found");
@@ -148,68 +159,67 @@ class ControllerOverrideTest extends TestCase
                 return $this->plain($user->username . $id . $user->id);
             }
         };
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users/9', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertEquals('entity not found', $output);
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('entity not found', $response->getContent());
     }
 
     public function testInvalidOverrideNotEnough()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
-
-            public function initializeRoutes()
-            {
-                parent::get('/users/{user}', 'read');
-
-                parent::overrideArgument('user', function () {
-                    return "bob";
-                });
-            }
-
-            public function read(\stdClass $user)
-            {
-                $id = $this->request->getArgument('user')->id; // request should be overridden too
-                return $this->plain($user->username . $id . $user->id);
-            }
-        };
-
         try {
-            $controller->initializeRoutes();
+            $controller = new class() extends Controller {
+
+                public function __construct()
+                {
+                    $this->overrideArgument('user', function () {
+                        return "bob";
+                    });
+                }
+
+                public function initializeRoutes(): void
+                {
+                    $this->get('/users/{user}', 'read');
+                }
+
+                public function read(stdClass $user)
+                {
+                    $id = $this->request->getArgument('user')->id; // request should be overridden too
+                    return $this->plain($user->username . $id . $user->id);
+                }
+            };
             self::assertEquals('yes', 'no'); // should never reach
-        } catch (\InvalidArgumentException $exception) {
+        } catch (InvalidArgumentException $exception) {
             self::assertEquals("Override callback should have only one argument which will contain the value of the associated argument name", $exception->getMessage());
         }
     }
 
     public function testInvalidOverrideTooMuch()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
-
-            public function initializeRoutes()
-            {
-                parent::get('/users/{user}', 'read');
-
-                parent::overrideArgument('user', function ($value, $bob, $lewis) {
-                    return "bob";
-                });
-            }
-
-            public function read(\stdClass $user)
-            {
-                $id = $this->request->getArgument('user')->id; // request should be overridden too
-                return $this->plain($user->username . $id . $user->id);
-            }
-        };
-
         try {
-            $controller->initializeRoutes();
+            $controller = new class() extends Controller {
+
+                public function __construct()
+                {
+                    $this->overrideArgument('user', function ($value, $bob, $lewis) {
+                        return "bob";
+                    });
+                }
+
+                public function initializeRoutes(): void
+                {
+                    $this->get('/users/{user}', 'read');
+                }
+
+                public function read(stdClass $user)
+                {
+                    $id = $this->request->getArgument('user')->id; // request should be overridden too
+                    return $this->plain($user->username . $id . $user->id);
+                }
+            };
             self::assertEquals('yes', 'no'); // should never reach
-        } catch (\InvalidArgumentException $exception) {
+        } catch (InvalidArgumentException $exception) {
             self::assertEquals("Override callback should have only one argument which will contain the value of the associated argument name", $exception->getMessage());
         }
     }

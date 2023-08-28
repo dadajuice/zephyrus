@@ -9,10 +9,9 @@ class ControllerDownloadTest extends TestCase
 {
     public function testDownload()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -25,7 +24,7 @@ class ControllerDownloadTest extends TestCase
         $controller->index()->send();
         $output = ob_get_clean();
         $headers = xdebug_get_headers();
-        self::assertTrue(strpos($output, "[application]") !== false);
+        self::assertTrue(str_contains($output, "[application]"));
         self::assertTrue(in_array('Content-Disposition:attachment; filename="config.ini"', $headers));
     }
 
@@ -34,10 +33,9 @@ class ControllerDownloadTest extends TestCase
         $f = File::create(ROOT_DIR . '/lib/to_delete.txt');
         $f->write("Bubu");
         self::assertTrue(file_exists(ROOT_DIR . '/lib/to_delete.txt'));
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -50,7 +48,7 @@ class ControllerDownloadTest extends TestCase
         $controller->index()->send();
         $output = ob_get_clean();
         $headers = xdebug_get_headers();
-        self::assertTrue(strpos($output, "Bubu") !== false);
+        self::assertTrue(str_contains($output, "Bubu"));
         self::assertTrue(in_array('Content-Disposition:attachment; filename="test.txt"', $headers));
         self::assertFalse(file_exists(ROOT_DIR . '/lib/to_delete.txt'));
     }

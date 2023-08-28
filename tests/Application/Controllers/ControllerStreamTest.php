@@ -9,10 +9,9 @@ class ControllerStreamTest extends TestCase
 {
     public function testPollingSse()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -24,16 +23,15 @@ class ControllerStreamTest extends TestCase
         ob_start();
         $controller->index()->send();
         $output = ob_get_clean();
-        self::assertTrue(strpos($output, 'data: "test"') !== false);
+        self::assertTrue(str_contains($output, 'data: "test"'));
     }
 
     public function testStreamingSse()
     {
         Session::kill();
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -52,15 +50,14 @@ class ControllerStreamTest extends TestCase
         ob_start();
         $controller->index()->send();
         $output = ob_get_clean();
-        self::assertTrue(strpos($output, 'data: "works"') !== false);
+        self::assertTrue(str_contains($output, 'data: "works"'));
     }
 
     public function testFlowSse()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -75,6 +72,6 @@ class ControllerStreamTest extends TestCase
         ob_start();
         $controller->index()->send();
         $output = ob_get_clean();
-        self::assertTrue(strpos($output, 'data: "toto"') !== false);
+        self::assertTrue(str_contains($output, 'data: "toto"'));
     }
 }

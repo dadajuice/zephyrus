@@ -2,31 +2,32 @@
 
 use ReflectionClass;
 use ReflectionException;
-use Zephyrus\Network\Router;
+use Zephyrus\Network\RouteRepository;
 
 class Bootstrap
 {
-    /**
-     * @param Router $router
-     * @throws ReflectionException
-     */
-    public static function initializeRoutableControllers(Router $router)
-    {
-        foreach (recursiveGlob(ROOT_DIR . '/app/Controllers/*.php') as $file) {
-            $reflection = self::fileToReflectionClass($file);
-            if ($reflection->implementsInterface('Zephyrus\Network\Routable') && !$reflection->isAbstract()) {
-                $controllerInstance = $reflection->newInstance($router);
-                $controllerInstance->initializeRoutes();
-            }
-        }
-    }
-
     public static function getHelperFunctionsPath(): string
     {
         return realpath(__DIR__ . '/../functions.php');
     }
 
+    public static function initializeControllerRoutes(RouteRepository $repository): void
+    {
+        foreach (recursiveGlob(ROOT_DIR . '/app/Controllers/*.php') as $file) {
+            $reflection = self::fileToReflectionClass($file);
+            if ($reflection->isSubclassOf('Zephyrus\Application\Controller') && !$reflection->isAbstract()) {
+                $controllerInstance = $reflection->newInstance();
+                $controllerInstance->setRouteRepository($repository);
+                $controllerInstance->initializeRoutes();
+                $controllerInstance->initializeRoutesFromAttributes($repository);
+            }
+        }
+    }
+
     /**
+     * Builds a ReflectionClass instance from a given file path. Should normally be a controller instance in this
+     * context.
+     *
      * @param string $file
      * @throws ReflectionException
      * @return ReflectionClass

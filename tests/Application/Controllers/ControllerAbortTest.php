@@ -8,10 +8,9 @@ class ControllerAbortTest extends TestCase
 {
     public function testBadRequest()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -26,10 +25,9 @@ class ControllerAbortTest extends TestCase
 
     public function testInternalError()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -44,10 +42,9 @@ class ControllerAbortTest extends TestCase
 
     public function testNotAcceptable()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -62,10 +59,9 @@ class ControllerAbortTest extends TestCase
 
     public function testAbort()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -80,10 +76,9 @@ class ControllerAbortTest extends TestCase
 
     public function testForbidden()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -98,10 +93,9 @@ class ControllerAbortTest extends TestCase
 
     public function testMethodNotAllowed()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -116,10 +110,9 @@ class ControllerAbortTest extends TestCase
 
     public function testAbortNotFound()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -134,10 +127,9 @@ class ControllerAbortTest extends TestCase
 
     public function testAbortNotImplemented()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -152,10 +144,9 @@ class ControllerAbortTest extends TestCase
 
     public function testAbortGatewayTimeout()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -170,10 +161,9 @@ class ControllerAbortTest extends TestCase
 
     public function testAbortServiceUnavailable()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -188,10 +178,9 @@ class ControllerAbortTest extends TestCase
 
     public function testAbortBadGateway()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -206,10 +195,9 @@ class ControllerAbortTest extends TestCase
 
     public function testAbortUnprocessableEntity()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -224,10 +212,9 @@ class ControllerAbortTest extends TestCase
 
     public function testAbortConflict()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -242,10 +229,9 @@ class ControllerAbortTest extends TestCase
 
     public function testAbortRequestTimeout()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -260,10 +246,9 @@ class ControllerAbortTest extends TestCase
 
     public function testAbortUnauthorized()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 
@@ -278,10 +263,9 @@ class ControllerAbortTest extends TestCase
 
     public function testAbortPaymentRequired()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
             }
 

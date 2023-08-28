@@ -7,27 +7,32 @@ use Zephyrus\Exceptions\InvalidCsrfException;
 use Zephyrus\Exceptions\UnauthorizedAccessException;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
+use Zephyrus\Network\RouteRepository;
 use Zephyrus\Security\Authorization;
 use Zephyrus\Security\ContentSecurityPolicy;
 use Zephyrus\Security\Controller;
-use Zephyrus\Security\IntrusionDetection;
 
 class SecurityControllerTest extends TestCase
 {
     public function testGetRouting()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $router = new Router($repository);
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
                 parent::get('/', 'index');
                 parent::get('/users', 'test');
             }
 
-            public function before(): ?Response
+            public function setupSecurity(): void
             {
                 $this->applyContentSecurityPolicies();
+            }
+
+            public function before(): ?Response
+            {
                 try {
                     parent::before();
                 } catch (IntrusionDetectionException $exception) {
@@ -68,33 +73,40 @@ class SecurityControllerTest extends TestCase
             }
         };
 
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-
-        $guard = $controller->getCsrfGuard();
-        self::assertTrue($guard->isPostSecured());
+        $response = $router->resolve($req);
 
         // CSRF tokens applied
-        self::assertTrue(strpos($output, '<input type="hidden" name="CSRFToken"') !== false);
+        self::assertTrue(str_contains($response->getContent(), '<input type="hidden" name="CSRFToken"'));
     }
 
     public function testGetRoutingFailed()
     {
-        $router = new Router();
-        $controller = new class($router) extends Controller {
+        $repository = new RouteRepository();
+        $router = new Router($repository);
+        $controller = new class() extends Controller {
 
-            public function initializeRoutes()
+            public function initializeRoutes(): void
             {
                 parent::get('/', 'index');
                 parent::get('/users', 'test');
             }
 
+            public function setupSecurity(): void
+            {
+                parent::getAuthorization()->setMode(Authorization::MODE_BLACKLIST);
+                parent::getAuthorization()->addSessionRule('sudo', 'AUTH_LEVEL', 'sudo');
+                parent::getAuthorization()->addRule('public', function () {
+                    return true;
+                });
+                parent::getAuthorization()->protect('/users', Authorization::ALL, 'sudo');
+                parent::getAuthorization()->protect('/', Authorization::ALL, 'public');
+            }
+
             public function before(): ?Response
             {
-                $this->setupAuthorizations();
                 try {
                     parent::before();
                 } catch (IntrusionDetectionException $exception) {
@@ -110,17 +122,6 @@ class SecurityControllerTest extends TestCase
                 return null;
             }
 
-            private function setupAuthorizations()
-            {
-                parent::getAuthorization()->setMode(Authorization::MODE_BLACKLIST);
-                parent::getAuthorization()->addSessionRule('sudo', 'AUTH_LEVEL', 'sudo');
-                parent::getAuthorization()->addRule('public', function () {
-                    return true;
-                });
-                parent::getAuthorization()->protect('/users', Authorization::ALL, 'sudo');
-                parent::getAuthorization()->protect('/', Authorization::ALL, 'public');
-            }
-
             public function index()
             {
                 return $this->html('test<form><input type="text" /></form>');
@@ -132,15 +133,10 @@ class SecurityControllerTest extends TestCase
             }
         };
 
+        $controller->setRouteRepository($repository);
         $controller->initializeRoutes();
         $req = new Request('http://test.local/users', 'get');
-        ob_start();
-        $router->run($req);
-        $output = ob_get_clean();
-        self::assertTrue($controller->getCsrfGuard()->isEnabled());
-        self::assertTrue($controller->getIntrusionDetection()->isEnabled());
-        self::assertTrue($controller->getAuthorization()->isAuthorized("/"));
-        self::assertEquals("SAMEORIGIN", $controller->getSecureHeader()->getFrameOptions());
-        self::assertEquals("invalid access", $output);
+        $response = $router->resolve($req);
+        self::assertEquals("invalid access", $response->getContent());
     }
 }
