@@ -123,7 +123,7 @@ class ListView
 
     public function getMaxPage(): int
     {
-        return $this->model?->getPagination()->getMaxPage($this->count) ?? 0;
+        return $this->model?->getPagination()->getMaxPage($this->count) ?? 1;
     }
 
     public function getLimit(): int
