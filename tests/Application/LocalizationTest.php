@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use Zephyrus\Application\Localization;
 use Zephyrus\Exceptions\LocalizationException;
+use Zephyrus\Utilities\FileSystem\Directory;
 
 class LocalizationTest extends TestCase
 {
@@ -21,7 +22,7 @@ class LocalizationTest extends TestCase
         self::assertEquals("/connexion", Localization::getInstance()->localize("routes.login"));
         self::assertEquals("/admin", Localization::getInstance()->localize("routes.administration")); // subfolder test
         self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", localize("messages.success.add_user", "martin"));
-        self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", __("L'utilisateur [%s] a été ajouté avec succès", 'martin'));
+        self::assertEquals("L'utilisateur [martin] a été ajouté avec succès", localize("L'utilisateur [%s] a été ajouté avec succès", 'martin'));
         self::assertEquals("/no/key/3", Localization::getInstance()->localize("/no/%s/{id}", ['id' => 3, 'key']));
 
         // Rest should be english
@@ -137,7 +138,7 @@ class LocalizationTest extends TestCase
 
     private function removeDirectory($path)
     {
-        $files = recursiveGlob($path . '/*');
+        $files = Directory::recursiveGlob($path . '/*');
         $directories = [];
         foreach ($files as $file) {
             if (is_file($file)) {

@@ -242,7 +242,7 @@ class Localization
     private function buildGlobalArrayFromJsonFiles(string $locale): array
     {
         $globalArray = [];
-        foreach (recursiveGlob(ROOT_DIR . "/locale/$locale/*.json") as $file) {
+        foreach (Directory::recursiveGlob(ROOT_DIR . "/locale/$locale/*.json") as $file) {
             $string = file_get_contents($file);
             $jsonAssociativeArray = json_decode($string, true);
             $jsonLastError = json_last_error();

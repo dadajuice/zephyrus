@@ -3,6 +3,7 @@
 use ReflectionClass;
 use ReflectionException;
 use Zephyrus\Network\RouteRepository;
+use Zephyrus\Utilities\FileSystem\Directory;
 
 class Bootstrap
 {
@@ -13,7 +14,7 @@ class Bootstrap
 
     public static function initializeControllerRoutes(RouteRepository $repository): void
     {
-        foreach (recursiveGlob(ROOT_DIR . '/app/Controllers/*.php') as $file) {
+        foreach (Directory::recursiveGlob(ROOT_DIR . '/app/Controllers/*.php') as $file) {
             $reflection = self::fileToReflectionClass($file);
             if ($reflection->isSubclassOf('Zephyrus\Application\Controller') && !$reflection->isAbstract()) {
                 $controllerInstance = $reflection->newInstance();

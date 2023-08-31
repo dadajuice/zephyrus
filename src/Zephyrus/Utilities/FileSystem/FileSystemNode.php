@@ -44,6 +44,15 @@ abstract class FileSystemNode
         return is_readable($path);
     }
 
+    public static function recursiveGlob(string $pattern, int $flags = 0): false|array
+    {
+        $files = glob($pattern, $flags);
+        foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
+            $files = array_merge($files, self::recursiveGlob($dir . '/' . basename($pattern), $flags));
+        }
+        return $files;
+    }
+
     /**
      * Constructs an abstract FileSystemNode which is used by the Directory
      * and File classes. Throws an InvalidArgumentException if the given path

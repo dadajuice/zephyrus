@@ -6,20 +6,21 @@ use Zephyrus\Application\Form;
 use Zephyrus\Application\Localization;
 use Zephyrus\Application\Session;
 use Zephyrus\Security\ContentSecurityPolicy;
+use Zephyrus\Utilities\StringUtility;
 
-define('FORMAT_DATE', "Y-m-d");
-define('FORMAT_TIME', "H:i:s");
-define('FORMAT_DATE_TIME', FORMAT_DATE . " " . FORMAT_TIME);
+const FORMAT_DATE = "Y-m-d";
+const FORMAT_TIME = "H:i:s";
+const FORMAT_DATE_TIME = FORMAT_DATE . " " . FORMAT_TIME;
 
 /**
  * Shorthand function to quickly access session data. If the given parameter is an associative array, it will set the
  * key / values to the current session. Otherwise, it will try to read the value.
  *
  * @param array|string $data
- * @param mixed|null $defaultValue
+ * @param mixed $defaultValue
  * @return mixed|void
  */
-function session($data, $defaultValue = null)
+function session(array|string $data, mixed $defaultValue = null)
 {
     if (is_array($data)) {
         Session::getInstance()->setAll($data);
@@ -64,22 +65,6 @@ function feedbackFields(): array
 }
 
 /**
- * Performs a normal glob pattern search, but enters directories recursively.
- *
- * @param string $pattern
- * @param int $flags
- * @return array
- */
-function recursiveGlob($pattern, $flags = 0)
-{
-    $files = glob($pattern, $flags);
-    foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
-        $files = array_merge($files, recursiveGlob($dir . '/' . basename($pattern), $flags));
-    }
-    return $files;
-}
-
-/**
  * Simple alias function to simplify formatting usage inside view files. Use the
  * following types : filesize, time, elapsed, datetime, date, percent, money and
  * decimal.
@@ -88,23 +73,10 @@ function recursiveGlob($pattern, $flags = 0)
  * @param array ...$args
  * @return string
  */
-function format(string $type, ...$args)
+function format(string $type, ...$args): string
 {
     $class = '\Zephyrus\Utilities\Formatter';
     return forward_static_call_array([$class, $type], $args);
-}
-
-/**
- * Simple alias function to directly read a data from the session to simplify
- * usage inside view files.
- *
- * @param string $key
- * @param mixed $defaultValue
- * @return mixed
- */
-function sess(string $key, $defaultValue = null)
-{
-    return session($key, $defaultValue);
 }
 
 /**
@@ -116,14 +88,13 @@ function sess(string $key, $defaultValue = null)
  * @param string|null $defaultValue
  * @return mixed
  */
-function config(string $section, string $property, string $defaultValue = null)
+function config(string $section, string $property, string $defaultValue = null): mixed
 {
     return Configuration::getConfiguration($section, $property, $defaultValue);
 }
 
 /**
- * Simple alias function to read a memorized form value to simplify usage
- * inside view files.
+ * Simple alias function to read a memorized form value to simplify usage inside view files.
  *
  * @param string $fieldId
  * @param mixed $defaultValue
@@ -135,8 +106,7 @@ function val(string $fieldId, mixed $defaultValue = ""): mixed
 }
 
 /**
- * Simple alias function to quickly retrieve the CSP nonce to be used for
- * inline JavaScript.
+ * Simple alias function to quickly retrieve the current CSP nonce to be used for inline JavaScript.
  *
  * @return string
  */
@@ -146,14 +116,13 @@ function nonce(): string
 }
 
 /**
- * Simple alias function to get the localize string corresponding to the
- * desired key (e.g. messages.success.add_user).
+ * Simple alias function to get the localize string corresponding to the desired key (e.g. messages.success.add_user).
  *
  * @param string $key
  * @param mixed ...$args
  * @return string
  */
-function localize($key, ...$args): string
+function localize(string $key, ...$args): string
 {
     return Localization::getInstance()->localize($key, $args);
 }
@@ -170,14 +139,27 @@ function objectToArray(stdClass $object): array
 }
 
 /**
- * Simple alias function to sprintf parameters into the defined message.
+ * Replacement of the empty function that should be used which considers numeric values (0, 0.0, "0", etc.).
  *
- * @param string $message
- * @param mixed ...$args
- * @return string
+ * @param mixed $value
+ * @return bool
  */
-function __(string $message, ...$args): string
+function is_blank(mixed $value): bool
 {
-    $parameters = array_merge([$message], $args);
-    return call_user_func_array('sprintf', $parameters);
+    return empty($value) && !is_numeric($value);
+}
+
+function ellipsis(?string $string, int $length = 50): string
+{
+    return StringUtility::ellipsis($string, $length);
+}
+
+function acronym(?string $string, int $length = 2): string
+{
+    return StringUtility::acronym($string, $length);
+}
+
+function mark(?string $string, ?string $search): string
+{
+    return StringUtility::mark($string, $search);
 }
