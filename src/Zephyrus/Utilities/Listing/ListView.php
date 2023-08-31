@@ -151,6 +151,21 @@ class ListView
         return $this->model?->getSort()->getSorts(false) ?? [];
     }
 
+    /**
+     * Verifies if the result set is really empty or empty because of a filtering or search. This methods return true
+     * if the initial result set is empty only. The presence of a filter or a search indicates there were an initial
+     * result set.
+     *
+     * @return bool
+     */
+    public function isEmpty(): bool
+    {
+        $hasResults = count($this->rows) > 0;
+        $hasFilters = count($this->getFilters()) > 0;
+        $hasSearch = !is_blank($this->getSearch() ?? "");
+        return !$hasResults && !$hasFilters && !$hasSearch;
+    }
+
     public function getCurrentRowCount(): int
     {
         return $this->count;
