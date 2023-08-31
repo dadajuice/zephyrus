@@ -8,7 +8,7 @@ class StringUtility
             return "";
         }
         return (strlen($string) > $length)
-            ? substr($string,0, $length) . "..."
+            ? substr($string, 0, $length) . "..."
             : $string;
     }
 
