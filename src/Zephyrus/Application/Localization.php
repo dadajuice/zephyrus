@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Application;
 
+use Locale;
 use stdClass;
 use Zephyrus\Exceptions\LocalizationException;
 use Zephyrus\Utilities\FileSystem\Directory;
@@ -276,6 +277,7 @@ class Localization
     {
         $charset = Configuration::getLocaleConfiguration('charset');
         $locale = $this->appLocale . '.' . $charset;
+        Locale::setDefault($this->appLocale);
         setlocale(LC_MESSAGES, $locale);
         setlocale(LC_TIME, $locale);
         setlocale(LC_CTYPE, $locale);
