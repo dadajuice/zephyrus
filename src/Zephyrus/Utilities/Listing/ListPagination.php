@@ -35,7 +35,7 @@ class ListPagination
 
     public function getMaxPage(int $recordCount): int
     {
-        return ceil($recordCount / $this->getLimit());
+        return ceil($recordCount / $this->getLimit()) ?: 1;
     }
 
     public function setDefaultLimit(int $defaultLimit, int $maxLimitAllowed): void
