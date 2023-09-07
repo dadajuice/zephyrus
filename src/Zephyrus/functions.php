@@ -84,13 +84,14 @@ function format(string $type, ...$args): string
  * view files.
  *
  * @param string $section
- * @param string $property
+ * @param string|null $property
  * @param string|null $defaultValue
  * @return mixed
  */
-function config(string $section, string $property, string $defaultValue = null): mixed
+function config(string $section, ?string $property = null, ?string $defaultValue = null): mixed
 {
-    return Configuration::getConfiguration($section, $property, $defaultValue);
+    $config = Configuration::read($section);
+    return ($property) ? $config[$property] ?? $defaultValue : $config;
 }
 
 /**

@@ -115,7 +115,7 @@ class IntrusionDetection
     private function initializeConfigurations(array $configurations)
     {
         if (empty($configurations)) {
-            $configurations = Configuration::getConfiguration('ids') ?? self::DEFAULT_CONFIGURATIONS;
+            $configurations = Configuration::getSecurity('ids') ?? self::DEFAULT_CONFIGURATIONS;
         }
         $this->configurations = $configurations;
     }

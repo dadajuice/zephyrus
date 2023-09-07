@@ -340,7 +340,7 @@ class Session
     private function initializeConfigurations(array $configurations)
     {
         if (empty($configurations)) {
-            $configurations = Configuration::getConfiguration('session') ?? self::DEFAULT_CONFIGURATIONS;
+            $configurations = Configuration::getSession() ?? self::DEFAULT_CONFIGURATIONS;
         }
         $this->configurations = $configurations;
         $this->enabled = (bool) ($this->configurations['enabled'] ?? self::DEFAULT_CONFIGURATIONS['enabled']);

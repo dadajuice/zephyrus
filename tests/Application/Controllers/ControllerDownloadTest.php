@@ -17,15 +17,15 @@ class ControllerDownloadTest extends TestCase
 
             public function index()
             {
-                return parent::download(ROOT_DIR . '/config.ini');
+                return parent::download(ROOT_DIR . '/config.yml');
             }
         };
         ob_start();
         $controller->index()->send();
         $output = ob_get_clean();
         $headers = xdebug_get_headers();
-        self::assertTrue(str_contains($output, "[application]"));
-        self::assertTrue(in_array('Content-Disposition:attachment; filename="config.ini"', $headers));
+        self::assertTrue(str_contains($output, "application"));
+        self::assertTrue(in_array('Content-Disposition:attachment; filename="config.yml"', $headers));
     }
 
     public function testDownloadAndDelete()

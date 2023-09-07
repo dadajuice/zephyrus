@@ -56,6 +56,6 @@ class DatabaseSession
 
     private function activateLocale()
     {
-        $this->database->query("SET lc_time = '" . Configuration::getLocaleConfiguration('language') . ".UTF-8'");
+        $this->database->query("SET lc_time = '" . Configuration::getLocale('language') . ".UTF-8'");
     }
 }

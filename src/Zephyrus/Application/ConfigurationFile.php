@@ -1,6 +1,8 @@
 <?php namespace Zephyrus\Application;
 
 use RuntimeException;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 class ConfigurationFile
 {
@@ -11,77 +13,37 @@ class ConfigurationFile
     {
         $this->path = $filePath;
         if (is_readable($this->path)) {
-            $this->content = parse_ini_file($this->path, true, INI_SCANNER_TYPED);
+            try {
+                $this->content = Yaml::parseFile($this->path, Yaml::PARSE_CONSTANT);
+            } catch (ParseException $exception) {
+                throw new RuntimeException("Unable to parse the YAML string [{$exception->getMessage()}]");
+            }
         }
     }
 
-    public function save(): bool
+    public function save(): void
     {
         if (!is_writable(dirname($this->path))) {
             throw new RuntimeException("Cannot write file [$this->path]");
         }
-        $file = fopen($this->path, 'w');
-        flock($file, LOCK_EX);
-        fwrite($file, implode(PHP_EOL, $this->buildConfigurations()));
-        flock($file, LOCK_UN);
-        fclose($file);
-        return true;
+        $yaml = Yaml::dump($this->content);
+        file_put_contents($this->path, $yaml);
     }
 
-    public function read(?string $section = null, ?string $property = null, $defaultValue = null)
+    public function read(?string $property = null, $defaultValue = null): mixed
     {
-        if (is_null($section)) {
-            return $this->content;
-        }
         return (is_null($property))
-            ? $this->content[$section] ?? $defaultValue
-            : $this->content[$section][$property] ?? $defaultValue;
+            ? $this->content
+            : $this->content[$property] ?? $defaultValue;
     }
 
-    public function write(array $content)
+    public function write(array $content): void
     {
         $this->content = $content;
     }
 
-    public function writeSection(string $section, $properties)
+    public function writeProperty(string $property, mixed $value): void
     {
-        $this->content[$section] = $properties;
-    }
-
-    private function buildConfigurations(): array
-    {
-        $data = [];
-        foreach ($this->content as $sectionName => $sectionContent) {
-            if (is_array($sectionContent)) {
-                $data[] = "[$sectionName]";
-                $this->buildConfigurationProperty($data, $sectionContent);
-            } elseif (is_bool($sectionContent)) {
-                $data[] = $sectionName . ' = ' . var_export($sectionContent, true);
-            } else {
-                $data[] = $sectionName . ' = ' . $this->formatConfigurationData($sectionContent);
-            }
-            $data[] = null;
-        }
-        return $data;
-    }
-
-    private function formatConfigurationData(string $data): string
-    {
-        return (defined($data) || is_numeric($data)) ? $data : '"' . $data . '"';
-    }
-
-    private function buildConfigurationProperty(array &$data, array $sectionValue)
-    {
-        foreach ($sectionValue as $key => $value) {
-            if (is_array($value)) {
-                foreach ($value as $propertyName => $propertyValue) {
-                    $data[] = $key . ((is_numeric($propertyName))
-                        ? '[] = ' . $this->formatConfigurationData($propertyValue)
-                        : '[' . $propertyName . '] = ' . $this->formatConfigurationData($propertyValue));
-                }
-            } else {
-                $data[] = $key . ' = ' . $this->formatConfigurationData($value);
-            }
-        }
+        $this->content[$property] = $value;
     }
 }

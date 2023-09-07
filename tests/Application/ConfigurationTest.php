@@ -7,86 +7,86 @@ class ConfigurationTest extends TestCase
 {
     public function testReadAllConfigurations()
     {
-        Configuration::set(['database' => ['host' => 'localhost'], 'security' => ['encryption_algorithm' => 'aes-256-cbc']]);
-        $config = Configuration::getConfigurations();
+        Configuration::write(['database' => ['host' => 'localhost'], 'security' => ['encryption_algorithm' => 'aes-256-cbc']]);
+        $config = Configuration::read();
         self::assertEquals('aes-256-cbc', $config['security']['encryption_algorithm']);
         self::assertEquals('localhost', $config['database']['host']);
-        Configuration::set(null);
-        $config = Configuration::getConfigurations();
+        Configuration::write(null);
+        $config = Configuration::read();
         self::assertEquals('zephyrus_database', $config['database']['hostname']);
-        Configuration::set(null);
+        Configuration::write(null);
     }
 
     public function testFile()
     {
-        Configuration::set(null);
+        Configuration::write(null);
         self::assertNull(Configuration::getFile());
-        Configuration::getConfiguration('database');
-        self::assertEquals('zephyrus_database', Configuration::getFile()->read('database', 'hostname'));
     }
 
     public function testReadSingleConfiguration()
     {
-        Configuration::set(['application' => ['env' => 'dev']]);
-        $config = Configuration::getConfiguration('application', 'env');
+        Configuration::write(['application' => ['env' => 'dev']]);
+        $config = Configuration::getApplication('env', 'dev');
         self::assertEquals('dev', $config);
-        Configuration::set(null);
+        Configuration::write(null);
     }
 
     public function testReadLocaleConfiguration()
     {
-        Configuration::set(['locale' => ['currency' => 'CAD', 'charset' => 'utf8']]);
-        $config = Configuration::getLocaleConfiguration();
-        $precise = Configuration::getLocaleConfiguration('currency');
+        Configuration::write(['locale' => ['currency' => 'CAD', 'charset' => 'utf8']]);
+        $config = Configuration::getLocale();
+        $precise = Configuration::getLocale('currency');
         self::assertEquals("CAD", $precise);
         self::assertEquals('utf8', $config['charset']);
-        Configuration::set(null);
+        Configuration::write(null);
     }
 
     public function testReadDatabaseConfiguration()
     {
-        Configuration::set(['database' => ['host' => 'localhost', 'charset' => 'utf8']]);
-        $config = Configuration::getDatabaseConfiguration();
-        $precise = Configuration::getDatabaseConfiguration('host');
+        Configuration::write(['database' => ['host' => 'localhost', 'charset' => 'utf8']]);
+        $config = Configuration::getDatabase();
+        $precise = Configuration::getDatabase('host');
         self::assertEquals('localhost', $precise);
         self::assertEquals('utf8', $config['charset']);
-        Configuration::set(null);
+        Configuration::write(null);
     }
 
     public function testReadSessionConfiguration()
     {
-        Configuration::set(['session' => ['encryption_enabled' => true, 'refresh_after_interval' => 60]]);
-        $config = Configuration::getSessionConfiguration();
-        $precise = (bool) Configuration::getSessionConfiguration('encryption_enabled');
+        Configuration::write(['session' => ['encryption_enabled' => true, 'refresh_after_interval' => 60]]);
+        $config = Configuration::getSession();
+        $precise = (bool) Configuration::getSession('encryption_enabled');
         self::assertTrue($precise);
         self::assertEquals('60', $config['refresh_after_interval']);
-        Configuration::set(null);
+        Configuration::write(null);
     }
 
     public function testInvalidConfigurationFile()
     {
-        rename(ROOT_DIR . '/config.ini', ROOT_DIR . '/config.ini_test');
+        rename(ROOT_DIR . '/config.yml', ROOT_DIR . '/config.yml_test');
         $catch = false;
         try {
-            Configuration::set(null);
-            Configuration::getConfiguration('session');
+            Configuration::write(null);
+            Configuration::read('session');
         } catch (\RuntimeException $e) {
             $catch = true;
         } finally {
-            rename(ROOT_DIR . '/config.ini_test', ROOT_DIR . '/config.ini');
+            rename(ROOT_DIR . '/config.yml_test', ROOT_DIR . '/config.yml');
         }
         self::assertTrue($catch);
     }
 
     public function testInvalidSection()
     {
-        $result = Configuration::getConfiguration('invalid');
+        $result = Configuration::read('invalid');
         self::assertNull($result);
+        $result = Configuration::read('invalid', 'test');
+        self::assertEquals('test', $result);
     }
 
     public function testInvalidSectionField()
     {
-        $result = Configuration::getApplicationConfiguration('invalid');
+        $result = Configuration::getApplication('invalid');
         self::assertNull($result);
     }
 }

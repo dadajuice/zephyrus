@@ -8,7 +8,7 @@ abstract class DatabaseTestCase extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
-        $db = new Database(Configuration::getDatabaseConfiguration());
+        $db = new Database(Configuration::getDatabase());
         $db->query("DROP TABLE IF EXISTS heroes CASCADE");
         $db->query('CREATE TABLE heroes(id SERIAL PRIMARY KEY, name TEXT NULL, alter TEXT NULL, power FLOAT)');
         $db->query("INSERT INTO heroes(name, alter, power) VALUES ('Batman', 'Bruce Wayne', 20.56);");
@@ -21,7 +21,7 @@ abstract class DatabaseTestCase extends TestCase
 
     public static function tearDownAfterClass(): void
     {
-        $db = new Database(Configuration::getDatabaseConfiguration());
+        $db = new Database(Configuration::getDatabase());
         $db->query("DROP TABLE heroes CASCADE");
     }
 
@@ -39,6 +39,6 @@ abstract class DatabaseTestCase extends TestCase
 
     public function buildDatabase(): Database
     {
-        return new Database(Configuration::getDatabaseConfiguration());
+        return new Database(Configuration::getDatabase());
     }
 }

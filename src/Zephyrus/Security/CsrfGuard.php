@@ -326,7 +326,7 @@ class CsrfGuard
     private function initializeConfigurations(array $configurations)
     {
         if (empty($configurations)) {
-            $configurations = Configuration::getConfiguration('csrf') ?? self::DEFAULT_CONFIGURATIONS;
+            $configurations = Configuration::getSecurity('csrf') ?? self::DEFAULT_CONFIGURATIONS;
         }
         $this->configurations = $configurations;
     }
