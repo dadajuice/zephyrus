@@ -25,7 +25,7 @@ class Cryptography
      */
     public static function hashPassword(string $clearTextPassword, string $algorithm = PASSWORD_DEFAULT): string
     {
-        $pepper = Configuration::getApplicationConfiguration("password_pepper");
+        $pepper = Configuration::getSecurity("password_pepper");
         if ($pepper) {
             $clearTextPassword = $clearTextPassword . $pepper;
         }
@@ -42,7 +42,7 @@ class Cryptography
      */
     public static function verifyHashedPassword(string $clearTextPassword, string $hash): bool
     {
-        $pepper = Configuration::getApplicationConfiguration("password_pepper");
+        $pepper = Configuration::getSecurity("password_pepper");
         if ($pepper) {
             $clearTextPassword = $clearTextPassword . $pepper;
         }
@@ -322,6 +322,6 @@ class Cryptography
      */
     public static function getEncryptionAlgorithm(): string
     {
-        return Configuration::getApplicationConfiguration('encryption_algorithm', self::DEFAULT_ENCRYPTION_ALGORITHM);
+        return Configuration::getSecurity('encryption_algorithm', self::DEFAULT_ENCRYPTION_ALGORITHM);
     }
 }

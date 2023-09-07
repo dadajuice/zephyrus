@@ -106,7 +106,7 @@ class PugEngine
     private function initializeConfigurations(array $configurations): void
     {
         if (empty($configurations)) {
-            $configurations = Configuration::getConfiguration('pug') ?? self::DEFAULT_CONFIGURATIONS;
+            $configurations = Configuration::read('pug') ?? self::DEFAULT_CONFIGURATIONS;
         }
         $this->configurations = $configurations;
     }

@@ -17,7 +17,7 @@ class DatabaseConfigurationTest extends TestCase
 
     public function testConfigIniConfigurations()
     {
-        $source = new DatabaseConfiguration(Configuration::getDatabaseConfiguration());
+        $source = new DatabaseConfiguration(Configuration::getDatabase());
         self::assertEquals("zephyrus", $source->getDatabaseName());
         self::assertEquals("zephyrus_database", $source->getHostname());
         self::assertEquals("pgsql:dbname=zephyrus;host=zephyrus_database;", $source->getDatabaseSourceName());

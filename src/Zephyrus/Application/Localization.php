@@ -89,7 +89,7 @@ class Localization
      */
     public function start(?string $locale = null): void
     {
-        $this->appLocale = $locale ?? Configuration::getLocaleConfiguration('language');
+        $this->appLocale = $locale ?? Configuration::getLocale('language');
         $this->initializeLocale();
         $this->generate();
         $this->initializeCache();
@@ -275,14 +275,14 @@ class Localization
 
     private function initializeLocale(): void
     {
-        $charset = Configuration::getLocaleConfiguration('charset');
+        $charset = Configuration::getLocale('charset');
         $locale = $this->appLocale . '.' . $charset;
         Locale::setDefault($this->appLocale);
         setlocale(LC_MESSAGES, $locale);
         setlocale(LC_TIME, $locale);
         setlocale(LC_CTYPE, $locale);
         putenv("LANG=" . $this->appLocale);
-        date_default_timezone_set(Configuration::getLocaleConfiguration('timezone'));
+        date_default_timezone_set(Configuration::getLocale('timezone'));
     }
 
     private function initializeCache(): void

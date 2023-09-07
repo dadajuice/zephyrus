@@ -7,41 +7,46 @@ class ConfigurationFileTest extends TestCase
 {
     public function testLoad()
     {
-        $ini = new ConfigurationFile(ROOT_DIR . '/config.ini');
-        $data = $ini->read();
+        $file = new ConfigurationFile(ROOT_DIR . '/config.yml');
+        $data = $file->read();
         self::assertArrayHasKey('database', $data);
-        $data = $ini->read('database');
+
+        $data = $file->read('database');
         self::assertArrayHasKey('hostname', $data);
-        $data = $ini->read('database', 'hostname');
-        self::assertEquals('zephyrus_database', $data);
+
+        $data = $file->read('test', 'nope');
+        self::assertEquals('nope', $data);
     }
 
     public function testWrite()
     {
-        $ini = new ConfigurationFile(ROOT_DIR . '/test.ini');
-        $ini->write([
+        $file = new ConfigurationFile(ROOT_DIR . '/test.yml');
+        $file->write([
             'test' => [
-                'propertyA' => 1,
-                'propertyB' => 2
+                'property_a' => 1,
+                'property_b' => 2
             ],
-            'test2' => 3
+            'test_2' => 3
         ]);
-        $data = $ini->read();
+
+        $data = $file->read();
         self::assertArrayHasKey('test', $data);
-        $data = $ini->read('test');
-        self::assertArrayHasKey('propertyA', $data);
-        $data = $ini->read('test', 'propertyA');
-        self::assertEquals(1, $data);
-        $ini->writeSection('test3', [
+
+        $data = $file->read('test');
+        self::assertArrayHasKey('property_a', $data);
+
+        $data = $file->read('test', 'propertyA');
+        self::assertEquals(1, $data['property_a']);
+        $file->writeProperty('test_3', [
             'Junji' => 'Ito'
         ]);
-        self::assertEquals("Ito", $ini->read('test3', 'Junji'));
+        self::assertEquals("Ito", $file->read('test_3')['Junji']);
     }
 
     public function testSave()
     {
-        $ini = new ConfigurationFile(ROOT_DIR . '/test.ini');
-        $ini->write([
+        $file = new ConfigurationFile(ROOT_DIR . '/test.yml');
+        $file->write([
             'test' => [
                 'propertyA' => 1,
                 'propertyB' => 2,
@@ -54,21 +59,22 @@ class ConfigurationFileTest extends TestCase
             ],
             'test2' => 3
         ]);
-        $ini->save();
-        $ini = new ConfigurationFile(ROOT_DIR . '/test.ini');
-        $data = $ini->read('test', 'propertyA');
-        self::assertEquals(1, $data);
-        self::assertTrue(is_int($data));
-        @unlink(ROOT_DIR . '/test.ini');
-    }
+        $file->save();
 
-//    public function testLock()
-//    {
-//        $this->expectException(\RuntimeException::class);
-//        $ini = new ConfigurationFile('/etc/lock.ini');
-//        $ini->write([
-//            'test' => 5
-//        ]);
-//        $ini->save();
-//    }
+        $file = new ConfigurationFile(ROOT_DIR . '/test.yml');
+        $data = $file->read('test');
+        self::assertEquals([
+            'propertyA' => 1,
+            'propertyB' => 2,
+            'propertyC' => ['b', 'd'],
+            'propertyD' => [
+                'a' => 'b',
+                'b' => 'd'
+            ],
+            'testBoolean' => true
+        ], $data);
+
+        self::assertTrue(is_int($data['propertyB']));
+        @unlink(ROOT_DIR . '/test.yml');
+    }
 }

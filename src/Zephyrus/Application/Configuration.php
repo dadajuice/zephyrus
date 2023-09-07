@@ -4,21 +4,22 @@ use RuntimeException;
 
 class Configuration
 {
-    public const CONFIGURATION_PATH = ROOT_DIR . '/config.ini';
-
+    public const CONFIGURATION_PATH = ROOT_DIR . '/config.yml';
     private static ?ConfigurationFile $configurationFile = null;
 
     /**
-     * Reads all available configurations.
+     * Retrieves the configurations of the given property.
      *
-     * @return array
+     * @param string|null $property
+     * @param mixed|null $defaultValue
+     * @return mixed
      */
-    public static function getConfigurations(): array
+    public static function read(?string $property = null, mixed $defaultValue = null): mixed
     {
         if (is_null(self::$configurationFile)) {
             self::initializeConfigurations();
         }
-        return self::$configurationFile->read();
+        return self::$configurationFile->read($property, $defaultValue);
     }
 
     public static function getFile(): ?ConfigurationFile
@@ -26,7 +27,7 @@ class Configuration
         return self::$configurationFile;
     }
 
-    public static function set(?array $configurations)
+    public static function write(?array $configurations): void
     {
         self::$configurationFile = null;
         if (!is_null($configurations)) {
@@ -35,51 +36,44 @@ class Configuration
         }
     }
 
-    public static function getApplicationConfiguration(?string $property = null, $defaultValue = null)
+    public static function getApplication(?string $property = null, mixed $defaultValue = null): mixed
     {
-        return self::getConfiguration('application', $property, $defaultValue);
+        $configs = self::read('application');
+        return ($property) ? $configs[$property] ?? $defaultValue : $configs;
     }
 
-    public static function getLocaleConfiguration(?string $property = null, $defaultValue = null)
+    public static function getLocale(?string $property = null, mixed $defaultValue = null): mixed
     {
-        return self::getConfiguration('locale', $property, $defaultValue);
+        $configs = self::read('locale');
+        return ($property) ? $configs[$property] ?? $defaultValue : $configs;
     }
 
-    public static function getDatabaseConfiguration(?string $property = null, $defaultValue = null)
+    public static function getDatabase(?string $property = null, mixed $defaultValue = null): mixed
     {
-        return self::getConfiguration('database', $property, $defaultValue);
+        $configs = self::read('database');
+        return ($property) ? $configs[$property] ?? $defaultValue : $configs;
     }
 
-    public static function getSessionConfiguration(?string $property = null, $defaultValue = null)
+    public static function getSession(?string $property = null, mixed $defaultValue = null): mixed
     {
-        return self::getConfiguration('session', $property, $defaultValue);
+        $configs = self::read('session');
+        return ($property) ? $configs[$property] ?? $defaultValue : $configs;
     }
 
-    /**
-     * Retrieves the configurations of the given section if no property has been set, otherwise, tries to read the
-     * specified property within the given section. If it fails, the default value is returned.
-     *
-     * @param string $section
-     * @param string|null $property
-     * @param mixed|null $defaultValue
-     * @return mixed
-     */
-    public static function getConfiguration(string $section, ?string $property = null, mixed $defaultValue = null)
+    public static function getSecurity(?string $property = null, mixed $defaultValue = null): mixed
     {
-        if (is_null(self::$configurationFile)) {
-            self::initializeConfigurations();
-        }
-        return self::$configurationFile->read($section, $property, $defaultValue);
+        $configs = self::read('security');
+        return ($property) ? $configs[$property] ?? $defaultValue : $configs;
     }
 
     /**
-     * Parse the .ini configuration file (/config.ini) into a PHP associative array including sections. Throws an
+     * Parse the yml configuration file (/config.yml) into a PHP associative array including sections. Throws an
      * exception if file is not accessible.
      */
-    private static function initializeConfigurations()
+    private static function initializeConfigurations(): void
     {
         if (!is_readable(self::CONFIGURATION_PATH)) {
-            throw new RuntimeException("Cannot parse configurations file (config.ini)");
+            throw new RuntimeException("Cannot parse configurations file [" . self::CONFIGURATION_PATH . "]");
         }
         self::$configurationFile = new ConfigurationFile(self::CONFIGURATION_PATH);
     }
