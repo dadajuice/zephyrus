@@ -25,9 +25,16 @@ session:
   lifetime: 600
 
 security:
-  encryption_algorithm: "aes-256-cbc"
-  password_pepper: "my_secret_pepper"
-  encryption_key: "secret"
+  encryption:
+    algorithm: "aes-256-cbc"
+    key: "secret"
+
+  password:
+    pepper: "my_secret_pepper"
+    #algorithm: !php/const PASSWORD_BCRYPT
+    #options:
+    #  cost: 13
+
   csrf:
     enabled: true
     html_integration_enabled: true

@@ -1,40 +1,60 @@
 <?php namespace Zephyrus\Security;
 
 use InvalidArgumentException;
+use RuntimeException;
 use Zephyrus\Application\Configuration;
 
 class Cryptography
 {
     /**
      * Default algorithm to use with encrypt() and decrypt() methods if none is specified otherwise within the security
-     * section of the config.ini configuration file as property [encryption_algorithm].
+     * section of the config.yml configuration file as property [encryption -> algorithm].
      */
     private const DEFAULT_ENCRYPTION_ALGORITHM = 'aes-256-cbc';
 
     /**
+     * Default algorithm to use with hashPassword() if none is specified otherwise within the security section of the
+     * config.yml configuration file as property [password -> algorithm].
+     */
+    private const DEFAULT_PASSWORD_HASH_ALGORITHM = PASSWORD_BCRYPT;
+
+    /**
+     * Default cost option to use with hashPassword() for BCRYPT if none is specified otherwise within the security
+     * section of the config.yml configuration file as property [password -> options -> cost].
+     */
+    private const DEFAULT_PASSWORD_HASH_COST = 13;
+
+    /**
      * Cryptographically hash a specified string using the default PHP hashing algorithm. This method uses the default
      * hash function included in the PHP core and thus automatically provides a cryptographically random salt. If the
-     * property [password_pepper] is defined in the security section of the config.ini file, the method will concatenate
-     * the password with the configured pepper. This pepper should be unique by project and thus ensure that a given
-     * hashed password will work only within a specific project. The pepper is designed to be a "secret" kept within the
-     * server. Should be defined as a server environment to ensure maximum security.
+     * property [pepper] is defined in the password security section of the config.yml file, the method will concatenate
+     * the password with the configured pepper.
+     *
+     * This pepper should be unique by project and thus ensure that a given hashed password will work only within a
+     * specific project. The pepper is designed to be a "secret" kept within the server. Should be defined as a server
+     * environment to ensure maximum security.
+     *
+     * The algorithm used by default is PASSWORD_CRYPT but can be changed with the property [algorithm] in the password
+     * security section of the config.yml file as well as the hash options.
      *
      * @param string $clearTextPassword
-     * @param string $algorithm
      * @return string
      */
-    public static function hashPassword(string $clearTextPassword, string $algorithm = PASSWORD_DEFAULT): string
+    public static function hashPassword(string $clearTextPassword): string
     {
-        $pepper = Configuration::getSecurity("password_pepper");
+        $config = Configuration::getSecurity("password");
+        $pepper = $config['pepper'] ?? "";
+        $algorithm = $config['algorithm'] ?? self::DEFAULT_PASSWORD_HASH_ALGORITHM;
+        $options = $config['options'] ?? ['cost' => self::DEFAULT_PASSWORD_HASH_COST];
         if ($pepper) {
             $clearTextPassword = $clearTextPassword . $pepper;
         }
-        return password_hash($clearTextPassword, $algorithm);
+        return password_hash($clearTextPassword, $algorithm, $options);
     }
 
     /**
      * Determines if the specified hash matches the given clear text password. Makes sure to add the pepper if one is
-     * defines within the project's config.ini file. See hashPassword method for more information.
+     * defined within the project's config.yml file. See hashPassword method for more information.
      *
      * @param string $clearTextPassword
      * @param string $hash
@@ -42,7 +62,8 @@ class Cryptography
      */
     public static function verifyHashedPassword(string $clearTextPassword, string $hash): bool
     {
-        $pepper = Configuration::getSecurity("password_pepper");
+        $config = Configuration::getSecurity("password");
+        $pepper = $config['pepper'] ?? "";
         if ($pepper) {
             $clearTextPassword = $clearTextPassword . $pepper;
         }
@@ -167,12 +188,17 @@ class Cryptography
      * derive hmac key. Use method decrypt to retrieve the original plain text.
      *
      * @param string $plainText
-     * @param string $key
+     * @param string|null $key
      * @return string
      */
-    public static function encrypt(string $plainText, string $key): string
+    public static function encrypt(string $plainText, ?string $key = null): string
     {
         $algorithm = self::getEncryptionAlgorithm();
+        $key = !is_null($key) ? $key : self::getEncryptionDefaultKey();
+        if (is_null($key)) {
+            throw new RuntimeException("The encryption key cannot be null. Be sure to either give one specifically for the operation or set a default key within the config.yml file.");
+        }
+
         $initializationVector = self::randomBytes(openssl_cipher_iv_length($algorithm));
         $keys = self::deriveEncryptionKey($key, $initializationVector); // password is the encryption key
         $encryptionKey = mb_substr($keys, 0, 32, '8bit');
@@ -188,16 +214,22 @@ class Cryptography
      * default, will decrypt using the AES CBC mode 256 bits (aes-256-cbc) algorithm. Returns null if decryption fails.
      *
      * @param string $cipherText
-     * @param string $key
+     * @param string|null $key
      * @return null|string
      */
-    public static function decrypt(string $cipherText, string $key): ?string
+    public static function decrypt(string $cipherText, ?string $key = null): ?string
     {
+        $algorithm = self::getEncryptionAlgorithm();
+        $key = !is_null($key) ? $key : self::getEncryptionDefaultKey();
+        if (is_null($key)) {
+            throw new RuntimeException("The encryption key cannot be null. Be sure to either give one specifically for the operation or set a default key within the config.yml file.");
+        }
+
         $cipherText = base64_decode($cipherText);
         if (strlen($cipherText) < 81) {
             return null;
         }
-        $algorithm = self::getEncryptionAlgorithm();
+
         $hmac = mb_substr($cipherText, 0, 64, '8bit');
         $initializationVector = mb_substr($cipherText, 64, 16, '8bit');
         $cipher = mb_substr($cipherText, 80, null, '8bit');
@@ -227,7 +259,7 @@ class Cryptography
      * @param string $key
      * @param string|null $destination
      */
-    public static function encryptFile(string $plainTextFilename, string $key, ?string $destination = null)
+    public static function encryptFile(string $plainTextFilename, string $key, ?string $destination = null): void
     {
         if (!file_exists($plainTextFilename)) {
             throw new InvalidArgumentException("Specified file to encrypt does not exist");
@@ -247,7 +279,7 @@ class Cryptography
      * @param string $key
      * @param string|null $destination
      */
-    public static function decryptFile(string $cipherTextFilename, string $key, ?string $destination = null)
+    public static function decryptFile(string $cipherTextFilename, string $key, ?string $destination = null): void
     {
         if (!file_exists($cipherTextFilename)) {
             throw new InvalidArgumentException("Specified file to decrypt does not exist");
@@ -322,6 +354,19 @@ class Cryptography
      */
     public static function getEncryptionAlgorithm(): string
     {
-        return Configuration::getSecurity('encryption_algorithm', self::DEFAULT_ENCRYPTION_ALGORITHM);
+        $config = Configuration::getSecurity("encryption");
+        return $config['algorithm'] ?? self::DEFAULT_ENCRYPTION_ALGORITHM;
+    }
+
+    /**
+     * Returns the configured default encryption key to be used in the application with encrypt and decrypt
+     * methods. Returns null if no default key has been specified.
+     *
+     * @return string|null
+     */
+    public static function getEncryptionDefaultKey(): ?string
+    {
+        $config = Configuration::getSecurity("encryption");
+        return $config['key'] ?? self::DEFAULT_ENCRYPTION_ALGORITHM;
     }
 }
