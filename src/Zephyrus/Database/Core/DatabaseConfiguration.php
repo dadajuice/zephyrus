@@ -43,6 +43,7 @@ class DatabaseConfiguration
         $this->initializePort();
         $this->initializeDatabaseName();
         $this->initializeAuthentication();
+        $this->initializeSearchPaths();
     }
 
     /**
