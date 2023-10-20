@@ -19,14 +19,6 @@ class DatabaseSessionTest extends TestCase
         $database = DatabaseSession::getInstance()->getDatabase();
         self::assertEquals("demo", $database->getConfiguration()->getUsername());
         self::assertEquals("zephyrus", $database->getConfiguration()->getDatabaseName());
-    }
-
-    public function testInitiateNoSearchPath()
-    {
-        DatabaseSession::initiate(Configuration::getDatabase(), []);
-        $database = DatabaseSession::getInstance()->getDatabase();
-        self::assertEmpty(DatabaseSession::getInstance()->getSearchPaths());
-        self::assertEquals("demo", $database->getConfiguration()->getUsername());
-        self::assertEquals("zephyrus", $database->getConfiguration()->getDatabaseName());
+        self::assertEquals(['public'], $database->getConfiguration()->getSearchPaths());
     }
 }

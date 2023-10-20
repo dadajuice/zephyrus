@@ -10,7 +10,8 @@ class DatabaseConfiguration
         'port' => '', // Port to access the database's server, leave empty to use the default port of your dbms
         'database' => '', // Database name
         'username' => '', // Username for database authentication
-        'password' => '' // Password for database authentication
+        'password' => '', // Password for database authentication
+        'search_paths' => ['public'] // Default search_path configuration
     ];
 
     private array $configurations;
@@ -19,6 +20,7 @@ class DatabaseConfiguration
     private string $databaseName = '';
     private string $username = '';
     private string $password = '';
+    private array $searchPaths = ['public'];
 
     /**
      * Wrapper to retrieve the list of currently installed DBMS's drivers.
@@ -95,6 +97,16 @@ class DatabaseConfiguration
     }
 
     /**
+     * Retrieve the configured search paths (optional) for the default search schema of the database.
+     *
+     * @return array
+     */
+    public function getSearchPaths(): array
+    {
+        return $this->searchPaths;
+    }
+
+    /**
      * Retrieves the PDO compatible DSN string for connection purpose.
      *
      * @return string
@@ -105,7 +117,7 @@ class DatabaseConfiguration
         return 'pgsql:dbname=' . $this->getDatabaseName() . ';host=' . $this->getHostname() . ';' . $port;
     }
 
-    private function initializeConfigurations(array $configurations)
+    private function initializeConfigurations(array $configurations): void
     {
         $this->configurations = $configurations;
     }
@@ -114,7 +126,7 @@ class DatabaseConfiguration
      * @codeCoverageIgnore
      * @throws FatalDatabaseException
      */
-    private function initializeDbms()
+    private function initializeDbms(): void
     {
         if (!in_array('pgsql', self::getAvailableDrivers())) {
             throw FatalDatabaseException::driverNotAvailable('pgsql');
@@ -124,7 +136,7 @@ class DatabaseConfiguration
     /**
      * @throws FatalDatabaseException
      */
-    private function initializeHostname()
+    private function initializeHostname(): void
     {
         if (!isset($this->configurations['hostname'])) {
             throw FatalDatabaseException::missingConfiguration('hostname');
@@ -135,7 +147,7 @@ class DatabaseConfiguration
     /**
      * @throws FatalDatabaseException
      */
-    private function initializeDatabaseName()
+    private function initializeDatabaseName(): void
     {
         if (!isset($this->configurations['database'])) {
             throw FatalDatabaseException::missingConfiguration('database');
@@ -146,7 +158,7 @@ class DatabaseConfiguration
     /**
      * @throws FatalDatabaseException
      */
-    private function initializePort()
+    private function initializePort(): void
     {
         if (isset($this->configurations['port']) && $this->configurations['port']) {
             if (!is_numeric($this->configurations['port'])) {
@@ -156,13 +168,26 @@ class DatabaseConfiguration
         }
     }
 
-    private function initializeAuthentication()
+    private function initializeAuthentication(): void
     {
         if (isset($this->configurations['username']) && $this->configurations['username']) {
             $this->username = $this->configurations['username'];
         }
         if (isset($this->configurations['password']) && $this->configurations['password']) {
             $this->password = $this->configurations['password'];
+        }
+    }
+
+    /**
+     * @throws FatalDatabaseException
+     */
+    private function initializeSearchPaths(): void
+    {
+        if (isset($this->configurations['search_paths']) && $this->configurations['search_paths']) {
+            if (!is_array($this->configurations['search_paths'])) {
+                throw FatalDatabaseException::invalidSearchPathsConfiguration();
+            }
+            $this->searchPaths = $this->configurations['search_paths'];
         }
     }
 }

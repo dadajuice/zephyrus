@@ -9,14 +9,13 @@ class DatabaseSession
 {
     private static ?DatabaseSession $instance = null;
     private Database $database;
-    private array $searchPaths;
 
     /**
      * @throws FatalDatabaseException
      */
-    final public static function initiate(array $configurations, array $searchPaths = ['public'])
+    final public static function initiate(array $configurations): void
     {
-        static::$instance = new static(new Database($configurations), $searchPaths);
+        static::$instance = new static(new Database($configurations));
     }
 
     final public static function getInstance(): static
@@ -32,29 +31,24 @@ class DatabaseSession
         return $this->database;
     }
 
-    public function getSearchPaths(): array
-    {
-        return $this->searchPaths;
-    }
-
-    private function __construct(Database $database, array $searchPaths)
+    protected function __construct(Database $database)
     {
         $this->database = $database;
-        $this->searchPaths = $searchPaths;
-        $this->activateSearchPath();
         $this->activateLocale();
+        $this->activateSearchPath();
     }
 
-    private function activateSearchPath()
+    private function activateSearchPath(): void
     {
-        if (empty($this->searchPaths)) {
+        $searchPaths = $this->database->getConfiguration()->getSearchPaths();
+        if (empty($searchPaths)) {
             return;
         }
-        $paths = implode(', ', $this->searchPaths);
+        $paths = implode(', ', $searchPaths);
         $this->database->query("SET search_path TO $paths;");
     }
 
-    private function activateLocale()
+    private function activateLocale(): void
     {
         $this->database->query("SET lc_time = '" . Configuration::getLocale('language') . ".UTF-8'");
     }
