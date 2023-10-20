@@ -53,5 +53,6 @@ interface ContentType
     const IMAGE_PNG = 'image/png';
     const IMAGE_TIFF = 'image/tiff';
     const IMAGE_WEBP = 'image/webp';
+    const IMAGE_AVIF = 'image/avif';
     const IMAGE_ICON = 'image/vnd.microsoft.icon';
 }
