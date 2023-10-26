@@ -19,6 +19,7 @@ use Zephyrus\Network\Router\Get;
 use Zephyrus\Network\Router\Patch;
 use Zephyrus\Network\Router\Post;
 use Zephyrus\Network\Router\Put;
+use Zephyrus\Network\Router\Root;
 use Zephyrus\Network\RouteRepository;
 
 abstract class Controller
@@ -44,8 +45,18 @@ abstract class Controller
 
     public function initializeRoutesFromAttributes(RouteRepository $repository): void
     {
-        $reflection = new ReflectionClass($this);
-        $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
+        $class = new ReflectionClass($this);
+        $classAttributes = $class->getAttributes();
+        $baseRoute = "";
+        foreach ($classAttributes as $attribute) {
+            if ($attribute->getName() == Root::class) {
+                $instance = $attribute->newInstance();
+                $baseRoute = rtrim($instance->getBaseRoute(), "/");
+                break;
+            }
+        }
+
+        $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
         $supportedAttributes = [Get::class, Post::class, Put::class, Patch::class, Delete::class];
         foreach ($methods as $method) {
             $attributes = $method->getAttributes();
@@ -55,19 +66,19 @@ abstract class Controller
                 }
                 switch ($attribute->getName()) {
                     case Get::class:
-                        $repository->get($instance->getRoute(), [$this, $method->name]);
+                        $repository->get($baseRoute . $instance->getRoute(), [$this, $method->name]);
                         break;
                     case Post::class:
-                        $repository->post($instance->getRoute(), [$this, $method->name]);
+                        $repository->post($baseRoute . $instance->getRoute(), [$this, $method->name]);
                         break;
                     case Put::class:
-                        $repository->put($instance->getRoute(), [$this, $method->name]);
+                        $repository->put($baseRoute . $instance->getRoute(), [$this, $method->name]);
                         break;
                     case Patch::class:
-                        $repository->patch($instance->getRoute(), [$this, $method->name]);
+                        $repository->patch($baseRoute . $instance->getRoute(), [$this, $method->name]);
                         break;
                     case Delete::class:
-                        $repository->delete($instance->getRoute(), [$this, $method->name]);
+                        $repository->delete($baseRoute . $instance->getRoute(), [$this, $method->name]);
                         break;
                 }
             }

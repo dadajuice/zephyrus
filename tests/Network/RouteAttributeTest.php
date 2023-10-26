@@ -73,4 +73,32 @@ class RouteAttributeTest extends TestCase
         $response = (new Router($repository))->resolve($req);
         self::assertEquals('this is delete', $response->getContent());
     }
+
+    public function testRootGetRouting()
+    {
+        $controller = new AttributeExampleController();
+
+        $repository = new RouteRepository();
+        $controller->initializeRoutesFromAttributes($repository);
+
+        $req = new Request('http://test.local/toto/test', 'get');
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('test', $response->getContent());
+
+        $req = new Request('http://test.local/toto/login', 'post');
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('this is sparta', $response->getContent());
+
+        $req = new Request('http://test.local/toto/test', 'put');
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('this is update', $response->getContent());
+
+        $req = new Request('http://test.local/toto/test', 'patch');
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('this is partial update', $response->getContent());
+
+        $req = new Request('http://test.local/toto/test', 'delete');
+        $response = (new Router($repository))->resolve($req);
+        self::assertEquals('this is delete', $response->getContent());
+    }
 }
