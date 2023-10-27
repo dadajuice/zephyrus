@@ -31,9 +31,24 @@ class Form
      */
     public static function readMemorizedValue(string $fieldId, mixed $defaultValue = ""): mixed
     {
-        return (isset($_SESSION[self::SESSION_KEY][$fieldId]))
-            ? $_SESSION[self::SESSION_KEY][$fieldId]
-            : $defaultValue;
+        if (preg_match_all('/(?<field>[^\[]*)\[(?<keys>[^\[\]]+)\]/', $fieldId, $matches)) {
+            if (isset($_SESSION[self::SESSION_KEY][$matches["field"][0] . "[]"])) {
+                $value = $_SESSION[self::SESSION_KEY][$matches["field"][0] . "[]"];
+                foreach ($matches["keys"] as $key) {
+                    if (isset($value[$key])) {
+                        $value = $value[$key];
+                    } else {
+                        return $defaultValue;
+                    }
+                }
+                return $value;
+            }
+            return $defaultValue;
+        } else {
+            return (isset($_SESSION[self::SESSION_KEY][$fieldId]))
+                ? $_SESSION[self::SESSION_KEY][$fieldId]
+                : $defaultValue;
+        }
     }
 
     /**
