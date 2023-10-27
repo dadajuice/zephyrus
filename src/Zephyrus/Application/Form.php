@@ -48,14 +48,7 @@ class Form
         if (!isset($_SESSION[self::SESSION_KEY])) {
             $_SESSION[self::SESSION_KEY] = [];
         }
-        if (is_array($value)) {
-            foreach ($value as $key => $val) {
-                $fieldId = str_replace("[]", "", $fieldId);
-                self::memorizeValue("$fieldId" . "[" . $key . "]", $val);
-            }
-        } else {
-            $_SESSION[self::SESSION_KEY][$fieldId] = $value;
-        }
+        $_SESSION[self::SESSION_KEY][$fieldId] = $value;
     }
 
     /**
