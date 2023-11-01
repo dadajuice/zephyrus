@@ -2,21 +2,22 @@
 
 class ContentSecurityPolicy
 {
-    const SELF = "'self'";
-    const UNSAFE_INLINE = "'unsafe-inline'";
-    const UNSAFE_EVAL = "'unsafe-eval'";
-    const BASE64 = "data:";
-    const BLOB = "blob:";
-    const NONE = "'none'";
-    const ANY = "*";
-    const HTTPS_ONLY = "https:";
+    public const SELF = "'self'";
+    public const UNSAFE_INLINE = "'unsafe-inline'";
+    public const UNSAFE_EVAL = "'unsafe-eval'";
+    public const BASE64 = "data:";
+    public const BLOB = "blob:";
+    public const NONE = "'none'";
+    public const ANY = "*";
+    public const HTTPS_ONLY = "https:";
 
     /**
-     * Defines the supported source types.
-     *
-     * @var array
+     * Define script execution by requiring the presence of the specified nonce on script elements. Must be used in
+     * script tag: <script nonce=...>.
      */
-    private $sourceTypes = [
+    private static ?string $nonce = null;
+
+    private array $supportedSourceTypes = [
         'default-src',
         'script-src',
         'worker-src',
@@ -33,21 +34,7 @@ class ContentSecurityPolicy
         'plugin-types',
         'sandbox'
     ];
-
-    /**
-     * Define script execution by requiring the presence of the specified nonce on script elements. Must be used in
-     * script tag: <script nonce=...>.
-     *
-     * @var string
-     */
-    private static $nonce = null;
-
-    /**
-     * Defines the content for each supported source types.
-     *
-     * @var array
-     */
-    private $headers = [];
+    private array $headers = [];
 
     /**
      * The policy specified in report-only mode won’t block restricted resources, but it will send violation reports to
@@ -56,14 +43,14 @@ class ContentSecurityPolicy
      *
      * @var bool
      */
-    private $reportOnly = false;
+    private bool $reportOnly = false;
 
     /**
      * Specify to send the X-Content-Security-Policy along with the standard one. Currently only for IE 11.
      *
      * @var bool
      */
-    private $compatible = false;
+    private bool $compatible = false;
 
     /**
      * Specifies a URL where a browser will send reports when a content security policy is violated. This directive
@@ -71,19 +58,16 @@ class ContentSecurityPolicy
      *
      * @var string
      */
-    private $reportUri;
+    private string $reportUri;
 
-    /**
-     * @return string
-     */
-    public static function getRequestNonce()
+    public static function getRequestNonce(): string
     {
         return self::$nonce;
     }
 
     public function __construct()
     {
-        foreach ($this->sourceTypes as $type) {
+        foreach ($this->supportedSourceTypes as $type) {
             $this->headers[$type] = [];
         }
         if (empty(self::$nonce)) {
@@ -94,7 +78,7 @@ class ContentSecurityPolicy
     /**
      * Build and send the complete CSP security header according to the object specified data.
      */
-    public function send()
+    public function send(): void
     {
         $header = $this->buildCompleteHeader();
         $reportOnly = ($this->reportOnly) ? "-Report-Only" : "";
@@ -104,9 +88,6 @@ class ContentSecurityPolicy
         }
     }
 
-    /**
-     * @return string[]
-     */
     public function getAllHeader(): array
     {
         return $this->headers;
@@ -119,9 +100,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $defaultSources
      */
-    public function setDefaultSources(array $defaultSources)
+    public function setDefaultSources(array $defaultSources): void
     {
         $this->headers['default-src'] = $defaultSources;
+    }
+
+    public function addDefaultSource(string $source): void
+    {
+        $this->addSource('default-src', $source);
     }
 
     /**
@@ -129,9 +115,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $scriptSources
      */
-    public function setScriptSources(array $scriptSources)
+    public function setScriptSources(array $scriptSources): void
     {
         $this->headers['script-src'] = $scriptSources;
+    }
+
+    public function addScriptSource(string $source): void
+    {
+        $this->addSource('script-src', $source);
     }
 
     /**
@@ -139,9 +130,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $styleSources
      */
-    public function setStyleSources(array $styleSources)
+    public function setStyleSources(array $styleSources): void
     {
         $this->headers['style-src'] = $styleSources;
+    }
+
+    public function addStyleSource(string $source): void
+    {
+        $this->addSource('style-src', $source);
     }
 
     /**
@@ -149,9 +145,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $objectSources
      */
-    public function setObjectSources(array $objectSources)
+    public function setObjectSources(array $objectSources): void
     {
         $this->headers['object-src'] = $objectSources;
+    }
+
+    public function addObjectSource(string $source): void
+    {
+        $this->addSource('object-src', $source);
     }
 
     /**
@@ -159,9 +160,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $imageSources
      */
-    public function setImageSources(array $imageSources)
+    public function setImageSources(array $imageSources): void
     {
         $this->headers['img-src'] = $imageSources;
+    }
+
+    public function addImageSource(string $source): void
+    {
+        $this->addSource('img-src', $source);
     }
 
     /**
@@ -169,9 +175,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $workerSources
      */
-    public function setWorkerSources(array $workerSources)
+    public function setWorkerSources(array $workerSources): void
     {
         $this->headers['worker-src'] = $workerSources;
+    }
+
+    public function addWorkerSource(string $source): void
+    {
+        $this->addSource('worker-src', $source);
     }
 
     /**
@@ -179,9 +190,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $mediaSources
      */
-    public function setMediaSources(array $mediaSources)
+    public function setMediaSources(array $mediaSources): void
     {
         $this->headers['media-src'] = $mediaSources;
+    }
+
+    public function addMediaSource(string $source): void
+    {
+        $this->addSource('media-src', $source);
     }
 
     /**
@@ -191,9 +207,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $childSources
      */
-    public function setChildSources(array $childSources)
+    public function setChildSources(array $childSources): void
     {
         $this->headers['child-src'] = $childSources;
+    }
+
+    public function addChildSource(string $source): void
+    {
+        $this->addSource('child-src', $source);
     }
 
     /**
@@ -202,9 +223,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $frameAncestors
      */
-    public function setFrameAncestors(array $frameAncestors)
+    public function setFrameAncestors(array $frameAncestors): void
     {
         $this->headers['frame-ancestors'] = $frameAncestors;
+    }
+
+    public function addFrameAncestor(string $frameAncestor): void
+    {
+        $this->addSource('frame-ancestors', $frameAncestor);
     }
 
     /**
@@ -213,9 +239,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $fontSources
      */
-    public function setFontSources(array $fontSources)
+    public function setFontSources(array $fontSources): void
     {
         $this->headers['font-src'] = $fontSources;
+    }
+
+    public function addFontSource(string $source): void
+    {
+        $this->addSource('font-src', $source);
     }
 
     /**
@@ -223,9 +254,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $connectSources
      */
-    public function setConnectSources(array $connectSources)
+    public function setConnectSources(array $connectSources): void
     {
         $this->headers['connect-src'] = $connectSources;
+    }
+
+    public function addConnectSource(string $source): void
+    {
+        $this->addSource('connect-src', $source);
     }
 
     /**
@@ -233,9 +269,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $formActionSources
      */
-    public function setFormActionSources(array $formActionSources)
+    public function setFormActionSources(array $formActionSources): void
     {
         $this->headers['form-action'] = $formActionSources;
+    }
+
+    public function addFormActionSource(string $source): void
+    {
+        $this->addSource('form-action', $source);
     }
 
     /**
@@ -243,9 +284,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $pluginTypes
      */
-    public function setPluginTypes(array $pluginTypes)
+    public function setPluginTypes(array $pluginTypes): void
     {
         $this->headers['plugin-types'] = $pluginTypes;
+    }
+
+    public function addPluginType(string $pluginType): void
+    {
+        $this->addSource('plugin-types', $pluginType);
     }
 
     /**
@@ -253,9 +299,14 @@ class ContentSecurityPolicy
      *
      * @param string[] $baseUri
      */
-    public function setBaseUri(array $baseUri)
+    public function setBaseUri(array $baseUri): void
     {
         $this->headers['base-uri'] = $baseUri;
+    }
+
+    public function addBaseUri(string $baseUri): void
+    {
+        $this->addSource('base-uri', $baseUri);
     }
 
     /**
@@ -265,21 +316,31 @@ class ContentSecurityPolicy
      * @param string $sourceType
      * @param string[] $sources
      */
-    public function setSourceType(string $sourceType, array $sources)
+    public function setSources(string $sourceType, array $sources): void
     {
         $this->headers[$sourceType] = $sources;
     }
 
+    private function addSource(string $sourceType, string $source): void
+    {
+        $this->headers[$sourceType] = array_merge($this->headers[$sourceType] ?? [], [$source]);
+    }
+
     /**
      * Places restrictions on actions the page can take, rather than on resources that the page can load. If the sandbox
-     * directive is present, the page will be treated as though it was loaded inside of an iframe with a sandbox
+     * directive is present, the page will be treated as though it was loaded inside an iframe with a sandbox
      * attribute.
      *
      * @param string[] $sandbox
      */
-    public function setSandbox(array $sandbox)
+    public function setSandbox(array $sandbox): void
     {
         $this->headers['sandbox'] = $sandbox;
+    }
+
+    public function addSandbox(string $sandbox): void
+    {
+        $this->addSource('sandbox', $sandbox);
     }
 
     /**
@@ -293,7 +354,7 @@ class ContentSecurityPolicy
     /**
      * @param bool $reportOnly
      */
-    public function setReportOnly(bool $reportOnly)
+    public function setReportOnly(bool $reportOnly): void
     {
         $this->reportOnly = $reportOnly;
     }
@@ -301,7 +362,7 @@ class ContentSecurityPolicy
     /**
      * @param string $reportUri
      */
-    public function setReportUri(string $reportUri)
+    public function setReportUri(string $reportUri): void
     {
         $this->reportUri = $reportUri;
     }
@@ -309,7 +370,7 @@ class ContentSecurityPolicy
     /**
      * @param bool $compatible
      */
-    public function setCompatible(bool $compatible)
+    public function setCompatible(bool $compatible): void
     {
         $this->compatible = $compatible;
     }
@@ -359,7 +420,7 @@ class ContentSecurityPolicy
     /**
      * Generate a cryptographic nonce to be used for inline style and script.
      */
-    private static function generateNonce()
+    private static function generateNonce(): void
     {
         self::$nonce = Cryptography::randomString(27);
     }
