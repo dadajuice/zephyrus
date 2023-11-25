@@ -34,7 +34,7 @@ Bienvenue dans le Framework Zephyrus! Ce framework est fondé sur un modèle pé
 * Et plus encore !
 
 # Installation
-Zephyrus nécessite PHP 8.0 ou plus. Présentement, supporte uniquement Apache comme serveur web (pour un autre type de serveur, il suffirait d’adapter les fichiers .htaccess). Le gestionnaire de dépendance [Composer](https://getcomposer.org/) est également requis. La structure résultante de l’installation contient plusieurs exemples pour faciliter les premiers pas.
+Zephyrus nécessite PHP 8.2 ou plus. Présentement, supporte uniquement Apache comme serveur web (pour un autre type de serveur, il suffirait d’adapter les fichiers .htaccess). Le gestionnaire de dépendance [Composer](https://getcomposer.org/) est également requis. La structure résultante de l’installation contient plusieurs exemples pour faciliter les premiers pas.
 
 #### Option 1 : Installation depuis composer (recommandé)
 ```
@@ -97,25 +97,22 @@ class ClientBroker extends Broker
 ```
 
 app/Controllers/ExampleBroker.php
+
 ```php
 <?php namespace Controllers;
 
-use Models\Brokers\ClientBroker;
+use Models\Brokers\ClientBroker;use Zephyrus\Network\Router\Get;
 
 class ExampleController extends Controller
 {
-    public function initializeRoutes()
-    {      
-        $this->get("/clients", "index");
-        $this->get("/clients/{id}", "read");
-    }
-
+    #[Get("/clients")]
     public function index()
     {
         $broker = new ClientBroker();       
         return $this->json(['clients' => $broker->findAll()]);
     }
 
+    #[Get("/clients/{id}")]
     public function read($clientId)
     {
         $broker = new ClientBroker();
@@ -134,36 +131,33 @@ class ExampleController extends Controller
 <?php namespace Controllers;
 
 use Models\Brokers\UserBroker;
-use Zephyrus\Application\Rule;
+use Zephyrus\Application\Rule;use Zephyrus\Network\Router\Post;
 
 class ExampleController extends Controller
 {
-    public function initializeRoutes()
-    {              
-        ...
-        $this->post("/users", "insert");
-    }
-
+    #[Post("/users")]
     public function insert()
     {
         // Construire un objet Form depuis les données de la requête
         $form = $this->buildForm();
     
         // Appliquer une série de règles de validation sur les champs nécessaires. Il existe une grande quantité
-        // de validations intégrés dans Zephyrus. Consulter les Rule:: pour les découvrir.
-        $form->field('firstname')->validate(Rule::notEmpty("Firstname must not be empty")));
-        $form->field('lastname')->validate(Rule::notEmpty("Lastname must not be empty"));
-        $form->field('birthdate')->validate(Rule::date("Date is invalid"));
-        $form->field('email')
-            ->validate(Rule::notEmpty("Email must not be empty"))
-            ->validate(Rule::email("Email is invalid"));
-        $form->field('password')->validate(Rule::passwordCompliant("Password does not meet security requirements"));
-        $form->field('password_confirm')->validate(Rule::sameAs("password", "Password doesn't match"));
-        $form->field('username')
-            ->validate(Rule::notEmpty("Username must not be empty"))
-            ->validate(new Rule(function ($value) {
-            return $value != "admin";
-        }, "Username must not be admin!"));        
+        // de validations intégrées dans Zephyrus. Consulter les Rule:: pour les découvrir.
+        $form->field('firstname', [Rule::required("Firstname must not be empty")]);
+        $form->field('lastname', [Rule::required("Lastname must not be empty")]);
+        $form->field('birthdate', [Rule::date("Date is invalid")]);
+        $form->field('email', [
+            Rule::required("Email must not be empty"),
+            Rule::email("Email is invalid")
+        ]);
+        $form->field('password', [Rule::passwordCompliant("Password does not meet security requirements")]);
+        $form->field('password_confirm', [Rule::sameAs("password", "Password doesn't match")]);
+        $form->field('username', [
+            Rule::required("Username must not be empty"),
+            new Rule(function ($value) {
+                return $value != "admin";
+            }, "Username must not be admin!")
+        ]);        
 
         // Si la vérification échoue, retourner les messages d'erreur avec leur champs
         if (!$form->verify()) {            
@@ -184,7 +178,7 @@ class ExampleController extends Controller
 
 #### Remerciements ❤️
 * Étudiants de la Technique informatique du Cégep de Sorel-Tracy ainsi que les employés de Onirique pour leur support et idées d'améliorations. 
-* Auteurs de _[PHPIDS](https://github.com/PHPIDS/PHPIDS)_ pour avoir donner leur permission pour l'inclusion de certaines parties de leur code pour concevoir le module de détection d'intrusion.
+* Auteurs de _[PHPIDS](https://github.com/PHPIDS/PHPIDS)_ pour avoir donné leur permission pour l'inclusion de certaines parties de leur code pour concevoir le module de détection d'intrusion.
 
 #### Sécurité
 Veuillez communiquer en privé pour tout problème pouvant affecter la sécurité des applications créées avec ce framework.

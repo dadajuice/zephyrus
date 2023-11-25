@@ -4,7 +4,7 @@ use stdClass;
 
 class Form
 {
-    private const SESSION_KEY = '__ZF__FIELDS';
+    private const SESSION_KEY = '__ZF_FORM_FIELDS';
 
     /**
      * List of all the submitted fields.
@@ -22,33 +22,34 @@ class Form
     private array $errors = [];
 
     /**
-     * Reads a memorized value for a given fieldId. If value has not been set the specified default value is
-     * assigned (empty if not set). Used mostly to set remembered data in forms.
+     * Reads a memorized value for a given field name. If value has not been set the specified default value is
+     * assigned (empty if not set). Used mostly to set remembered data in forms. Field name can be given in the flatten
+     * way for array.
      *
-     * @param string $fieldId
+     * @param string $fieldName
      * @param mixed $defaultValue
      * @return mixed
      */
-    public static function readMemorizedValue(string $fieldId, mixed $defaultValue = ""): mixed
+    public static function getSavedField(string $fieldName, mixed $defaultValue = ""): mixed
     {
-        if (preg_match_all('/(?<field>[^\[]*)\[(?<keys>[^\[\]]+)\]/', $fieldId, $matches)) {
-            if (isset($_SESSION[self::SESSION_KEY][$matches["field"][0] . "[]"])) {
-                $value = $_SESSION[self::SESSION_KEY][$matches["field"][0] . "[]"];
-                foreach ($matches["keys"] as $key) {
-                    if (isset($value[$key])) {
-                        $value = $value[$key];
-                    } else {
-                        return $defaultValue;
-                    }
-                }
-                return $value;
-            }
-            return $defaultValue;
-        } else {
-            return (isset($_SESSION[self::SESSION_KEY][$fieldId]))
-                ? $_SESSION[self::SESSION_KEY][$fieldId]
-                : $defaultValue;
-        }
+        $savedFields = self::getSavedFields();
+        return $savedFields[$fieldName] ?? $defaultValue;
+    }
+
+    public static function getSavedFields(): array
+    {
+        return self::flattenArray(self::getRawSavedFields());
+    }
+
+    public static function getRawSavedField(string $fieldName, mixed $defaultValue = ""): mixed
+    {
+        $savedFields = self::getRawSavedFields();
+        return $savedFields[$fieldName] ?? $defaultValue;
+    }
+
+    public static function getRawSavedFields(): array
+    {
+        return $_SESSION["__ZF_FORM_FIELDS"] ?? [];
     }
 
     /**
@@ -286,5 +287,19 @@ class Form
             $objectProperties[rtrim($field, "[]")] = $value;
         }
         return (object) $objectProperties;
+    }
+
+    private static function flattenArray(array $array, $prefix = ''): array
+    {
+        $results = [];
+        foreach ($array as $key => $value) {
+            $newKey = $prefix . (empty($prefix) ? '' : '[') . $key . (empty($prefix) ? '' : ']');
+            if (is_array($value)) {
+                $results = array_merge($results, self::flattenArray($value, $newKey));
+            } else {
+                $results[$newKey] = $value;
+            }
+        }
+        return $results;
     }
 }

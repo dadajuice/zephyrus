@@ -266,11 +266,22 @@ class File extends FileSystemNode
     /**
      * Updates the modification time of the file to the given timestamp or simply the current time if none is supplied.
      *
-     * @param int|null $timestamp
+     * @param int|null $updateTimestamp
+     * @param int|null $accessTimestamp
      */
-    public function touch(?int $timestamp = null)
+    public function touch(?int $updateTimestamp = null, ?int $accessTimestamp = null): void
     {
-        touch($this->path, $timestamp ?? time());
+        touch($this->path, $updateTimestamp ?? time(), $accessTimestamp ?? time());
+    }
+
+    /**
+     * Updates only the last access time of the file. Make sure to keep the previous last modification time.
+     *
+     * @param int|null $accessTimestamp
+     */
+    public function touchAccess(?int $accessTimestamp = null): void
+    {
+        touch($this->path, filemtime($this->path), $accessTimestamp ?? time());
     }
 
     /**

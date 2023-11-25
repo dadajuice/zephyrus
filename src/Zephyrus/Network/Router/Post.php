@@ -2,12 +2,13 @@
 
 use Attribute;
 use Zephyrus\Network\ContentType;
+use Zephyrus\Network\HttpMethod;
 
 #[Attribute(Attribute::TARGET_METHOD)]
 class Post extends RouterAttribute
 {
-    public function __construct(string $route, string|array $acceptedFormats = ContentType::ANY)
+    public function __construct(string $route, array $acceptedFormats = [ContentType::ANY])
     {
-        parent::__construct("post", $route, $acceptedFormats);
+        parent::__construct(HttpMethod::POST, $route, $acceptedFormats);
     }
 }

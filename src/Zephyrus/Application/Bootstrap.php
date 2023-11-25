@@ -2,7 +2,7 @@
 
 use ReflectionClass;
 use ReflectionException;
-use Zephyrus\Network\RouteRepository;
+use Zephyrus\Network\Router\RouteRepository;
 use Zephyrus\Utilities\FileSystem\Directory;
 
 class Bootstrap
@@ -17,10 +17,7 @@ class Bootstrap
         foreach (Directory::recursiveGlob(ROOT_DIR . '/app/Controllers/*.php') as $file) {
             $reflection = self::fileToReflectionClass($file);
             if ($reflection->isSubclassOf('Zephyrus\Application\Controller') && !$reflection->isAbstract()) {
-                $controllerInstance = $reflection->newInstance();
-                $controllerInstance->setRouteRepository($repository);
-                $controllerInstance->initializeRoutes();
-                $controllerInstance->initializeRoutesFromAttributes($repository);
+                call_user_func($reflection->getName() .'::initializeRoutes', $repository);
             }
         }
     }

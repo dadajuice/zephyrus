@@ -4,6 +4,7 @@ use Locale;
 use stdClass;
 use Zephyrus\Exceptions\LocalizationException;
 use Zephyrus\Utilities\FileSystem\Directory;
+use Zephyrus\Utilities\FileSystem\File;
 
 class Localization
 {
@@ -92,7 +93,6 @@ class Localization
         $this->appLocale = $locale ?? Configuration::getLocale('language');
         $this->initializeLocale();
         $this->generate();
-        $this->initializeCache();
     }
 
     /**
@@ -182,6 +182,21 @@ class Localization
                 $this->generateCache($locale);
             }
         }
+        $this->initializeCache();
+    }
+
+    /**
+     * Removes the cache directory for the specified locale. If no locale is given, the whole cache directory will be
+     * deleted.
+     *
+     * @param string|null $locale
+     */
+    public function clearCache(?string $locale = null): void
+    {
+        $path = ($locale) ? ROOT_DIR . "/locale/cache/$locale" : "/locale/cache";
+        if (Directory::exists($path)) {
+            (new Directory($path))->remove();
+        }
     }
 
     /**
@@ -193,7 +208,6 @@ class Localization
      */
     private function generateCache(string $locale): void
     {
-        $this->clearCacheDirectory($locale);
         $globalArray = $this->buildGlobalArrayFromJsonFiles($locale);
         $arrayCode = '<?php' . PHP_EOL . '$localizeCache = ' . var_export($globalArray, true) . ';' . PHP_EOL . 'return $localizeCache;' . PHP_EOL;
         file_put_contents(ROOT_DIR . "/locale/cache/$locale/generated.php", $arrayCode);
@@ -222,12 +236,14 @@ class Localization
     private function prepareCache(string $locale): bool
     {
         $newlyCreated = false;
-        if (!file_exists(ROOT_DIR . "/locale/cache")) {
-            mkdir(ROOT_DIR . "/locale/cache");
+        if (!Directory::exists(ROOT_DIR . "/locale/cache")) {
+            Directory::create(ROOT_DIR . "/locale/cache");
             $newlyCreated = true;
         }
-        if (!file_exists(ROOT_DIR . "/locale/cache/$locale")) {
-            mkdir(ROOT_DIR . "/locale/cache/$locale");
+
+        $path = ROOT_DIR . "/locale/cache/$locale";
+        if (!Directory::exists($path)) {
+            Directory::create($path);
             $newlyCreated = true;
         }
         return $newlyCreated;
@@ -296,19 +312,6 @@ class Localization
     {
         $this->buildInstalledLanguages();
         $this->buildInstalledLocales();
-    }
-
-    /**
-     * Removes the cache directory for the specified locale. Ignores if the directory does not exist (nothing to
-     * empty).
-     *
-     * @param string $locale
-     */
-    private function clearCacheDirectory(string $locale): void
-    {
-        if (Directory::exists($locale)) {
-            (new Directory(ROOT_DIR . "/locale/cache/$locale"))->remove();
-        }
     }
 
     /**

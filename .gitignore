@@ -1,9 +1,13 @@
 composer.phar
 .idea/
 /vendor/
-/tests/coverage
-/tests/cache
-/tests/php_input.txt
 /logs/*
 composer.lock
+
+tests/.env
+tests/coverage
+tests/.phpunit.result.cache
+tests/.phpunit.cache/
+tests/temp
+/tests/php_input.txt
 

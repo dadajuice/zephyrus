@@ -1,398 +1,260 @@
 <?php namespace Zephyrus\Network;
 
+use Zephyrus\Application\Configuration;
+use Zephyrus\Exceptions\RouteMethodUnsupportedException;
+use Zephyrus\Exceptions\Security\IntrusionDetectionException;
+use Zephyrus\Exceptions\Security\InvalidCsrfException;
+use Zephyrus\Exceptions\Security\MissingCsrfException;
+use Zephyrus\Exceptions\Security\UnauthorizedAccessException;
+use Zephyrus\Network\Request\CookieJar;
+use Zephyrus\Network\Request\QueryString;
+use Zephyrus\Network\Request\RequestAccept;
+use Zephyrus\Network\Request\RequestBody;
+use Zephyrus\Network\Request\RequestHistory;
+use Zephyrus\Network\Router\RouteDefinition;
+use Zephyrus\Security\AuthorizationGuard;
+use Zephyrus\Security\CsrfGuard;
+use Zephyrus\Security\IntrusionDetection;
+
 class Request
 {
-    /**
-     * @var array every body parameters included in the request
-     */
-    private $parameters = [];
+    private ServerEnvironnement $environnement;
+    private Url $url;
+    private RequestBody $body;
+    private RequestAccept $accept;
+    private RequestHistory $history;
+    private QueryString $queryString;
+    private ?RouteDefinition $routeDefinition = null; // Exists only when the route is found in the repository ...
+    private CookieJar $cookieJar;
+    private IntrusionDetection $intrusionDetection;
+    private CsrfGuard $csrfGuard;
+    private AuthorizationGuard $authorizationGuard;
+
+    public function __construct(ServerEnvironnement $environnement)
+    {
+        $this->environnement = $environnement;
+        $this->url = new Url($environnement->getRequestedUrl());
+        $this->queryString = $this->url->buildQueryString();
+        $this->body = new RequestBody($environnement->getRawData(), $environnement->getContentType());
+        $this->accept = new RequestAccept($environnement->getAccept());
+        $this->cookieJar = new CookieJar($environnement->getCookies());
+        $this->intrusionDetection = new IntrusionDetection($this, Configuration::getSecurity('ids'));
+        $this->csrfGuard = new CsrfGuard($this, Configuration::getSecurity('csrf'));
+        $this->authorizationGuard = new AuthorizationGuard($this);
+        $this->history = new RequestHistory();
+    }
 
     /**
-     * @var array every route parameters found from the routing process
-     */
-    private $arguments = [];
-
-    /**
-     * @var string HTTP method used by client
-     */
-    private $method;
-
-    /**
-     * @var string ip address of originated request
-     */
-    private $clientIp;
-
-    /**
-     * @var string accepted representation from the client
-     */
-    private $accept;
-
-    /**
-     * @var Uri destined uri of the request
-     */
-    private $uri;
-
-    /**
-     * @var string Uri of where the client initiated the current request
-     */
-    private $referer;
-
-    /**
-     * @var string requested uri as it was received (e.g demo.local/users/1)
-     */
-    private $requestedUri;
-
-    /**
-     * @var string destined full url of request
-     */
-    private $baseUrl;
-
-    /**
-     * @var string specified user agent (e.g Chrome)
-     */
-    private $userAgent;
-
-    /**
-     * @var mixed[] list of all server variables ($_SERVER)
-     */
-    private $serverVariables;
-
-    /**
-     * @var mixed[] list of all specified cookies
-     */
-    private $cookies;
-
-    /**
-     * @var mixed[] list of all HTTP headers
-     */
-    private $headers;
-
-    /**
-     * @var mixed[] list of all uploaded files
-     */
-    private $files;
-
-    /**
-     * @var bool checks if the request was done through HTTPS
-     */
-    private $secure;
-
-    /**
-     * Request constructor which need the option array data to populate the
-     * request. E.g.
+     * Guards the request before processing by verifying if the intrusion detection system detected an activity over the
+     * configured threshold or if the CSRF was not submitted. If the IDS is not enabled, it is ignored. Same with the
+     * CSRF guard.
      *
-     * 'parameters' => ['t' => 1, 'z' => 5],
-     * 'cookies' => $_COOKIE,
-     * 'files' => $_FILES,
-     * 'server' => $_SERVER,
-     * 'headers' => getallheaders()
-     *
-     * @param string $uri
-     * @param string $method
-     * @param array $options
+     * @throws IntrusionDetectionException
+     * @throws InvalidCsrfException
+     * @throws MissingCsrfException
+     * @throws UnauthorizedAccessException
      */
-    public function __construct(string $uri, string $method, array $options = [])
+    public function guard(): void
     {
-        $this->uri = new Uri($uri);
-        $this->requestedUri = $uri;
-        $this->method = $method;
-        $this->parameters = $options['parameters'] ?? [];
-        $this->serverVariables = $options['server'] ?? [];
-        $this->cookies = $options['cookies'] ?? [];
-        $this->files = $options['files'] ?? [];
-        $this->headers = $options['headers'] ?? [];
-        $this->initializeServer();
-        $this->initializeBaseUrl();
-    }
-
-    /**
-     * @param string $name
-     * @param string $defaultValue
-     * @return string
-     */
-    public function getCookieValue(string $name, ?string $defaultValue = null): ?string
-    {
-        return (isset($this->cookies[$name])) ? $this->cookies[$name] : $defaultValue;
-    }
-
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function hasCookie(string $name): bool
-    {
-        return isset($this->cookies[$name]);
-    }
-
-    /**
-     * @return mixed[]
-     */
-    public function getCookies()
-    {
-        return $this->cookies;
-    }
-
-    /**
-     * @param $name
-     * @return mixed[]
-     */
-    public function getFile($name)
-    {
-        if (isset($this->files[$name])) {
-            return $this->files[$name];
+        if ($this->intrusionDetection->isEnabled()) {
+            $this->intrusionDetection->run();
         }
-        return null;
+        if ($this->csrfGuard->isEnabled()) {
+            $this->csrfGuard->run();
+        }
+        $this->authorizationGuard->run();
     }
 
     /**
-     * @return mixed[]
+     * Retrieves the HTTP method of the request (either GET, POST, PUT, PATCH or DELETE).
+     *
+     * @return HttpMethod
+     * @throws RouteMethodUnsupportedException
      */
-    public function getFiles()
+    public function getMethod(): HttpMethod
     {
-        return $this->files;
+        return $this->body->getHttpMethodOverride() ?? $this->environnement->getMethod();
     }
 
     /**
+     * Retrieves the requested route as it should be processed by the router (e.g. /users/4).
+     *
      * @return string
      */
-    public function getClientIp()
+    public function getRoute(): string
     {
-        return $this->clientIp;
+        return $this->url->getPath();
     }
 
     /**
+     * Retrieves one specific parameter from the body data or query string. If the specified parameter doesn't exist,
+     * the method returns the given default value (defaults to null).
+     *
      * @param string $name
-     * @param string $value
+     * @param mixed $default
+     * @return mixed
      */
-    public function addParameter($name, $value)
+    public function getParameter(string $name, mixed $default = null): mixed
     {
-        $this->parameters[$name] = $value;
+        return $this->queryString->getArgument($name) ?? $this->body->getParameter($name, $default);
     }
 
     /**
-     * @param string $name
-     * @param string $value
-     */
-    public function prependParameter($name, $value)
-    {
-        $this->parameters = array_merge([$name => $value], $this->parameters);
-    }
-
-    /**
-     * Retrieves the entire body parameters.
+     * Retrieves the entire request parameters either given in query string or body.
      *
      * @return array
      */
     public function getParameters(): array
     {
-        return $this->parameters;
+        return array_merge($this->queryString->getArguments(), $this->body->getParameters());
+    }
+
+    public function getRequestedUrl(): string
+    {
+        return $this->environnement->getRequestedUrl();
     }
 
     /**
-     * Retrieves one specific parameter from the body data. If the specified parameter doesn't exists, the method
-     * returns the given default value (default to null).
+     * Retrieves the complete request body with parsed parameter based on the content type.
      *
-     * @param string $name
-     * @param mixed | null $default
-     * @return mixed | null
+     * @return RequestBody
      */
-    public function getParameter(string $name, $default = null)
+    public function getBody(): RequestBody
     {
-        if (isset($this->parameters[$name])) {
-            return $this->parameters[$name];
-        }
-        return $default;
+        return $this->body;
     }
 
     /**
-     * Retrieves the parameters used within the route resolution. In example, the route "/users/{userId}/logs/{logId}"
-     * would produce two arguments : userId and logId with their values assigned.
+     * Retrieves the accepted representation the client asks with the request.
      *
-     * @return array
+     * @return RequestAccept
      */
-    public function getArguments(): array
-    {
-        return $this->arguments;
-    }
-
-    /**
-     * Retrieves one specific parameter from the route resolution. If the specified parameter doesn't exists, the method
-     * returns the given default value (default to null).
-     *
-     * @param string $name
-     * @param mixed | null $default
-     * @return mixed | null
-     */
-    public function getArgument(string $name, $default = null)
-    {
-        if (isset($this->arguments[$name])) {
-            return $this->arguments[$name];
-        }
-        return $default;
-    }
-
-    /**
-     * Adds a route resolution parameter. Done automatically by the Router class when evaluating controller method to
-     * execute.
-     *
-     * @param string $name
-     * @param mixed $value
-     */
-    public function addArgument(string $name, $value)
-    {
-        $this->arguments[$name] = $value;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMethod()
-    {
-        return $this->method;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAccept()
+    public function getAccept(): RequestAccept
     {
         return $this->accept;
     }
 
-    /**
-     * @return bool
-     */
-    public function isSecure(): bool
+    public function getCookieJar(): CookieJar
     {
-        return $this->secure;
+        return $this->cookieJar;
     }
 
     /**
-     * Retrieves the defined accepted representations order by specified priority using the standard parameter "q" which
-     * should range from 0 (lowest) to 1 (highest).
+     * Retrieves the complete Uri instance for the current request. Meaning, the complete details of the url the client
+     * requested.
      *
-     * @return array
+     * @return Url
      */
-    public function getAcceptedRepresentations(): array
+    public function getUrl(): Url
     {
-        $acceptedRepresentations = explode(',', $this->accept);
-        array_walk($acceptedRepresentations, function (&$accept) {
-            // When no priority parameter is given, use natural defined order
-            // by adding q=1.
-            if (strpos($accept, ';q') === false) {
-                $accept .= ';q=1';
-            }
-            $accept = explode(';q=', $accept);
-        });
-        usort($acceptedRepresentations, function ($a, $b) {
-            // Sort using priority parameters
-            return $b[1] <=> $a[1];
-        });
-        usort($acceptedRepresentations, function ($a, $b) {
-            // Sort using specificity (*/*) for same priority
-            if ($a[1] == $b[1]) {
-                return substr_count($a[0], '*') <=> substr_count($b[0], '*');
-            }
-            return 0;
-        });
-        return array_filter(array_column($acceptedRepresentations, 0));
+        return $this->url;
+    }
+
+    public function getClientIp(): string
+    {
+        return $this->environnement->getClientIp();
+    }
+
+    public function getUserAgent(): string
+    {
+        return $this->environnement->getUserAgent();
     }
 
     /**
-     * @return Uri
-     */
-    public function getUri()
-    {
-        return $this->uri;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUserAgent()
-    {
-        return $this->userAgent;
-    }
-
-    /**
-     * @return string
-     */
-    public function getBaseUrl()
-    {
-        return $this->baseUrl;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRoute()
-    {
-        return $this->getUri()->getPath();
-    }
-
-    /**
-     * @return string
-     */
-    public function getRequestedUri(): string
-    {
-        return $this->requestedUri;
-    }
-
-    /**
+     * Returns only the last recorded visited GET route the client did within his active session. Should be considered
+     * for returning to the previous visited URL.
+     *
      * @return string
      */
     public function getReferer(): string
     {
-        return $this->referer;
+        return $this->history->getReferer();
     }
 
     /**
-     * @return string[]
+     * Retrieves the entire route definition instance the client requested which contains the url, the arguments and
+     * callbacks associated. Can be null if the router was not used.
+     *
+     * @return RouteDefinition | null
      */
-    public function getServerVariables(): array
+    public function getRouteDefinition(): ?RouteDefinition
     {
-        return $this->serverVariables;
+        return $this->routeDefinition;
     }
 
     /**
-     * @param string $name
-     * @param null|string $defaultValue
-     * @return null|string
+     * Applies the matching route definition for the client request if any. The route definition contains essentially
+     * what is needed for the URL arguments and the callback to execute.
+     *
+     * @param RouteDefinition $routeDefinition
      */
-    public function getServerVariable(string $name, ?string $defaultValue = null): ?string
+    public function setRouteDefinition(RouteDefinition $routeDefinition): void
     {
-        return $this->serverVariables[$name] ?? $defaultValue;
+        $this->routeDefinition = $routeDefinition;
     }
 
     /**
+     * Retrieves all the request headers the client sent.
+     *
      * @return array
      */
     public function getHeaders(): array
     {
-        return $this->headers;
+        return $this->environnement->getHeaders();
     }
 
     /**
+     * Retrieves a specific HTTP header from the request (case-insensitive).
+     *
      * @param string $name
+     * @param string|null $defaultValue
      * @return string|null
      */
-    public function getHeader(string $name): ?string
+    public function getHeader(string $name, ?string $defaultValue = null): ?string
     {
-        // TODO: Should be case insensitive
-        return isset($this->headers[$name]) ? $this->headers[$name] : null;
+        return $this->environnement->getHeader($name) ?? $defaultValue;
     }
 
-    private function initializeServer()
+    public function getArgument(string $name, mixed $defaultValue = null): mixed
     {
-        $this->accept = $this->serverVariables['HTTP_ACCEPT'] ?? '';
-        $this->userAgent = $this->serverVariables['HTTP_USER_AGENT'] ?? '';
-        $this->clientIp = $this->serverVariables['REMOTE_ADDR'] ?? '';
-        $this->referer = $this->serverVariables['HTTP_REFERER'] ?? '';
-        $this->secure = $this->serverVariables['HTTPS'] ?? false;
+        return $this->routeDefinition?->getArgument($name, $defaultValue) ?? null;
     }
 
-    private function initializeBaseUrl()
+    public function getArguments(): array
     {
-        $this->baseUrl = $this->uri->getBaseUrl();
+        return $this->routeDefinition?->getArguments() ?? [];
+    }
+
+    public function getServerEnvironnement(): ServerEnvironnement
+    {
+        return $this->environnement;
+    }
+
+    public function getIntrusionDetection(): IntrusionDetection
+    {
+        return $this->intrusionDetection;
+    }
+
+    public function getCsrfGuard(): CsrfGuard
+    {
+        return $this->csrfGuard;
+    }
+
+    public function getHistory(): RequestHistory
+    {
+        return $this->history;
+    }
+
+    /**
+     * Records the request into the client session history.
+     */
+    public function addToHistory(): void
+    {
+        $this->history->add($this);
+    }
+
+    public function getFiles(): array
+    {
+        return $_FILES;
     }
 }

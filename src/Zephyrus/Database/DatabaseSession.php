@@ -18,6 +18,11 @@ class DatabaseSession
         static::$instance = new static(new Database($configurations));
     }
 
+    final public static function kill(): void
+    {
+        static::$instance = null;
+    }
+
     final public static function getInstance(): static
     {
         if (is_null(static::$instance)) {

@@ -29,6 +29,7 @@ class OperatingSystem
     /**
      * Retrieves the percent representation of the average CPU load.
      *
+     * @codeCoverageIgnore
      * @return float
      */
     public static function getCpuAverageLoad(): float
@@ -39,12 +40,13 @@ class OperatingSystem
     /**
      * Retrieves the percent representation of the memory used on the system.
      *
+     * @codeCoverageIgnore
      * @return float
      */
     public static function getMemoryUsage(): float
     {
         $free = shell_exec('free');
-        $free = (string) trim($free);
+        $free = trim($free);
         $free_arr = explode("\n", $free);
         $mem = explode(" ", $free_arr[1]);
         $mem = array_filter($mem);
@@ -55,16 +57,18 @@ class OperatingSystem
     /**
      * Retrieves the current established connections for the specified port.
      *
+     * @codeCoverageIgnore
      * @param int $port
      * @return mixed
      */
-    public static function getActiveConnections(int $port = 443)
+    public static function getActiveConnections(int $port = 443): mixed
     {
         //return `netstat -an | grep $port | grep tcp | grep -v 0.0.0.0 | grep -v ::: | cut -d':' -f2 | cut -d' ' -f12 | sort | uniq | wc -l;`;
         return `netstat -an | grep $port | grep tcp | grep -v 0.0.0.0 | grep -v ::: | grep ESTABLISHED | wc -l`;
     }
 
     /**
+     * @codeCoverageIgnore
      * @return int
      */
     public static function getCurrentMemory(): int
@@ -73,6 +77,7 @@ class OperatingSystem
     }
 
     /**
+     * @codeCoverageIgnore
      * @return int
      */
     public static function getCurrentAllocatedMemory(): int
@@ -86,6 +91,7 @@ class OperatingSystem
      * memory for the script than its peak.
      *
      * @see getAllocatedMemoryPeak
+     * @codeCoverageIgnore
      * @return int
      */
     public static function getMemoryPeak(): int
@@ -97,6 +103,7 @@ class OperatingSystem
      * Retrieves the script's peak allocated memory in bytes. This is the REAL memory used at peak by PHP for the
      * running script, PHP allocates memory in chunks depending on the overall usage.
      *
+     * @codeCoverageIgnore
      * @return int
      */
     public static function getAllocatedMemoryPeak(): int

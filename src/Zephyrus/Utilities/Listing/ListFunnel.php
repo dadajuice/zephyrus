@@ -1,6 +1,6 @@
 <?php namespace Zephyrus\Utilities\Listing;
 
-use Zephyrus\Network\QueryString;
+use Zephyrus\Network\Request\QueryString;
 
 class ListFunnel
 {

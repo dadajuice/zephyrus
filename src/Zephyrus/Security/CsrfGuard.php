@@ -2,8 +2,9 @@
 
 use RuntimeException;
 use Zephyrus\Application\Configuration;
-use Zephyrus\Application\Session;
-use Zephyrus\Exceptions\InvalidCsrfException;
+use Zephyrus\Core\Session;
+use Zephyrus\Exceptions\Security\InvalidCsrfException;
+use Zephyrus\Exceptions\Security\MissingCsrfException;
 use Zephyrus\Network\Request;
 
 class CsrfGuard
@@ -66,9 +67,16 @@ class CsrfGuard
      */
     private array $configurations;
 
-    public function __construct(?Request &$request, array $configurations = [])
+    public static function generate(): string
     {
-        $this->request = &$request;
+        $name = self::generateFormName();
+        $token = self::generateToken($name);
+        return $name . '$' . $token;
+    }
+
+    public function __construct(?Request $request, array $configurations = [])
+    {
+        $this->request = $request;
         $this->initializeConfigurations($configurations);
         $this->initializeEnabledState();
         $this->initializeAutomaticHtmlIntegration();
@@ -106,9 +114,7 @@ class CsrfGuard
      */
     public function generateHiddenFields(): string
     {
-        $name = $this->generateFormName();
-        $token = $this->generateToken($name);
-        $value = $name . '$' . $token;
+        $value = self::generate();
         return '<input type="hidden" name="' . self::REQUEST_TOKEN_VALUE . '" value="' . $value . '" />';
     }
 
@@ -116,22 +122,23 @@ class CsrfGuard
      * Proceeds to filter the current request for any CSRF mismatch. Forms must provide its unique name and
      * corresponding generated csrf token. Will throw a InvalidCsrfException on failure.
      *
+     * @throws MissingCsrfException
      * @throws InvalidCsrfException
      */
-    public function run()
+    public function run(): void
     {
         if (!$this->isExempt()) {
             $providedToken = $this->getProvidedCsrfToken();
             if (is_null($providedToken)) {
-                throw new InvalidCsrfException(InvalidCsrfException::ERROR_MISSING_TOKEN, $this->request);
+                throw new MissingCsrfException($this->request);
             }
             $tokenParts = explode("$", $providedToken);
             if (count($tokenParts) < 2) {
-                throw new InvalidCsrfException(InvalidCsrfException::ERROR_INVALID_TOKEN, $this->request);
+                throw new InvalidCsrfException($this->request);
             }
             list($formName, $token) = $tokenParts;
             if (!$this->validateToken($formName, $token)) {
-                throw new InvalidCsrfException(InvalidCsrfException::ERROR_INVALID_TOKEN, $this->request);
+                throw new InvalidCsrfException($this->request);
             }
         }
     }
@@ -207,7 +214,7 @@ class CsrfGuard
      */
     private function isExempt(): bool
     {
-        if (!$this->isHttpMethodFiltered(strtoupper($this->request->getMethod()))) {
+        if (!$this->isHttpMethodFiltered($this->request->getMethod()->value)) {
             return true;
         }
         foreach ($this->exceptions as $exceptionRegex) {
@@ -228,12 +235,12 @@ class CsrfGuard
      * @param string $formName
      * @return string
      */
-    private function generateToken(string $formName): string
+    private static function generateToken(string $formName): string
     {
         $token = Cryptography::randomString(self::TOKEN_LENGTH);
-        $csrfData = Session::getInstance()->read('__CSRF_TOKEN', []);
+        $csrfData = Session::get('__CSRF_TOKEN', []);
         $csrfData[$formName] = $token;
-        Session::getInstance()->set('__CSRF_TOKEN', $csrfData);
+        Session::set('__CSRF_TOKEN', $csrfData);
         return $token;
     }
 
@@ -242,7 +249,7 @@ class CsrfGuard
      *
      * @return string
      */
-    private function generateFormName(): string
+    private static function generateFormName(): string
     {
         return "CSRFGuard_" . mt_rand(0, mt_getrandmax());
     }
@@ -259,11 +266,11 @@ class CsrfGuard
     {
         $sortedCsrf = $this->getStoredCsrfToken($formName);
         if (!is_null($sortedCsrf)) {
-            $csrfData = Session::getInstance()->read('__CSRF_TOKEN', []);
+            $csrfData = Session::get('__CSRF_TOKEN', []);
             if (is_null($this->request->getHeader('CSRF_KEEP_ALIVE'))
                 && is_null($this->request->getParameter('CSRF_KEEP_ALIVE'))) {
                 $csrfData[$formName] = '';
-                Session::getInstance()->set('__CSRF_TOKEN', $csrfData);
+                Session::set('__CSRF_TOKEN', $csrfData);
             }
             return hash_equals($sortedCsrf, $token);
         }
@@ -278,7 +285,7 @@ class CsrfGuard
      */
     private function getStoredCsrfToken(string $formName): ?string
     {
-        $csrfData = Session::getInstance()->read('__CSRF_TOKEN');
+        $csrfData = Session::get('__CSRF_TOKEN');
         if (is_null($csrfData)) {
             return null;
         }
@@ -308,7 +315,6 @@ class CsrfGuard
      */
     private function isHttpMethodFiltered(string $method): bool
     {
-        $method = strtoupper($method);
         if ($this->isGetSecured() && $method == "GET") {
             return true;
         } elseif ($this->isPostSecured() && $method == "POST") {
@@ -323,7 +329,7 @@ class CsrfGuard
         return false;
     }
 
-    private function initializeConfigurations(array $configurations)
+    private function initializeConfigurations(array $configurations): void
     {
         if (empty($configurations)) {
             $configurations = Configuration::getSecurity('csrf') ?? self::DEFAULT_CONFIGURATIONS;
@@ -331,21 +337,21 @@ class CsrfGuard
         $this->configurations = $configurations;
     }
 
-    private function initializeEnabledState()
+    private function initializeEnabledState(): void
     {
         if (isset($this->configurations['enabled'])) {
             $this->enabled = (bool) $this->configurations['enabled'];
         }
     }
 
-    private function initializeAutomaticHtmlIntegration()
+    private function initializeAutomaticHtmlIntegration(): void
     {
         if (isset($this->configurations['html_integration_enabled'])) {
             $this->htmlIntegrationEnabled = $this->configurations['html_integration_enabled'];
         }
     }
 
-    private function initializeGuardedMethods()
+    private function initializeGuardedMethods(): void
     {
         if (isset($this->configurations['guard_methods'])) {
             foreach ($this->configurations['guard_methods'] as $method) {
@@ -357,7 +363,7 @@ class CsrfGuard
         }
     }
 
-    private function initializeExceptions()
+    private function initializeExceptions(): void
     {
         if (isset($this->configurations['exceptions']) && !empty($this->configurations['exceptions'])) {
             $this->exceptions = $this->configurations['exceptions'];

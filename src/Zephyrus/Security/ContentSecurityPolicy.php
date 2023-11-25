@@ -60,8 +60,14 @@ class ContentSecurityPolicy
      */
     private string $reportUri;
 
-    public static function getRequestNonce(): string
+    /**
+     * Returns the generated cryptographic nonce for inline styles and scripts. One per request.
+     */
+    public static function nonce(): string
     {
+        if (is_null(self::$nonce)) {
+            self::$nonce = Cryptography::randomString(27);
+        }
         return self::$nonce;
     }
 
@@ -69,9 +75,6 @@ class ContentSecurityPolicy
     {
         foreach ($this->supportedSourceTypes as $type) {
             $this->headers[$type] = [];
-        }
-        if (empty(self::$nonce)) {
-            self::generateNonce();
         }
     }
 
@@ -415,13 +418,5 @@ class ContentSecurityPolicy
                 : "$name $value;";
         }
         return $header;
-    }
-
-    /**
-     * Generate a cryptographic nonce to be used for inline style and script.
-     */
-    private static function generateNonce(): void
-    {
-        self::$nonce = Cryptography::randomString(27);
     }
 }

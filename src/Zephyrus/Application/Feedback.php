@@ -1,5 +1,7 @@
 <?php namespace Zephyrus\Application;
 
+use Zephyrus\Core\Session;
+
 class Feedback
 {
     private const SESSION_KEY = '__ZF_FEEDBACK';
@@ -25,7 +27,7 @@ class Feedback
             }
             $feedback[$registeredName] = array_merge($feedback[$registeredName], $errorMessages);
         }
-        Session::getInstance()->set(self::SESSION_KEY, $feedback);
+        Session::set(self::SESSION_KEY, $feedback);
     }
 
     /**
@@ -89,7 +91,7 @@ class Feedback
      */
     public static function clear(): void
     {
-        Session::getInstance()->remove(self::SESSION_KEY);
+        Session::remove(self::SESSION_KEY);
     }
 
     /**
@@ -99,7 +101,7 @@ class Feedback
      */
     private static function getSavedFeedback(): array
     {
-        $feedback = Session::getInstance()->read(self::SESSION_KEY);
+        $feedback = Session::get(self::SESSION_KEY);
         if (is_null($feedback)) {
             $feedback = [];
         }
@@ -107,7 +109,7 @@ class Feedback
     }
 
     /**
-     * Transforms the pathing into HTML array notation. E.g. cart[].quantity.2 -> cart[quantity][2].
+     * Transforms the pathing into HTML array notation. E.g. cart.quantity.2 -> cart[quantity][2].
      *
      * @param string $inputString
      * @return string
@@ -117,8 +119,12 @@ class Feedback
         if (!str_contains($inputString, '.')) {
             return $inputString;
         }
-        $transformedString = str_replace(['[].', '.'], ['[', ']['], $inputString);
-        $transformedString .= ']';
+        $parts = explode('.', $inputString);
+        $transformedString = reset($parts);
+        array_shift($parts);
+        foreach ($parts as $part) {
+            $transformedString .= "[$part]";
+        }
         return $transformedString;
     }
 }

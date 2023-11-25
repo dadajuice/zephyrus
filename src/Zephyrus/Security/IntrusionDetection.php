@@ -2,7 +2,7 @@
 
 use RuntimeException;
 use Zephyrus\Application\Configuration;
-use Zephyrus\Exceptions\IntrusionDetectionException;
+use Zephyrus\Exceptions\Security\IntrusionDetectionException;
 use Zephyrus\Network\Request;
 use Zephyrus\Security\IntrusionDetection\IntrusionCache;
 use Zephyrus\Security\IntrusionDetection\IntrusionMonitor;
@@ -12,8 +12,7 @@ use Zephyrus\Security\IntrusionDetection\IntrusionRuleLoader;
 class IntrusionDetection
 {
     public const DEFAULT_CONFIGURATIONS = [
-        'enabled' => true, // Enable the intrusion detection feature
-        'cached' => true, // Enable the APCu (PHP cache) for loaded rules
+        'enabled' => false, // Enable the intrusion detection feature
         'custom_file' => '', // Change the default rule file
         'impact_threshold' => 0, // Minimum impact to be considered to throw an exception (default is any detection)
         'monitor_cookies' => true, // Verifies the content of request cookies
@@ -22,45 +21,13 @@ class IntrusionDetection
     ];
 
     private array $configurations;
-
-    /**
-     * @var IntrusionMonitor
-     */
     private IntrusionMonitor $monitor;
-
-    /**
-     * @var array
-     */
     private array $exceptions = [];
-
-    /**
-     * @var int
-     */
     private int $impactThreshold = 0;
-
-    /**
-     * @var bool
-     */
     private bool $enabled = true;
-
-    /**
-     * @var bool
-     */
     private bool $includeCookiesMonitoring = true;
-
-    /**
-     * @var bool
-     */
     private bool $includeUrlMonitoring = true;
-
-    /**
-     * @var IntrusionReport | null
-     */
     private ?IntrusionReport $report = null;
-
-    /**
-     * @var Request | null
-     */
     private ?Request $request;
 
     public function __construct(?Request &$request, array $configurations = [])
@@ -81,7 +48,7 @@ class IntrusionDetection
      *
      * @throws IntrusionDetectionException
      */
-    public function run()
+    public function run(): void
     {
         $this->monitor->setExceptions($this->exceptions);
         $this->report = $this->monitor->run($this->getMonitoringInputs());
@@ -112,7 +79,7 @@ class IntrusionDetection
         return $this->report;
     }
 
-    private function initializeConfigurations(array $configurations)
+    private function initializeConfigurations(array $configurations): void
     {
         if (empty($configurations)) {
             $configurations = Configuration::getSecurity('ids') ?? self::DEFAULT_CONFIGURATIONS;
@@ -120,44 +87,40 @@ class IntrusionDetection
         $this->configurations = $configurations;
     }
 
-    private function initializeMonitor()
+    private function initializeMonitor(): void
     {
         $loader = new IntrusionRuleLoader($this->configurations['custom_file'] ?? null);
-        if (isset($this->configurations['cached']) && $this->configurations['cached']) {
-            $cache = new IntrusionCache();
-            $intrusionRules = $cache->getRules();
-            if (empty($intrusionRules)) {
-                $intrusionRules = $loader->loadFromFile();
-                $cache->cache($intrusionRules);
-            }
-        } else {
+        $cache = new IntrusionCache();
+        $intrusionRules = $cache->getRules();
+        if (empty($intrusionRules)) {
             $intrusionRules = $loader->loadFromFile();
+            $cache->cache($intrusionRules);
         }
         $this->monitor = new IntrusionMonitor($intrusionRules);
     }
 
-    private function initializeExceptions()
+    private function initializeExceptions(): void
     {
         if (isset($this->configurations['exceptions']) && !empty($this->configurations['exceptions'])) {
             $this->exceptions = $this->configurations['exceptions'];
         }
     }
 
-    private function initializeCookieMonitoring()
+    private function initializeCookieMonitoring(): void
     {
         if (isset($this->configurations['monitor_cookies']) && $this->configurations['monitor_cookies']) {
             $this->includeCookiesMonitoring = $this->configurations['monitor_cookies'];
         }
     }
 
-    private function initializeUrlMonitoring()
+    private function initializeUrlMonitoring(): void
     {
         if (isset($this->configurations['monitor_url']) && $this->configurations['monitor_url']) {
             $this->includeUrlMonitoring = $this->configurations['monitor_url'];
         }
     }
 
-    private function initializeImpactThreshold()
+    private function initializeImpactThreshold(): void
     {
         if (isset($this->configurations['impact_threshold'])) {
             if (!is_int($this->configurations['impact_threshold'])) {
@@ -167,7 +130,7 @@ class IntrusionDetection
         }
     }
 
-    private function initializeEnabledState()
+    private function initializeEnabledState(): void
     {
         if (isset($this->configurations['enabled'])) {
             $this->enabled = (bool) $this->configurations['enabled'];
@@ -185,8 +148,8 @@ class IntrusionDetection
         return [
             'parameters' => $this->request->getParameters(),
             'arguments' => $this->request->getArguments(),
-            'cookies' => ($this->includeCookiesMonitoring) ? $this->request->getCookies() : [],
-            'url' => ($this->includeUrlMonitoring) ? ['requested_url' => $this->request->getRequestedUri()] : [],
+            'cookies' => ($this->includeCookiesMonitoring) ? $this->request->getCookieJar()->getAll() : [],
+            'url' => ($this->includeUrlMonitoring) ? ['requested_url' => $this->request->getRequestedUrl()] : [],
         ];
     }
 }

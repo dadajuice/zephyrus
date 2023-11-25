@@ -1,6 +1,7 @@
 <?php namespace Zephyrus\Application;
 
 use stdClass;
+use Zephyrus\Core\Session;
 
 class Flash
 {
@@ -33,7 +34,7 @@ class Flash
 
     public static function readAll(): stdClass
     {
-        $flash = Session::getInstance()->read(self::SESSION_KEY);
+        $flash = Session::get(self::SESSION_KEY);
         $args = [];
         $args["success"] = $flash['SUCCESS'] ?? "";
         $args["warning"] = $flash['WARNING'] ?? "";
@@ -45,16 +46,16 @@ class Flash
 
     public static function clearAll(): void
     {
-        Session::getInstance()->remove(self::SESSION_KEY);
+        Session::remove(self::SESSION_KEY);
     }
 
     private static function addFlash(string $type, string|array $message): void
     {
-        $flash = Session::getInstance()->read(self::SESSION_KEY);
+        $flash = Session::get(self::SESSION_KEY);
         if (is_null($flash)) {
             $flash = [];
         }
         $flash[$type] = $message;
-        Session::getInstance()->set(self::SESSION_KEY, $flash);
+        Session::set(self::SESSION_KEY, $flash);
     }
 }

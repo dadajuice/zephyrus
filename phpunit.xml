@@ -1,32 +1,40 @@
 <?xml version="1.0"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.4/phpunit.xsd"
          bootstrap="tests/lib/init.php"
          colors="true"
-         backupGlobals="false"
-         backupStaticAttributes="false"
-         processIsolation="false"
-         stopOnFailure="false"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true">
-  <coverage processUncoveredFiles="true">
-    <include>
-      <directory suffix=".php">src</directory>
-    </include>
-    <exclude/>
-    <report>
-      <clover outputFile="clover.xml"/>
-      <html outputDirectory="tests/coverage/result"/>
-    </report>
-  </coverage>
-  <testsuites>
-    <testsuite name="application">
-      <directory>tests/Application</directory>
-      <directory>tests/Database</directory>
-      <directory>tests/Network</directory>
-      <directory>tests/Security</directory>
-      <directory>tests/Utilities</directory>
-    </testsuite>
-  </testsuites>
-  <logging/>
+         cacheDirectory="tests/.phpunit.cache">
+<coverage>
+  <report>
+    <clover outputFile="tests/coverage/clover.xml" />
+    <html outputDirectory="tests/coverage/result" />
+  </report>
+</coverage>
+<testsuites>
+  <testsuite name="Core">
+    <directory>tests/Zephyrus/Core</directory>
+  </testsuite>
+  <testsuite name="Application">
+    <directory>tests/Zephyrus/Application</directory>
+  </testsuite>
+  <testsuite name="Database">
+    <directory>tests/Zephyrus/Database</directory>
+  </testsuite>
+  <testsuite name="Network">
+    <directory>tests/Zephyrus/Network</directory>
+  </testsuite>
+  <testsuite name="Utilities">
+    <directory>tests/Zephyrus/Utilities</directory>
+  </testsuite>
+  <testsuite name="Security">
+    <directory>tests/Zephyrus/Security</directory>
+  </testsuite>
+</testsuites>
+<logging/>
+<source>
+  <include>
+    <directory>src</directory>
+  </include>
+</source>
 </phpunit>
+

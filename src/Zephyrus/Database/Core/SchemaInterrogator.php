@@ -18,10 +18,10 @@ final class SchemaInterrogator
      *
      * @return string[]
      */
-    public function getAllTableNames(): array
+    public function getAllTableNames(string $schema = 'public'): array
     {
-        $sql = "SELECT tables.table_name FROM information_schema.tables WHERE tables.table_schema = 'public' AND tables.table_name != 'schema_version'";
-        $statement = $this->database->query($sql);
+        $sql = "SELECT tables.table_name FROM information_schema.tables WHERE tables.table_schema = ? AND tables.table_name != 'schema_version'";
+        $statement = $this->database->query($sql, [$schema]);
         $results = [];
         while ($row = $statement->next()) {
             $results[] = $row->table_name;
@@ -35,26 +35,55 @@ final class SchemaInterrogator
      * columns names as value (e.g. ['firstname', 'lastname']).
      *
      * @param string $tableName
+     * @param string $schema
      * @return string[]
      */
-    public function getAllColumnNames(string $tableName): array
+    public function getAllColumnNames(string $tableName, string $schema = 'public'): array
     {
         $columns = [];
-        $statement = $this->database->query("SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = ?", [$tableName]);
+        $statement = $this->database->query("SELECT column_name FROM information_schema.columns WHERE table_schema = ? AND table_name = ?", [$schema, $tableName]);
         while ($row = $statement->next()) {
             $columns[] = $row->column_name;
         }
         return $columns;
     }
 
+    public function columnExists(string $column, string $table, string $schema = 'public'): bool
+    {
+        $sql = "SELECT EXISTS (SELECT 1 
+                  FROM information_schema.columns 
+                 WHERE table_schema = ? AND table_name = ? AND column_name = ?) as existance";
+        $statement = $this->database->query($sql, [$schema, $table, $column]);
+        return $statement->next()?->existance ?? false;
+    }
+
+    public function tableExists(string $table, string $schema = 'public'): bool
+    {
+        $sql = "SELECT EXISTS (SELECT 1 
+                  FROM information_schema.tables 
+                 WHERE table_schema LIKE ? AND table_type LIKE 'BASE TABLE' AND table_name = ?) as existance";
+        $statement = $this->database->query($sql, [$schema, $table]);
+        return $statement->next()?->existance ?? false;
+    }
+
+    public function viewExists(string $view, string $schema = 'public'): bool
+    {
+        $sql = "SELECT EXISTS (SELECT 1 
+                  FROM information_schema.tables 
+                 WHERE table_schema LIKE ? AND table_type LIKE 'VIEW' AND table_name = ?) as existance";
+        $statement = $this->database->query($sql, [$schema, $view]);
+        return $statement->next()?->existance ?? false;
+    }
+
     /**
      * Meta query to retrieve all contraints of a specific table. Must be redefined in children adapter classes to
      * adapt for each supported DBMS. Should return an array of stdClass.
      *
-     * @param string $tableName
+     * @param string $table
+     * @param string $schema
      * @return stdClass[]
      */
-    public function getAllConstraints(string $tableName): array
+    public function getAllConstraints(string $table, string $schema = 'public'): array
     {
         $constraints = [];
         $sql = "SELECT tco.constraint_type, kcu.column_name
@@ -64,8 +93,8 @@ final class SchemaInterrogator
                    AND kcu.constraint_schema = tco.constraint_schema
                    AND kcu.constraint_name = tco.constraint_name
                  WHERE kcu.table_name = ?
-                   AND kcu.table_schema = 'public'";
-        $statement = $this->database->query($sql, [$tableName]);
+                   AND kcu.table_schema = ?";
+        $statement = $this->database->query($sql, [$table, $schema]);
         while ($row = $statement->next()) {
             $constraints[] = (object) [
                 'column' => $row->column_name,
@@ -79,17 +108,18 @@ final class SchemaInterrogator
      * Meta query to retrieve all column details of given table name within the specified database instance. Must be
      * redefined in children adapter classes to adapt for each supported DBMS. Should return an array of stdClass.
      *
-     * @param string $tableName
+     * @param string $table
+     * @param string $schema
      * @return stdClass[]
      */
-    public function getAllColumns(string $tableName): array
+    public function getAllColumns(string $table, string $schema = 'public'): array
     {
         $columns = [];
         $sql = "SELECT column_name, is_nullable, udt_name, character_maximum_length, column_default 
                   FROM information_schema.columns 
-                 WHERE table_schema = 'public' 
+                 WHERE table_schema = ? 
                    AND table_name = ?";
-        $statement = $this->database->query($sql, [$tableName]);
+        $statement = $this->database->query($sql, [$schema, $table]);
         while ($row = $statement->next()) {
             $columns[] = (object) [
                 'name' => $row->column_name,
@@ -101,28 +131,29 @@ final class SchemaInterrogator
         return $columns;
     }
 
-    public function getTableSize(string $tableName): int
+    public function getTableSize(string $table, string $schema = 'public'): int
     {
-        $statement = $this->database->query("SELECT pg_total_relation_size('$tableName') as size");
-        $row = $statement->next();
-        return $row->size;
+        $name = $schema . '.' . $table;
+        $statement = $this->database->query("SELECT pg_total_relation_size('$name') as size");
+        return $statement->next()?->size ?? 0;
     }
 
     /**
      * Meta query to retrieve all table details of given database instance. Return an array of stdClasses with the
      * following properties: name, size, columns and contraints.
      *
+     * @param string $schema
      * @return stdClass[]
      */
-    public function getAllTables(): array
+    public function getAllTables(string $schema = 'public'): array
     {
         $results = [];
-        foreach ($this->getAllTableNames() as $name) {
+        foreach ($this->getAllTableNames($schema) as $name) {
             $results[] = (object) [
                 'name' => $name,
-                'size' => $this->getTableSize($name),
-                'columns' => $this->getAllColumns($name),
-                'constraints' => $this->getAllConstraints($name)
+                'size' => $this->getTableSize($name, $schema),
+                'columns' => $this->getAllColumns($name, $schema),
+                'constraints' => $this->getAllConstraints($name, $schema)
             ];
         }
         return $results;

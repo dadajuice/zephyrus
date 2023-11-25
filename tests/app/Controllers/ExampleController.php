@@ -1,7 +1,8 @@
 <?php namespace Controllers;
 
+use Zephyrus\Application\Controller;
 use Zephyrus\Network\Response;
-use Zephyrus\Security\Controller;
+use Zephyrus\Network\Router\RouteRepository;
 use Zephyrus\Network\Router\Get;
 
 /**
@@ -9,9 +10,10 @@ use Zephyrus\Network\Router\Get;
  */
 class ExampleController extends Controller
 {
-    public function initializeRoutes(): void
+    public static function initializeRoutes(RouteRepository $repository): void
     {
-        $this->get("/batman", "index");
+        $repository->get("/batman", [self::class, "index"]);
+        parent::initializeRoutes($repository);
     }
 
     public function index(): Response

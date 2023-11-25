@@ -1,16 +1,16 @@
 <?php namespace Zephyrus\Exceptions;
 
-class RouteMethodUnsupportedException extends \Exception
+class RouteMethodUnsupportedException extends ZephyrusRuntimeException
 {
-    private $method;
+    private string $method;
 
-    public function __construct($method)
+    public function __construct(string $method)
     {
-        parent::__construct("The specified method [{$method}] is not supported");
+        parent::__construct("The specified HTTP method [$method] is not supported.");
         $this->method = $method;
     }
 
-    public function getMethod()
+    public function getMethod(): string
     {
         return $this->method;
     }

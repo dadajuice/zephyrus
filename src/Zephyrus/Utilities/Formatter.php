@@ -7,18 +7,18 @@ use Zephyrus\Utilities\Formatters\TimeFormatter;
 
 class Formatter
 {
-    private static $customFormatters = [];
+    private static array $customFormatters = [];
 
     use NumericFormatter;
     use TimeFormatter;
     use SpecializedFormatter;
 
-    public static function register(string $name, $callback)
+    public static function register(string $name, mixed $callback): void
     {
         self::$customFormatters[$name] = $callback;
     }
 
-    public static function hasCustomFormatter(string $name)
+    public static function hasCustomFormatter(string $name): bool
     {
         return isset(self::$customFormatters[$name]);
     }

@@ -1,18 +1,21 @@
 <?php namespace Zephyrus\Network\Router;
 
 use Zephyrus\Network\ContentType;
+use Zephyrus\Network\HttpMethod;
 
 abstract class RouterAttribute
 {
-    private string $route;
-    private string $method;
-    private string|array $acceptedFormats;
+    public const SUPPORTED_ANNOTATIONS = [Get::class, Post::class, Put::class, Patch::class, Delete::class];
 
-    public function __construct(string $method, string $route, string|array $acceptedFormats = ContentType::ANY)
+    private string $route;
+    private HttpMethod $method;
+    private array $acceptedContentTypes;
+
+    public function __construct(HttpMethod $method, string $route, array $acceptedContentTypes = [ContentType::ANY])
     {
         $this->method = $method;
         $this->route = $route;
-        $this->acceptedFormats = $acceptedFormats;
+        $this->acceptedContentTypes = $acceptedContentTypes;
     }
 
     public function getRoute(): string
@@ -20,13 +23,13 @@ abstract class RouterAttribute
         return $this->route;
     }
 
-    public function getMethod(): string
+    public function getMethod(): HttpMethod
     {
         return $this->method;
     }
 
-    public function getAcceptedFormats(): string|array
+    public function getAcceptedContentTypes(): array
     {
-        return $this->acceptedFormats;
+        return $this->acceptedContentTypes;
     }
 }

@@ -1,7 +1,7 @@
 <?php namespace Zephyrus\Utilities\Listing;
 
 use InvalidArgumentException;
-use Zephyrus\Network\QueryString;
+use Zephyrus\Network\Request\QueryString;
 
 class ListPagination
 {

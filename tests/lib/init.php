@@ -5,8 +5,8 @@ if (!$loader = @require __DIR__ . '/../../vendor/autoload.php') {
 }
 
 // Simulate .htaccess default settings
-ini_set('session.use_cookies', 1);
 ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_httponly', 1);
 
 define('ROOT_DIR', realpath(__DIR__ . '/..'));
 $loader->addPsr4('Controllers\\', ROOT_DIR . '/app/Controllers');

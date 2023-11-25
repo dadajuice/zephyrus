@@ -3,29 +3,27 @@
 use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionMethod;
-use RuntimeException;
+use stdClass;
 use Zephyrus\Exceptions\RouteArgumentException;
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Request;
 use Zephyrus\Network\Response;
-use Zephyrus\Network\Responses\AbortResponses;
-use Zephyrus\Network\Responses\DownloadResponses;
-use Zephyrus\Network\Responses\RenderResponses;
-use Zephyrus\Network\Responses\StreamResponses;
-use Zephyrus\Network\Responses\SuccessResponse;
-use Zephyrus\Network\Responses\XmlResponses;
-use Zephyrus\Network\Router\Delete;
-use Zephyrus\Network\Router\Get;
-use Zephyrus\Network\Router\Patch;
-use Zephyrus\Network\Router\Post;
-use Zephyrus\Network\Router\Put;
+use Zephyrus\Network\Response\AbortResponses;
+use Zephyrus\Network\Response\DownloadResponses;
+use Zephyrus\Network\Response\RenderResponses;
+use Zephyrus\Network\Response\StreamResponses;
+use Zephyrus\Network\Response\SuccessResponse;
+use Zephyrus\Network\Response\XmlResponses;
+use Zephyrus\Network\Router\Authorize;
 use Zephyrus\Network\Router\Root;
-use Zephyrus\Network\RouteRepository;
+use Zephyrus\Network\Router\RouteDefinition;
+use Zephyrus\Network\Router\RouterAttribute;
+use Zephyrus\Network\Router\RouteRepository;
+use Zephyrus\Security\SecureHeader;
 
 abstract class Controller
 {
     protected ?Request $request = null;
-    private ?RouteRepository $repository = null;
     private array $overrideArguments = [];
     private array $restrictedArguments = [];
 
@@ -37,65 +35,12 @@ abstract class Controller
     use DownloadResponses;
 
     /**
-     * Defines all the routes supported by this controller associated with inner methods.
+     * Programmatically defines all routes supported by this controller associated with inner methods. Works parallel
+     * with the annotation route definitions.
      */
-    public function initializeRoutes(): void
+    public static function initializeRoutes(RouteRepository $repository): void
     {
-    }
-
-    public function initializeRoutesFromAttributes(RouteRepository $repository): void
-    {
-        $class = new ReflectionClass($this);
-        $classAttributes = $class->getAttributes();
-        $baseRoute = "";
-        foreach ($classAttributes as $attribute) {
-            if ($attribute->getName() == Root::class) {
-                $instance = $attribute->newInstance();
-                $baseRoute = rtrim($instance->getBaseRoute(), "/");
-                break;
-            }
-        }
-
-        $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
-        $supportedAttributes = [Get::class, Post::class, Put::class, Patch::class, Delete::class];
-        foreach ($methods as $method) {
-            $attributes = $method->getAttributes();
-            foreach ($attributes as $attribute) {
-                if (in_array($attribute->getName(), $supportedAttributes)) {
-                    $instance = $attribute->newInstance();
-                }
-                switch ($attribute->getName()) {
-                    case Get::class:
-                        $repository->get($baseRoute . $instance->getRoute(), [$this, $method->name]);
-                        break;
-                    case Post::class:
-                        $repository->post($baseRoute . $instance->getRoute(), [$this, $method->name]);
-                        break;
-                    case Put::class:
-                        $repository->put($baseRoute . $instance->getRoute(), [$this, $method->name]);
-                        break;
-                    case Patch::class:
-                        $repository->patch($baseRoute . $instance->getRoute(), [$this, $method->name]);
-                        break;
-                    case Delete::class:
-                        $repository->delete($baseRoute . $instance->getRoute(), [$this, $method->name]);
-                        break;
-                }
-            }
-        }
-    }
-
-    /**
-     * Applies the route collection instance to be used with the inner get, post, put, patch and delete method. These
-     * will register the route into the given repository. This method is necessary to make sure we keep the controller
-     * instance reference.
-     *
-     * @param RouteRepository $repository
-     * @return void
-     */
-    public function setRouteRepository(RouteRepository $repository): void
-    {
-        $this->repository = $repository;
+        static::initializeRoutesFromAttributes($repository);
     }
 
     public function setRequest(Request $request): void
@@ -116,16 +61,25 @@ abstract class Controller
     }
 
     /**
-     * Method called immediately after calling the associated route callback method. The default behavior is to do
-     * nothing. This should be overridden to customize any operation to be made right after the route callback. This
-     * callback receives the previous obtained response from either the before callback or the natural execution. Used
-     * as a middleware mechanic.
+     * Method called immediately after calling the associated route callback method. The default behavior is to inject
+     * CSRF token into forms automatically. This should be overridden to customize any operation to be made right after
+     * the route callback. This callback receives the previous obtained response from either the before callback or the
+     * natural execution. Used as a middleware mechanic.
      *
      * @param Response|null $response
      * @return Response | null
      */
     public function after(?Response $response): ?Response
     {
+        if (!is_null($response)
+            && $response->getContentType() == ContentType::HTML
+            && $this->request->getCsrfGuard()->isEnabled()
+            && $this->request->getCsrfGuard()->isHtmlIntegrationEnabled()) {
+            $content = $this->request->getCsrfGuard()->injectForms($response->getContent());
+            $response->setContent($content);
+        }
+        $this->request->addToHistory();
+        $this->setupSecurityHeaders($response->getSecureHeader());
         return $response;
     }
 
@@ -197,97 +151,23 @@ abstract class Controller
     }
 
     /**
-     * Adds a new GET route for the application. The GET method must be used to represent a specific resource (or
-     * collection) in some representational format (HTML, JSON, XML, ...). Normally, a GET request must only present
-     * data and not alter them in any way.
+     * Sets the desired security headers for all response of this specific controller.
      *
-     * E.g. GET /books
-     *      GET /book/{id}
-     *
-     * @param string $uri
-     * @param string $instanceMethod
-     * @param string | array $acceptedFormats
+     * @param SecureHeader $secureHeader
      */
-    final protected function get(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY): void
+    protected function setupSecurityHeaders(SecureHeader $secureHeader): void
     {
-        if (is_null($this->repository)) {
-            throw new RuntimeException("You must first set a RouteRepository instance on which the route definition will apply. Be sure to use the setRouteRepository method before any calls to get, post, put, patch and delete methods.");
-        }
-        $this->repository->get($uri, [$this, $instanceMethod], $acceptedFormats);
+
     }
 
     /**
-     * Adds a new POST route for the application. The POST method must be used to create a new entry in a collection. It
-     * is rarely used on a specific resource.
+     * Redirects the user to the previous GET route visited during his session.
      *
-     * E.g. POST /books
-     *
-     * @param string $uri
-     * @param string $instanceMethod
-     * @param string | array $acceptedFormats
+     * @return Response
      */
-    final protected function post(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY): void
+    public function previous(): Response
     {
-        if (is_null($this->repository)) {
-            throw new RuntimeException("You must first set a RouteRepository instance on which the route definition will apply. Be sure to use the setRouteRepository method before any calls to get, post, put, patch and delete methods.");
-        }
-        $this->repository->post($uri, [$this, $instanceMethod], $acceptedFormats);
-    }
-
-    /**
-     * Adds a new PUT route for the application. The PUT method must be used to update a specific resource or
-     * collection and must be considered idempotent.
-     *
-     * E.g. PUT /book/{id}
-     *
-     * @param string $uri
-     * @param string $instanceMethod
-     * @param string | array $acceptedFormats
-     */
-    final protected function put(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY): void
-    {
-        if (is_null($this->repository)) {
-            throw new RuntimeException("You must first set a RouteRepository instance on which the route definition will apply. Be sure to use the setRouteRepository method before any calls to get, post, put, patch and delete methods.");
-        }
-        $this->repository->put($uri, [$this, $instanceMethod], $acceptedFormats);
-    }
-
-    /**
-     * Adds a new PATCH route for the application. The PATCH method must be used to update a specific resource or
-     * collection and must be considered idempotent. Should be used instead of PUT when it is possible to update only
-     * given fields to update and not the entire resource.
-     *
-     * E.g. PATCH /book/{id}
-     *
-     * @param string $uri
-     * @param string $instanceMethod
-     * @param string | array $acceptedFormats
-     */
-    final protected function patch(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY): void
-    {
-        if (is_null($this->repository)) {
-            throw new RuntimeException("You must first set a RouteRepository instance on which the route definition will apply. Be sure to use the setRouteRepository method before any calls to get, post, put, patch and delete methods.");
-        }
-        $this->repository->patch($uri, [$this, $instanceMethod], $acceptedFormats);
-    }
-
-    /**
-     * Adds a new DELETE route for the application. The DELETE method must be used only to delete a specific resource or
-     * collection and must be considered idempotent.
-     *
-     * E.g. DELETE /book/{id}
-     *      DELETE /books
-     *
-     * @param string $uri
-     * @param string $instanceMethod
-     * @param string | array $acceptedFormats
-     */
-    final protected function delete(string $uri, string $instanceMethod, string|array $acceptedFormats = ContentType::ANY): void
-    {
-        if (is_null($this->repository)) {
-            throw new RuntimeException("You must first set a RouteRepository instance on which the route definition will apply. Be sure to use the setRouteRepository method before any calls to get, post, put, patch and delete methods.");
-        }
-        $this->repository->delete($uri, [$this, $instanceMethod], $acceptedFormats);
+        return $this->redirectBack($this->request);
     }
 
     /**
@@ -307,5 +187,81 @@ abstract class Controller
         $form->addFields($parameters);
         $form->addFields($this->request->getFiles());
         return $form;
+    }
+
+    private static function initializeBaseRoute(ReflectionClass $class): string
+    {
+        $classAttributes = $class->getAttributes();
+        foreach ($classAttributes as $attribute) {
+            if ($attribute->getName() == Root::class) {
+                $instance = $attribute->newInstance();
+                return rtrim($instance->getBaseRoute(), "/");
+            }
+        }
+        return "";
+    }
+
+    private static function initializeBaseAuthorizationRules(ReflectionClass $class): stdClass
+    {
+        $parentClasses = [];
+        $currentClass = $class;
+        while ($currentClass = $currentClass->getParentClass()) {
+            $parentClasses[] = $currentClass;
+        }
+        array_unshift($parentClasses, $class);
+
+        $result = (object) [
+            'rules' => [],
+            'strict' => false
+        ];
+        for ($i = count($parentClasses) - 1; $i >= 0; $i--) {
+            $currentClass = $parentClasses[$i];
+            $attributes = $currentClass->getAttributes();
+            foreach ($attributes as $attribute) {
+                if ($attribute->getName() == Authorize::class) {
+                    $instance = $attribute->newInstance();
+                    $result = (object) [
+                        'rules' => $instance->getRules(),
+                        'strict' => $instance->isStrict()
+                    ];
+                }
+            }
+        }
+        return $result;
+    }
+
+    private static function initializeRoutesFromAttributes(RouteRepository $repository): void
+    {
+        $class = new ReflectionClass(static::class);
+        $baseRoute = self::initializeBaseRoute($class);
+        $result = self::initializeBaseAuthorizationRules($class);
+        $baseRules = $result->rules;
+        $strictRules = $result->strict;
+
+        $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
+        foreach ($methods as $method) {
+            $attributes = $method->getAttributes();
+            foreach ($attributes as $attribute) {
+                if ($attribute->getName() == Authorize::class) {
+                    $instance = $attribute->newInstance();
+                    $baseRules = array_merge($baseRules, $instance->getRules());
+                    if ($instance->isStrict()) {
+                        $strictRules = $instance->isStrict();
+                    }
+                }
+            }
+            foreach ($attributes as $attribute) {
+                if (in_array($attribute->getName(), RouterAttribute::SUPPORTED_ANNOTATIONS)) {
+                    $instance = $attribute->newInstance();
+                    $url = $baseRoute . $instance->getRoute();
+
+                    $route = new RouteDefinition($url);
+                    $route->setCallback([static::class, $method->name]);
+                    $route->setAcceptedContentTypes($instance->getAcceptedContentTypes());
+                    $route->setAuthorizationRules($baseRules, $strictRules);
+                    $repository->addRoute($instance->getMethod(), $route);
+                }
+            }
+        }
     }
 }

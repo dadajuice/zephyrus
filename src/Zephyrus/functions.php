@@ -4,7 +4,7 @@ use Zephyrus\Application\Configuration;
 use Zephyrus\Application\Feedback;
 use Zephyrus\Application\Form;
 use Zephyrus\Application\Localization;
-use Zephyrus\Application\Session;
+use Zephyrus\Core\Session;
 use Zephyrus\Security\ContentSecurityPolicy;
 use Zephyrus\Utilities\StringUtility;
 
@@ -23,10 +23,10 @@ const FORMAT_DATE_TIME = FORMAT_DATE . " " . FORMAT_TIME;
 function session(array|string $data, mixed $defaultValue = null)
 {
     if (is_array($data)) {
-        Session::getInstance()->setAll($data);
+        Session::setAll($data);
         return;
     }
-    return Session::getInstance()->read($data, $defaultValue);
+    return Session::get($data, $defaultValue);
 }
 
 /**
@@ -103,7 +103,8 @@ function config(string $section, ?string $property = null, ?string $defaultValue
  */
 function val(string $fieldId, mixed $defaultValue = ""): mixed
 {
-    return Form::readMemorizedValue($fieldId, $defaultValue);
+    $raw = Form::getRawSavedField($fieldId, null);
+    return $raw ?? Form::getSavedField($fieldId, $defaultValue);
 }
 
 /**
@@ -113,7 +114,7 @@ function val(string $fieldId, mixed $defaultValue = ""): mixed
  */
 function nonce(): string
 {
-    return ContentSecurityPolicy::getRequestNonce() ?? "";
+    return ContentSecurityPolicy::nonce();
 }
 
 /**
@@ -163,4 +164,49 @@ function acronym(?string $string, int $length = 2): string
 function mark(?string $string, ?string $search): string
 {
     return StringUtility::mark($string, $search);
+}
+
+/**
+ * Provides a replacement for getallheaders if on another web server than Apache.
+ *
+ * @see https://github.com/ralouphie/getallheaders
+ */
+if (!function_exists('getallheaders')) {
+
+    /**
+     * Retrieves all HTTP header key/values as an associative array for the current request.
+     *
+     * @return array
+     */
+    function getallheaders(): array
+    {
+        $headers = [];
+        $copy_server = [
+            'CONTENT_TYPE'   => 'Content-Type',
+            'CONTENT_LENGTH' => 'Content-Length',
+            'CONTENT_MD5'    => 'Content-Md5',
+        ];
+        foreach ($_SERVER as $key => $value) {
+            if (str_starts_with($key, 'HTTP_')) {
+                $key = substr($key, 5);
+                if (!isset($copy_server[$key]) || !isset($_SERVER[$key])) {
+                    $key = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', $key))));
+                    $headers[$key] = $value;
+                }
+            } elseif (isset($copy_server[$key])) {
+                $headers[$copy_server[$key]] = $value;
+            }
+        }
+        if (!isset($headers['Authorization'])) {
+            if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+                $headers['Authorization'] = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+            } elseif (isset($_SERVER['PHP_AUTH_USER'])) {
+                $basic_pass = $_SERVER['PHP_AUTH_PW'] ?? '';
+                $headers['Authorization'] = 'Basic ' . base64_encode($_SERVER['PHP_AUTH_USER'] . ':' . $basic_pass);
+            } elseif (isset($_SERVER['PHP_AUTH_DIGEST'])) {
+                $headers['Authorization'] = $_SERVER['PHP_AUTH_DIGEST'];
+            }
+        }
+        return $headers;
+    }
 }

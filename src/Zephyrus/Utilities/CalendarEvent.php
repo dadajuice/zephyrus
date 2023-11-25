@@ -2,7 +2,6 @@
 
 use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Response;
-use Zephyrus\Network\ResponseFactory;
 
 class CalendarEvent
 {
@@ -107,7 +106,7 @@ DTSTART:<?= $this->formatCalendarDate($this->startDate) . PHP_EOL ?>
 END:VEVENT
 END:VCALENDAR<?php
         $content = ob_get_clean();
-        return ResponseFactory::getInstance()->downloadContent($content, $this->getFilename(), ContentType::CALENDAR);
+        return Response::builder()->downloadContent($content, $this->getFilename(), ContentType::CALENDAR);
     }
 
     /**
