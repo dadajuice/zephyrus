@@ -10,6 +10,7 @@ class Database
     private DatabaseConfiguration $configuration;
     private DatabaseHandle $handle;
     private SchemaInterrogator $schemaInterrogator;
+    private array $typeConversions = [];
 
     /**
      * Instantiates the database facade instance which will permit queries to be sent to the database.
@@ -45,11 +46,22 @@ class Database
                 );
             }
             $statement->execute();
-            return new DatabaseStatement($statement);
+            return new DatabaseStatement($statement, $this->typeConversions);
         } catch (PDOException $e) {
             throw new DatabaseException('Error while preparing query « ' . $query . ' » (' .
                 $e->getMessage() . ')', $query);
         }
+    }
+
+    /**
+     * Registers a custom type conversion for a project. Useful for automated composite type processing.
+     *
+     * @param string $pdoType
+     * @param callable $callback
+     */
+    public function registerTypeConversion(string $pdoType, callable $callback): void
+    {
+        $this->typeConversions[strtoupper($pdoType)] = $callback;
     }
 
     /**

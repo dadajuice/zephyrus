@@ -1,5 +1,6 @@
 <?php namespace Zephyrus\Tests\Database\Core;
 
+use Zephyrus\Application\Localization;
 use Zephyrus\Database\Core\Database;
 use Zephyrus\Exceptions\DatabaseException;
 use Zephyrus\Exceptions\FatalDatabaseException;
@@ -101,6 +102,37 @@ class DatabaseTest extends DatabaseTestCase
         self::assertEquals(1, $result->hero_ids[0]);
         self::assertEquals("Batman", $result->hero_names[0]);
         $db->query("DROP VIEW view_test");
+    }
+
+    public function testEvaluationOfCustomTypes()
+    {
+        Localization::getInstance()->start();
+        $db = $this->buildDatabase();
+        $db->query("CREATE TYPE multi_lang_text AS(fr TEXT, en TEXT, es TEXT)");
+        $db->query("CREATE TABLE formation(training_course_id SERIAL PRIMARY KEY, code TEXT NOT NULL, name multi_lang_text NOT NULL)");
+        $db->query("INSERT INTO formation(code, name) VALUES (?, (?, ?, ?))", ['D-2-20', 'Le test', 'The test', 'El Test']);
+
+        $db->registerTypeConversion('MULTI_LANG_TEXT', function ($compositeValue) {
+            $code = Localization::getInstance()->getLoadedLanguage()->lang_code;
+            $properties = ['fr', 'en', 'es'];
+            $compositeValue = str_replace('(', '', $compositeValue);
+            $compositeValue = str_replace(')', '', $compositeValue);
+            $parts = str_getcsv($compositeValue, ",", "\"");
+            $results = [];
+            foreach ($properties as $index => $name) {
+                $results[$name] = trim($parts[$index], "\"");
+            }
+            $results = (object) $results;
+            return $results->$code;
+        });
+
+        $res = $db->query("SELECT * FROM formation");
+        $result = $res->next();
+
+        $this->assertEquals("Le test", $result->name);
+
+        $db->query("DROP TABLE IF EXISTS formation");
+        $db->query("DROP TYPE IF EXISTS multi_lang_text");
     }
 
     public function testQueryDDLError()
