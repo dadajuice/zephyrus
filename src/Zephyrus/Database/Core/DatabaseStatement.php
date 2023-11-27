@@ -4,6 +4,7 @@ use Exception;
 use PDO;
 use PDOStatement;
 use stdClass;
+use Zephyrus\Application\Localization;
 
 /**
  * This class serves as a PDOStatement wrapper with some specialized behavior such as automatically convert value types
@@ -18,15 +19,17 @@ class DatabaseStatement
 
     private PDOStatement $statement;
     private array $fetchColumnTypes = [];
+    private array $typeConversions = [];
 
     /**
      * @var callable
      */
     private $sanitizeCallback = null;
 
-    public function __construct(PDOStatement $statement)
+    public function __construct(PDOStatement $statement, array $typeConversions = [])
     {
         $this->statement = $statement;
+        $this->typeConversions = $typeConversions;
         //$this->statement->setAttribute(PDO::ATTR_CURSOR, PDO::CURSOR_SCROLL);
         $this->initializeTypeConversion();
     }
@@ -146,6 +149,9 @@ class DatabaseStatement
      */
     private function getMetaCallback(string $pdoType): mixed
     {
+        if (key_exists(strtoupper($pdoType), $this->typeConversions)) {
+            return $this->typeConversions[strtoupper($pdoType)];
+        }
         if (in_array($pdoType, self::TYPE_INTEGER)) {
             return "intval";
         }
