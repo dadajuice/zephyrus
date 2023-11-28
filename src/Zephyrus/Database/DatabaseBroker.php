@@ -7,6 +7,7 @@ use Zephyrus\Database\Core\DatabaseStatement;
 abstract class DatabaseBroker
 {
     private Database $database;
+    private ?DatabaseStatement $lastStatement = null;
 
     /**
      * Broker constructor called by children. Simply get the database reference for further use by queries. If no
@@ -41,6 +42,16 @@ abstract class DatabaseBroker
         return $this->database;
     }
 
+    public function getLastAffectedCount(): int
+    {
+        return $this->lastStatement?->count() ?? 0;
+    }
+
+    public function getLastStatement(): ?DatabaseStatement
+    {
+        return $this->lastStatement;
+    }
+
     /**
      * Executes any type of query and simply returns the DatabaseStatement object ready to be fetched. Will throw a
      * DatabaseException (silent as a RuntimeException) is the query fails to execute.
@@ -51,7 +62,8 @@ abstract class DatabaseBroker
      */
     protected function rawQuery(string $query, array $parameters = []): DatabaseStatement
     {
-        return $this->prepareStatement($query, $parameters);
+        $this->lastStatement = $this->prepareStatement($query, $parameters);
+        return $this->lastStatement;
     }
 
     /**
@@ -65,8 +77,8 @@ abstract class DatabaseBroker
      */
     protected function query(string $query, array $parameters = []): ?stdClass
     {
-        $statement = $this->prepareStatement($query, $parameters);
-        return $statement->next();
+        $this->lastStatement = $this->prepareStatement($query, $parameters);
+        return $this->lastStatement->next();
     }
 
     /**
@@ -80,8 +92,8 @@ abstract class DatabaseBroker
      */
     protected function selectSingle(string $query, array $parameters = []): ?stdClass
     {
-        $statement = $this->prepareStatement($query, $parameters);
-        return $statement->next();
+        $this->lastStatement = $this->prepareStatement($query, $parameters);
+        return $this->lastStatement->next();
     }
 
     /**
@@ -96,7 +108,8 @@ abstract class DatabaseBroker
      */
     protected function select(string $query, array $parameters = [], ?callable $callback = null): array
     {
-        $result = new SqlResult($this->prepareStatement($query, $parameters));
+        $this->lastStatement = $this->prepareStatement($query, $parameters);
+        $result = new SqlResult($this->lastStatement);
         return $result->toArray($callback);
     }
 
