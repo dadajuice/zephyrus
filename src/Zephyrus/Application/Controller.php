@@ -170,6 +170,20 @@ abstract class Controller
         return $this->redirectBack($this->request);
     }
 
+    public function getRouteRoot(): string
+    {
+        return $this->request->getRouteDefinition()->getRouteRoot();
+    }
+
+    public function redirectRoot(string $defaultRedirect = "/"): Response
+    {
+        $root = $this->request->getRouteDefinition()->getRouteRoot();
+        if (empty($root)) {
+            $root = $defaultRedirect;
+        }
+        return $this->redirect($root);
+    }
+
     /**
      * Builds a Form class instance automatically filled with all the request body parameters. Should be used to add
      * validation rules.
@@ -255,7 +269,7 @@ abstract class Controller
                     $instance = $attribute->newInstance();
                     $url = $baseRoute . $instance->getRoute();
 
-                    $route = new RouteDefinition($url);
+                    $route = new RouteDefinition($url, $baseRoute);
                     $route->setCallback([static::class, $method->name]);
                     $route->setAcceptedContentTypes($instance->getAcceptedContentTypes());
                     $route->setAuthorizationRules($baseRules, $strictRules);
