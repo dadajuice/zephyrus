@@ -8,8 +8,8 @@ use Zephyrus\Network\Request;
 
 class RouteDefinition
 {
-    private string $rawRouteRoot;
-    private string $routeRoot;
+    private string $rawRouteRoot = "";
+    private string $routeRoot = "";
     private string $route;
     private ?string $controllerClass = null;
     private ?string $controllerMethod = null;
