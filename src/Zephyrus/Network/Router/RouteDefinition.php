@@ -8,6 +8,8 @@ use Zephyrus\Network\Request;
 
 class RouteDefinition
 {
+    private string $rawRouteRoot;
+    private string $routeRoot;
     private string $route;
     private ?string $controllerClass = null;
     private ?string $controllerMethod = null;
@@ -24,8 +26,9 @@ class RouteDefinition
      *
      * @param string $route
      */
-    public function __construct(string $route)
+    public function __construct(string $route, string $routeRoot = "")
     {
+        $this->rawRouteRoot = ($routeRoot == "/") ? $routeRoot : rtrim($routeRoot, "/");;
         $this->route = ($route == "/") ? $route : rtrim($route, "/");
         $this->initializeUrlArguments();
         $this->initializeRegexPattern();
@@ -61,6 +64,16 @@ class RouteDefinition
             }
         }
         return false;
+    }
+
+    public function getRouteRoot(): string
+    {
+        return $this->routeRoot;
+    }
+
+    public function getRawRouteRoot(): string
+    {
+        return $this->rawRouteRoot;
     }
 
     /**
@@ -125,10 +138,12 @@ class RouteDefinition
         $values = [];
         $pattern = '/^' . $this->regexPattern . '$/';
         preg_match_all($pattern, $requestedUrl, $matches);
+
         $matchCount = count($matches);
         for ($i = 1; $i < $matchCount; ++$i) {
             $values[] = $matches[$i][0];
         }
+
         $argumentValues = [];
         $i = 0;
         foreach ($this->argumentDefinitions as $argument) {
@@ -136,6 +151,13 @@ class RouteDefinition
             ++$i;
         }
         $this->arguments = $argumentValues;
+
+        if (!empty($this->rawRouteRoot)) {
+            $this->routeRoot = $this->rawRouteRoot;
+            foreach ($this->argumentDefinitions as $argumentName) {
+                $this->routeRoot = localize($this->routeRoot, [$argumentName => $this->arguments[$argumentName]]);
+            }
+        }
     }
 
     public function getArgumentValues(): array
