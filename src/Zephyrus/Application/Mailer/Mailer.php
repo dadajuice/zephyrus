@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Utilities;
+<?php namespace Zephyrus\Application\Mailer;
 
 use InvalidArgumentException;
 use PHPMailer\PHPMailer\Exception;

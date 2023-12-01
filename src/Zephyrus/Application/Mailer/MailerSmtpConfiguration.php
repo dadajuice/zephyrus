@@ -1,4 +1,4 @@
-<?php namespace Zephyrus\Utilities;
+<?php namespace Zephyrus\Application\Mailer;
 
 use Zephyrus\Exceptions\Mailer\MailerSmtpEncryptionException;
 use Zephyrus\Exceptions\Mailer\MailerSmtpPortException;
