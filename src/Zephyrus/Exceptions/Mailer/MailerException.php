@@ -3,7 +3,7 @@
 use Throwable;
 use Zephyrus\Exceptions\ZephyrusException;
 
-abstract class MailerException extends ZephyrusException
+class MailerException extends ZephyrusException
 {
     /**
      * Groups all exception related to the Zephyrus internal PHP session wrapper. All children exception classes have a

@@ -3,6 +3,9 @@
 use InvalidArgumentException;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
+use Zephyrus\Exceptions\Mailer\MailerAttachmentNotFoundException;
+use Zephyrus\Exceptions\Mailer\MailerException;
+use Zephyrus\Exceptions\Mailer\MailerInvalidAddressException;
 use Zephyrus\Utilities\FileSystem\File;
 
 class Mailer
@@ -13,7 +16,7 @@ class Mailer
     public function __construct(MailerSmtpConfiguration $configuration)
     {
         $this->smtpConfiguration = $configuration;
-        $this->phpMailer = new PHPMailer();
+        $this->phpMailer = new PHPMailer(true);
         $this->phpMailer->CharSet = 'UTF-8';
         $this->initializeSmtp();
     }
@@ -28,28 +31,30 @@ class Mailer
      *
      * @param string $email
      * @param string $name
+     * @throws MailerInvalidAddressException
      */
     public function setFrom(string $email, string $name): void
     {
         try {
             $this->phpMailer->setFrom($email, $name);
-        } catch (Exception $e) {
-            // TODO: Invalid Address ...
+        } catch (Exception) {
+            throw new MailerInvalidAddressException($email);
         }
     }
 
+    /**
+     * @throws MailerException
+     */
     public function send(bool $asHtml = true): string
     {
         $this->phpMailer->IsHTML($asHtml);
-        if (!$this->phpMailer->preSend()) {
-            echo $this->phpMailer->ErrorInfo;
-            //TODO: throw exception
-        }
-        if ($this->smtpConfiguration->isEnabled()) {
-            if (!$this->phpMailer->postSend()) {
-                echo $this->phpMailer->ErrorInfo;
-                //TODO: throw exception
+        try {
+            $this->phpMailer->preSend();
+            if ($this->smtpConfiguration->isEnabled()) {
+                $this->phpMailer->postSend();
             }
+        } catch (Exception $exception) {
+            throw new MailerException($exception->getMessage());
         }
         return $this->phpMailer->getSentMIMEMessage();
     }
@@ -82,33 +87,45 @@ class Mailer
         $this->phpMailer->AltBody = $altContent;
     }
 
+    /**
+     * @throws MailerInvalidAddressException
+     */
     public function addRecipient(string $email, string $name = ""): void
     {
         try {
             $this->phpMailer->addAddress($email, $name);
-        } catch (Exception $e) {
-            // TODO: Invalid Address ...
+        } catch (Exception) {
+            throw new MailerInvalidAddressException($email);
         }
     }
 
+    /**
+     * @throws MailerInvalidAddressException
+     */
     public function addRecipientCc(string $email, string $name = ""): void
     {
         try {
             $this->phpMailer->addCC($email, $name);
-        } catch (Exception $e) {
-            // TODO: Invalid Address ...
+        } catch (Exception) {
+            throw new MailerInvalidAddressException($email);
         }
     }
 
+    /**
+     * @throws MailerInvalidAddressException
+     */
     public function addRecipientBcc(string $email, string $name = ""): void
     {
         try {
             $this->phpMailer->addBCC($email, $name);
-        } catch (Exception $e) {
-            // TODO: Invalid Address ...
+        } catch (Exception) {
+            throw new MailerInvalidAddressException($email);
         }
     }
 
+    /**
+     * @throws MailerInvalidAddressException
+     */
     public function addRecipients(array $recipients): void
     {
         foreach ($recipients as $email => $name) {
@@ -116,12 +133,15 @@ class Mailer
         }
     }
 
+    /**
+     * @throws MailerInvalidAddressException
+     */
     public function addReplyTo(string $email, string $name = ""): void
     {
         try {
             $this->phpMailer->addReplyTo($email, $name);
-        } catch (Exception $e) {
-            // TODO: Invalid Address ...
+        } catch (Exception) {
+            throw new MailerInvalidAddressException($email);
         }
     }
 
@@ -134,6 +154,8 @@ class Mailer
      *
      * @param string $path
      * @param string|null $filename
+     * @throws MailerAttachmentNotFoundException
+     * @throws MailerException
      */
     public function addAttachment(string $path, ?string $filename = null): void
     {
@@ -141,10 +163,10 @@ class Mailer
             $attachment = new File($path);
             $this->phpMailer->addAttachment($path, $filename ?? $attachment->getFilename(),
                 PHPMailer::ENCODING_BASE64, $attachment->getMimeType());
-        } catch (InvalidArgumentException $exception) {
-            // TODO: File not exists ...
+        } catch (InvalidArgumentException) {
+            throw new MailerAttachmentNotFoundException($path);
         } catch (Exception $exception) {
-            // TODO: Mailer Exception ...
+            throw new MailerException($exception->getMessage());
         }
     }
 
@@ -157,6 +179,8 @@ class Mailer
      * @param string $path
      * @param string $cid
      * @param string|null $filename
+     * @throws MailerAttachmentNotFoundException
+     * @throws MailerException
      */
     public function addInlineAttachment(string $path, string $cid, ?string $filename = null): void
     {
@@ -164,10 +188,10 @@ class Mailer
             $attachment = new File($path);
             $this->phpMailer->addEmbeddedImage($path, $cid, $filename ?? $attachment->getFilename(),
                 PHPMailer::ENCODING_BASE64, $attachment->getMimeType());
-        } catch (InvalidArgumentException $exception) {
-            // TODO: File not exists ...
+        } catch (InvalidArgumentException) {
+            throw new MailerAttachmentNotFoundException($path);
         } catch (Exception $exception) {
-            // TODO: Mailer Exception ...
+            throw new MailerException($exception->getMessage());
         }
     }
 
@@ -181,6 +205,7 @@ class Mailer
      * @param string $string
      * @param string $filename
      * @param string|null $mimeType
+     * @throws MailerException
      */
     public function addBinaryAttachment(string $string, string $filename, ?string $mimeType = null): void
     {
@@ -188,7 +213,7 @@ class Mailer
             $this->phpMailer->addStringAttachment($string, $filename,
                 PHPMailer::ENCODING_BASE64, $mimeType ?? '');
         } catch (Exception $exception) {
-            // TODO: Mailer Exception ...
+            throw new MailerException($exception->getMessage());
         }
     }
 
@@ -200,6 +225,7 @@ class Mailer
      * @param string $filename
      * @param string|null $mimeType
      * @return void
+     * @throws MailerException
      */
     public function addBinaryInlineAttachment(string $string, string $filename, ?string $mimeType = null): void
     {
@@ -207,7 +233,7 @@ class Mailer
             $this->phpMailer->addStringAttachment($string, $filename,
                 PHPMailer::ENCODING_BASE64, $mimeType ?? '', 'inline');
         } catch (Exception $exception) {
-            // TODO: Mailer Exception ...
+            throw new MailerException($exception->getMessage());
         }
     }
 
