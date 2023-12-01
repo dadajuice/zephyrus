@@ -1,5 +1,8 @@
 <?php namespace Zephyrus\Utilities;
 
+use Zephyrus\Exceptions\Mailer\MailerSmtpEncryptionException;
+use Zephyrus\Exceptions\Mailer\MailerSmtpPortException;
+
 class MailerSmtpConfiguration
 {
     public const DEFAULT_CONFIGURATIONS = [
@@ -19,6 +22,10 @@ class MailerSmtpConfiguration
     private string $username;
     private string $password;
 
+    /**
+     * @throws MailerSmtpPortException
+     * @throws MailerSmtpEncryptionException
+     */
     public function __construct(array $configurations = self::DEFAULT_CONFIGURATIONS)
     {
         $this->initializeConfigurations($configurations);
@@ -70,38 +77,43 @@ class MailerSmtpConfiguration
 
     private function initializeEnabled(): void
     {
-        $enabled = $this->configurations['enabled'] ?? self::DEFAULT_CONFIGURATIONS['enabled'];
-        if (!is_bool($enabled)) {
-            //throw new SessionLifetimeException();
-            //TODO: throw
-        }
-        $this->enabled = $enabled;
+        $this->enabled = (bool) $this->configurations['enabled']
+            ?? self::DEFAULT_CONFIGURATIONS['enabled'];
     }
 
+    /**
+     * @throws MailerSmtpEncryptionException
+     */
     private function initializeEncryption(): void
     {
-        $encryption = $this->configurations['encryption'] ?? self::DEFAULT_CONFIGURATIONS['encryption'];
+        $encryption = $this->configurations['encryption']
+            ?? self::DEFAULT_CONFIGURATIONS['encryption'];
         if (!in_array($encryption, ['ssl', 'tls'])) {
-            //throw new SessionLifetimeException();
-            //TODO: throw
+            throw new MailerSmtpEncryptionException();
         }
         $this->encryption = $encryption;
     }
 
+    /**
+     * @throws MailerSmtpPortException
+     */
     private function initializeHost(): void
     {
-        $this->host = $this->configurations['host'] ?? self::DEFAULT_CONFIGURATIONS['host'];
-        $port = $this->configurations['port'] ?? self::DEFAULT_CONFIGURATIONS['port'];
+        $this->host = $this->configurations['host']
+            ?? self::DEFAULT_CONFIGURATIONS['host'];
+        $port = $this->configurations['port']
+            ?? self::DEFAULT_CONFIGURATIONS['port'];
         if (!is_numeric($port)) {
-            //throw new SessionLifetimeException();
-            //TODO: throw
+            throw new MailerSmtpPortException();
         }
         $this->port = $port;
     }
 
     private function initializeAuthentication(): void
     {
-        $this->username = $this->configurations['username'] ?? self::DEFAULT_CONFIGURATIONS['username'];
-        $this->password = $this->configurations['password'] ?? self::DEFAULT_CONFIGURATIONS['password'];
+        $this->username = $this->configurations['username']
+            ?? self::DEFAULT_CONFIGURATIONS['username'];
+        $this->password = $this->configurations['password']
+            ?? self::DEFAULT_CONFIGURATIONS['password'];
     }
 }
