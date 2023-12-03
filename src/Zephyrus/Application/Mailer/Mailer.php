@@ -242,11 +242,17 @@ class Mailer
         if ($this->smtpConfiguration->isEnabled()) {
             $this->phpMailer->isSMTP();
             $this->phpMailer->Host = $this->smtpConfiguration->getHost();
+            $this->phpMailer->Port = $this->smtpConfiguration->getPort();
             $this->phpMailer->SMTPAuth = $this->smtpConfiguration->hasAuthentication();
             $this->phpMailer->Username = $this->smtpConfiguration->getUsername();
             $this->phpMailer->Password = $this->smtpConfiguration->getPassword();
-            $this->phpMailer->SMTPSecure = $this->smtpConfiguration->getEncryption();
-            $this->phpMailer->Port = $this->smtpConfiguration->getPort();
+            $this->phpMailer->SMTPOptions = $this->smtpConfiguration->getSslOptions();
+            if ($this->smtpConfiguration->getEncryption() != "none") {
+                $this->phpMailer->SMTPSecure = $this->smtpConfiguration->getEncryption();
+            }
+            if ($this->smtpConfiguration->isDebug()) {
+                $this->phpMailer->SMTPDebug = 2;
+            }
         }
     }
 }

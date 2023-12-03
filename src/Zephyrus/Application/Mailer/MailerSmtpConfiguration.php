@@ -9,9 +9,12 @@ class MailerSmtpConfiguration
         'enabled' => false, // Enables the SMTP processing of emails, default to false which makes available the raw message.
         'host' => '', // SMTP server to send through (e.g. smtp.example.com)
         'port' => 465, // TCP port to connect to; use 587 if you have set encryption to 'tls'
-        'encryption' => 'ssl', // Encryption algorithm to use (ssl | tls)
+        'encryption' => 'ssl', // Encryption algorithm to use (none | ssl | tls)
         'username' => '', // SMTP username
-        'password' => '' // SMTP password
+        'password' => '', // SMTP password
+        'debug' => false, // Use setting SMTPDebug=2 of PHPMailer for verbose debugging
+        'allow_self_signed' => true, // SSL configuration to allow self signed
+        'verify_peer' => false // SSL configuration to ignore peer verification
     ];
 
     private array $configurations;
@@ -21,6 +24,8 @@ class MailerSmtpConfiguration
     private string $encryption;
     private string $username;
     private string $password;
+    private bool $debug;
+    private array $sslOptions;
 
     /**
      * @throws MailerSmtpPortException
@@ -33,6 +38,8 @@ class MailerSmtpConfiguration
         $this->initializeHost();
         $this->initializeAuthentication();
         $this->initializeEncryption();
+        $this->initializeDebug();
+        $this->initializeSslOptions();
     }
 
     public function isEnabled(): bool
@@ -70,6 +77,16 @@ class MailerSmtpConfiguration
         return $this->password;
     }
 
+    public function isDebug(): bool
+    {
+        return $this->debug;
+    }
+
+    public function getSslOptions(): array
+    {
+        return $this->sslOptions;
+    }
+
     private function initializeConfigurations(array $configurations): void
     {
         $this->configurations = $configurations;
@@ -88,7 +105,7 @@ class MailerSmtpConfiguration
     {
         $encryption = $this->configurations['encryption']
             ?? self::DEFAULT_CONFIGURATIONS['encryption'];
-        if (!in_array($encryption, ['ssl', 'tls'])) {
+        if (!in_array($encryption, ['none', 'ssl', 'tls'])) {
             throw new MailerSmtpEncryptionException();
         }
         $this->encryption = $encryption;
@@ -115,5 +132,25 @@ class MailerSmtpConfiguration
             ?? self::DEFAULT_CONFIGURATIONS['username'];
         $this->password = $this->configurations['password']
             ?? self::DEFAULT_CONFIGURATIONS['password'];
+    }
+
+    private function initializeDebug(): void
+    {
+        $this->debug = (bool) $this->configurations['debug']
+            ?? self::DEFAULT_CONFIGURATIONS['debug'];
+    }
+
+    private function initializeSslOptions(): void
+    {
+        $this->sslOptions = [
+            'ssl' => [
+                'verify_peer' => (bool) $this->configurations['verify_peer']
+                    ?? self::DEFAULT_CONFIGURATIONS['verify_peer'],
+                'verify_peer_name' => (bool) $this->configurations['verify_peer']
+                    ?? self::DEFAULT_CONFIGURATIONS['verify_peer'],
+                'allow_self_signed' => (bool) $this->configurations['allow_self_signed']
+                    ?? self::DEFAULT_CONFIGURATIONS['allow_self_signed'],
+            ]
+        ];
     }
 }
