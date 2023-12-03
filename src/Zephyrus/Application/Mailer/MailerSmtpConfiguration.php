@@ -94,8 +94,9 @@ class MailerSmtpConfiguration
 
     private function initializeEnabled(): void
     {
-        $this->enabled = (bool) $this->configurations['enabled']
-            ?? self::DEFAULT_CONFIGURATIONS['enabled'];
+        $this->enabled = (bool) ((isset($this->configurations['enabled']))
+            ? $this->configurations['enabled']
+            : self::DEFAULT_CONFIGURATIONS['enabled']);
     }
 
     /**
@@ -116,8 +117,7 @@ class MailerSmtpConfiguration
      */
     private function initializeHost(): void
     {
-        $this->host = $this->configurations['host']
-            ?? self::DEFAULT_CONFIGURATIONS['host'];
+        $this->host = $this->configurations['host'] ?? self::DEFAULT_CONFIGURATIONS['host'];
         $port = $this->configurations['port']
             ?? self::DEFAULT_CONFIGURATIONS['port'];
         if (!is_numeric($port)) {
@@ -128,28 +128,34 @@ class MailerSmtpConfiguration
 
     private function initializeAuthentication(): void
     {
-        $this->username = $this->configurations['username']
-            ?? self::DEFAULT_CONFIGURATIONS['username'];
-        $this->password = $this->configurations['password']
-            ?? self::DEFAULT_CONFIGURATIONS['password'];
+        $this->username = (isset($this->configurations['username']))
+            ? $this->configurations['username']
+            : self::DEFAULT_CONFIGURATIONS['username'];
+        $this->password = (isset($this->configurations['password']))
+            ? $this->configurations['password']
+            : self::DEFAULT_CONFIGURATIONS['password'];
     }
 
     private function initializeDebug(): void
     {
-        $this->debug = (bool) $this->configurations['debug']
-            ?? self::DEFAULT_CONFIGURATIONS['debug'];
+        $this->debug = (bool) ((isset($this->configurations['debug']))
+            ? $this->configurations['debug']
+            : self::DEFAULT_CONFIGURATIONS['debug']);
     }
 
     private function initializeSslOptions(): void
     {
         $this->sslOptions = [
             'ssl' => [
-                'verify_peer' => (bool) $this->configurations['verify_peer']
-                    ?? self::DEFAULT_CONFIGURATIONS['verify_peer'],
-                'verify_peer_name' => (bool) $this->configurations['verify_peer']
-                    ?? self::DEFAULT_CONFIGURATIONS['verify_peer'],
-                'allow_self_signed' => (bool) $this->configurations['allow_self_signed']
-                    ?? self::DEFAULT_CONFIGURATIONS['allow_self_signed'],
+                'verify_peer' => (bool) ((isset($this->configurations['verify_peer']))
+                    ? $this->configurations['verify_peer']
+                    : self::DEFAULT_CONFIGURATIONS['verify_peer']),
+                'verify_peer_name' => (bool) ((isset($this->configurations['verify_peer']))
+                    ? $this->configurations['verify_peer']
+                    : self::DEFAULT_CONFIGURATIONS['verify_peer']),
+                'allow_self_signed' => (bool) ((isset($this->configurations['allow_self_signed']))
+                    ? $this->configurations['allow_self_signed']
+                    : self::DEFAULT_CONFIGURATIONS['allow_self_signed']),
             ]
         ];
     }
