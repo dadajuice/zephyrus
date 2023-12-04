@@ -157,7 +157,6 @@ abstract class Controller
      */
     protected function setupSecurityHeaders(SecureHeader $secureHeader): void
     {
-
     }
 
     /**

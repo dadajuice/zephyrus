@@ -4,7 +4,6 @@ use Exception;
 use PDO;
 use PDOStatement;
 use stdClass;
-use Zephyrus\Application\Localization;
 
 /**
  * This class serves as a PDOStatement wrapper with some specialized behavior such as automatically convert value types

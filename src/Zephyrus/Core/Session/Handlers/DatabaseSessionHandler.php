@@ -34,6 +34,7 @@ class DatabaseSessionHandler extends SessionHandler
             }
             return true;
         }
+
         throw new SessionDatabaseTableException($table, $schema);
     }
 

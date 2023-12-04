@@ -68,8 +68,8 @@ class Request
     /**
      * Retrieves the HTTP method of the request (either GET, POST, PUT, PATCH or DELETE).
      *
-     * @return HttpMethod
      * @throws RouteMethodUnsupportedException
+     * @return HttpMethod
      */
     public function getMethod(): HttpMethod
     {

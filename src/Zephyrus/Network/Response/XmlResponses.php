@@ -14,8 +14,8 @@ trait XmlResponses
      *
      * @param array | SimpleXMLElement | string $data
      * @param string $rootElement
-     * @return Response
      * @throws XmlParseException
+     * @return Response
      */
     public function xml(array|SimpleXMLElement|string $data, string $rootElement = ""): Response
     {

@@ -30,7 +30,6 @@ class Router
      * properly resolve the requested route. Returns null otherwise.
      *
      * @param Request $request
-     * @return Response|null
      * @throws RouteArgumentException
      * @throws RouteNotAcceptedException
      * @throws RouteNotFoundException
@@ -38,6 +37,7 @@ class Router
      * @throws InvalidCsrfException
      * @throws MissingCsrfException
      * @throws UnauthorizedAccessException
+     * @return Response|null
      */
     final public function resolve(Request $request): ?Response
     {
@@ -92,6 +92,7 @@ class Router
                 return $routeDefinition;
             }
         }
+
         throw new RouteNotAcceptedException($this->request->getAccept()->getAccept());
     }
 

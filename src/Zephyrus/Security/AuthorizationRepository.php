@@ -82,6 +82,5 @@ class AuthorizationRepository
 
     private function __construct()
     {
-
     }
 }
