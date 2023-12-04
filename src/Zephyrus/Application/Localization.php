@@ -124,14 +124,14 @@ class Localization
         foreach ($segments as $segment) {
             if (is_array($result)) {
                 if (isset($result[$segment])) {
-                    $result = $result[$segment];
+                    $result = $result['!' . $segment] ?? $result[$segment];
                 } else {
                     $result = null;
                     break;
                 }
             } else {
                 if (isset($keys[$segment])) {
-                    $result = $keys[$segment];
+                    $result = $keys['!' . $segment] ?? $keys[$segment];
                 } else {
                     $result = null;
                     break;
