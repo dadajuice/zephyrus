@@ -28,7 +28,7 @@ class RouteDefinition
      */
     public function __construct(string $route, string $routeRoot = "")
     {
-        $this->rawRouteRoot = ($routeRoot == "/") ? $routeRoot : rtrim($routeRoot, "/");;
+        $this->rawRouteRoot = ($routeRoot == "/") ? $routeRoot : rtrim($routeRoot, "/");
         $this->route = ($route == "/") ? $route : rtrim($route, "/");
         $this->initializeUrlArguments();
         $this->initializeRegexPattern();
