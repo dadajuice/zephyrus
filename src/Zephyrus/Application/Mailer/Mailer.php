@@ -48,6 +48,7 @@ class Mailer
     public function send(bool $asHtml = true): string
     {
         $this->phpMailer->IsHTML($asHtml);
+
         try {
             $this->phpMailer->preSend();
             if ($this->smtpConfiguration->isEnabled()) {
@@ -161,8 +162,12 @@ class Mailer
     {
         try {
             $attachment = new File($path);
-            $this->phpMailer->addAttachment($path, $filename ?? $attachment->getFilename(),
-                PHPMailer::ENCODING_BASE64, $attachment->getMimeType());
+            $this->phpMailer->addAttachment(
+                $path,
+                $filename ?? $attachment->getFilename(),
+                PHPMailer::ENCODING_BASE64,
+                $attachment->getMimeType()
+            );
         } catch (InvalidArgumentException) {
             throw new MailerAttachmentNotFoundException($path);
         } catch (Exception $exception) {
@@ -186,8 +191,13 @@ class Mailer
     {
         try {
             $attachment = new File($path);
-            $this->phpMailer->addEmbeddedImage($path, $cid, $filename ?? $attachment->getFilename(),
-                PHPMailer::ENCODING_BASE64, $attachment->getMimeType());
+            $this->phpMailer->addEmbeddedImage(
+                $path,
+                $cid,
+                $filename ?? $attachment->getFilename(),
+                PHPMailer::ENCODING_BASE64,
+                $attachment->getMimeType()
+            );
         } catch (InvalidArgumentException) {
             throw new MailerAttachmentNotFoundException($path);
         } catch (Exception $exception) {
@@ -210,8 +220,12 @@ class Mailer
     public function addBinaryAttachment(string $string, string $filename, ?string $mimeType = null): void
     {
         try {
-            $this->phpMailer->addStringAttachment($string, $filename,
-                PHPMailer::ENCODING_BASE64, $mimeType ?? '');
+            $this->phpMailer->addStringAttachment(
+                $string,
+                $filename,
+                PHPMailer::ENCODING_BASE64,
+                $mimeType ?? ''
+            );
         } catch (Exception $exception) {
             throw new MailerException($exception->getMessage());
         }
@@ -224,14 +238,19 @@ class Mailer
      * @param string $string
      * @param string $filename
      * @param string|null $mimeType
-     * @return void
      * @throws MailerException
+     * @return void
      */
     public function addBinaryInlineAttachment(string $string, string $filename, ?string $mimeType = null): void
     {
         try {
-            $this->phpMailer->addStringAttachment($string, $filename,
-                PHPMailer::ENCODING_BASE64, $mimeType ?? '', 'inline');
+            $this->phpMailer->addStringAttachment(
+                $string,
+                $filename,
+                PHPMailer::ENCODING_BASE64,
+                $mimeType ?? '',
+                'inline'
+            );
         } catch (Exception $exception) {
             throw new MailerException($exception->getMessage());
         }

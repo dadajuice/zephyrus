@@ -172,7 +172,6 @@ function mark(?string $string, ?string $search): string
  * @see https://github.com/ralouphie/getallheaders
  */
 if (!function_exists('getallheaders')) {
-
     /**
      * Retrieves all HTTP header key/values as an associative array for the current request.
      *

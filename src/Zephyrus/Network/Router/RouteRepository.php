@@ -84,7 +84,6 @@ class RouteRepository
     }
 
     /**
-     *
      * @param HttpMethod|null $method
      * @return RouteDefinition[]
      */
