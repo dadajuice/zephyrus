@@ -109,34 +109,50 @@ class ListFunnel
 
     public function getSearchQueryArguments(string $rawQueryString): array
     {
-        return (new QueryString($rawQueryString))
+        $newArgs = [];
+        $args = (new QueryString($rawQueryString))
             ->removeArgumentEquals('page')
             ->removeArgumentEquals('search')
             ->getArguments();
+        foreach ($args as $argName => $argValue) {
+            if (str_ends_with($argName, "filters") && is_array($argValue)) {
+                foreach ($argValue as $type => $value) {
+                    $newArgs[$argName . "[$type]"] = $value;
+                }
+            }
+        }
+        return $newArgs;
     }
 
     public function getSearchQuery(string $rawQueryString): string
     {
-        return (new QueryString($rawQueryString))
-            ->removeArgumentEquals('page')
-            ->removeArgumentEquals('search')
-            ->buildString();
+        $args = $this->getSearchQueryArguments($rawQueryString);
+        return http_build_query($args);
     }
 
     public function getFilterQuery(string $rawQueryString, string $column): string
     {
-        return (new QueryString($rawQueryString))
-            ->removeArgumentEquals('page')
-            ->removeArgumentStartsWith("filters[" . $column)
-            ->buildString();
+        $args = $this->getFilterQueryArguments($rawQueryString, $column);
+        return http_build_query($args);
     }
 
     public function getFilterQueryArguments(string $rawQueryString, string $column): array
     {
-        return (new QueryString($rawQueryString))
+        $newArgs = [];
+        $args = (new QueryString($rawQueryString))
             ->removeArgumentEquals('page')
-            ->removeArgumentStartsWith("filters[" . $column)
             ->getArguments();
+        foreach ($args as $argName => $argValue) {
+            if (str_ends_with($argName, "filters") && is_array($argValue)) {
+                foreach ($argValue as $type => $value) {
+                    if (str_starts_with($type, $column . ":")) {
+                        continue;
+                    }
+                    $newArgs[$argName . "[$type]"] = $value;
+                }
+            }
+        }
+        return $newArgs;
     }
 
     private function parseFilters(array $rawFilters, bool $convertAlias = true): array
