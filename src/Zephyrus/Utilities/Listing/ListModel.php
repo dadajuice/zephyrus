@@ -6,9 +6,9 @@ abstract class ListModel
 {
     private const COUNT_VAR = "_zf_count";
 
-    public const FILTERS_PARAMETER = 'filters[]';
+    public const FILTERS_PARAMETER = 'filters';
     public const SEARCH_PARAMETER = 'search';
-    public const SORTS_PARAMETER = 'sorts[]';
+    public const SORTS_PARAMETER = 'sorts';
     public const PAGE_PARAMETER = 'page';
     public const LIMIT_PARAMETER = 'limit';
 

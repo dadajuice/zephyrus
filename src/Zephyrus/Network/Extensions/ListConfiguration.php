@@ -26,7 +26,7 @@ class ListConfiguration
 
     public function parse(): void
     {
-        $pattern = '/^(.+_)?(filters\[\]|sorts\[\]|limit|page|search)$/';
+        $pattern = '/^(.+_)?(filters|sorts|limit|page|search)$/';
         $parameters = [];
         foreach ($this->request->getParameters() as $parameter => $value) {
             if (preg_match($pattern, $parameter, $matches)) {
