@@ -1,10 +1,8 @@
 <?php namespace Zephyrus\Database\QueryBuilder;
 
-use Zephyrus\Utilities\Listing\ListPagination;
-
 class LimitClause
 {
-    private int $limit = ListPagination::DEFAULT_LIMIT;
+    private int $limit = 50;
     private int $offset = 0;
 
     public function setLimit(int $limit): void
