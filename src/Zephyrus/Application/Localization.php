@@ -109,6 +109,17 @@ class Localization
         return $this->appLocale;
     }
 
+    /**
+     * Returns the entire caching array for the specified $locale (or the loaded one otherwise).
+     *
+     * @param string|null $locale
+     * @return array
+     */
+    public function getCache(?string $locale = null): array
+    {
+        return $this->cachedLocalizations[$locale ?? $this->appLocale];
+    }
+
     public function localize(string $key, array $args = []): string
     {
         $locale = $this->appLocale;
