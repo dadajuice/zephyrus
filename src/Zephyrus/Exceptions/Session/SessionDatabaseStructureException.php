@@ -9,6 +9,6 @@ class SessionDatabaseStructureException extends SessionDatabaseException
 
     private function buildMessage(string $table, string $schema): string
     {
-        return "The configured session table [$schema.$table] doesn't have the required columns (session_id, access and data).";
+        return "The configured session table [$schema.$table] doesn't have the required columns (session_id, access, data and expire).";
     }
 }
