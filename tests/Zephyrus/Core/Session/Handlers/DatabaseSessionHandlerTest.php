@@ -16,7 +16,7 @@ class DatabaseSessionHandlerTest extends TestCase
         DatabaseSession::initiate(Configuration::getDatabase());
         $db = DatabaseSession::getInstance()->getDatabase();
         $db->query("DROP TABLE IF EXISTS session");
-        $db->query('CREATE TABLE session(session_id TEXT PRIMARY KEY, access INT, data TEXT)');
+        $db->query('CREATE TABLE session(session_id TEXT PRIMARY KEY, access INT, data TEXT, expire INT)');
     }
 
     public static function tearDownAfterClass(): void
@@ -94,7 +94,7 @@ class DatabaseSessionHandlerTest extends TestCase
             $session->start();
             $this->assertTrue(false); // Should never reach
         } catch (SessionDatabaseStructureException $exception) {
-            $this->assertEquals("ZEPHYRUS SESSION: The configured session table [public.fake_session] doesn't have the required columns (session_id, access and data).", $exception->getMessage());
+            $this->assertEquals("ZEPHYRUS SESSION: The configured session table [public.fake_session] doesn't have the required columns (session_id, access, data and expire).", $exception->getMessage());
             $this->assertEquals("fake_session", $exception->getTable());
             $this->assertEquals("public", $exception->getSchema());
         }

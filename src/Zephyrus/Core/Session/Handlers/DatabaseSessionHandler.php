@@ -26,7 +26,7 @@ class DatabaseSessionHandler extends SessionHandler
             ? explode('.', $this->table)
             : ['public', $this->table];
         if ($this->database->getSchemaInterrogator()->tableExists($table, $schema)) {
-            $columns = ['session_id', 'access', 'data'];
+            $columns = ['session_id', 'access', 'data', 'expire'];
             foreach ($columns as $column) {
                 if (!$this->database->getSchemaInterrogator()->columnExists($column, $table, $schema)) {
                     throw new SessionDatabaseStructureException($table, $schema);
@@ -70,11 +70,13 @@ class DatabaseSessionHandler extends SessionHandler
     public function write(string $id, string $data): bool
     {
         $access = time();
-        $sql = "INSERT INTO $this->table(session_id, access, data) 
-                     VALUES (?, ?, ?) ON CONFLICT (session_id) DO UPDATE
+        $expire = $access + ini_get('session.gc_maxlifetime');
+        $sql = "INSERT INTO $this->table(session_id, access, data, expire) 
+                     VALUES (?, ?, ?, ?) ON CONFLICT (session_id) DO UPDATE
                      SET access = excluded.access, 
-                         data = excluded.data";
-        $this->database->query($sql, [$id, $access, $data]);
+                         data = excluded.data,
+                         expire = excluded.expire";
+        $this->database->query($sql, [$id, $access, $data, $expire]);
         return true;
     }
 }
